@@ -1,0 +1,56 @@
+{
+  "name": "kobayashi-bot-beta",
+  "version": "0.1.3-beta",
+  "description": "Kobayashi Bot Beta v0.1.3 - atualizador automático, comandos e administração",
+  "main": "bootstrap.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "bash start.sh",
+    "dev": "node --watch connection.js",
+    "direct": "node bootstrap.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "baileys",
+    "bot",
+    "kobayashi",
+    "maid-dragon"
+  ],
+  "author": "Theo",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@img/sharp-wasm32": "^0.35.3",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "axios": "^1.18.1",
+    "cfonts": "^3.3.1",
+    "chalk": "^5.6.2",
+    "cheerio": "^1.2.0",
+    "colors": "^1.4.0",
+    "fake-useragent": "^1.0.1",
+    "file-type": "^22.0.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "form-data": "^4.0.6",
+    "fs-extra": "^11.3.5",
+    "linkifyjs": "^4.3.3",
+    "mime-types": "^3.0.1",
+    "moment-timezone": "^0.6.2",
+    "multistream": "^4.1.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "node-webpmux": "^3.2.1",
+    "pino": "^10.3.1",
+    "qrcode-terminal": "^0.12.0",
+    "qs": "^6.14.0",
+    "request": "^2.88.2",
+    "scr-emoji": "^0.0.3",
+    "sharp": "^0.35.3",
+    "snapsave-media-downloader": "^2.4.0",
+    "yt-downld": "^1.0.0",
+    "yt-search": "^2.13.1",
+    "ms": "^2.1.3"
+  }
+}

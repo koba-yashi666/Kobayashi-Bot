@@ -1,0 +1,8 @@
+node_modules/
+files/database/qr-code/
+files/database/*.json
+.env
+*.log
+npm-debug.log*
+.koba-update-tmp/
+.koba-update-backup/
