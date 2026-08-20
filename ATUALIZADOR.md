@@ -13,3 +13,6 @@ O atualizador NÃO substitui:
 
 ## Importante
 O repositório do GitHub precisa manter a estrutura original de pastas.
+
+## Teste v0.1.4
+- `/statusatt` — comando ADM criado para confirmar que a v0.1.4 foi realmente carregada após o `/update`.

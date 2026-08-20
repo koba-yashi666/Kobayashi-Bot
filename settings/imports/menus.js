@@ -3,14 +3,14 @@
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭━━━━━━━━━━━━━━━━━━━━━━╮
 ┃ 🐉🌸 *KOBAYASHI BOT* 🌸🐉
-┃ ✨ *Versão:* 0.1.1-BETA
+┃ ✨ *Versão:* 0.1.4-BETA
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
 
 ╭─〔 🌸 *MENU PRINCIPAL* 〕─╮
 ┃ 🎨 ${prefix}stickers / ${prefix}s
 ┃ 🛡️ ${prefix}adv @membro
 ┃ 👤 ${prefix}perfil @membro
-┃ 🛑 ${prefix}banc / ${prefix}b @membro
+┃ 🛑 ${prefix}ban / ${prefix}b @membro
 ┃ ⚡ ${prefix}ping
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
 
@@ -30,10 +30,11 @@ export const menuAdm = (prefix) => {
 return `╭━━━━━━━━━━━━━━━━━━━━━━╮
 ┃ 🛡️ *MENU ADMINISTRADOR* 🛡️
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
-┃ 🛑 ${prefix}banc / ${prefix}b @membro
+┃ 🛑 ${prefix}ban / ${prefix}b @membro
 ┃ ⚠️ ${prefix}adv @membro [motivo]
 ┃ 🔨 ${prefix}promover @membro
 ┃ 📛 ${prefix}rebaixar @membro
+┃ 🔄 ${prefix}statusatt — status da atualização
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
 🐉 *Use os poderes com responsabilidade.*`;
 };

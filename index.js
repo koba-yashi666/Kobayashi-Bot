@@ -449,6 +449,41 @@ break;
 //
 
 
+
+// teste de atualização v0.1.4
+case "statusatt":
+case "attstatus":
+case "statusupdate": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  reagir("✅");
+
+  try {
+    const status = await checkUpdate();
+    const sincronizado = status.local === "0.1.4-beta";
+
+    return reply(
+      `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
+      `📦 Versão carregada: *${status.local}*\n` +
+      `☁️ Versão no GitHub: *${status.remote}*\n` +
+      `🧪 Teste v0.1.4: *${sincronizado ? "APROVADO ✅" : "AINDA NÃO ATUALIZOU ⚠️"}*\n\n` +
+      (status.available
+        ? `🔄 Ainda existe uma atualização disponível no GitHub.`
+        : `🌸 Kobayashi está sincronizada com a versão publicada.`)
+    );
+  } catch (e) {
+    return reply(
+      `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
+      `📦 Versão carregada: *${getLocalVersion()}*\n` +
+      `🧪 Comando da *v0.1.4-beta* carregado com sucesso ✅\n` +
+      `⚠️ Só não consegui consultar o GitHub agora.`
+    );
+  }
+}
+break;
+//
+
 // versão e atualização
 case "version":
 case "versao":
