@@ -45,4 +45,19 @@ try {
 }
 
 
+// KOBAYASHI_YUTA_CONFIG_V0125
+try {
+  const fs = (await import("node:fs")).default;
+  const settingsUrl = new URL("./settings/settings.json", import.meta.url);
+  const cfg = JSON.parse(fs.readFileSync(settingsUrl, "utf8"));
+
+  if (!Object.prototype.hasOwnProperty.call(cfg, "yutaToken")) {
+    cfg.yutaToken = "COLOQUE_SEU_TOKEN_YUTA_AQUI";
+    fs.writeFileSync(settingsUrl, JSON.stringify(cfg, null, 2), "utf8");
+    console.log("🔑 Campo yutaToken adicionado às configurações.");
+  }
+} catch (e) {
+  console.error("⚠️ Não foi possível preparar yutaToken:", e?.message || e);
+}
+
 await import('./connection.js');

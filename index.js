@@ -1409,77 +1409,159 @@ break;
 
 case "play": {
   const query = String(q || "").trim();
-  if (!query) return reply(`🎧 *KOBAYASHI PLAY*\n\n🌸 Use: *${prefix}play nome da música*\n🔗 Ou: *${prefix}play link do YouTube*`);
 
-  let tempPath = null;
+  if (!query) {
+    return reply(
+      `╭──────「 🎧 」──────╮\n` +
+      `       *PLAY*\n` +
+      `╰──────────────────╯\n\n` +
+      `🌸 Digite o nome da música ou envie um link do YouTube.\n\n` +
+      `🎵 *${prefix}play nome da música*\n` +
+      `🔗 *${prefix}play link do YouTube*`
+    );
+  }
+
   try {
     await reagir("🎧");
+
+    const cfg = readSettingsFile();
+    const yutaToken = String(cfg.yutaToken || "").trim();
+
+    if (!yutaToken || yutaToken === "COLOQUE_SEU_TOKEN_YUTA_AQUI") {
+      return reply(
+        `🔑🌸 *YUTA API NÃO CONFIGURADA*\n\n` +
+        `O Play agora usa o mesmo backend de download do Hutao.\n\n` +
+        `Configure seu token em:\n` +
+        `*settings/settings.json*\n\n` +
+        `"yutaToken": "SEU_TOKEN_AQUI"`
+      );
+    }
+
     const ytsModule = await import("yt-search");
     const yts = ytsModule.default || ytsModule;
-    const ytdlModule = await import("@distube/ytdl-core");
-    const ytdl = ytdlModule.default || ytdlModule;
 
     const isUrl = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)/i.test(query);
     let video = null;
+
     if (isUrl) {
-      let id = null;
+      let videoId = null;
       try {
         const u = new URL(query);
-        id = u.hostname.includes("youtu.be") ? u.pathname.split("/").filter(Boolean)[0]
-          : u.pathname.includes("/shorts/") ? u.pathname.split("/shorts/")[1]?.split(/[?&/]/)[0]
-          : u.searchParams.get("v");
+        if (u.hostname.includes("youtu.be")) {
+          videoId = u.pathname.split("/").filter(Boolean)[0];
+        } else if (u.pathname.includes("/shorts/")) {
+          videoId = u.pathname.split("/shorts/")[1]?.split(/[?&/]/)[0];
+        } else {
+          videoId = u.searchParams.get("v");
+        }
       } catch {}
-      if (id) video = await yts({ videoId: id });
+
+      if (videoId) video = await yts({ videoId });
     } else {
       const result = await yts(query);
       video = result?.videos?.[0];
     }
-    if (!video?.url) return reply("🌸 Não encontrei essa música.");
+
+    if (!video?.url) {
+      return reply("🌸 Não encontrei essa música no YouTube.");
+    }
 
     await conn.sendMessage(from, {
       image: { url: video.thumbnail },
-      caption: `╭──────「 🎧 」──────╮\n    *KOBAYASHI PLAY*\n╰──────────────────╯\n\n🎵 *${video.title || "Música"}*\n🎙️ Canal: ${video.author?.name || video.author || "Desconhecido"}\n⏱️ Duração: ${video.timestamp || "—"}\n\n🌸 Preparando seu áudio...`
+      caption:
+        `╭──────「 🎧 」──────╮\n` +
+        `    *KOBAYASHI PLAY*\n` +
+        `╰──────────────────╯\n\n` +
+        `🎵 *${video.title || "Música"}*\n` +
+        `🎙️ Canal: ${video.author?.name || video.author || "Desconhecido"}\n` +
+        `⏱️ Duração: ${video.timestamp || "—"}\n` +
+        `🔗 ${video.url}\n\n` +
+        `🌸 Baixando pela Yuta API...`
     }, { quoted: info });
 
-    const ytInfo = await ytdl.getInfo(video.url);
-    const format = ytdl.chooseFormat(ytInfo.formats, { quality: "highestaudio", filter: "audioonly" });
-    if (!format?.url) throw new Error("Formato de áudio indisponível");
+    // Rota de áudio usada pelo sistema do Hutao V10.
+    const apiUrl =
+      `https://yuta-apis.xyz/api/downloads/ytaudio2?url=${encodeURIComponent(video.url)}`;
 
-    const maxBytes = 25 * 1024 * 1024;
-    if (Number(format.contentLength || 0) > maxBytes) return reply("⚠️ Esse áudio é grande demais. Tente uma música mais curta.");
-
-    const ext = format.container === "webm" ? "webm" : format.container === "mp4" ? "m4a" : (format.container || "mp3");
-    tempPath = path.join(os.tmpdir(), `koba-play-${randomBytes(6).toString("hex")}.${ext}`);
-
-    await new Promise((resolve, reject) => {
-      const stream = ytdl.downloadFromInfo(ytInfo, { format, highWaterMark: 1 << 25 });
-      const output = fsx.createWriteStream(tempPath);
-      let total = 0;
-      stream.on("data", chunk => {
-        total += chunk.length;
-        if (total > maxBytes) stream.destroy(new Error("Áudio excedeu 25 MB"));
-      });
-      stream.on("error", reject);
-      output.on("error", reject);
-      output.on("finish", resolve);
-      stream.pipe(output);
+    const response = await fetch(apiUrl, {
+      headers: {
+        "Authorization": yutaToken,
+        "x-yuta-client": "HutaoBot-MD",
+        "x-yuta-apikey": "lmonly_92848OlfQmCn836B53OSR1mEk7X7n8o63l8",
+        "Accept": "application/json"
+      }
     });
 
-    const audio = fsx.readFileSync(tempPath);
-    const mime = format.container === "webm" ? "audio/webm" : format.container === "mp4" ? "audio/mp4" : "audio/mpeg";
+    if (!response.ok) {
+      let detail = "";
+      try { detail = await response.text(); } catch {}
+      throw new Error(`Yuta API HTTP ${response.status}: ${detail.slice(0,200)}`);
+    }
+
+    const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    // O endpoint do Hutao retorna o áudio diretamente.
+    // Se a API devolver JSON de erro, mostramos uma mensagem mais clara.
+    if (contentType.includes("application/json")) {
+      let apiData = null;
+      try { apiData = JSON.parse(buffer.toString("utf8")); } catch {}
+
+      if (apiData) {
+        const possibleUrl =
+          apiData?.url ||
+          apiData?.audio ||
+          apiData?.result?.url ||
+          apiData?.result?.audio ||
+          apiData?.data?.url ||
+          apiData?.data?.audio;
+
+        if (typeof possibleUrl === "string" && /^https?:\/\//i.test(possibleUrl)) {
+          const mediaRes = await fetch(possibleUrl);
+          if (!mediaRes.ok) throw new Error(`Falha ao baixar áudio retornado pela API: ${mediaRes.status}`);
+          const audioBuffer = Buffer.from(await mediaRes.arrayBuffer());
+
+          await conn.sendMessage(from, {
+            audio: audioBuffer,
+            mimetype: "audio/mpeg",
+            fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0,80)}.mp3`
+          }, { quoted: info });
+
+          await reagir("🌸");
+          break;
+        }
+
+        const apiMessage =
+          apiData?.message ||
+          apiData?.msg ||
+          apiData?.error ||
+          "A API não retornou um áudio válido.";
+
+        throw new Error(String(apiMessage));
+      }
+    }
+
+    if (!buffer.length) throw new Error("A Yuta API retornou um arquivo vazio.");
+
     await conn.sendMessage(from, {
-      audio,
-      mimetype: mime,
-      fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0,80)}.${ext}`
+      audio: buffer,
+      mimetype: contentType.includes("audio/") ? contentType.split(";")[0] : "audio/mpeg",
+      fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0,80)}.mp3`
     }, { quoted: info });
+
     await reagir("🌸");
   } catch (e) {
-    console.error("Erro no /play:", e);
-    return reply(/429|rate limit/i.test(String(e?.message || e))
-      ? "⚠️ O YouTube limitou temporariamente a hospedagem. Tente mais tarde."
-      : "❌🌸 Não consegui baixar essa música agora. Tente outro nome ou link.");
-  } finally {
-    if (tempPath) try { if (fsx.existsSync(tempPath)) fsx.unlinkSync(tempPath); } catch {}
+    console.error("Erro no /play Yuta:", e);
+    const errorText = String(e?.message || e || "");
+
+    if (/401|403|token|authorization|unauthorized/i.test(errorText)) {
+      return reply("🔑❌ A Yuta API recusou o token. Confira o `yutaToken` nas configurações.");
+    }
+
+    return reply(
+      `❌🌸 Não consegui baixar essa música pela Yuta API.\n\n` +
+      `Detalhe: ${errorText.slice(0,180)}`
+    );
   }
 }
 break;

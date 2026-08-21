@@ -144,3 +144,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Removido executável externo yt-dlp.
 - Download feito diretamente pelo Node com @distube/ytdl-core.
 - Limite preventivo de 25 MB.
+
+## v0.1.25-beta — Play via Yuta API
+- `/play` refeito usando o backend de download observado no Hutao V10.
+- Download usa `https://yuta-apis.xyz/api/downloads/ytaudio2`.
+- Token configurável em `settings/settings.json -> yutaToken`.
+- Novo `/yutatoken TOKEN`, exclusivo do dono principal, para configurar sem editar arquivos.
+- Pesquisa por nome continua usando `yt-search`; o download é feito pela Yuta API.
+- Removida dependência do ytdl-core para o Play.
