@@ -93,3 +93,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Figurinhas criadas por `/s` e pelo autosticker recebem metadados com usuário, grupo, bot e criador.
 - Dono/criador padrão alterado para `✧༒☬ƙσႦαყαʂԋι☬༒✧` com migração automática para instalações que ainda usam `Theo`.
 - Observação: o WhatsApp não suporta legenda visível em sticker; os dados ficam nos metadados/informações do pacote da figurinha.
+
+## v0.1.19-beta
+- Sistema de múltiplos donos/líderes com até 5 slots (`/dono1` até `/dono5`).
+- `/lideres` mostra os líderes configurados.
+- Líderes passam a usar comandos anteriormente exclusivos do dono.
+- Apenas o dono principal pode alterar líderes ou configurações críticas: número do bot, número do dono, prefixo, foto do menu, Anti-PV e atualização do bot.
+- Configuração salva em `settings.settings.json -> leaders`.

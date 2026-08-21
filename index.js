@@ -255,6 +255,35 @@ function writeSettingsFile(next) {
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), "utf8");
 }
 
+
+function getConfiguredLeaders() {
+  try {
+    const cfg = readSettingsFile();
+    const values = Array.isArray(cfg.leaders) ? cfg.leaders : [];
+    return values
+      .map((n) => onlyDigits(n))
+      .filter(Boolean)
+      .slice(0, 5)
+      .map((n) => `${n}@s.whatsapp.net`);
+  } catch {
+    return [];
+  }
+}
+
+function isMainOwnerJid(jid) {
+  try {
+    const cfg = readSettingsFile();
+    const owner = onlyDigits(cfg.ownerNumber || "");
+    return Boolean(owner) && jid === `${owner}@s.whatsapp.net`;
+  } catch {
+    return false;
+  }
+}
+
+function isLeaderJid(jid) {
+  return getConfiguredLeaders().includes(jid);
+}
+
 function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
 }
@@ -414,7 +443,9 @@ const botNumber = await getPNForJid(conn, conn.user.id, conn.user.lid || conn.us
 const groupMembers = isGroup ? groupMetadata.participants : "";
 
 const dono = ownerNumber + "@s.whatsapp.net";
-const SoDono = sender === dono;
+const SoDonoPrincipal = sender === dono || isMainOwnerJid(sender);
+const SoLider = isLeaderJid(sender);
+const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
 if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
   if (isCmd) {
@@ -1463,7 +1494,7 @@ break;
 
 case "update":
 case "atualizar": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
 
   reagir("🔄");
   await reply("🐉🌸 *Verificando atualização...*\n\nNão desligue o bot durante o processo.");
@@ -1601,10 +1632,122 @@ break;
 //
 
 
+
+// líderes / múltiplos donos • v0.1.19
+case "dono1":
+case "dono2":
+case "dono3":
+case "dono4":
+case "dono5": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o *dono principal* configurado no bot pode alterar os líderes.");
+  }
+
+  const slot = Number(command.replace("dono", "")) - 1;
+  const numero = onlyDigits(q);
+
+  if (!numero) {
+    const cfg = readSettingsFile();
+    const leaders = Array.isArray(cfg.leaders) ? cfg.leaders : [];
+    const atual = leaders[slot];
+
+    if (!atual) {
+      return reply(
+        `👑🌸 *LÍDER ${slot + 1}*\n\n` +
+        `Este slot está vazio.\n\n` +
+        `Para adicionar:\n*${prefix}${command} 5511999999999*`
+      );
+    }
+
+    return reply(
+      `👑🌸 *LÍDER ${slot + 1}*\n\n` +
+      `📱 Número: *${atual}*\n\n` +
+      `Para remover:\n*${prefix}${command} remover*`
+    );
+  }
+
+  const raw = String(q || "").trim().toLowerCase();
+  const cfg = readSettingsFile();
+  const leaders = Array.isArray(cfg.leaders) ? cfg.leaders.slice(0, 5) : [];
+
+  while (leaders.length < 5) leaders.push("");
+
+  if (["remover","remove","off","0"].includes(raw)) {
+    leaders[slot] = "";
+    cfg.leaders = leaders;
+    writeSettingsFile(cfg);
+
+    return reply(
+      `✅🌸 *Líder ${slot + 1} removido.*\n\n` +
+      `O slot agora está disponível.`
+    );
+  }
+
+  if (numero.length < 8) {
+    return reply(
+      `❌ Número inválido.\n\n` +
+      `Use: *${prefix}${command} 5511999999999*`
+    );
+  }
+
+  const ownerNumber = onlyDigits(cfg.ownerNumber || "");
+  if (numero === ownerNumber) {
+    return reply("👑 Esse número já é o dono principal do bot.");
+  }
+
+  // Evita o mesmo líder em mais de um slot.
+  for (let i = 0; i < leaders.length; i++) {
+    if (i !== slot && onlyDigits(leaders[i]) === numero) {
+      return reply(`⚠️ Esse número já está configurado como *Líder ${i + 1}*.`);
+    }
+  }
+
+  leaders[slot] = numero;
+  cfg.leaders = leaders;
+  writeSettingsFile(cfg);
+
+  return reply(
+    `╭──────「 👑 」──────╮\n` +
+    `      *NOVO LÍDER*\n` +
+    `╰──────────────────╯\n\n` +
+    `🌸 Líder ${slot + 1} configurado com sucesso.\n` +
+    `📱 Número: *${numero}*\n\n` +
+    `🐉 Esse líder agora pode usar comandos restritos ao dono, exceto alterações críticas do bot.`
+  );
+}
+break;
+
+case "lideres":
+case "líderes":
+case "donos": {
+  if (!SoDono) return reply(mess.onlyOwner());
+
+  const cfg = readSettingsFile();
+  const leaders = Array.isArray(cfg.leaders) ? cfg.leaders : [];
+  const filled = leaders
+    .map((n, i) => ({ n: onlyDigits(n), slot: i + 1 }))
+    .filter((x) => x.n);
+
+  const linhas = filled.length
+    ? filled.map((x) => `│ 👑 Líder ${x.slot} › ${x.n}`).join("\n")
+    : "│ 🌸 Nenhum líder configurado.";
+
+  return reply(
+    `╭──────「 👑 」──────╮\n` +
+    `     *LÍDERES DO BOT*\n` +
+    `╰──────────────────╯\n\n` +
+    `${linhas}\n\n` +
+    `🐉 Máximo de *5 líderes*.\n` +
+    `👑 Apenas o dono principal pode adicionar/remover.`
+  );
+}
+break;
+//
+
 // configurações exclusivas do dono • v0.1.6
 case "numero_dono":
 case "número_dono": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const numero = onlyDigits(q);
   if (numero.length < 8) return reply(`📱 Use: *${prefix}numero_dono 5511999999999*`);
 
@@ -1620,7 +1763,7 @@ break;
 
 case "numero_bot":
 case "número_bot": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const numero = onlyDigits(q);
   if (numero.length < 8) return reply(`🤖 Use: *${prefix}numero_bot 5511999999999*`);
 
@@ -1670,7 +1813,7 @@ case "prefixo": {
 break;
 
 case "add_prefixo": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const novo = String(q || "").trim();
   if (!novo || /\s/.test(novo) || novo.length > 3)
     return reply(`➕ Use: *${prefix}add_prefixo !*\nO prefixo deve ter de 1 a 3 caracteres e não pode conter espaços.`);
@@ -1714,7 +1857,7 @@ case "foto_gp": {
 break;
 
 case "foto_menu": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const mediaTarget = getCurrentOrQuotedMedia(info);
   if (!mediaTarget?.message || getContentType(mediaTarget.message) !== "imageMessage")
     return reply(`🌸 Envie uma *imagem com ${prefix}foto_menu na legenda* ou responda uma imagem com o comando.`);
@@ -1736,7 +1879,7 @@ case "foto_menu": {
 break;
 
 case "antipv": {
-  if (!SoDono) return reply(mess.onlyOwner());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const op = String(args[0] || "").toLowerCase();
   if (!["on", "off"].includes(op))
     return reply(`🛡️ Use *${prefix}antipv on* ou *${prefix}antipv off*.`);

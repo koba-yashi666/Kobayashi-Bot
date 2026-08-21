@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.18-beta",
-  "description": "Kobayashi Bot Beta v0.1.18 - comandos de grupo, autosticker e metadados",
+  "version": "0.1.19-beta",
+  "description": "Kobayashi Bot Beta v0.1.19 - sistema de líderes/múltiplos donos",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
