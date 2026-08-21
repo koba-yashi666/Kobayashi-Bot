@@ -6,10 +6,12 @@
   "channeldl": "",
   "channel": "",
   "newsletterName": "🐉🌸 Kobayashi Bot • Canal Oficial",
-  "version": "0.1.12-beta",
+  "version": "0.1.14-beta",
   "theme": "🐉🌸 Kobayashi Bot",
   "botNumber": "",
   "antiPv": false,
   "creatorName": "Theo",
-  "creatorNumber": "5515997075304"
+  "creatorNumber": "5515997075304",
+  "creatorGithub": "koba-yashi666",
+  "creatorInstagram": "Koba.yashi666"
 }

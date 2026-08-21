@@ -53,3 +53,13 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Menu VIP: Dragon VIP.
 - Ping redesenhado como System Status.
 - Nenhuma alteração no sistema de figurinhas nesta versão.
+
+## v0.1.13-beta
+- Nova identidade visual oficial Kobayashi.
+- Visual floral detalhado, mantendo Kobayashi como tema central.
+- Menus principal, ADM, dono, VIP e ping redesenhados.
+
+## v0.1.14-beta
+- `/criador` redesenhado.
+- Adicionados link de WhatsApp, GitHub e Instagram do criador.
+- GitHub e Instagram configuráveis pelo `settings/settings.json`.

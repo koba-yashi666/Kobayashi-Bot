@@ -728,19 +728,57 @@ case "creator": {
   const cfg = readSettingsFile();
   const creatorName = cfg.creatorName || cfg.ownerName || ownerName;
   const creatorNumber = onlyDigits(cfg.creatorNumber || cfg.ownerNumber || ownerNumber);
+  const creatorGithub = String(cfg.creatorGithub || "koba-yashi666").replace(/^@/, "");
+  const creatorInstagram = String(cfg.creatorInstagram || "Koba.yashi666").replace(/^@/, "");
   const creatorJid = creatorNumber ? `${creatorNumber}@s.whatsapp.net` : null;
+  const whatsappLink = creatorNumber ? `https://wa.me/${creatorNumber}` : "Não configurado";
+  const githubLink = `https://github.com/${creatorGithub}`;
+  const instagramLink = `https://instagram.com/${creatorInstagram}`;
 
   return conn.sendMessage(from, {
     text:
-      `┏╾ׁ═╼･ﾟ♡ﾟ･｡🐉｡･ﾟ♡ﾟ･╾ᷓ═╼┓\n` +
-      `┣━〔 • 𝑪𝒓𝒊𝒂𝒅𝒐𝒓 • 🐉 〕\n` +
-      `┗╾ׁ═╼･ﾟ♡ﾟ･｡🐉｡･ﾟ♡ﾟ･╾ᷓ═╼┛\n╎\n` +
-      `┃╭╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╮\n` +
-      `┃╎୨୧ 👤 *Nome*: ${creatorName}\n` +
-      `┃╎୨୧ 📱 *Número*: ${creatorNumber || "Não configurado"}\n` +
-      `┃╎୨୧ 🤖 *Projeto*: KӨBΛYΛƧΗI BӨƬ\n` +
-      `┃╎୨୧ 📦 *Versão*: ${getLocalVersion()}\n` +
-      `┃╰╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╯`,
+      `╭═══════ ❀ 小林 ❀ ═══════╮
+` +
+      `       🐉 *CRIADOR DO BOT*
+` +
+      `╰═══════ ❀ 🌸 ❀ ═══════╯
+
+` +
+      `╭───〔 🎐 DESENVOLVEDOR 〕──╮
+` +
+      `│ 🌷 Nome     › *${creatorName}*
+` +
+      `│ 🤖 Projeto  › *KOBAYASHI BOT*
+` +
+      `│ 💮 Versão   › *${getLocalVersion()}*
+` +
+      `╰──────── ❀ ─────────────╯
+
+` +
+      `╭───〔 💌 CONTATO 〕────────╮
+` +
+      `│ 📱 WhatsApp
+` +
+      `│ ↳ ${whatsappLink}
+` +
+      `│
+` +
+      `│ 💻 GitHub
+` +
+      `│ ↳ ${githubLink}
+` +
+      `│
+` +
+      `│ 📸 Instagram
+` +
+      `│ ↳ ${instagramLink}
+` +
+      `╰──────── ❀ ─────────────╯
+
+` +
+      `     🌸 ──「 小林 」── 🐉
+` +
+      `       *KOBAYASHI SYSTEM*`,
     mentions: creatorJid ? [creatorJid] : [],
   }, { quoted: info });
 }
