@@ -76,6 +76,26 @@ function getQuotedMessage(info) {
   };
 }
 
+
+function getCurrentOrQuotedMedia(info) {
+  const currentMessage = info?.message || {};
+  const currentType = getContentType(currentMessage);
+
+  if (["imageMessage", "videoMessage", "stickerMessage"].includes(currentType)) {
+    return { key: info.key, message: currentMessage, source: "current" };
+  }
+
+  const quoted = getQuotedMessage(info);
+  if (quoted?.message) {
+    const quotedType = getContentType(quoted.message);
+    if (["imageMessage", "videoMessage", "stickerMessage"].includes(quotedType)) {
+      return { ...quoted, source: "quoted" };
+    }
+  }
+
+  return null;
+}
+
 function getTargetFromMessage(info, fallback) {
   const context = info.message?.extendedTextMessage?.contextInfo ||
     info.message?.imageMessage?.contextInfo ||
@@ -103,25 +123,43 @@ const from = info.key.remoteJid;
 const isGroup = from.endsWith("@g.us");
 const isStatus = from.endsWith("@broadcast");
 
-const body =
-info.message?.conversation ||
-info.message?.viewOnceMessageV2?.message?.imageMessage?.caption ||
-info.message?.viewOnceMessageV2?.message?.videoMessage?.caption ||
-info.message?.imageMessage?.caption ||
-info.message?.videoMessage?.caption ||
-info.message?.extendedTextMessage?.text ||
-info.message?.viewOnceMessage?.message?.videoMessage?.caption ||
-info.message?.viewOnceMessage?.message?.imageMessage?.caption ||
-info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption ||
-info.message?.buttonsMessage?.imageMessage?.caption ||
-info.message?.buttonsResponseMessage?.selectedButtonId ||
-info.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
-info.message?.templateButtonReplyMessage?.selectedId ||
-info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.extendedTextMessage?.text ||
-info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.imageMessage?.caption ||
-JSON.parse(info.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson || "{}")?.id ||
-info?.text ||
-"";
+function extractCommandText(message = {}) {
+  try {
+    const interactiveId = JSON.parse(
+      message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson || "{}"
+    )?.id;
+
+    return (
+      message?.conversation ||
+      message?.extendedTextMessage?.text ||
+      message?.imageMessage?.caption ||
+      message?.videoMessage?.caption ||
+      message?.documentMessage?.caption ||
+      message?.documentWithCaptionMessage?.message?.documentMessage?.caption ||
+      message?.viewOnceMessage?.message?.imageMessage?.caption ||
+      message?.viewOnceMessage?.message?.videoMessage?.caption ||
+      message?.viewOnceMessageV2?.message?.imageMessage?.caption ||
+      message?.viewOnceMessageV2?.message?.videoMessage?.caption ||
+      message?.ephemeralMessage?.message?.conversation ||
+      message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
+      message?.ephemeralMessage?.message?.imageMessage?.caption ||
+      message?.ephemeralMessage?.message?.videoMessage?.caption ||
+      message?.editedMessage?.message?.protocolMessage?.editedMessage?.extendedTextMessage?.text ||
+      message?.editedMessage?.message?.protocolMessage?.editedMessage?.imageMessage?.caption ||
+      message?.editedMessage?.message?.protocolMessage?.editedMessage?.videoMessage?.caption ||
+      message?.buttonsMessage?.imageMessage?.caption ||
+      message?.buttonsResponseMessage?.selectedButtonId ||
+      message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
+      message?.templateButtonReplyMessage?.selectedId ||
+      interactiveId ||
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
+const body = extractCommandText(info.message) || info?.text || "";
 
 const isCmd = body.startsWith(prefix);
 const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
@@ -316,21 +354,21 @@ case "stickers":
 case "sticker":
 case "s": {
   reagir("🎨");
-  const quoted = getQuotedMessage(info);
-  if (!quoted?.message) return reply(`🎨🌸 Responda uma *imagem, vídeo ou figurinha* com ${prefix}s para transformar em figurinha.`);
+  const mediaTarget = getCurrentOrQuotedMedia(info);
+  if (!mediaTarget?.message) return reply(`🎨🌸 Envie uma *imagem/vídeo com ${prefix}s na legenda* ou responda uma mídia com o comando.`);
 
   try {
-    const quotedType = getContentType(quoted.message);
+    const quotedType = getContentType(mediaTarget.message);
     if (!['imageMessage', 'videoMessage', 'stickerMessage'].includes(quotedType)) {
       return reply(`🎨🌸 O arquivo respondido não é uma imagem, vídeo ou figurinha.`);
     }
 
     if (quotedType === 'stickerMessage') {
-      const stickerBuffer = await downloadMediaMessage(quoted, 'buffer', {});
+      const stickerBuffer = await downloadMediaMessage(mediaTarget, 'buffer', {});
       return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
     }
 
-    const mediaBuffer = await downloadMediaMessage(quoted, 'buffer', {});
+    const mediaBuffer = await downloadMediaMessage(mediaTarget, 'buffer', {});
     const sharpModule = await import('sharp');
     const sharp = sharpModule.default || sharpModule;
 
@@ -772,12 +810,12 @@ case "foto_gp": {
   if (!SoDono) return reply(mess.onlyOwner());
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
-  const quoted = getQuotedMessage(info);
-  if (!quoted?.message || getContentType(quoted.message) !== "imageMessage")
-    return reply(`🖼️ Responda uma *imagem* com *${prefix}foto_gp*.`);
+  const mediaTarget = getCurrentOrQuotedMedia(info);
+  if (!mediaTarget?.message || getContentType(mediaTarget.message) !== "imageMessage")
+    return reply(`🖼️ Envie uma *imagem com ${prefix}foto_gp na legenda* ou responda uma imagem com o comando.`);
 
   try {
-    const media = await downloadMediaMessage(quoted, "buffer", {});
+    const media = await downloadMediaMessage(mediaTarget, "buffer", {});
     await conn.updateProfilePicture(from, media);
     return reply("✅🌸 Foto do grupo atualizada.");
   } catch (e) {
@@ -789,12 +827,12 @@ break;
 
 case "foto_menu": {
   if (!SoDono) return reply(mess.onlyOwner());
-  const quoted = getQuotedMessage(info);
-  if (!quoted?.message || getContentType(quoted.message) !== "imageMessage")
-    return reply(`🌸 Responda uma *imagem* com *${prefix}foto_menu*.`);
+  const mediaTarget = getCurrentOrQuotedMedia(info);
+  if (!mediaTarget?.message || getContentType(mediaTarget.message) !== "imageMessage")
+    return reply(`🌸 Envie uma *imagem com ${prefix}foto_menu na legenda* ou responda uma imagem com o comando.`);
 
   try {
-    const media = await downloadMediaMessage(quoted, "buffer", {});
+    const media = await downloadMediaMessage(mediaTarget, "buffer", {});
     const sharpModule = await import("sharp");
     const sharp = sharpModule.default || sharpModule;
     const output = await sharp(media).png().toBuffer();

@@ -3,7 +3,7 @@
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭━━━━━━━━━━━━━━━━━━━━━━╮
 ┃ 🐉🌸 *KOBAYASHI BOT* 🌸🐉
-┃ ✨ *Versão:* 0.1.6-BETA
+┃ ✨ *Versão:* 0.1.7-BETA
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
 
 ╭─〔 🌸 *MENU PRINCIPAL* 〕─╮

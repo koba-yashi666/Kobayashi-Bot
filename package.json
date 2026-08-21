@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.6-beta",
-  "description": "Kobayashi Bot Beta v0.1.6 - Menu do Dono e configurações",
+  "version": "0.1.7-beta",
+  "description": "Kobayashi Bot Beta v0.1.7 - correção de comandos enviados em legendas de mídia",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
