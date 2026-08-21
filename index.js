@@ -21,6 +21,94 @@ const { prefix, NomeDoBot, ownerNumber, ownerName } = settings;
 
 const ADV_DB = path.join(process.cwd(), "files", "database", "adv.json");
 
+const FUN_DB = path.join(process.cwd(), "files", "database", "brincadeiras.json");
+
+function ensureFunDb() {
+  try {
+    fs.mkdirSync(path.dirname(FUN_DB), { recursive: true });
+    if (!fs.existsSync(FUN_DB)) {
+      fs.writeFileSync(FUN_DB, JSON.stringify({ groups: {}, scores: {} }, null, 2), "utf8");
+    }
+  } catch {}
+}
+
+function readFunDb() {
+  ensureFunDb();
+  try {
+    const data = JSON.parse(fs.readFileSync(FUN_DB, "utf8"));
+    return {
+      groups: data?.groups && typeof data.groups === "object" ? data.groups : {},
+      scores: data?.scores && typeof data.scores === "object" ? data.scores : {},
+    };
+  } catch {
+    return { groups: {}, scores: {} };
+  }
+}
+
+function writeFunDb(data) {
+  ensureFunDb();
+  fs.writeFileSync(FUN_DB, JSON.stringify(data, null, 2), "utf8");
+}
+
+function isFunModeEnabled(groupJid) {
+  const db = readFunDb();
+  return db.groups?.[groupJid]?.enabled === true;
+}
+
+function setFunMode(groupJid, enabled) {
+  const db = readFunDb();
+  if (!db.groups[groupJid]) db.groups[groupJid] = {};
+  db.groups[groupJid].enabled = Boolean(enabled);
+  writeFunDb(db);
+  return db.groups[groupJid].enabled;
+}
+
+function getOrCreateFunScore(groupJid, category, jid) {
+  const db = readFunDb();
+  if (!db.scores[groupJid]) db.scores[groupJid] = {};
+  if (!db.scores[groupJid][category]) db.scores[groupJid][category] = {};
+  if (!Number.isInteger(db.scores[groupJid][category][jid])) {
+    // Persistente: o primeiro valor sorteado permanece até o DB ser limpo.
+    db.scores[groupJid][category][jid] = Math.floor(Math.random() * 101);
+    writeFunDb(db);
+  }
+  return db.scores[groupJid][category][jid];
+}
+
+function getTwoTargetsFromMessage(info, sender, text) {
+  const context =
+    info.message?.extendedTextMessage?.contextInfo ||
+    info.message?.imageMessage?.contextInfo ||
+    info.message?.videoMessage?.contextInfo ||
+    {};
+  const mentions = context.mentionedJid || [];
+  if (mentions.length >= 2) return [mentions[0], mentions[1]];
+  if (mentions.length === 1) return [sender, mentions[0]];
+
+  const quotedTarget = context.participant || context.participantAlt;
+  if (quotedTarget) return [sender, quotedTarget];
+
+  return [sender, null];
+}
+
+function funCardPath(name) {
+  return path.join(process.cwd(), "settings", "FUN", `${name}.png`);
+}
+
+async function sendFunCard(conn, from, info, card, caption, mentions = []) {
+  const imagePath = funCardPath(card);
+  if (fs.existsSync(imagePath)) {
+    return conn.sendMessage(
+      from,
+      { image: fs.readFileSync(imagePath), caption, mentions },
+      { quoted: info }
+    );
+  }
+  return conn.sendMessage(from, { text: caption, mentions }, { quoted: info });
+}
+
+
+
 const SETTINGS_FILE = new URL("./settings/settings.json", import.meta.url);
 
 function readSettingsFile() {
@@ -829,6 +917,209 @@ case "info_adv": {
 break;
 //
 
+
+// KOBAYASHI FUN • v0.1.15
+case "menubn": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  const enabled = isFunModeEnabled(from);
+  const status = enabled ? "🟢 ATIVADO" : "🔒 DESATIVADO";
+
+  return reply(
+    `╭────────「 🎭 」────────╮\n` +
+    `      *KOBAYASHI FUN*\n` +
+    `╰─────────────────────╯\n\n` +
+    `Status › *${status}*\n\n` +
+    `┌─ 🌸 *BRINCADEIRAS*\n` +
+    `│ 🌷 ${prefix}linda @membro\n` +
+    `│ 🌺 ${prefix}lindo @membro\n` +
+    `│ 🏳️‍🌈 ${prefix}gay @membro\n` +
+    `│ 💙 ${prefix}hetero @membro\n` +
+    `│ 🫂 ${prefix}abraco @membro\n` +
+    `│ 🐂 ${prefix}gado @membro\n` +
+    `│ 💞 ${prefix}shipo @membro\n` +
+    `│ 🔥 ${prefix}gostosa @membro\n` +
+    `│ 😏 ${prefix}gostoso @membro\n` +
+    `│\n` +
+    `├─ 🏆 *RANKINGS*\n` +
+    `│ 👑 ${prefix}ranklinda\n` +
+    `│ 👑 ${prefix}ranklindo\n` +
+    `│ 🌈 ${prefix}rankgay\n` +
+    `│ 💙 ${prefix}rankhetero\n` +
+    `│ 🔥 ${prefix}rankgostosa\n` +
+    `│ 😏 ${prefix}rankgostoso\n` +
+    `│\n` +
+    `└ 🎭 ${prefix}modobrincadeira\n` +
+    `   ↳ Somente ADM liga/desliga\n\n` +
+    `🌸 Quando ativado, todos os membros podem brincar.`
+  );
+}
+break;
+
+case "modobrincadeira": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const atual = isFunModeEnabled(from);
+  const novo = setFunMode(from, !atual);
+
+  return reply(
+    novo
+      ? `╭──────「 🎭 」──────╮\n` +
+        `   *KOBAYASHI FUN*\n` +
+        `╰──────────────────╯\n\n` +
+        `🟢 *Modo Brincadeira ativado!*\n\n` +
+        `🌸 Todos os membros agora podem usar os comandos do *${prefix}menubn*.\n` +
+        `↳ Use *${prefix}modobrincadeira* novamente para desativar.`
+      : `╭──────「 🎭 」──────╮\n` +
+        `   *KOBAYASHI FUN*\n` +
+        `╰──────────────────╯\n\n` +
+        `🔒 *Modo Brincadeira desativado.*\n\n` +
+        `Os comandos de diversão foram bloqueados neste grupo.`
+  );
+}
+break;
+
+case "linda":
+case "lindo":
+case "gay":
+case "hetero":
+case "gado":
+case "gostosa":
+case "gostoso": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+
+  const target = getTargetFromMessage(info, sender) || sender;
+  const labels = {
+    linda: ["🌷", "Linda"],
+    lindo: ["🌺", "Lindo"],
+    gay: ["🏳️‍🌈", "Gay"],
+    hetero: ["💙", "Hétero"],
+    gado: ["🐂", "Gado"],
+    gostosa: ["🔥", "Gostosa"],
+    gostoso: ["😏", "Gostoso"],
+  };
+  const [emoji, label] = labels[command];
+  const score = getOrCreateFunScore(from, command, target);
+
+  const caption =
+    `╭──────「 ${emoji} 」──────╮\n` +
+    `     *${label.toUpperCase()} METER*\n` +
+    `╰──────────────────╯\n\n` +
+    `👤 @${target.split("@")[0]}\n` +
+    `${emoji} Resultado › *${score}%*\n\n` +
+    `🐉 Avaliação oficial do Kobayashi Fun.`;
+
+  return sendFunCard(conn, from, info, command, caption, [target]);
+}
+break;
+
+case "abraco":
+case "abraço": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+
+  const target = getTargetFromMessage(info, null);
+  if (!target || target === sender) {
+    return reply(`🫂 Marque alguém ou responda à mensagem da pessoa.\nEx.: *${prefix}abraco @membro*`);
+  }
+
+  const caption =
+    `╭──────「 🫂 」──────╮\n` +
+    `       *ABRAÇO*\n` +
+    `╰──────────────────╯\n\n` +
+    `🌸 @${sender.split("@")[0]} deu um abraço em @${target.split("@")[0]}!\n\n` +
+    `🐉 Um pouquinho de carinho na residência.`;
+
+  return sendFunCard(conn, from, info, "abraco", caption, [sender, target]);
+}
+break;
+
+case "shipo":
+case "ship": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+
+  const [a, b] = getTwoTargetsFromMessage(info, sender, q);
+  if (!b) {
+    return reply(`💞 Marque alguém para shippar.\nEx.: *${prefix}shipo @membro*\n\nVocê também pode marcar duas pessoas.`);
+  }
+
+  const pairKey = [a, b].sort().join("|");
+  const score = getOrCreateFunScore(from, "shipo", pairKey);
+
+  const caption =
+    `╭──────「 💞 」──────╮\n` +
+    `        *SHIPO*\n` +
+    `╰──────────────────╯\n\n` +
+    `💗 @${a.split("@")[0]}\n` +
+    `           ×\n` +
+    `💗 @${b.split("@")[0]}\n\n` +
+    `💞 Compatibilidade › *${score}%*\n\n` +
+    (score >= 80 ? `🌸 Isso aqui tá perigoso de tão fofo.` :
+     score >= 50 ? `🐉 Tem potencial... talvez com um café.` :
+     `🎐 A Kobayashi recomenda amizade primeiro.`);
+
+  return sendFunCard(conn, from, info, "shipo", caption, [a, b]);
+}
+break;
+
+case "ranklinda":
+case "ranklindo":
+case "rankgay":
+case "rankhetero":
+case "rankgostosa":
+case "rankgostoso": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+
+  const categoryMap = {
+    ranklinda: ["linda", "🌷", "RANK LINDA"],
+    ranklindo: ["lindo", "🌺", "RANK LINDO"],
+    rankgay: ["gay", "🏳️‍🌈", "RANK GAY"],
+    rankhetero: ["hetero", "💙", "RANK HÉTERO"],
+    rankgostosa: ["gostosa", "🔥", "RANK GOSTOSA"],
+    rankgostoso: ["gostoso", "😏", "RANK GOSTOSO"],
+  };
+  const [category, emoji, title] = categoryMap[command];
+
+  const participants = (groupMembers || [])
+    .map((p) => p?.id || p?.jid)
+    .filter(Boolean)
+    .filter((jid) => jid !== botNumber);
+
+  const ranked = participants
+    .map((jid) => ({ jid, score: getOrCreateFunScore(from, category, jid) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  if (!ranked.length) return reply("🏆 Não encontrei membros suficientes para montar o ranking.");
+
+  const medals = ["🥇","🥈","🥉"];
+  const lines = ranked.map((item, i) =>
+    `${medals[i] || `#${i+1}`} @${item.jid.split("@")[0]} — *${item.score}%*`
+  ).join("\n");
+
+  const caption =
+    `╭──────「 🏆 」──────╮\n` +
+    `      *${title}*\n` +
+    `╰──────────────────╯\n\n` +
+    `${lines}\n\n` +
+    `🌸 Ranking persistente do Kobayashi Fun.`;
+
+  return sendFunCard(conn, from, info, "rank", caption, ranked.map((x) => x.jid));
+}
+break;
+//
 // menu
 case "menu":
 reagir("🐉");

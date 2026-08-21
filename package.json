@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.14-beta",
-  "description": "Kobayashi Bot Beta v0.1.14 - comando criador atualizado",
+  "version": "0.1.15-beta",
+  "description": "Kobayashi Bot Beta v0.1.15 - Modo Brincadeira e rankings",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

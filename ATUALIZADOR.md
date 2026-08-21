@@ -63,3 +63,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/criador` redesenhado.
 - Adicionados link de WhatsApp, GitHub e Instagram do criador.
 - GitHub e Instagram configuráveis pelo `settings/settings.json`.
+
+## v0.1.15-beta
+- Novo `/menubn` (Kobayashi Fun).
+- `/modobrincadeira` exclusivo de ADM/dono; alterna ligado/desligado por grupo.
+- Todos os membros podem usar as brincadeiras quando o modo está ativo.
+- Comandos: linda, lindo, gay, hetero, abraco, gado, shipo, gostosa, gostoso.
+- Rankings: ranklinda, ranklindo, rankgay, rankhetero, rankgostosa, rankgostoso.
+- Scores são persistentes em `files/database/brincadeiras.json`.
+- Imagens locais temáticas incluídas, sem depender de APIs externas.

@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.14-beta • tema oficial Kobayashi */
+/* KOBAYASHI BOT • v0.1.15-beta • tema oficial Kobayashi */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -14,7 +14,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 │ 🎀 Usuário  › @${sender.split("@")[0]}
 │ 🌺 Dono     › ${ownerName}
 │ 🪭 Prefixo  › ${prefix}
-│ 💮 Versão   › 0.1.14-beta
+│ 💮 Versão   › 0.1.15-beta
 ╰─────── ❀ ───────────╯
 
        ── 🌸 ──
@@ -28,6 +28,8 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 │    ↳ Configurações
 │ 💎 ${prefix}menuvip
 │    ↳ Recursos exclusivos
+│ 🎭 ${prefix}menubn
+│    ↳ Modo Brincadeira
 ╰─────── ❀ ───────────╯
 
 ╭───〔 🌺 INFORMAÇÕES 〕──╮
