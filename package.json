@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.7-beta",
-  "description": "Kobayashi Bot Beta v0.1.7 - correção de comandos enviados em legendas de mídia",
+  "version": "0.1.8-beta",
+  "description": "Kobayashi Bot Beta v0.1.8 - renovação visual dos menus",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

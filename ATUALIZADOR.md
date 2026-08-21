@@ -20,3 +20,8 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 ## Correção v0.1.7
 - Comandos em legendas de imagens/vídeos agora são reconhecidos.
 - `/s`, `/foto_gp` e `/foto_menu` aceitam a mídia enviada junto com o próprio comando, sem precisar responder outra mensagem.
+
+## Visual v0.1.8
+- Menus principal, ADM, dono, VIP e status foram redesenhados.
+- Novo estilo com molduras, divisórias, símbolos e tema 🐉🌸.
+- Adicionado/garantido alias `/menudono`.
