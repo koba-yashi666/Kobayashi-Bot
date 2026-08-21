@@ -36,3 +36,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/figurinhas` sem número agora pede claramente uma quantidade entre 1 e 15.
 - `/figurinhas 10` envia exatamente 10 figurinhas.
 - Mensagens do comando redesenhadas com tema Kobayashi 🐉🌸.
+
+## v0.1.11-beta
+- Novo visual do menu inspirado no menu enviado pelo proprietário.
+- `/admins` / `/adms`: lista administradores do grupo.
+- `/criador`: mostra os dados do criador do projeto.
+- `/dono`: mostra o dono atualmente configurado.
+- `/infoadv`: explica o sistema de 3 advertências.
+- Fonte de `/figurinhas` mantida sem alterações nesta versão.

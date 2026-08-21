@@ -695,6 +695,102 @@ case "packfig": {
 }
 break;
 //
+
+// informações • v0.1.11
+case "admins":
+case "adms": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  const adminsLista = Array.isArray(groupAdmins) ? groupAdmins : [];
+  if (!adminsLista.length) return reply("🌸 Não encontrei administradores neste grupo.");
+
+  const linhas = adminsLista.map((jid, i) => {
+    const isOwnerBot = jid === dono;
+    return `┃╎୨୧ ${isOwnerBot ? "👑" : "🛡️"} ${i + 1}. @${jid.split("@")[0]}${isOwnerBot ? " • Dono do Bot" : ""}`;
+  }).join("\n");
+
+  return conn.sendMessage(from, {
+    text:
+      `┏╾ׁ═╼･ﾟ♡ﾟ･｡🛡️｡･ﾟ♡ﾟ･╾ᷓ═╼┓\n` +
+      `┣━〔 • 𝑨𝑫𝑴𝒊𝒏𝒔 • 🛡️ 〕\n` +
+      `┗╾ׁ═╼･ﾟ♡ﾟ･｡🛡️｡･ﾟ♡ﾟ･╾ᷓ═╼┛\n╎\n` +
+      `┃╭╾ׁ═╼〔 • 👑 • 〕╾ׁ═╼╮\n` +
+      `${linhas}\n` +
+      `┃╎\n┃╎୨୧ Total: *${adminsLista.length}*\n` +
+      `┃╰╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╯`,
+    mentions: adminsLista,
+  }, { quoted: info });
+}
+break;
+
+case "criador":
+case "creator": {
+  const cfg = readSettingsFile();
+  const creatorName = cfg.creatorName || cfg.ownerName || ownerName;
+  const creatorNumber = onlyDigits(cfg.creatorNumber || cfg.ownerNumber || ownerNumber);
+  const creatorJid = creatorNumber ? `${creatorNumber}@s.whatsapp.net` : null;
+
+  return conn.sendMessage(from, {
+    text:
+      `┏╾ׁ═╼･ﾟ♡ﾟ･｡🐉｡･ﾟ♡ﾟ･╾ᷓ═╼┓\n` +
+      `┣━〔 • 𝑪𝒓𝒊𝒂𝒅𝒐𝒓 • 🐉 〕\n` +
+      `┗╾ׁ═╼･ﾟ♡ﾟ･｡🐉｡･ﾟ♡ﾟ･╾ᷓ═╼┛\n╎\n` +
+      `┃╭╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╮\n` +
+      `┃╎୨୧ 👤 *Nome*: ${creatorName}\n` +
+      `┃╎୨୧ 📱 *Número*: ${creatorNumber || "Não configurado"}\n` +
+      `┃╎୨୧ 🤖 *Projeto*: KӨBΛYΛƧΗI BӨƬ\n` +
+      `┃╎୨୧ 📦 *Versão*: ${getLocalVersion()}\n` +
+      `┃╰╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╯`,
+    mentions: creatorJid ? [creatorJid] : [],
+  }, { quoted: info });
+}
+break;
+
+case "dono":
+case "owner": {
+  const cfg = readSettingsFile();
+  const numero = onlyDigits(cfg.ownerNumber || ownerNumber);
+  const nome = cfg.ownerName || ownerName;
+  const jid = numero ? `${numero}@s.whatsapp.net` : null;
+
+  return conn.sendMessage(from, {
+    text:
+      `┏╾ׁ═╼･ﾟ♡ﾟ･｡👑｡･ﾟ♡ﾟ･╾ᷓ═╼┓\n` +
+      `┣━〔 • 𝑫𝒐𝒏𝒐 • 👑 〕\n` +
+      `┗╾ׁ═╼･ﾟ♡ﾟ･｡👑｡･ﾟ♡ﾟ･╾ᷓ═╼┛\n╎\n` +
+      `┃╭╾ׁ═╼〔 • 💌 • 〕╾ׁ═╼╮\n` +
+      `┃╎୨୧ 👤 *Nome*: ${nome}\n` +
+      `┃╎୨୧ 📱 *Número*: ${numero || "Não configurado"}\n` +
+      `┃╎୨୧ 🐉 *Responsável atual pela Kobayashi*\n` +
+      `┃╰╾ׁ═╼〔 • 💌 • 〕╾ׁ═╼╯`,
+    mentions: jid ? [jid] : [],
+  }, { quoted: info });
+}
+break;
+
+case "infoadv":
+case "info_adv": {
+  return reply(
+    `┏╾ׁ═╼･ﾟ♡ﾟ･｡⚠️｡･ﾟ♡ﾟ･╾ᷓ═╼┓\n` +
+    `┣━〔 • 𝑺𝒊𝒔𝒕𝒆𝒎𝒂 𝑨𝑫𝑽 • ⚠️ 〕\n` +
+    `┗╾ׁ═╼･ﾟ♡ﾟ･｡⚠️｡･ﾟ♡ﾟ･╾ᷓ═╼┛\n╎\n` +
+    `┃╭╾ׁ═╼〔 • 🐉 • 〕╾ׁ═╼╮\n` +
+    `┃╎୨୧ ⚠️ *1/3* — Primeira advertência\n` +
+    `┃╎୨୧ ⚠️ *2/3* — Segunda advertência\n` +
+    `┃╎୨୧ 🚨 *3/3* — Remoção automática\n` +
+    `┃╎\n` +
+    `┃╎୨୧ 📝 *Como usar:*\n` +
+    `┃╎   ${prefix}adv @membro motivo\n` +
+    `┃╎\n` +
+    `┃╎୨୧ 🛡️ Apenas administradores podem aplicar ADV.\n` +
+    `┃╎୨୧ 🤖 A Kobayashi precisa ser ADM para remover no 3/3.\n` +
+    `┃╎୨୧ ♻️ Após uma remoção bem-sucedida, as ADVs são zeradas.\n` +
+    `┃╰╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╯`
+  );
+}
+break;
+//
+
 // menu
 case "menu":
 reagir("🐉");

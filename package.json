@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.10-beta",
-  "description": "Kobayashi Bot Beta v0.1.10 - melhorias no comando figurinhas",
+  "version": "0.1.11-beta",
+  "description": "Kobayashi Bot Beta v0.1.11 - novo visual e comandos de informação",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

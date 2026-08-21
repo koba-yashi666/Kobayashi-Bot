@@ -1,144 +1,128 @@
-/* Tema: Kobayashi Bot Beta 🐉🌸
- * Layout renovado na v0.1.10 usando molduras e símbolos decorativos
- * inspirados nos packs enviados pelo usuário.
+/* Kobayashi Bot • v0.1.11-beta
+ * Visual inspirado no menu usado pelo proprietário.
  */
 
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
-return `╭🌸・🐉・☆・🐉・🌸╮
-┆ ⋮ *${NomeDoBot.toUpperCase()}*
-┆ ⋮ 🧪 Beta • v0.1.10
-┆ ⋮ 👤 @${sender.split("@")[0]}
-┆ ⋮ 👑 ${ownerName}
-╰🌸・🐉・☆・🐉・🌸╯
+return `┏╾ׁ═╼°❀•°: | ⊱🌸⊰ | :°•❀°╾ᷓ═╼┓
+┃        ୨୧ *KӨBΛYΛƧΗI BӨƬ* ୨୧
+┗╾ׁ═╼°❀•°: | ⊱🌸⊰ | :°•❀°╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🎀｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • 💌 • 〕╾ׁ═╼╮
+┃╎  Oiê @${sender.split("@")[0]} ^-^
+┃╎
+┃╎ ୨୧ *Bot*: KӨBΛYΛƧΗI BӨƬ
+┃╎ ୨୧ *Versão*: v0.1.11-beta
+┃╎ ୨୧ *Dono*: ${ownerName}
+┃╎ ୨୧ *Prefixo*: ${prefix}
+┃╰╾ׁ═╼〔 • 💌 • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🎀｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🥂｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑴𝒆𝒏𝒖𝒔 • 🥂 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🥂｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🍸｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • ✿ • 〕╾ׁ═╼╮
+┃╎୨୧ 🍸 ${prefix}MenuAdm
+┃╎୨୧ 🍸 ${prefix}MenuDono
+┃╎୨୧ 🍸 ${prefix}MenuVip
+┃╰╾ׁ═╼〔 • ✿ • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🍸｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🌸｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑰𝒏𝒇𝒐𝒓𝒎𝒂𝒄̧𝒐̃𝒆𝒔 • 🌸 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🌸｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🌷｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • 🎀 • 〕╾ׁ═╼╮
+┃╎✧͜͡ 🌷 ${prefix}Ping
+┃╎✧͜͡ 🌷 ${prefix}GrupoInfo
+┃╎✧͜͡ 🌷 ${prefix}Admins
+┃╎✧͜͡ 🌷 ${prefix}Criador
+┃╎✧͜͡ 🌷 ${prefix}Dono
+┃╎✧͜͡ 🌷 ${prefix}InfoAdv
+┃╰╾ׁ═╼〔 • 🎀 • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🌷｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡✨｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑴𝒆𝒎𝒃𝒆𝒓𝒔 • 💖 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡✨｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡💎｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • 🌌 • 〕╾ׁ═╼╮
+┃╎୨୧ 🧉 ${prefix}Perfil
+┃╎୨୧ 🧉 ${prefix}Stickers / ${prefix}S
+┃╎୨୧ 🧉 ${prefix}Figurinhas 1-15
+┃╰╾ׁ═╼〔 • 🌌 • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡💎｡･ﾟ♡ﾟ･╾ᷓ═╼┛
 
-┏━─━─━─━─━─━─━─━─━┓
-│▢ 🌸 *MENU PRINCIPAL*
-┗━─━─━─━─━─━─━─━─━┛
-┏━─━─━─━─━─━─━─━─━┓
-│▢ 🎨 ${prefix}stickers / ${prefix}s
-│▢ 🌸 ${prefix}figurinhas 1-15
-│▢ 👤 ${prefix}perfil @membro
-│▢ ⚡ ${prefix}ping
-│▢ 🐉 ${prefix}grupoinfo
-┗━─━─━─━─━─━─━─━─━┛
-
-╭・・・・☆・・・・・・☆ ・・・・
-┆ ⋮ 🛡️ *ADMINISTRAÇÃO*
-┆°⋅⊰ꕤ ⚠️ ${prefix}adv @membro
-┆°⋅⊰ꕤ 🛑 ${prefix}ban / ${prefix}b
-╰・・・・☆・・・・・・☆ ・・・・
-
-╭🌟・🌸・☆・🌸・🌟╮
-┆ ⋮ 📚 *OUTROS MENUS*
-┆ ➤🛡️ ${prefix}menuadm
-┆ ➤👑 ${prefix}menudono
-┆ ➤💎 ${prefix}menuvip
-╰🌟・🌸・☆・🌸・🌟╯
-
-⊰᯽⊱═══❖•ೋ°🐉°ೋ•❖═══⊰᯽⊱
-🌸 *Kobayashi Bot — pequena no tamanho, grande no caos.*
-⊰᯽⊱═══❖•ೋ°🌸°ೋ•❖═══⊰᯽⊱`;
+✰ۣۜۜ͜͡KӨBΛYΛƧΗI BӨƬ
+✰✰✰✰✰`;
 };
 
 export const menuAdm = (prefix) => {
-return `╭🌸・🛡️・☆・🛡️・🌸╮
-┆ ⋮ *MENU ADMINISTRADOR*
-┆ ⋮ 🐉 Kobayashi Security
-╰🌸・🛡️・☆・🛡️・🌸╯
-
-┏━─━─━─━─━─━─━─━─━┓
-│▢ 👥 *MEMBROS*
-┗━─━─━─━─━─━─━─━─━┛
-│▢ 🛑 ${prefix}ban / ${prefix}b @membro
-│▢ ⚠️ ${prefix}adv @membro [motivo] • 3/3 = ban
-│▢ 🔨 ${prefix}promover @membro
-│▢ 📛 ${prefix}rebaixar @membro
-
-┏━─━─━─━─━─━─━─━─━┓
-│▢ 🔧 *FERRAMENTAS*
-┗━─━─━─━─━─━─━─━─━┛
-│▢ 🔄 ${prefix}statusatt
-│▢ 🐉 ${prefix}grupoinfo
-
-★━━━━━━━━▃▅▆█✿█▆▅▃━━━━━━━━★
-🛡️ *Administre com calma. A Tohru já causa caos suficiente.*
-★━━━━━━━━▃▅▆█✿█▆▅▃━━━━━━━━★`;
+return `┏╾ׁ═╼･ﾟ♡ﾟ･｡🛡️｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑴𝒆𝒏𝒖 𝑨𝑫𝑴 • 🛡️ 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🛡️｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡⚠️｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • 🐉 • 〕╾ׁ═╼╮
+┃╎୨୧ ⚠️ ${prefix}Adv @membro motivo
+┃╎୨୧ 🔨 ${prefix}Ban / ${prefix}B @membro
+┃╎୨୧ 🐉 ${prefix}GrupoInfo
+┃╎୨୧ 👑 ${prefix}Admins
+┃╎୨୧ 📚 ${prefix}InfoAdv
+┃╎୨୧ 🔄 ${prefix}StatusAtt
+┃╰╾ׁ═╼〔 • 🐉 • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡⚠️｡･ﾟ♡ﾟ･╾ᷓ═╼┛`;
 };
 
 export const menuOwner = (prefix) => {
-return `╭👑・🐉・☆・🐉・👑╮
-┆ ⋮ *MENU DO DONO*
-┆ ⋮ 🌸 Painel da Kobayashi
-╰👑・🐉・☆・🐉・👑╯
-
-╭・・・・☆・・・・・・☆ ・・・・
-┆ ⋮ 👑 *PROPRIETÁRIO*
-┆°⋅⊰ꕤ 📱 ${prefix}numero_dono 55...
-┆°⋅⊰ꕤ 🤖 ${prefix}numero_bot 55...
-┆°⋅⊰ꕤ 📊 ${prefix}status_bot
-╰・・・・☆・・・・・・☆ ・・・・
-
-╭・・・・☆・・・・・・☆ ・・・・
-┆ ⋮ ⚙️ *CONFIGURAÇÕES*
-┆°⋅⊰ꕤ ⌨️ ${prefix}prefixo
-┆°⋅⊰ꕤ ➕ ${prefix}add_prefixo !
-┆°⋅⊰ꕤ 🛡️ ${prefix}antipv on/off
-╰・・・・☆・・・・・・☆ ・・・・
-
-╭・・・・☆・・・・・・☆ ・・・・
-┆ ⋮ 🎨 *PERSONALIZAÇÃO*
-┆°⋅⊰ꕤ 🖼️ ${prefix}foto_gp
-┆°⋅⊰ꕤ ✏️ ${prefix}nome_gp Novo nome
-┆°⋅⊰ꕤ 🌸 ${prefix}foto_menu
-╰・・・・☆・・・・・・☆ ・・・・
-
-╭・・・・☆・・・・・・☆ ・・・・
-┆ ⋮ 🔧 *SISTEMA*
-┆°⋅⊰ꕤ 📦 ${prefix}version
-┆°⋅⊰ꕤ 🔄 ${prefix}update
-┆°⋅⊰ꕤ 🧪 ${prefix}statusatt
-┆°⋅⊰ꕤ ♻️ ${prefix}reiniciar / ${prefix}rr
-╰・・・・☆・・・・・・☆ ・・・・
-
-⊰᯽⊱═══❖•ೋ°👑°ೋ•❖═══⊰᯽⊱
-🐉 *Acesso exclusivo do proprietário.*
-⊰᯽⊱═══❖•ೋ°🌸°ೋ•❖═══⊰᯽⊱`;
+return `┏╾ׁ═╼･ﾟ♡ﾟ･｡👑｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑴𝒆𝒏𝒖 𝑫𝒐𝒏𝒐 • 👑 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡👑｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┏╾ׁ═╼･ﾟ♡ﾟ･｡🌸｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┃╭╾ׁ═╼〔 • ⚙️ • 〕╾ׁ═╼╮
+┃╎୨୧ 📱 ${prefix}Numero_Dono 55...
+┃╎୨୧ 🤖 ${prefix}Numero_Bot 55...
+┃╎୨୧ 📊 ${prefix}Status_Bot
+┃╎୨୧ ⌨️ ${prefix}Prefixo
+┃╎୨୧ ➕ ${prefix}Add_Prefixo !
+┃╎୨୧ 🖼️ ${prefix}Foto_Gp
+┃╎୨୧ ✏️ ${prefix}Nome_Gp Novo nome
+┃╎୨୧ 🎀 ${prefix}Foto_Menu
+┃╎୨୧ 🛡️ ${prefix}AntiPv on/off
+┃╎୨୧ 📦 ${prefix}Version
+┃╎୨୧ 🔄 ${prefix}Update
+┃╰╾ׁ═╼〔 • ⚙️ • 〕╾ׁ═╼╯
+┗╾ׁ═╼･ﾟ♡ﾟ･｡🌸｡･ﾟ♡ﾟ･╾ᷓ═╼┛`;
 };
 
 export const menuVip = (prefix) => {
-return `╭💎・🌸・☆・🌸・💎╮
-┆ ⋮ *MENU VIP*
-┆ ⋮ ✨ Kobayashi Premium
-╰💎・🌸・☆・🌸・💎╯
-
-┏━─━─━─━─━─━─━─━─━┓
-│▢ 💎 *ÁREA EXCLUSIVA*
-┗━─━─━─━─━─━─━─━─━┛
-│▢ 🌸 Novas funções VIP chegarão em breve.
-│▢ ✨ ${prefix}menuvip
-
-◇☆★☆★☆★☆◆◇☆★☆★☆★☆◆
-💎 *Obrigado por apoiar o Kobayashi Bot.*
-◇☆★☆★☆★☆◆◇☆★☆★☆★☆◆`;
+return `┏╾ׁ═╼･ﾟ♡ﾟ･｡💎｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑴𝒆𝒏𝒖 𝑽𝑰𝑷 • 💎 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡💎｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┃╭╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╮
+┃╎୨୧ 💎 Área VIP em desenvolvimento
+┃╎୨୧ 🌸 Mais funções em breve
+┃╰╾ׁ═╼〔 • 🌸 • 〕╾ׁ═╼╯`;
 };
 
 export const ping = (atraso, uptime, so, ramUsada, cpuUso, nodeVersion, baileysVersion) => {
-return `╭⚡・🐉・☆・🐉・⚡╮
-┆ ⋮ *KOBAYASHI STATUS*
-┆ ⋮ 🌸 Sistemas da residência
-╰⚡・🐉・☆・🐉・⚡╯
-
-┏━─━─━─━─━─━─━─━─━┓
-│▢ ⚡ Atraso: ${atraso}
-│▢ ⏱️ Uptime: ${uptime}
-│▢ 💻 Sistema: ${so}
-│▢ 🧠 RAM: ${ramUsada}
-│▢ 📊 CPU: ${cpuUso}
-│▢ 🟢 NodeJS: ${nodeVersion}
-│▢ 📦 Baileys: ${baileysVersion}
-┗━─━─━─━─━─━─━─━─━┛
-
-★━━━━━━━━▃▅▆█✿█▆▅▃━━━━━━━━★
-🌸 *Kobayashi está online e servindo café.*
-★━━━━━━━━▃▅▆█✿█▆▅▃━━━━━━━━★`;
+return `┏╾ׁ═╼･ﾟ♡ﾟ･｡⚡｡･ﾟ♡ﾟ･╾ᷓ═╼┓
+┣━〔 • 𝑺𝒕𝒂𝒕𝒖𝒔 • ⚡ 〕
+┗╾ׁ═╼･ﾟ♡ﾟ･｡⚡｡･ﾟ♡ﾟ･╾ᷓ═╼┛
+╎
+┃╭╾ׁ═╼〔 • 🐉 • 〕╾ׁ═╼╮
+┃╎୨୧ ⚡ Atraso: ${atraso}
+┃╎୨୧ ⏱️ Uptime: ${uptime}
+┃╎୨୧ 💻 Sistema: ${so}
+┃╎୨୧ 🧠 RAM: ${ramUsada}
+┃╎୨୧ 📊 CPU: ${cpuUso}
+┃╎୨୧ 🟢 Node: ${nodeVersion}
+┃╎୨୧ 📦 Baileys: ${baileysVersion}
+┃╰╾ׁ═╼〔 • 🐉 • 〕╾ׁ═╼╯`;
 };
