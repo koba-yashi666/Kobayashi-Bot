@@ -139,3 +139,8 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Mostra thumbnail, título, canal e duração antes do áudio.
 - Play adicionado ao Menu Geral.
 - Bootstrap verifica/tenta instalar yt-dlp automaticamente.
+
+### Fix do Play v0.1.24
+- Removido executável externo yt-dlp.
+- Download feito diretamente pelo Node com @distube/ytdl-core.
+- Limite preventivo de 25 MB.
