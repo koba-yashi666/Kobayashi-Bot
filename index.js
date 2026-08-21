@@ -551,6 +551,58 @@ case "atualizar": {
 break;
 //
 
+
+// informações do grupo
+case "grupoinfo":
+case "infogrupo":
+case "groupinfo": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  reagir("🐉");
+
+  try {
+    // Usa os metadados já carregados pelo bot para evitar chamadas desnecessárias.
+    const membros = Array.isArray(groupMembers) ? groupMembers.length : 0;
+    const admins = Array.isArray(groupAdmins) ? groupAdmins.length : 0;
+    const descricao = groupMetadata?.desc?.trim() || "Sem descrição.";
+    const criadorJid = groupMetadata?.owner || null;
+    const criador = criadorJid
+      ? `@${normalizeJid(criadorJid).split("@")[0]}`
+      : "Não disponível";
+    const criadoEm = groupMetadata?.creation
+      ? moment.unix(Number(groupMetadata.creation)).format("DD/MM/YYYY HH:mm")
+      : "Não disponível";
+    const botAdm = isBotGroupAdmins ? "Sim ✅" : "Não ❌";
+
+    const texto =
+      `╭━━━━━━━━━━━━━━━━━━━━━━╮\n` +
+      `┃ 🐉🌸 *INFORMAÇÕES DO GRUPO* 🌸🐉\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `🏷️ *Nome:* ${groupName}\n` +
+      `👥 *Membros:* ${membros}\n` +
+      `👑 *Administradores:* ${admins}\n` +
+      `🤖 *Kobayashi ADM:* ${botAdm}\n` +
+      `👤 *Criador:* ${criador}\n` +
+      `📅 *Criado em:* ${criadoEm}\n\n` +
+      `📝 *Descrição:*\n${descricao}\n\n` +
+      `🆔 *ID:* ${from}`;
+
+    return conn.sendMessage(
+      from,
+      {
+        text: texto,
+        mentions: criadorJid ? [normalizeJid(criadorJid)] : []
+      },
+      { quoted: info }
+    );
+  } catch (e) {
+    console.error("Erro no comando grupoinfo:", e);
+    return reply("❌ Não consegui obter as informações deste grupo agora.");
+  }
+}
+break;
+//
+
 // ping
 case "ping": {
 reagir("🌸");
