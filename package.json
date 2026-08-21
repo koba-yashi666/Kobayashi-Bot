@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.21-beta",
-  "description": "Kobayashi Bot Beta v0.1.21 - Lista Branca para links",
+  "version": "0.1.22-beta",
+  "description": "Kobayashi Bot Beta v0.1.22 - ferramentas de figurinhas e comandos por sticker",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

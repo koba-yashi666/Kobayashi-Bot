@@ -117,3 +117,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Membros autorizados podem enviar links sem serem ADM.
 - A Lista Branca é independente por grupo.
 - `/listabranca add @membro`, `/listabranca del @membro` e `/listabranca` para consultar.
+
+## v0.1.22-beta
+- `/toimg`: converte figurinha para imagem PNG.
+- `/togif`: converte figurinha animada para vídeo com reprodução GIF.
+- `/take Pacote | Autor`: altera metadados de uma figurinha.
+- Sistema de comandos por figurinha: `/setcmd`, `/delcmd`, `/listcmdsticker`.
+- Figurinhas associadas passam a executar comandos quando enviadas no chat.
+- Apenas ADM/líder/dono podem configurar comandos por figurinha.

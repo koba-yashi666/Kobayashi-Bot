@@ -29,6 +29,65 @@ const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-li
 
 const WHITELIST_DB = path.join(process.cwd(), "files", "database", "lista-branca.json");
 
+const STICKER_CMD_DB = path.join(process.cwd(), "files", "database", "sticker-cmd.json");
+
+function readStickerCmdDb() {
+  try {
+    fs.mkdirSync(path.dirname(STICKER_CMD_DB), { recursive: true });
+    if (!fs.existsSync(STICKER_CMD_DB)) {
+      fs.writeFileSync(STICKER_CMD_DB, JSON.stringify({}, null, 2), "utf8");
+    }
+    return JSON.parse(fs.readFileSync(STICKER_CMD_DB, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function writeStickerCmdDb(db) {
+  fs.mkdirSync(path.dirname(STICKER_CMD_DB), { recursive: true });
+  fs.writeFileSync(STICKER_CMD_DB, JSON.stringify(db, null, 2), "utf8");
+}
+
+function stickerHashFromMessage(message = {}) {
+  const sticker = message?.stickerMessage;
+  const hash = sticker?.fileSha256;
+  if (!hash) return null;
+
+  try {
+    return Buffer.from(hash).toString("base64");
+  } catch {
+    return null;
+  }
+}
+
+function getStickerMappedCommand(message = {}) {
+  const hash = stickerHashFromMessage(message);
+  if (!hash) return null;
+  const db = readStickerCmdDb();
+  return db[hash] || null;
+}
+
+function setStickerMappedCommand(message = {}, commandText) {
+  const hash = stickerHashFromMessage(message);
+  if (!hash) return false;
+  const db = readStickerCmdDb();
+  db[hash] = commandText;
+  writeStickerCmdDb(db);
+  return true;
+}
+
+function removeStickerMappedCommand(message = {}) {
+  const hash = stickerHashFromMessage(message);
+  if (!hash) return false;
+  const db = readStickerCmdDb();
+  if (!(hash in db)) return false;
+  delete db[hash];
+  writeStickerCmdDb(db);
+  return true;
+}
+
+
+
 function readWhitelistDb() {
   try {
     fs.mkdirSync(path.dirname(WHITELIST_DB), { recursive: true });
@@ -557,7 +616,17 @@ function extractCommandText(message = {}) {
   }
 }
 
-const body = extractCommandText(info.message) || info?.text || "";
+let body = extractCommandText(info.message) || info?.text || "";
+
+// Figurinha pode disparar um comando previamente associado.
+if (!body && type === "stickerMessage") {
+  const mappedStickerCommand = getStickerMappedCommand(info.message);
+  if (mappedStickerCommand) {
+    body = mappedStickerCommand.startsWith(prefix)
+      ? mappedStickerCommand
+      : `${prefix}${mappedStickerCommand}`;
+  }
+}
 
 const isCmd = body.startsWith(prefix);
 const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
@@ -1119,6 +1188,217 @@ case "autostk": {
         `╰──────────────────╯\n\n` +
         `🔒 *Desativado neste grupo.*\n\n` +
         `As fotos não serão mais convertidas automaticamente.`
+  );
+}
+break;
+//
+
+
+// ferramentas de figurinhas • v0.1.22
+case "toimg":
+case "toimage": {
+  const quoted = getQuotedMessage(info);
+  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+
+  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
+    return reply(`🖼️ Responda a uma figurinha com *${prefix}toimg*.`);
+  }
+
+  try {
+    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    const sharpModule = await import("sharp");
+    const sharp = sharpModule.default || sharpModule;
+    const imageBuffer = await sharp(stickerBuffer).png().toBuffer();
+
+    return conn.sendMessage(
+      from,
+      {
+        image: imageBuffer,
+        caption: "🌸 Figurinha convertida para imagem pela Kobayashi."
+      },
+      { quoted: info }
+    );
+  } catch (e) {
+    console.error("Erro /toimg:", e);
+    return reply("❌ Não consegui converter essa figurinha para imagem.");
+  }
+}
+break;
+
+case "togif": {
+  const quoted = getQuotedMessage(info);
+  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+
+  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
+    return reply(`🎞️ Responda a uma figurinha animada com *${prefix}togif*.`);
+  }
+
+  try {
+    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    const tmpId = randomBytes(6).toString("hex");
+    const inputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.webp`);
+    const outputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.mp4`);
+
+    fsx.writeFileSync(inputPath, stickerBuffer);
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(inputPath)
+        .outputOptions([
+          "-movflags faststart",
+          "-pix_fmt yuv420p",
+          "-vf scale=trunc(iw/2)*2:trunc(ih/2)*2"
+        ])
+        .toFormat("mp4")
+        .on("end", resolve)
+        .on("error", reject)
+        .save(outputPath);
+    });
+
+    const videoBuffer = fsx.readFileSync(outputPath);
+    try { fsx.unlinkSync(inputPath); } catch {}
+    try { fsx.unlinkSync(outputPath); } catch {}
+
+    return conn.sendMessage(
+      from,
+      {
+        video: videoBuffer,
+        gifPlayback: true,
+        caption: "🐉🌸 Figurinha convertida para GIF."
+      },
+      { quoted: info }
+    );
+  } catch (e) {
+    console.error("Erro /togif:", e);
+    return reply("❌ Não consegui converter essa figurinha. Tente com uma figurinha animada.");
+  }
+}
+break;
+
+case "take": {
+  const quoted = getQuotedMessage(info);
+  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+
+  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
+    return reply(
+      `🎐 Responda a uma figurinha com:\n\n` +
+      `*${prefix}take Nome do pacote | Autor*\n\n` +
+      `Ex.: *${prefix}take Kobayashi Pack | ${pushname || "Usuário"}*`
+    );
+  }
+
+  try {
+    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    const parts = String(q || "").split("|").map((x) => x.trim());
+    const cfg = readSettingsFile();
+
+    const packName = parts[0] || "Kobayashi Pack";
+    const authorName = parts[1] || pushname || sender.split("@")[0];
+
+    const webpModule = await import("node-webpmux");
+    const WebpImage = webpModule.Image || webpModule.default?.Image;
+    if (!WebpImage) return reply("❌ Não consegui carregar o editor de metadados.");
+
+    const jsonMeta = Buffer.from(JSON.stringify({
+      "sticker-pack-id": "kobayashi-take",
+      "sticker-pack-name": packName,
+      "sticker-pack-publisher": authorName,
+      "emojis": ["🐉","🌸"]
+    }), "utf8");
+
+    const exif = Buffer.concat([
+      Buffer.from([0x49,0x49,0x2A,0x00,0x08,0x00,0x00,0x00,0x01,0x00,0x41,0x57,0x07,0x00]),
+      Buffer.alloc(4),
+      Buffer.from([0x16,0x00,0x00,0x00]),
+      jsonMeta
+    ]);
+    exif.writeUIntLE(jsonMeta.length, 14, 4);
+
+    const img = new WebpImage();
+    await img.load(stickerBuffer);
+    img.exif = exif;
+    const result = await img.save(null);
+
+    return conn.sendMessage(from, { sticker: result }, { quoted: info });
+  } catch (e) {
+    console.error("Erro /take:", e);
+    return reply("❌ Não consegui alterar os dados dessa figurinha.");
+  }
+}
+break;
+
+case "setcmd": {
+  if (!SoDono && !isGroupAdmins) {
+    return reply("🛡️ Apenas administradores, líderes ou o dono podem associar comandos a figurinhas.");
+  }
+
+  const quoted = getQuotedMessage(info);
+  if (!quoted?.message || getContentType(quoted.message) !== "stickerMessage") {
+    return reply(
+      `🎴 Responda a uma figurinha com:\n\n` +
+      `*${prefix}setcmd comando*\n\n` +
+      `Ex.: *${prefix}setcmd ping*`
+    );
+  }
+
+  const cmdText = String(q || "").trim();
+  if (!cmdText) {
+    return reply(`🎴 Informe o comando.\nEx.: *${prefix}setcmd menu*`);
+  }
+
+  const normalized = cmdText.startsWith(prefix) ? cmdText : `${prefix}${cmdText}`;
+  if (!setStickerMappedCommand(quoted.message, normalized)) {
+    return reply("❌ Não consegui identificar essa figurinha.");
+  }
+
+  return reply(
+    `✅🎴 *COMANDO NA FIGURINHA*\n\n` +
+    `Essa figurinha agora executa:\n*${normalized}*\n\n` +
+    `🐉 Basta enviá-la no chat.`
+  );
+}
+break;
+
+case "delcmd": {
+  if (!SoDono && !isGroupAdmins) {
+    return reply("🛡️ Apenas administradores, líderes ou o dono podem remover comandos de figurinhas.");
+  }
+
+  const quoted = getQuotedMessage(info);
+  if (!quoted?.message || getContentType(quoted.message) !== "stickerMessage") {
+    return reply(`🎴 Responda à figurinha com *${prefix}delcmd*.`);
+  }
+
+  if (!removeStickerMappedCommand(quoted.message)) {
+    return reply("🌸 Essa figurinha não possui comando associado.");
+  }
+
+  return reply("✅🌸 Comando removido dessa figurinha.");
+}
+break;
+
+case "listcmdsticker":
+case "stickercmds": {
+  if (!SoDono && !isGroupAdmins) {
+    return reply("🛡️ Apenas administradores, líderes ou o dono podem consultar essa lista.");
+  }
+
+  const db = readStickerCmdDb();
+  const entries = Object.entries(db);
+
+  if (!entries.length) {
+    return reply("🎴 Nenhuma figurinha com comando foi configurada ainda.");
+  }
+
+  const lines = entries.slice(0, 30).map(([hash, cmd], i) =>
+    `${i + 1}. *${cmd}* • ${hash.slice(0, 10)}…`
+  ).join("\n");
+
+  return reply(
+    `╭──────「 🎴 」──────╮\n` +
+    `   *STICKER COMMANDS*\n` +
+    `╰──────────────────╯\n\n` +
+    `${lines}\n\n` +
+    `📦 Total: *${entries.length}*`
   );
 }
 break;
