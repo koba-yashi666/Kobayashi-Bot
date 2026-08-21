@@ -110,3 +110,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Administradores, dono e líderes são imunes aos filtros.
 - `/suicidio`: remove do grupo o próprio membro que executou o comando.
 - `/bam`: falso ban; imita a mensagem do `/ban` e após 10 segundos revela a pegadinha.
+
+## v0.1.21-beta
+- Novo `/listabranca` para exceções aos filtros de links.
+- Apenas ADMs podem adicionar/remover membros da Lista Branca.
+- Membros autorizados podem enviar links sem serem ADM.
+- A Lista Branca é independente por grupo.
+- `/listabranca add @membro`, `/listabranca del @membro` e `/listabranca` para consultar.

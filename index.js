@@ -27,6 +27,50 @@ const AUTOSTICKER_DB = path.join(process.cwd(), "files", "database", "autosticke
 
 const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-links.json");
 
+const WHITELIST_DB = path.join(process.cwd(), "files", "database", "lista-branca.json");
+
+function readWhitelistDb() {
+  try {
+    fs.mkdirSync(path.dirname(WHITELIST_DB), { recursive: true });
+    if (!fs.existsSync(WHITELIST_DB)) {
+      fs.writeFileSync(WHITELIST_DB, JSON.stringify({}, null, 2), "utf8");
+    }
+    return JSON.parse(fs.readFileSync(WHITELIST_DB, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function writeWhitelistDb(db) {
+  fs.mkdirSync(path.dirname(WHITELIST_DB), { recursive: true });
+  fs.writeFileSync(WHITELIST_DB, JSON.stringify(db, null, 2), "utf8");
+}
+
+function getWhitelist(groupJid) {
+  const db = readWhitelistDb();
+  return Array.isArray(db[groupJid]) ? db[groupJid] : [];
+}
+
+function isWhitelisted(groupJid, jid) {
+  return getWhitelist(groupJid).includes(jid);
+}
+
+function addWhitelist(groupJid, jid) {
+  const db = readWhitelistDb();
+  if (!Array.isArray(db[groupJid])) db[groupJid] = [];
+  if (!db[groupJid].includes(jid)) db[groupJid].push(jid);
+  writeWhitelistDb(db);
+}
+
+function removeWhitelist(groupJid, jid) {
+  const db = readWhitelistDb();
+  if (!Array.isArray(db[groupJid])) db[groupJid] = [];
+  db[groupJid] = db[groupJid].filter((x) => x !== jid);
+  writeWhitelistDb(db);
+}
+
+
+
 function readProtectionDb() {
   try {
     fs.mkdirSync(path.dirname(PROTECTION_DB), { recursive: true });
@@ -706,7 +750,7 @@ conn.sendMessage(from, { react: { text: reassao, key: info.key } });
 
 
 // ─── KOBAYASHI AUTOMOD • PROTEÇÃO DE LINKS ───
-if (isGroup && !info.key.fromMe && !isGroupAdmins) {
+if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender)) {
   const protection = getGroupProtection(from);
   const detected = detectLinkTypes(body);
 
@@ -813,6 +857,85 @@ if (
 if (isCmd) {
 switch (command) {
 
+
+
+case "listabranca":
+case "whitelist": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const rawAction = String(args[0] || "").toLowerCase();
+  const target = getTargetFromMessage(info, null);
+  const list = getWhitelist(from);
+
+  // Sem argumento: mostra a lista atual.
+  if (!rawAction && !target) {
+    if (!list.length) {
+      return reply(
+        `╭──────「 🤍 」──────╮\n` +
+        `      *LISTA BRANCA*\n` +
+        `╰──────────────────╯\n\n` +
+        `🌸 Nenhum membro autorizado.\n\n` +
+        `➕ *${prefix}listabranca add @membro*\n` +
+        `➖ *${prefix}listabranca del @membro*\n` +
+        `📋 *${prefix}listabranca*`
+      );
+    }
+
+    const lines = list.map((jid, i) => `${i + 1}. @${jid.split("@")[0]}`).join("\n");
+    return conn.sendMessage(from, {
+      text:
+        `╭──────「 🤍 」──────╮\n` +
+        `      *LISTA BRANCA*\n` +
+        `╰──────────────────╯\n\n` +
+        `${lines}\n\n` +
+        `🔗 Esses membros podem enviar links mesmo sem serem ADM.`,
+      mentions: list,
+    }, { quoted: info });
+  }
+
+  if (!["add","adicionar","+","del","remover","remove","-"].includes(rawAction)) {
+    return reply(
+      `🤍 *LISTA BRANCA*\n\n` +
+      `➕ ${prefix}listabranca add @membro\n` +
+      `➖ ${prefix}listabranca del @membro\n` +
+      `📋 ${prefix}listabranca`
+    );
+  }
+
+  if (!target) {
+    return reply(`🌸 Marque ou responda à mensagem do membro que deseja alterar na Lista Branca.`);
+  }
+
+  if (["add","adicionar","+"].includes(rawAction)) {
+    if (isWhitelisted(from, target)) {
+      return reply(`🤍 @${target.split("@")[0]} já está na Lista Branca.`);
+    }
+    addWhitelist(from, target);
+    return conn.sendMessage(from, {
+      text:
+        `🤍🌸 *LISTA BRANCA*\n\n` +
+        `✅ @${target.split("@")[0]} foi autorizado.\n\n` +
+        `🔗 Agora pode enviar links mesmo sem ser ADM.\n` +
+        `🐉 A permissão vale somente neste grupo.`,
+      mentions: [target],
+    }, { quoted: info });
+  }
+
+  if (!isWhitelisted(from, target)) {
+    return reply(`🤍 @${target.split("@")[0]} não está na Lista Branca.`);
+  }
+
+  removeWhitelist(from, target);
+  return conn.sendMessage(from, {
+    text:
+      `🤍🌸 *LISTA BRANCA*\n\n` +
+      `❌ @${target.split("@")[0]} foi removido da lista.\n\n` +
+      `🔐 Os filtros de links voltarão a valer normalmente para esse membro.`,
+    mentions: [target],
+  }, { quoted: info });
+}
+break;
 
 // proteção / diversão ADM • v0.1.20
 case "antilink":
