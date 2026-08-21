@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.19-beta",
-  "description": "Kobayashi Bot Beta v0.1.19 - sistema de líderes/múltiplos donos",
+  "version": "0.1.20-beta",
+  "description": "Kobayashi Bot Beta v0.1.20 - proteção de links e novos comandos ADM",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

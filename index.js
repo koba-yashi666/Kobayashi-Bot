@@ -25,6 +25,107 @@ const FUN_DB = path.join(process.cwd(), "files", "database", "brincadeiras.json"
 
 const AUTOSTICKER_DB = path.join(process.cwd(), "files", "database", "autosticker.json");
 
+const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-links.json");
+
+function readProtectionDb() {
+  try {
+    fs.mkdirSync(path.dirname(PROTECTION_DB), { recursive: true });
+    if (!fs.existsSync(PROTECTION_DB)) {
+      fs.writeFileSync(PROTECTION_DB, JSON.stringify({}, null, 2), "utf8");
+    }
+    return JSON.parse(fs.readFileSync(PROTECTION_DB, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function getGroupProtection(groupJid) {
+  const db = readProtectionDb();
+  return {
+    antilink: Boolean(db?.[groupJid]?.antilink),
+    antilinkgp: Boolean(db?.[groupJid]?.antilinkgp),
+    antilinklight: Boolean(db?.[groupJid]?.antilinklight),
+    antitelegram: Boolean(db?.[groupJid]?.antitelegram),
+  };
+}
+
+function toggleGroupProtection(groupJid, key) {
+  const db = readProtectionDb();
+  if (!db[groupJid]) db[groupJid] = {};
+  db[groupJid][key] = !Boolean(db[groupJid][key]);
+  fs.writeFileSync(PROTECTION_DB, JSON.stringify(db, null, 2), "utf8");
+  return Boolean(db[groupJid][key]);
+}
+
+function detectLinkTypes(text = "") {
+  const value = String(text || "");
+
+  const telegram =
+    /(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me|telegram\.dog)\/[^\s]+/i.test(value);
+
+  const whatsappGroup =
+    /(?:https?:\/\/)?(?:chat\.whatsapp\.com|whatsapp\.com\/channel)\/[^\s]+/i.test(value);
+
+  const anyLink =
+    /(?:https?:\/\/|www\.)[^\s]+/i.test(value) ||
+    /\b(?:[a-z0-9-]+\.)+(?:com|net|org|io|gg|me|app|site|online|br|co|xyz|link|dev|tv|store|info)(?:\/[^\s]*)?/i.test(value) ||
+    telegram ||
+    whatsappGroup;
+
+  return { anyLink, whatsappGroup, telegram };
+}
+
+async function deleteDetectedMessage(conn, jid, info) {
+  try {
+    await conn.sendMessage(jid, { delete: info.key });
+    return true;
+  } catch (e) {
+    console.error("Erro ao apagar mensagem de link:", e?.message || e);
+    return false;
+  }
+}
+
+async function addAutomaticWarning(conn, groupJid, target, reason, botIsAdmin, quotedInfo) {
+  const db = readAdvDb();
+  if (!db[groupJid]) db[groupJid] = {};
+  if (!db[groupJid][target]) db[groupJid][target] = { count: 0, history: [] };
+
+  db[groupJid][target].count = Math.min((db[groupJid][target].count || 0) + 1, 3);
+  db[groupJid][target].history.push({
+    reason,
+    by: "Kobayashi AutoMod",
+    at: new Date().toISOString(),
+  });
+
+  const count = db[groupJid][target].count;
+  writeAdvDb(db);
+
+  if (count >= 3 && botIsAdmin) {
+    try {
+      await conn.groupParticipantsUpdate(groupJid, [target], "remove");
+      db[groupJid][target] = { count: 0, history: [] };
+      writeAdvDb(db);
+
+      await conn.sendMessage(groupJid, {
+        text:
+          `🚨🌸 *AUTOMOD • 3/3 ADVERTÊNCIAS*\n\n` +
+          `👤 @${target.split("@")[0]} atingiu o limite.\n` +
+          `🔨 Membro removido automaticamente.\n` +
+          `♻️ Advertências zeradas.`,
+        mentions: [target],
+      }, { quoted: quotedInfo });
+
+      return { count: 3, removed: true };
+    } catch (e) {
+      console.error("Erro ao remover após ADV automática:", e?.message || e);
+    }
+  }
+
+  return { count, removed: false };
+}
+
+
+
 function readAutoStickerDb() {
   try {
     fs.mkdirSync(path.dirname(AUTOSTICKER_DB), { recursive: true });
@@ -603,6 +704,87 @@ conn.sendMessage(from, { react: { text: reassao, key: info.key } });
 };
 
 
+
+// ─── KOBAYASHI AUTOMOD • PROTEÇÃO DE LINKS ───
+if (isGroup && !info.key.fromMe && !isGroupAdmins) {
+  const protection = getGroupProtection(from);
+  const detected = detectLinkTypes(body);
+
+  let action = null;
+  let reason = "";
+
+  // Prioridade: AntiLink geral > AntiLink GP > AntiTelegram > Light.
+  if (protection.antilink && detected.anyLink) {
+    action = "strict";
+    reason = "Envio de link com AntiLink ativado";
+  } else if (protection.antilinkgp && detected.whatsappGroup) {
+    action = "strict";
+    reason = "Link de grupo com AntiLink GP ativado";
+  } else if (protection.antitelegram && detected.telegram) {
+    action = "strict";
+    reason = "Link de Telegram com AntiTelegram ativado";
+  } else if (protection.antilinklight && detected.anyLink) {
+    action = "light";
+    reason = "Envio de link com AntiLink Light ativado";
+  }
+
+  if (action) {
+    await deleteDetectedMessage(conn, from, info);
+
+    if (action === "light") {
+      const result = await addAutomaticWarning(
+        conn,
+        from,
+        sender,
+        reason,
+        isBotGroupAdmins,
+        info
+      );
+
+      if (!result.removed) {
+        await conn.sendMessage(from, {
+          text:
+            `⚠️🌸 *ANTILINK LIGHT*\n\n` +
+            `👤 @${sender.split("@")[0]}\n` +
+            `🗑️ Link apagado.\n` +
+            `⚠️ Advertências: *${result.count}/3*\n\n` +
+            `🐉 Na terceira advertência o membro poderá ser removido.`,
+          mentions: [sender],
+        }, { quoted: info });
+      }
+    } else {
+      if (isBotGroupAdmins) {
+        try {
+          await conn.groupParticipantsUpdate(from, [sender], "remove");
+          await conn.sendMessage(from, {
+            text:
+              `🚫🐉 *KOBAYASHI AUTOMOD*\n\n` +
+              `🔗 Link bloqueado e mensagem apagada.\n` +
+              `🔨 @${sender.split("@")[0]} foi removido do grupo.`,
+            mentions: [sender],
+          }, { quoted: info });
+        } catch (e) {
+          await conn.sendMessage(from, {
+            text:
+              `🚫🌸 Link bloqueado e apagado.\n\n` +
+              `⚠️ Não consegui remover @${sender.split("@")[0]}.`,
+            mentions: [sender],
+          }, { quoted: info });
+        }
+      } else {
+        await conn.sendMessage(from, {
+          text:
+            `🚫🌸 Link bloqueado e apagado.\n\n` +
+            `⚠️ Preciso ser ADM para remover o membro.`,
+          mentions: [sender],
+        }, { quoted: info });
+      }
+    }
+
+    continue;
+  }
+}
+
 // Autosticker: em grupos ativados, qualquer foto sem comando vira figurinha automaticamente.
 if (
   isGroup &&
@@ -630,6 +812,137 @@ if (
 
 if (isCmd) {
 switch (command) {
+
+
+// proteção / diversão ADM • v0.1.20
+case "antilink":
+case "antilinkgp":
+case "antilinklight":
+case "antitelegram": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const modeMap = {
+    antilink: {
+      key: "antilink",
+      title: "ANTILINK",
+      description: "qualquer tipo de link",
+      icon: "🚫",
+      punishment: "apaga o link e remove o membro"
+    },
+    antilinkgp: {
+      key: "antilinkgp",
+      title: "ANTILINK GP",
+      description: "links de grupos/canais do WhatsApp",
+      icon: "🔗",
+      punishment: "apaga o link e remove o membro"
+    },
+    antilinklight: {
+      key: "antilinklight",
+      title: "ANTILINK LIGHT",
+      description: "qualquer tipo de link",
+      icon: "⚠️",
+      punishment: "apaga o link e aplica 1 advertência"
+    },
+    antitelegram: {
+      key: "antitelegram",
+      title: "ANTITELEGRAM",
+      description: "links do Telegram",
+      icon: "✈️",
+      punishment: "apaga o link e remove o membro"
+    },
+  };
+
+  const mode = modeMap[command];
+  const enabled = toggleGroupProtection(from, mode.key);
+
+  return reply(
+    `╭──────「 ${mode.icon} 」──────╮\n` +
+    `       *${mode.title}*\n` +
+    `╰──────────────────╯\n\n` +
+    `${enabled ? "🟢 *ATIVADO*" : "🔒 *DESATIVADO*"}\n\n` +
+    `🔎 Detecta: ${mode.description}\n` +
+    `🛡️ Ação: ${mode.punishment}\n\n` +
+    `🌸 Administradores e líderes não são afetados.\n` +
+    `↳ Use *${prefix}${command}* novamente para alternar.`
+  );
+}
+break;
+
+case "suicidio":
+case "suicídio": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+
+  if (SoDonoPrincipal || SoLider) {
+    return reply("👑🌸 Donos e líderes não podem usar esse comando para sair do grupo.");
+  }
+
+  try {
+    await conn.sendMessage(from, {
+      text:
+        `💀🐉 *KOBAYASHI BOT*\n\n` +
+        `@${sender.split("@")[0]} decidiu sair por conta própria...\n` +
+        `🌸 Até uma próxima residência.`,
+      mentions: [sender],
+    }, { quoted: info });
+
+    await delay(1200);
+    await conn.groupParticipantsUpdate(from, [sender], "remove");
+    return;
+  } catch (e) {
+    console.error("Erro no comando suicidio:", e);
+    return reply("❌ Não consegui remover você do grupo.");
+  }
+}
+break;
+
+case "bam": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const target = getTargetFromMessage(info, menc_os2);
+  if (!target || target === from) {
+    return reply(`🐉🌸 Marque um membro ou responda à mensagem dele para usar *${prefix}bam*.`);
+  }
+
+  if (target === botNumber) return reply("🌸 Eu já conheço esse truque.");
+  if (target === dono) return reply("👑 Melhor não tentar assustar o dono da Kobayashi.");
+
+  const targetNumber = target.split("@")[0];
+
+  // Primeira mensagem imita o /ban normal, mas NÃO remove ninguém.
+  await conn.sendMessage(from, {
+    text:
+      `🐉🌸 *Membro removido!*\n\n` +
+      `👤 @${targetNumber}\n` +
+      `🛡️ Ação realizada por: @${sender.split("@")[0]}`,
+    mentions: [target, sender],
+  }, { quoted: info });
+
+  // Pegadinha 10 segundos depois.
+  setTimeout(async () => {
+    try {
+      await conn.sendMessage(from, {
+        text:
+          `╭──────「 🤡 」──────╮\n` +
+          `        *BAM!*\n` +
+          `╰──────────────────╯\n\n` +
+          `Calma, @${targetNumber}... 😂\n\n` +
+          `Você *não foi removido*.\n` +
+          `Ainda... 👀🐉`,
+        mentions: [target],
+      });
+    } catch (e) {
+      console.error("Erro ao concluir BAM:", e?.message || e);
+    }
+  }, 10000);
+
+  return;
+}
+break;
+//
+
 
 // comandos de grupo • v0.1.18
 case "gp": {

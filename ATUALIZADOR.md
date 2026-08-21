@@ -100,3 +100,13 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Líderes passam a usar comandos anteriormente exclusivos do dono.
 - Apenas o dono principal pode alterar líderes ou configurações críticas: número do bot, número do dono, prefixo, foto do menu, Anti-PV e atualização do bot.
 - Configuração salva em `settings.settings.json -> leaders`.
+
+## v0.1.20-beta
+- `/antilink`: bloqueia links em geral; apaga e remove o remetente.
+- `/antilinkgp`: bloqueia links de grupos/canais do WhatsApp; apaga e remove.
+- `/antilinklight`: apaga links e aplica uma ADV; 3/3 pode remover automaticamente.
+- `/antitelegram`: bloqueia links do Telegram; apaga e remove.
+- Proteções são ativadas/desativadas por grupo e apenas ADMs podem alternar.
+- Administradores, dono e líderes são imunes aos filtros.
+- `/suicidio`: remove do grupo o próprio membro que executou o comando.
+- `/bam`: falso ban; imita a mensagem do `/ban` e após 10 segundos revela a pegadinha.
