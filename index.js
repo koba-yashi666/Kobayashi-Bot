@@ -1326,9 +1326,10 @@ case "take": {
 }
 break;
 
-case "setcmd": {
-  if (!SoDono && !isGroupAdmins) {
-    return reply("🛡️ Apenas administradores, líderes ou o dono podem associar comandos a figurinhas.");
+case "setcmd":
+case "rgcmd": {
+  if (!isGroup || !groupAdmins.includes(sender)) {
+    return reply("🛡️ Apenas administradores do grupo podem associar comandos a figurinhas.");
   }
 
   const quoted = getQuotedMessage(info);
@@ -1359,8 +1360,8 @@ case "setcmd": {
 break;
 
 case "delcmd": {
-  if (!SoDono && !isGroupAdmins) {
-    return reply("🛡️ Apenas administradores, líderes ou o dono podem remover comandos de figurinhas.");
+  if (!isGroup || !groupAdmins.includes(sender)) {
+    return reply("🛡️ Apenas administradores do grupo podem remover comandos de figurinhas.");
   }
 
   const quoted = getQuotedMessage(info);
@@ -1378,8 +1379,8 @@ break;
 
 case "listcmdsticker":
 case "stickercmds": {
-  if (!SoDono && !isGroupAdmins) {
-    return reply("🛡️ Apenas administradores, líderes ou o dono podem consultar essa lista.");
+  if (!isGroup || !groupAdmins.includes(sender)) {
+    return reply("🛡️ Apenas administradores do grupo podem consultar essa lista.");
   }
 
   const db = readStickerCmdDb();
@@ -2138,9 +2139,16 @@ reagir("👑");
 reply(linguagem.menuOwner(prefix));
 break;
 
-case "menuvip":
-reagir("💎");
-reply(linguagem.menuVip(prefix));
+case "menusticker":
+case "menustk":
+reagir("🎴");
+reply(linguagem.menuSticker(prefix));
+break;
+
+case "menugeral":
+case "geral":
+reagir("🪷");
+reply(linguagem.menuGeral(prefix));
 break;
 //
 

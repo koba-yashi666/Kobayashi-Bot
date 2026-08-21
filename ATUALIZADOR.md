@@ -125,3 +125,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Sistema de comandos por figurinha: `/setcmd`, `/delcmd`, `/listcmdsticker`.
 - Figurinhas associadas passam a executar comandos quando enviadas no chat.
 - Apenas ADM/líder/dono podem configurar comandos por figurinha.
+
+## v0.1.23-beta
+- Menu principal reduzido a cinco painéis: ADM, Dono, BN, Sticker e Geral.
+- Novo `/menusticker`.
+- Novo `/menugeral`.
+- `/rgcmd` registra comandos em figurinhas e é restrito a ADM do grupo.
+- Ferramentas administrativas de sticker também foram movidas para os menus adequados.

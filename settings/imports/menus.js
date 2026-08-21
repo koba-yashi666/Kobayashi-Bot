@@ -1,179 +1,154 @@
-/* KOBAYASHI BOT • v0.1.22-beta • tema oficial Kobayashi */
+/* KOBAYASHI BOT • v0.1.23-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
           🐉 SYSTEM 🌸
 ╰═══════ ❀ 🐉 ❀ ═══════╯
-          ⋮
-     🌸 いらっしゃい 🌸
-          ⋮
-╭───〔 🎐 PERFIL 〕────╮
-│ 🌷 Olá, @${sender.split("@")[0]}
-│
-│ 🪷 Bot      › ${NomeDoBot}
-│ 🎀 Usuário  › @${sender.split("@")[0]}
-│ 🌺 Dono     › ${ownerName}
-│ 🪭 Prefixo  › ${prefix}
-│ 💮 Versão   › 0.1.22-beta
-╰─────── ❀ ───────────╯
 
-       ── 🌸 ──
-     🐉 KOBAYASHI MENU
-       ── 🌸 ──
+🌷 Olá, @${sender.split("@")[0]}
+🪷 Bot › ${NomeDoBot}
+🌺 Dono › ${ownerName}
+🪭 Prefixo › ${prefix}
+💮 Versão › 0.1.23-beta
 
-╭───〔 🎐 PAINÉIS 〕────╮
-│ 🪷 ${prefix}menuadm
-│    ↳ Administração
-│ 🎎 ${prefix}menudono
-│    ↳ Configurações
-│ 💎 ${prefix}menuvip
-│    ↳ Recursos exclusivos
+╭───〔 🌸 MENUS 〕────────╮
+│ 🛡️ ${prefix}menuadm
+│ 👑 ${prefix}menudono
 │ 🎭 ${prefix}menubn
-│    ↳ Modo Brincadeira
-╰─────── ❀ ───────────╯
-
-╭───〔 🌺 INFORMAÇÕES 〕──╮
-│ 🫧 ${prefix}ping
-│    ↳ Status da Kobayashi
-│ 🏮 ${prefix}grupoinfo
-│    ↳ Informações do grupo
-│ 🎐 ${prefix}admins
-│    ↳ Administradores
-│ 🐉 ${prefix}criador
-│    ↳ Criador do projeto
-│ 🎀 ${prefix}dono
-│    ↳ Proprietário atual
-│ ⚠️ ${prefix}infoadv
-│    ↳ Sistema de advertências
+│ 🎴 ${prefix}menusticker
+│ 🪷 ${prefix}menugeral
 ╰─────── ❀ ────────────╯
 
-╭───〔 🪷 UTILIDADES 〕────╮
-│ 🎴 ${prefix}figurinhas 1-15
-│    ↳ Pacote de figurinhas
-│ 🖼️ ${prefix}stickers
-│    ↳ Criar figurinha
-│ 🌄 ${prefix}toimg
-│    ↳ Figurinha para imagem
-│ 🎞️ ${prefix}togif
-│    ↳ Figurinha animada para GIF
-│ 🎐 ${prefix}take
-│    ↳ Alterar pacote/autor
-│ 🌷 ${prefix}perfil
-│    ↳ Informações do usuário
-╰─────── ❀ ────────────╯
-
-     🌸 ──「 小林 」── 🌸
-       K O B A Y A S H I
-          B O T
-    🐉 residência online 🐉`;
+🌸 Cada painel agora tem sua própria categoria.
+🐉 ──「 小林 」── KOBAYASHI`;
 };
 
 export const menuAdm = (prefix) => {
 return `╭══════ ❀ 守護 ❀ ══════╮
-      🌺 *KOBAYASHI GUARD*
+       🛡️ *MENU ADM*
 ╰══════ ❀ 🐉 ❀ ══════╯
 
-╭───〔 🛡️ MODERAÇÃO 〕───╮
+╭──〔 🛡️ MODERAÇÃO 〕────╮
 │ ⚠️ ${prefix}adv @membro motivo
-│    ↳ 3/3 = remoção automática
 │ 🔨 ${prefix}ban @membro
-│    ↳ Remover membro
+│ 🤡 ${prefix}bam @membro
 │ 🎐 ${prefix}admins
 │ 📖 ${prefix}infoadv
-╰─────── ❀ ───────────╯
+│ 💀 ${prefix}suicidio
+╰────── ❀ ─────────────╯
 
-╭───〔 🏮 GRUPO 〕────────╮
-│ 🐉 ${prefix}grupoinfo
+╭──〔 🏮 GRUPO 〕─────────╮
 │ 🟢 ${prefix}gp a
 │ 🔒 ${prefix}gp f
+│ 🐉 ${prefix}grupoinfo
 │ 🎨 ${prefix}autosticker
-│ 🫧 ${prefix}statusatt
-╰─────── ❀ ───────────╯
+╰────── ❀ ─────────────╯
 
-╭───〔 🔐 PROTEÇÃO 〕───────╮
-│
+╭──〔 🔐 PROTEÇÃO 〕──────╮
 │ 🚫 ${prefix}antilink
 │ 🔗 ${prefix}antilinkgp
 │ ⚠️ ${prefix}antilinklight
 │ ✈️ ${prefix}antitelegram
 │ 🤍 ${prefix}listabranca
-│
-╰─────── ❀ ───────────╯
+╰────── ❀ ─────────────╯
 
-╭───〔 🎭 EXTRAS 〕─────────╮
-│
-│ 🤡 ${prefix}bam @membro
-│ 💀 ${prefix}suicidio
-│
-╰─────── ❀ ───────────╯
-
-  🌸 Kobayashi • Guardian System 🐉`;
+╭──〔 🎴 STICKER CMD 〕────╮
+│ 🎴 ${prefix}rgcmd comando
+│ 🗑️ ${prefix}delcmd
+│ 📋 ${prefix}listcmdsticker
+╰────── ❀ ─────────────╯`;
 };
 
 export const menuOwner = (prefix) => {
 return `╭══════ ❀ 核心 ❀ ══════╮
-       🎎 *KOBAYASHI CORE*
-╰══════ ❀ 👑 ❀ ══════╯
+       👑 *MENU DONO*
+╰══════ ❀ 🐉 ❀ ══════╯
 
-╭───〔 👑 IDENTIDADE 〕───╮
+╭──〔 👑 IDENTIDADE 〕────╮
 │ 📱 ${prefix}numero_dono 55...
 │ 🤖 ${prefix}numero_bot 55...
 │ 🪷 ${prefix}status_bot
-╰─────── ❀ ───────────╯
+╰────── ❀ ─────────────╯
 
-╭───〔 🪭 CONFIGURAÇÕES 〕─╮
+╭──〔 🪭 CONFIGURAÇÕES 〕──╮
 │ 🎐 ${prefix}prefixo
 │ 🌷 ${prefix}add_prefixo !
 │ 🛡️ ${prefix}antipv on/off
-╰─────── ❀ ───────────╯
-
-╭───〔 🎨 APARÊNCIA 〕─────╮
 │ 🖼️ ${prefix}foto_gp
 │ 🏮 ${prefix}nome_gp Novo nome
 │ 🌸 ${prefix}foto_menu
-╰─────── ❀ ───────────╯
+╰────── ❀ ─────────────╯
 
-╭───〔 👑 LÍDERES 〕────────╮
-│
+╭──〔 👑 LÍDERES 〕───────╮
 │ 👑 ${prefix}dono1 55...
 │ 👑 ${prefix}dono2 55...
 │ 👑 ${prefix}dono3 55...
 │ 👑 ${prefix}dono4 55...
 │ 👑 ${prefix}dono5 55...
 │ 📋 ${prefix}lideres
-│
-╰─────── ❀ ───────────╯
+╰────── ❀ ─────────────╯
 
-╭───〔 🎴 STICKER COMMANDS 〕╮
-│
-│ 🎴 ${prefix}setcmd comando
-│ 🗑️ ${prefix}delcmd
-│ 📋 ${prefix}listcmdsticker
-│
-╰─────── ❀ ───────────╯
-
-╭───〔 ⚙️ SISTEMA 〕───────╮
+╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 💮 ${prefix}version
 │ 🫧 ${prefix}update
 │ 🎀 ${prefix}statusatt
-╰─────── ❀ ───────────╯
-
-     👑 ──「 小林 」── 🐉
-         OWNER CORE`;
+╰────── ❀ ─────────────╯`;
 };
 
-export const menuVip = (prefix) => {
-return `╭══════ ❀ 特別 ❀ ══════╮
-       💎 *KOBAYASHI VIP*
+export const menuSticker = (prefix) => {
+return `╭══════ ❀ 🎴 ❀ ══════╮
+      *MENU STICKER*
 ╰══════ ❀ 🌸 ❀ ══════╯
 
-╭───〔 🪷 PREMIUM 〕───────╮
-│ 💎 Área exclusiva
-│ 🎐 Novos recursos em breve
-╰─────── ❀ ───────────╯
+╭──〔 🌸 CRIAÇÃO 〕───────╮
+│ 🖼️ ${prefix}stickers
+│ 🎴 ${prefix}figurinhas 1-15
+│ 🎨 ${prefix}autosticker
+╰────── ❀ ─────────────╯
 
-     🌸 KOBAYASHI VIP 🐉`;
+╭──〔 🪄 FERRAMENTAS 〕────╮
+│ 🌄 ${prefix}toimg
+│ 🎞️ ${prefix}togif
+│ 🎐 ${prefix}take Pacote | Autor
+╰────── ❀ ─────────────╯
+
+╭──〔 🎴 STICKER CMD 〕────╮
+│ 🎴 ${prefix}rgcmd comando
+│    ↳ Somente ADM
+│ 🗑️ ${prefix}delcmd
+│ 📋 ${prefix}listcmdsticker
+╰────── ❀ ─────────────╯`;
 };
+
+export const menuGeral = (prefix) => {
+return `╭══════ ❀ 🪷 ❀ ══════╮
+       *MENU GERAL*
+╰══════ ❀ 🐉 ❀ ══════╯
+
+╭──〔 🌸 INFORMAÇÕES 〕────╮
+│ 🫧 ${prefix}ping
+│ 🐉 ${prefix}criador
+│ 🎀 ${prefix}dono
+│ 🎐 ${prefix}admins
+│ 🏮 ${prefix}grupoinfo
+│ 🌷 ${prefix}perfil
+╰────── ❀ ─────────────╯
+
+╭──〔 🎴 FIGURINHAS 〕─────╮
+│ 🖼️ ${prefix}stickers
+│ 🎴 ${prefix}figurinhas 1-15
+│ 🌄 ${prefix}toimg
+│ 🎞️ ${prefix}togif
+│ 🎐 ${prefix}take
+╰────── ❀ ─────────────╯
+
+╭──〔 🎭 DIVERSÃO 〕───────╮
+│ 🎭 ${prefix}menubn
+╰────── ❀ ─────────────╯
+
+🌸 Estes são os comandos gerais para membros.`;
+};
+
 
 export const ping = (atraso, uptime, so, ramUsada, cpuUso, nodeVersion, baileysVersion) => {
 return `╭══════ ❀ 状態 ❀ ══════╮

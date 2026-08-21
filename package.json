@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.22-beta",
-  "description": "Kobayashi Bot Beta v0.1.22 - ferramentas de figurinhas e comandos por sticker",
+  "version": "0.1.23-beta",
+  "description": "Kobayashi Bot Beta v0.1.23 - menus reorganizados",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
