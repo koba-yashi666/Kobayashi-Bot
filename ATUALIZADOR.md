@@ -25,3 +25,14 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Menus principal, ADM, dono, VIP e status foram redesenhados.
 - Novo estilo com molduras, divisórias, símbolos e tema 🐉🌸.
 - Adicionado/garantido alias `/menudono`.
+
+## v0.1.9-beta
+- `/adv`: ao atingir 3/3 advertências, tenta remover o membro automaticamente e zera o contador após sucesso.
+- `/figurinhas 1-15`: sistema de pacote aleatório baseado no comando `figurinhas` do Nazuna enviado pelo usuário.
+- Em grupos, `/figurinhas` envia o pacote no privado de quem solicitou.
+- Aliases: `/stickerpack` e `/packfig`.
+
+## v0.1.10-beta
+- `/figurinhas` sem número agora pede claramente uma quantidade entre 1 e 15.
+- `/figurinhas 10` envia exatamente 10 figurinhas.
+- Mensagens do comando redesenhadas com tema Kobayashi 🐉🌸.

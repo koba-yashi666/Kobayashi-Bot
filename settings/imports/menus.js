@@ -1,12 +1,12 @@
 /* Tema: Kobayashi Bot Beta 🐉🌸
- * Layout renovado na v0.1.8 usando molduras e símbolos decorativos
+ * Layout renovado na v0.1.10 usando molduras e símbolos decorativos
  * inspirados nos packs enviados pelo usuário.
  */
 
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭🌸・🐉・☆・🐉・🌸╮
 ┆ ⋮ *${NomeDoBot.toUpperCase()}*
-┆ ⋮ 🧪 Beta • v0.1.8
+┆ ⋮ 🧪 Beta • v0.1.10
 ┆ ⋮ 👤 @${sender.split("@")[0]}
 ┆ ⋮ 👑 ${ownerName}
 ╰🌸・🐉・☆・🐉・🌸╯
@@ -16,6 +16,7 @@ return `╭🌸・🐉・☆・🐉・🌸╮
 ┗━─━─━─━─━─━─━─━─━┛
 ┏━─━─━─━─━─━─━─━─━┓
 │▢ 🎨 ${prefix}stickers / ${prefix}s
+│▢ 🌸 ${prefix}figurinhas 1-15
 │▢ 👤 ${prefix}perfil @membro
 │▢ ⚡ ${prefix}ping
 │▢ 🐉 ${prefix}grupoinfo
@@ -49,7 +50,7 @@ return `╭🌸・🛡️・☆・🛡️・🌸╮
 │▢ 👥 *MEMBROS*
 ┗━─━─━─━─━─━─━─━─━┛
 │▢ 🛑 ${prefix}ban / ${prefix}b @membro
-│▢ ⚠️ ${prefix}adv @membro [motivo]
+│▢ ⚠️ ${prefix}adv @membro [motivo] • 3/3 = ban
 │▢ 🔨 ${prefix}promover @membro
 │▢ 📛 ${prefix}rebaixar @membro
 

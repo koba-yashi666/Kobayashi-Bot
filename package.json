@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.8-beta",
-  "description": "Kobayashi Bot Beta v0.1.8 - renovação visual dos menus",
+  "version": "0.1.10-beta",
+  "description": "Kobayashi Bot Beta v0.1.10 - melhorias no comando figurinhas",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

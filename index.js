@@ -11,7 +11,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
 
-import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdmins, logos, baileysVersion, fetch, fs as fsx, os, path, randomBytes, ffmpeg } from "./settings/imports/consts.js";
+import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdmins, logos, baileysVersion, fetch, axios, fs as fsx, os, path, randomBytes, ffmpeg } from "./settings/imports/consts.js";
 
 import { getGroupMetadata } from "./lib/groupCache.js";
 
@@ -437,7 +437,8 @@ case "adv": {
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
   const target = getTargetFromMessage(info, menc_os2);
-  if (!target) return reply(`⚠️🌸 Marque um membro ou responda à mensagem dele.\nExemplo: ${prefix}adv @membro motivo`);
+  if (!target) return reply(`⚠️🌸 Marque um membro ou responda à mensagem dele.
+Exemplo: ${prefix}adv @membro motivo`);
   if (target === botNumber) return reply(`🐉🌸 Eu não posso receber advertência.`);
   if (target === dono) return reply(`👑 O dono do Kobayashi Bot não pode receber advertência.`);
 
@@ -446,19 +447,87 @@ case "adv": {
   if (!db[from]) db[from] = {};
   if (!db[from][target]) db[from][target] = { count: 0, history: [] };
 
-  db[from][target].count += 1;
+  // Mantém o contador no máximo em 3 até a punição ser concluída.
+  db[from][target].count = Math.min((db[from][target].count || 0) + 1, 3);
   db[from][target].history.push({
     reason,
     by: sender,
     at: new Date().toISOString(),
   });
-  writeAdvDb(db);
 
   const count = db[from][target].count;
-  return conn.sendMessage(from, {
-    text: `⚠️🌸 *ADVERTÊNCIA REGISTRADA*\n\n👤 Usuário: @${target.split('@')[0]}\n📋 Motivo: ${reason}\n⚠️ Advertências: *${count}*\n🛡️ Aplicada por: @${sender.split('@')[0]}`,
-    mentions: [target, sender],
-  }, { quoted: info });
+  writeAdvDb(db);
+
+  if (count < 3) {
+    return conn.sendMessage(from, {
+      text:
+        `⚠️🌸 *ADVERTÊNCIA REGISTRADA*
+
+` +
+        `👤 Usuário: @${target.split('@')[0]}
+` +
+        `📋 Motivo: ${reason}
+` +
+        `⚠️ Advertências: *${count}/3*
+` +
+        `🛡️ Aplicada por: @${sender.split('@')[0]}
+
+` +
+        `🐉 Ao atingir *3/3*, o membro será removido automaticamente.`,
+      mentions: [target, sender],
+    }, { quoted: info });
+  }
+
+  if (!isBotGroupAdmins) {
+    return conn.sendMessage(from, {
+      text:
+        `🚨🌸 *LIMITE DE ADVERTÊNCIAS ATINGIDO*
+
+` +
+        `👤 @${target.split('@')[0]} chegou a *3/3 advertências*.
+` +
+        `📋 Último motivo: ${reason}
+
+` +
+        `⚠️ Eu preciso ser administradora para remover o membro automaticamente.`,
+      mentions: [target],
+    }, { quoted: info });
+  }
+
+  try {
+    await conn.groupParticipantsUpdate(from, [target], "remove");
+
+    // Zera as ADVs depois da remoção bem-sucedida.
+    db[from][target] = { count: 0, history: [] };
+    writeAdvDb(db);
+
+    return conn.sendMessage(from, {
+      text:
+        `🚨🌸 *3/3 ADVERTÊNCIAS*
+
+` +
+        `👤 @${target.split('@')[0]} atingiu o limite.
+` +
+        `📋 Último motivo: ${reason}
+` +
+        `🔨 Membro removido automaticamente.
+` +
+        `♻️ Advertências zeradas.`,
+      mentions: [target],
+    }, { quoted: info });
+  } catch (e) {
+    console.error("Erro ao remover após 3 ADVs:", e);
+    return conn.sendMessage(from, {
+      text:
+        `🚨🌸 *3/3 ADVERTÊNCIAS*
+
+` +
+        `👤 @${target.split('@')[0]} atingiu o limite, mas não consegui removê-lo.
+` +
+        `⚠️ Verifique se o membro é administrador ou se tenho permissão suficiente.`,
+      mentions: [target],
+    }, { quoted: info });
+  }
 }
 break;
 
@@ -484,6 +553,148 @@ case "perfil": {
 }
 break;
 
+
+// pacote de figurinhas aleatórias • quantidade obrigatória de 1 a 15
+case "figurinhas":
+case "stickerpack":
+case "packfig": {
+  try {
+    const quantidadeTexto = String(args?.[0] || "").trim();
+
+    if (!quantidadeTexto) {
+      return reply(
+        `╭🌸・🎨・☆・🎨・🌸╮
+` +
+        `┆ ⋮ *PACOTE DE FIGURINHAS*
+` +
+        `╰🌸・🎨・☆・🎨・🌸╯
+
+` +
+        `🔢 Por favor, selecione uma quantidade entre *1 e 15*.
+
+` +
+        `✨ Exemplos:
+` +
+        `┃ • *${prefix}figurinhas 5*
+` +
+        `┃ • *${prefix}figurinhas 10*
+` +
+        `┃ • *${prefix}figurinhas 15*
+
+` +
+        `🐉 A Kobayashi envia exatamente a quantidade escolhida.`
+      );
+    }
+
+    const quantidade = Number(quantidadeTexto);
+
+    if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > 15) {
+      return reply(
+        `❌🌸 *QUANTIDADE INVÁLIDA*
+
+` +
+        `Escolha um número inteiro entre *1 e 15*.
+
+` +
+        `Exemplo: *${prefix}figurinhas 10*`
+      );
+    }
+
+    const destino = isGroup ? sender : from;
+
+    if (isGroup) {
+      await reply(
+        `╭📬・🐉・☆・🐉・📬╮
+` +
+        `┆ ⋮ *PREPARANDO PACOTE*
+` +
+        `╰📬・🐉・☆・🐉・📬╯
+
+` +
+        `🎨 Quantidade: *${quantidade}*
+` +
+        `📱 Destino: *seu privado*
+` +
+        `⏳ Aguarde um pouquinho...`
+      );
+    } else {
+      await reply(
+        `╭🎨・🌸・☆・🌸・🎨╮
+` +
+        `┆ ⋮ *PREPARANDO PACOTE*
+` +
+        `╰🎨・🌸・☆・🌸・🎨╯
+
+` +
+        `✨ Vou enviar *${quantidade}* figurinha${quantidade > 1 ? "s" : ""}.
+` +
+        `⏳ Aguarde um pouquinho...`
+      );
+    }
+
+    const usedNumbers = new Set();
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < quantidade; i++) {
+      try {
+        let randomNum;
+        do {
+          randomNum = Math.floor(Math.random() * 8051);
+        } while (usedNumbers.has(randomNum));
+
+        usedNumbers.add(randomNum);
+
+        const stickerUrl =
+          `https://raw.githubusercontent.com/badDevelopper/Testfigu/main/fig (${randomNum}).webp`;
+
+        const response = await axios.get(stickerUrl, {
+          responseType: "arraybuffer",
+          timeout: 120000,
+        });
+
+        await conn.sendMessage(destino, {
+          sticker: Buffer.from(response.data),
+        });
+
+        successCount++;
+        await delay(800);
+      } catch (stickerError) {
+        console.error(`Erro ao buscar/enviar figurinha ${i + 1}:`, stickerError?.message || stickerError);
+        failCount++;
+      }
+    }
+
+    return conn.sendMessage(destino, {
+      text:
+        `╭🌸・✅・☆・✅・🌸╮
+` +
+        `┆ ⋮ *PACOTE CONCLUÍDO*
+` +
+        `╰🌸・✅・☆・✅・🌸╯
+
+` +
+        `🎨 Solicitadas: *${quantidade}*
+` +
+        `✅ Enviadas: *${successCount}*
+` +
+        `${failCount ? `⚠️ Falhas: *${failCount}*
+` : ""}` +
+        `
+🐉 *Kobayashi Bot*`,
+    });
+  } catch (e) {
+    console.error("Erro no comando figurinhas:", e);
+    return reply(
+      `❌🌸 *Não consegui buscar as figurinhas agora.*
+
+` +
+      `Tente novamente daqui a pouco.`
+    );
+  }
+}
+break;
+//
 // menu
 case "menu":
 reagir("🐉");
