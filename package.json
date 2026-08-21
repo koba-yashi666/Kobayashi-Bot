@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.11-beta",
-  "description": "Kobayashi Bot Beta v0.1.11 - novo visual e comandos de informação",
+  "version": "0.1.12-beta",
+  "description": "Kobayashi Bot Beta v0.1.12 - Dragon Panel minimalista",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

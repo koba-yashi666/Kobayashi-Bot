@@ -44,3 +44,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/dono`: mostra o dono atualmente configurado.
 - `/infoadv`: explica o sistema de 3 advertências.
 - Fonte de `/figurinhas` mantida sem alterações nesta versão.
+
+## v0.1.12-beta
+- Nova identidade visual própria e minimalista: KOBAYASHI SYSTEM.
+- Menu principal: Dragon Panel.
+- Menu ADM: Guardian Panel.
+- Menu do dono: Dragon Core.
+- Menu VIP: Dragon VIP.
+- Ping redesenhado como System Status.
+- Nenhuma alteração no sistema de figurinhas nesta versão.
