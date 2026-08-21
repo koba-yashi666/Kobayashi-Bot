@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.17-beta",
-  "description": "Kobayashi Bot Beta v0.1.17 - rankings aleatórios",
+  "version": "0.1.18-beta",
+  "description": "Kobayashi Bot Beta v0.1.18 - comandos de grupo, autosticker e metadados",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

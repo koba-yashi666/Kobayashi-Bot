@@ -86,3 +86,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Porcentagens são aleatórias de 0% a 100% em toda execução.
 - O ranking é reordenado pela porcentagem sorteada.
 - Os comandos individuais continuam com o comportamento anterior.
+
+## v0.1.18-beta
+- `/gp a`: abre o grupo; `/gp f`: fecha o grupo. Somente ADM.
+- `/autosticker`: alterna conversão automática de fotos por grupo. Somente ADM pode ativar/desativar.
+- Figurinhas criadas por `/s` e pelo autosticker recebem metadados com usuário, grupo, bot e criador.
+- Dono/criador padrão alterado para `✧༒☬ƙσႦαყαʂԋι☬༒✧` com migração automática para instalações que ainda usam `Theo`.
+- Observação: o WhatsApp não suporta legenda visível em sticker; os dados ficam nos metadados/informações do pacote da figurinha.

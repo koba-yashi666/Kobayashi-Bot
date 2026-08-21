@@ -20,4 +20,28 @@ if (!hasBaileys()) {
   console.log('\n✅ Dependências instaladas. Iniciando o Kobayashi Bot...\n');
 }
 
+// KOBAYASHI_OWNER_MIGRATION_V0118
+try {
+  const fs = (await import("node:fs")).default;
+  const settingsUrl = new URL("./settings/settings.json", import.meta.url);
+  const cfg = JSON.parse(fs.readFileSync(settingsUrl, "utf8"));
+  let changed = false;
+
+  if (!cfg.ownerName || cfg.ownerName === "Theo") {
+    cfg.ownerName = "✧༒☬ƙσႦαყαʂԋι☬༒✧";
+    changed = true;
+  }
+  if (!cfg.creatorName || cfg.creatorName === "Theo") {
+    cfg.creatorName = "✧༒☬ƙσႦαყαʂԋι☬༒✧";
+    changed = true;
+  }
+
+  if (changed) {
+    fs.writeFileSync(settingsUrl, JSON.stringify(cfg, null, 2), "utf8");
+    console.log("🌸 Nome do dono/criador atualizado para o tema Kobayashi.");
+  }
+} catch (e) {
+  console.error("⚠️ Não foi possível aplicar a migração de nome:", e?.message || e);
+}
+
 await import('./connection.js');

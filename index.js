@@ -23,6 +23,88 @@ const ADV_DB = path.join(process.cwd(), "files", "database", "adv.json");
 
 const FUN_DB = path.join(process.cwd(), "files", "database", "brincadeiras.json");
 
+const AUTOSTICKER_DB = path.join(process.cwd(), "files", "database", "autosticker.json");
+
+function readAutoStickerDb() {
+  try {
+    fs.mkdirSync(path.dirname(AUTOSTICKER_DB), { recursive: true });
+    if (!fs.existsSync(AUTOSTICKER_DB)) {
+      fs.writeFileSync(AUTOSTICKER_DB, JSON.stringify({}, null, 2), "utf8");
+    }
+    return JSON.parse(fs.readFileSync(AUTOSTICKER_DB, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function setAutoSticker(groupJid, enabled) {
+  const db = readAutoStickerDb();
+  db[groupJid] = Boolean(enabled);
+  fs.writeFileSync(AUTOSTICKER_DB, JSON.stringify(db, null, 2), "utf8");
+  return db[groupJid];
+}
+
+function isAutoStickerEnabled(groupJid) {
+  const db = readAutoStickerDb();
+  return db[groupJid] === true;
+}
+
+async function addStickerMetadata(webpBuffer, { userNick, groupName, botName, creatorName }) {
+  try {
+    const webpModule = await import("node-webpmux");
+    const WebpImage = webpModule.Image || webpModule.default?.Image;
+    if (!WebpImage) return webpBuffer;
+
+    const packName =
+      `Criador: ${userNick || "Usuário"}\n` +
+      `Grupo: ${groupName || "Privado"}`;
+
+    const publisher =
+      `${botName || "Kobayashi Bot"}\n` +
+      `Criador: ${creatorName || "Kobayashi"}`;
+
+    const json = Buffer.from(JSON.stringify({
+      "sticker-pack-id": "kobayashi-bot",
+      "sticker-pack-name": packName,
+      "sticker-pack-publisher": publisher,
+      "emojis": ["🐉", "🌸"]
+    }), "utf8");
+
+    const exif = Buffer.concat([
+      Buffer.from([0x49,0x49,0x2A,0x00,0x08,0x00,0x00,0x00,0x01,0x00,0x41,0x57,0x07,0x00]),
+      Buffer.alloc(4),
+      Buffer.from([0x16,0x00,0x00,0x00]),
+      json
+    ]);
+    exif.writeUIntLE(json.length, 14, 4);
+
+    const img = new WebpImage();
+    await img.load(webpBuffer);
+    img.exif = exif;
+    return await img.save(null);
+  } catch (e) {
+    console.error("Erro ao aplicar metadados da figurinha:", e?.message || e);
+    return webpBuffer;
+  }
+}
+
+async function imageToStickerWithMetadata(mediaBuffer, meta) {
+  const sharpModule = await import("sharp");
+  const sharp = sharpModule.default || sharpModule;
+
+  const webpBuffer = await sharp(mediaBuffer)
+    .resize(512, 512, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
+    .webp({ quality: 90 })
+    .toBuffer();
+
+  return addStickerMetadata(webpBuffer, meta);
+}
+
+
+
 function ensureFunDb() {
   try {
     fs.mkdirSync(path.dirname(FUN_DB), { recursive: true });
@@ -489,8 +571,92 @@ const reagir = (reassao) => {
 conn.sendMessage(from, { react: { text: reassao, key: info.key } });
 };
 
+
+// Autosticker: em grupos ativados, qualquer foto sem comando vira figurinha automaticamente.
+if (
+  isGroup &&
+  !info.key.fromMe &&
+  type === "imageMessage" &&
+  !isCmd &&
+  isAutoStickerEnabled(from)
+) {
+  try {
+    const mediaBuffer = await downloadMediaMessage(info, "buffer", {});
+    const cfg = readSettingsFile();
+    const stickerBuffer = await imageToStickerWithMetadata(mediaBuffer, {
+      userNick: pushname || sender.split("@")[0],
+      groupName,
+      botName: cfg.NomeDoBot || NomeDoBot,
+      creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+    });
+
+    await conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
+  } catch (e) {
+    console.error("Erro no autosticker:", e?.message || e);
+  }
+  continue;
+}
+
 if (isCmd) {
 switch (command) {
+
+// comandos de grupo • v0.1.18
+case "gp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+
+  const op = String(args[0] || "").toLowerCase();
+
+  if (!["a", "f"].includes(op)) {
+    return reply(
+      `🏮 *CONTROLE DO GRUPO*\n\n` +
+      `🟢 *${prefix}gp a* — abrir o grupo\n` +
+      `🔒 *${prefix}gp f* — fechar o grupo`
+    );
+  }
+
+  try {
+    if (op === "a") {
+      await conn.groupSettingUpdate(from, "not_announcement");
+      return reply("🟢🌸 *Grupo aberto!*\n\nTodos os membros podem enviar mensagens novamente.");
+    }
+
+    await conn.groupSettingUpdate(from, "announcement");
+    return reply("🔒🐉 *Grupo fechado!*\n\nSomente administradores podem enviar mensagens.");
+  } catch (e) {
+    console.error("Erro no comando gp:", e);
+    return reply("❌ Não consegui alterar as configurações do grupo.");
+  }
+}
+break;
+
+case "autosticker":
+case "autostk": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const atual = isAutoStickerEnabled(from);
+  const novo = setAutoSticker(from, !atual);
+
+  return reply(
+    novo
+      ? `╭──────「 🎨 」──────╮\n` +
+        `      *AUTOSTICKER*\n` +
+        `╰──────────────────╯\n\n` +
+        `🟢 *Ativado neste grupo.*\n\n` +
+        `🌸 A partir de agora, toda foto enviada sem comando será transformada automaticamente em figurinha.\n\n` +
+        `🎐 Use *${prefix}autosticker* novamente para desativar.`
+      : `╭──────「 🎨 」──────╮\n` +
+        `      *AUTOSTICKER*\n` +
+        `╰──────────────────╯\n\n` +
+        `🔒 *Desativado neste grupo.*\n\n` +
+        `As fotos não serão mais convertidas automaticamente.`
+  );
+}
+break;
+//
+
 // comandos públicos
 case "stickers":
 case "sticker":
@@ -506,7 +672,14 @@ case "s": {
     }
 
     if (quotedType === 'stickerMessage') {
-      const stickerBuffer = await downloadMediaMessage(mediaTarget, 'buffer', {});
+      const originalSticker = await downloadMediaMessage(mediaTarget, 'buffer', {});
+      const cfg = readSettingsFile();
+      const stickerBuffer = await addStickerMetadata(originalSticker, {
+        userNick: pushname || sender.split("@")[0],
+        groupName: isGroup ? groupName : "Privado",
+        botName: cfg.NomeDoBot || NomeDoBot,
+        creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+      });
       return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
     }
 
@@ -515,10 +688,13 @@ case "s": {
     const sharp = sharpModule.default || sharpModule;
 
     if (quotedType === 'imageMessage') {
-      const stickerBuffer = await sharp(mediaBuffer)
-        .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .webp({ quality: 90 })
-        .toBuffer();
+      const cfg = readSettingsFile();
+      const stickerBuffer = await imageToStickerWithMetadata(mediaBuffer, {
+        userNick: pushname || sender.split("@")[0],
+        groupName: isGroup ? groupName : "Privado",
+        botName: cfg.NomeDoBot || NomeDoBot,
+        creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+      });
       return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
     }
 
@@ -537,9 +713,17 @@ case "s": {
         .save(outputPath);
     });
 
-    const stickerBuffer = fsx.readFileSync(outputPath);
+    const rawStickerBuffer = fsx.readFileSync(outputPath);
     try { fsx.unlinkSync(inputPath); } catch {}
     try { fsx.unlinkSync(outputPath); } catch {}
+
+    const cfg = readSettingsFile();
+    const stickerBuffer = await addStickerMetadata(rawStickerBuffer, {
+      userNick: pushname || sender.split("@")[0],
+      groupName: isGroup ? groupName : "Privado",
+      botName: cfg.NomeDoBot || NomeDoBot,
+      creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+    });
     return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
   } catch (e) {
     console.error('Erro no comando stickers:', e);
