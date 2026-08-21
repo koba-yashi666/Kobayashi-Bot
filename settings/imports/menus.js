@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.23-beta */
+/* KOBAYASHI BOT • v0.1.24-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.23-beta
+💮 Versão › 0.1.24-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -132,6 +132,11 @@ return `╭══════ ❀ 🪷 ❀ ══════╮
 │ 🎐 ${prefix}admins
 │ 🏮 ${prefix}grupoinfo
 │ 🌷 ${prefix}perfil
+╰────── ❀ ─────────────╯
+
+╭──〔 🎧 MÚSICA 〕──────────╮
+│ 🎵 ${prefix}play nome/link
+│    ↳ Baixar música do YouTube
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🎴 FIGURINHAS 〕─────╮

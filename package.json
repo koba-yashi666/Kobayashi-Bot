@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.23-beta",
-  "description": "Kobayashi Bot Beta v0.1.23 - menus reorganizados",
+  "version": "0.1.24-beta",
+  "description": "Kobayashi Bot Beta v0.1.24 - Play System",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
@@ -50,7 +50,7 @@
     "sharp": "^0.35.3",
     "snapsave-media-downloader": "^2.4.0",
     "yt-downld": "^1.0.0",
-    "yt-search": "^2.13.1",
+    "yt-search": "^2.12.1",
     "ms": "^2.1.3"
   }
 }

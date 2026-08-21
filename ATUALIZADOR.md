@@ -132,3 +132,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Novo `/menugeral`.
 - `/rgcmd` registra comandos em figurinhas e é restrito a ADM do grupo.
 - Ferramentas administrativas de sticker também foram movidas para os menus adequados.
+
+## v0.1.24-beta
+- Novo `/play nome da música` para pesquisar no YouTube e enviar áudio MP3.
+- `/play` também aceita URL do YouTube.
+- Mostra thumbnail, título, canal e duração antes do áudio.
+- Play adicionado ao Menu Geral.
+- Bootstrap verifica/tenta instalar yt-dlp automaticamente.

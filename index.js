@@ -7,6 +7,7 @@ NÃO VENDA, REVENDA OU COMERCIALIZE ESTA BASE
 SEM A AUTORIZAÇÃO DO AUTOR.*/
 
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
+import { spawn } from "node:child_process";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
@@ -1404,6 +1405,122 @@ case "stickercmds": {
 }
 break;
 //
+
+
+case "play": {
+  const query = String(q || "").trim();
+
+  if (!query) {
+    return reply(
+      `╭──────「 🎧 」──────╮\n` +
+      `       *PLAY*\n` +
+      `╰──────────────────╯\n\n` +
+      `🌸 Digite o nome de uma música ou envie um link do YouTube.\n\n` +
+      `Exemplos:\n` +
+      `🎵 *${prefix}play nome da música*\n` +
+      `🔗 *${prefix}play https://youtube.com/watch?v=...*`
+    );
+  }
+
+  let inputPath = null;
+  let outputPath = null;
+
+  try {
+    await reagir("🎧");
+
+    const ytsModule = await import("yt-search");
+    const yts = ytsModule.default || ytsModule;
+
+    const isYoutubeUrl = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)/i.test(query);
+    let video;
+
+    if (isYoutubeUrl) {
+      const result = await yts({ videoId: (() => {
+        try {
+          const u = new URL(query);
+          if (u.hostname.includes("youtu.be")) return u.pathname.split("/").filter(Boolean)[0];
+          if (u.pathname.includes("/shorts/")) return u.pathname.split("/shorts/")[1]?.split(/[?&/]/)[0];
+          return u.searchParams.get("v");
+        } catch { return null; }
+      })() });
+      video = result;
+    } else {
+      const result = await yts(query);
+      video = result?.videos?.[0];
+    }
+
+    if (!video?.url) {
+      return reply("🌸 Não encontrei essa música no YouTube.");
+    }
+
+    const tmpId = randomBytes(6).toString("hex");
+    inputPath = path.join(os.tmpdir(), `koba-play-${tmpId}.source`);
+    outputPath = path.join(os.tmpdir(), `koba-play-${tmpId}.mp3`);
+
+    await conn.sendMessage(from, {
+      image: { url: video.thumbnail },
+      caption:
+        `╭──────「 🎧 」──────╮\n` +
+        `    *KOBAYASHI PLAY*\n` +
+        `╰──────────────────╯\n\n` +
+        `🎵 *${video.title || "Música"}*\n` +
+        `🎙️ Canal: ${video.author?.name || video.author || "Desconhecido"}\n` +
+        `⏱️ Duração: ${video.timestamp || "—"}\n\n` +
+        `🌸 Preparando seu áudio...`
+    }, { quoted: info });
+
+    // yt-dlp é usado como downloader; o bootstrap instala/verifica automaticamente.
+    await new Promise((resolve, reject) => {
+      const child = spawn(
+        "yt-dlp",
+        [
+          "--no-playlist",
+          "--no-warnings",
+          "-f", "bestaudio/best",
+          "-o", inputPath,
+          video.url
+        ],
+        { stdio: ["ignore", "ignore", "pipe"] }
+      );
+
+      let err = "";
+      child.stderr.on("data", d => err += d.toString());
+      child.on("error", reject);
+      child.on("close", code => code === 0 ? resolve() : reject(new Error(err || `yt-dlp saiu com código ${code}`)));
+    });
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(inputPath)
+        .audioCodec("libmp3lame")
+        .audioBitrate("128k")
+        .format("mp3")
+        .on("end", resolve)
+        .on("error", reject)
+        .save(outputPath);
+    });
+
+    const audioBuffer = fsx.readFileSync(outputPath);
+
+    await conn.sendMessage(from, {
+      audio: audioBuffer,
+      mimetype: "audio/mpeg",
+      fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0, 80)}.mp3`
+    }, { quoted: info });
+
+    await reagir("🌸");
+  } catch (e) {
+    console.error("Erro no /play:", e);
+    return reply(
+      `❌🌸 Não consegui baixar essa música agora.\n\n` +
+      `Tente outro nome/link ou tente novamente mais tarde.`
+    );
+  } finally {
+    for (const p of [inputPath, outputPath]) {
+      if (p) try { if (fsx.existsSync(p)) fsx.unlinkSync(p); } catch {}
+    }
+  }
+}
+break;
 
 // comandos públicos
 case "stickers":

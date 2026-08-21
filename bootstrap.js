@@ -44,4 +44,24 @@ try {
   console.error("⚠️ Não foi possível aplicar a migração de nome:", e?.message || e);
 }
 
+
+// KOBAYASHI_YTDLP_BOOTSTRAP_V0124
+try {
+  const { execFileSync } = await import("node:child_process");
+  try {
+    execFileSync("yt-dlp", ["--version"], { stdio: "ignore" });
+  } catch {
+    console.log("🎧 yt-dlp não encontrado. Tentando instalar para o Play System...");
+    try {
+      execFileSync("python", ["-m", "pip", "install", "-U", "yt-dlp"], { stdio: "inherit" });
+    } catch {
+      try {
+        execFileSync("python3", ["-m", "pip", "install", "-U", "yt-dlp"], { stdio: "inherit" });
+      } catch {
+        console.log("⚠️ Instalação automática do yt-dlp falhou. Instale manualmente com: pkg install python && pip install -U yt-dlp");
+      }
+    }
+  }
+} catch {}
+
 await import('./connection.js');
