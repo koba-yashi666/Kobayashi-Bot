@@ -21,6 +21,22 @@ const { prefix, NomeDoBot, ownerNumber, ownerName } = settings;
 
 const ADV_DB = path.join(process.cwd(), "files", "database", "adv.json");
 
+const SETTINGS_FILE = new URL("./settings/settings.json", import.meta.url);
+
+function readSettingsFile() {
+  return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
+}
+
+function writeSettingsFile(next) {
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), "utf8");
+}
+
+function onlyDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+
+
 function ensureAdvDb() {
   try {
     fs.mkdirSync(path.dirname(ADV_DB), { recursive: true });
@@ -137,6 +153,13 @@ const groupMembers = isGroup ? groupMetadata.participants : "";
 
 const dono = ownerNumber + "@s.whatsapp.net";
 const SoDono = sender === dono;
+const runtimeSettings = readSettingsFile();
+if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
+  if (isCmd) {
+    await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
+  }
+  continue;
+}
 
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
@@ -648,6 +671,155 @@ break;
 case "opcao2":
 reagir("2️⃣");
 reply("Você escolheu a *Opção 2* ✅");
+break;
+//
+
+
+// configurações exclusivas do dono • v0.1.6
+case "numero_dono":
+case "número_dono": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const numero = onlyDigits(q);
+  if (numero.length < 8) return reply(`📱 Use: *${prefix}numero_dono 5511999999999*`);
+
+  const cfg = readSettingsFile();
+  cfg.ownerNumber = numero;
+  writeSettingsFile(cfg);
+
+  await reply(`👑🌸 Número do dono alterado para *${numero}*.\n\n♻️ Reiniciando para aplicar a alteração...`);
+  setTimeout(() => process.exit(0), 1800);
+  return;
+}
+break;
+
+case "numero_bot":
+case "número_bot": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const numero = onlyDigits(q);
+  if (numero.length < 8) return reply(`🤖 Use: *${prefix}numero_bot 5511999999999*`);
+
+  const cfg = readSettingsFile();
+  cfg.botNumber = numero;
+  writeSettingsFile(cfg);
+
+  await reply(
+    `🤖🌸 Número de pareamento alterado para *${numero}*.\n\n` +
+    `⚠️ A sessão atual será removida e a Kobayashi vai reiniciar.\n` +
+    `🔐 O novo código de pareamento aparecerá no console do servidor.`
+  );
+
+  const authDir = path.join(process.cwd(), "files", "database", "qr-code");
+  fs.rmSync(authDir, { recursive: true, force: true });
+  setTimeout(() => process.exit(0), 2200);
+  return;
+}
+break;
+
+case "status_bot": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const cfg = readSettingsFile();
+  const uptime = Math.floor(process.uptime());
+  const h = Math.floor(uptime / 3600);
+  const m = Math.floor((uptime % 3600) / 60);
+  const s = uptime % 60;
+  const mem = (process.memoryUsage().rss / 1024 / 1024).toFixed(1);
+
+  return reply(
+    `🐉🌸 *STATUS DO KOBAYASHI BOT*\n\n` +
+    `🟢 Estado: *Online*\n` +
+    `📦 Versão: *${getLocalVersion()}*\n` +
+    `⌨️ Prefixo: *${cfg.prefix}*\n` +
+    `⏱️ Uptime: *${h}h ${m}m ${s}s*\n` +
+    `💾 Memória: *${mem} MB*\n` +
+    `🛡️ Anti-PV: *${cfg.antiPv ? "Ativado" : "Desativado"}*`
+  );
+}
+break;
+
+case "prefixo": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const cfg = readSettingsFile();
+  return reply(`⌨️🌸 Prefixo atual: *${cfg.prefix}*\n\nPara alterar: *${cfg.prefix}add_prefixo !*`);
+}
+break;
+
+case "add_prefixo": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const novo = String(q || "").trim();
+  if (!novo || /\s/.test(novo) || novo.length > 3)
+    return reply(`➕ Use: *${prefix}add_prefixo !*\nO prefixo deve ter de 1 a 3 caracteres e não pode conter espaços.`);
+
+  const cfg = readSettingsFile();
+  cfg.prefix = novo;
+  writeSettingsFile(cfg);
+  await reply(`✅🌸 Prefixo alterado de *${prefix}* para *${novo}*.\n♻️ Reiniciando para aplicar...`);
+  setTimeout(() => process.exit(0), 1800);
+  return;
+}
+break;
+
+case "nome_gp": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+  if (!q.trim()) return reply(`✏️ Use: *${prefix}nome_gp Novo nome do grupo*`);
+  await conn.groupUpdateSubject(from, q.trim());
+  return reply(`✅🌸 Nome do grupo alterado para *${q.trim()}*.`);
+}
+break;
+
+case "foto_gp": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+  const quoted = getQuotedMessage(info);
+  if (!quoted?.message || getContentType(quoted.message) !== "imageMessage")
+    return reply(`🖼️ Responda uma *imagem* com *${prefix}foto_gp*.`);
+
+  try {
+    const media = await downloadMediaMessage(quoted, "buffer", {});
+    await conn.updateProfilePicture(from, media);
+    return reply("✅🌸 Foto do grupo atualizada.");
+  } catch (e) {
+    console.error("Erro foto_gp:", e);
+    return reply("❌ Não consegui alterar a foto do grupo.");
+  }
+}
+break;
+
+case "foto_menu": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const quoted = getQuotedMessage(info);
+  if (!quoted?.message || getContentType(quoted.message) !== "imageMessage")
+    return reply(`🌸 Responda uma *imagem* com *${prefix}foto_menu*.`);
+
+  try {
+    const media = await downloadMediaMessage(quoted, "buffer", {});
+    const sharpModule = await import("sharp");
+    const sharp = sharpModule.default || sharpModule;
+    const output = await sharp(media).png().toBuffer();
+    const menuPath = path.join(process.cwd(), "settings", "LOGOS", "menu.png");
+    fs.mkdirSync(path.dirname(menuPath), { recursive: true });
+    fs.writeFileSync(menuPath, output);
+    return reply("✅🌸 Foto dos menus atualizada.");
+  } catch (e) {
+    console.error("Erro foto_menu:", e);
+    return reply("❌ Não consegui salvar a nova foto do menu.");
+  }
+}
+break;
+
+case "antipv": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const op = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(op))
+    return reply(`🛡️ Use *${prefix}antipv on* ou *${prefix}antipv off*.`);
+
+  const cfg = readSettingsFile();
+  cfg.antiPv = op === "on";
+  writeSettingsFile(cfg);
+  return reply(`🛡️🌸 Anti-PV *${cfg.antiPv ? "ativado" : "desativado"}* com sucesso.`);
+}
 break;
 //
 

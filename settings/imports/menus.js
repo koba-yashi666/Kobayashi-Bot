@@ -3,7 +3,7 @@
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭━━━━━━━━━━━━━━━━━━━━━━╮
 ┃ 🐉🌸 *KOBAYASHI BOT* 🌸🐉
-┃ ✨ *Versão:* 0.1.5-BETA
+┃ ✨ *Versão:* 0.1.6-BETA
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
 
 ╭─〔 🌸 *MENU PRINCIPAL* 〕─╮
@@ -42,15 +42,23 @@ return `╭━━━━━━━━━━━━━━━━━━━━━━╮
 
 export const menuOwner = (prefix) => {
 return `╭━━━━━━━━━━━━━━━━━━━━━━╮
-┃ 👑 *MENU DO DONO* 👑
+┃ 👑🐉 *MENU DO DONO* 🌸👑
 ╰━━━━━━━━━━━━━━━━━━━━━━╯
-┃ 🔄 ${prefix}reiniciar / ${prefix}rr
-┃ 🌸 Área reservada ao proprietário
-╰━━━━━━━━━━━━━━━━━━━━━━╯
-🐉 *Kobayashi está cuidando do sistema.*
+┃ 📱 ${prefix}numero_dono 55...
+┃ 🤖 ${prefix}numero_bot 55...
+┃ 📊 ${prefix}status_bot
+┃ ⌨️ ${prefix}prefixo
+┃ ➕ ${prefix}add_prefixo !
+┃ 🖼️ ${prefix}foto_gp
+┃ ✏️ ${prefix}nome_gp Novo nome
+┃ 🌸 ${prefix}foto_menu
+┃ 🛡️ ${prefix}antipv on/off
 ┃ 📦 ${prefix}version
 ┃ 🔄 ${prefix}update
-`;
+┃ 🧪 ${prefix}statusatt
+┃ ♻️ ${prefix}reiniciar / ${prefix}rr
+╰━━━━━━━━━━━━━━━━━━━━━━╯
+🐉 *Área exclusiva do proprietário.*`;
 };
 
 export const menuVip = (prefix) => {

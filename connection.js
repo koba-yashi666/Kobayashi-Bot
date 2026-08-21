@@ -55,8 +55,21 @@ async function getMessage(key) {
 }
 
 async function requestPairingCode(conn) {
-  const input = await ask(colors.cyan("\n🐉🌸 Digite o número do WhatsApp com DDI (somente números): "));
+  let configuredNumber = "";
+  try {
+    const settings = JSON.parse(
+      (await import("node:fs")).default.readFileSync(new URL("./settings/settings.json", import.meta.url), "utf8")
+    );
+    configuredNumber = collectNumbers(settings?.botNumber || "");
+  } catch {}
+
+  const input = configuredNumber ||
+    await ask(colors.cyan("\n🐉🌸 Digite o número do WhatsApp com DDI (somente números): "));
   const phoneNumber = collectNumbers(input);
+
+  if (configuredNumber) {
+    console.log(colors.cyan(`\n🐉🌸 Gerando pareamento para o número configurado: ${phoneNumber}`));
+  }
 
   // O WhatsApp exige um número real com DDI. Ex.: 5511999999999
   if (phoneNumber.length < 8) {

@@ -12,6 +12,7 @@ const BACKUP_DIR = path.join(ROOT, ".koba-update-backup");
 
 const PROTECTED_PATHS = [
   "settings/settings.json",
+  "settings/LOGOS/menu.png",
   "settings.json",
   "files/database/",
   ".env",
@@ -128,6 +129,7 @@ function ensureSafeRepoStructure(treePaths) {
     "settings/imports/consts.js",
     "settings/imports/menus.js",
     "settings/settings.json",
+  "settings/LOGOS/menu.png",
     "lib/groupCache.js"
   ];
 
