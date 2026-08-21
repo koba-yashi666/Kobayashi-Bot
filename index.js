@@ -95,7 +95,60 @@ function funCardPath(name) {
   return path.join(process.cwd(), "settings", "FUN", `${name}.png`);
 }
 
+function readFunImageBank() {
+  try {
+    const bankFile = path.join(process.cwd(), "settings", "FUN", "imglinks.json");
+    const mapFile = path.join(process.cwd(), "settings", "FUN", "mapa-imagens.json");
+    const bank = JSON.parse(fs.readFileSync(bankFile, "utf8"));
+    const map = JSON.parse(fs.readFileSync(mapFile, "utf8"));
+    return { bank, map };
+  } catch {
+    return { bank: {}, map: {} };
+  }
+}
+
+function getFunMediaUrl(card) {
+  const { bank, map } = readFunImageBank();
+  const key = map?.[card];
+  return key ? bank?.[key] || null : null;
+}
+
 async function sendFunCard(conn, from, info, card, caption, mentions = []) {
+  const mediaUrl = getFunMediaUrl(card);
+
+  // Primeiro tenta usar o banco de imagens externo.
+  if (mediaUrl) {
+    try {
+      const isVideo = /\.(mp4|mov|m4v)(\?|$)/i.test(mediaUrl);
+
+      if (isVideo) {
+        return await conn.sendMessage(
+          from,
+          {
+            video: { url: mediaUrl },
+            gifPlayback: true,
+            caption,
+            mentions,
+          },
+          { quoted: info }
+        );
+      }
+
+      return await conn.sendMessage(
+        from,
+        {
+          image: { url: mediaUrl },
+          caption,
+          mentions,
+        },
+        { quoted: info }
+      );
+    } catch (error) {
+      console.error(`Falha ao usar mídia externa do Kobayashi Fun (${card}):`, error?.message || error);
+    }
+  }
+
+  // Fallback: usa o card local da v0.1.15.
   const imagePath = funCardPath(card);
   if (fs.existsSync(imagePath)) {
     return conn.sendMessage(
@@ -104,6 +157,7 @@ async function sendFunCard(conn, from, info, card, caption, mentions = []) {
       { quoted: info }
     );
   }
+
   return conn.sendMessage(from, { text: caption, mentions }, { quoted: info });
 }
 
@@ -1116,7 +1170,7 @@ case "rankgostoso": {
     `${lines}\n\n` +
     `🌸 Ranking persistente do Kobayashi Fun.`;
 
-  return sendFunCard(conn, from, info, "rank", caption, ranked.map((x) => x.jid));
+  return sendFunCard(conn, from, info, command, caption, ranked.map((x) => x.jid));
 }
 break;
 //

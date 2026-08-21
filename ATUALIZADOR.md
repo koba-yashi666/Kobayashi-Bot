@@ -72,3 +72,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Rankings: ranklinda, ranklindo, rankgay, rankhetero, rankgostosa, rankgostoso.
 - Scores são persistentes em `files/database/brincadeiras.json`.
 - Imagens locais temáticas incluídas, sem depender de APIs externas.
+
+## v0.1.16-beta
+- Banco de imagens/links importado da base Hutao enviada pelo proprietário.
+- Kobayashi Fun agora usa imagens/GIFs correspondentes a linda, lindo, gay, hetero, abraço, gado, shipo, gostosa e gostoso.
+- Rankings usam mídias específicas quando disponíveis.
+- Cards locais continuam como fallback caso algum link externo falhe.
+- Banco salvo em `settings/FUN/imglinks.json` e mapeamento em `settings/FUN/mapa-imagens.json`.
