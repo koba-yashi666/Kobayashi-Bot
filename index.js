@@ -1146,15 +1146,29 @@ case "rankgostoso": {
   };
   const [category, emoji, title] = categoryMap[command];
 
-  const participants = (groupMembers || [])
-    .map((p) => p?.id || p?.jid)
-    .filter(Boolean)
-    .filter((jid) => jid !== botNumber);
+  const participants = [...new Set(
+    (groupMembers || [])
+      .map((p) => p?.id || p?.jid)
+      .filter(Boolean)
+      .filter((jid) => jid !== botNumber)
+  )];
 
-  const ranked = participants
-    .map((jid) => ({ jid, score: getOrCreateFunScore(from, category, jid) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+  // Em cada execução sorteia pessoas diferentes do grupo.
+  // Fisher-Yates evita repetir o mesmo membro dentro do ranking.
+  for (let i = participants.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [participants[i], participants[j]] = [participants[j], participants[i]];
+  }
+
+  const selected = participants.slice(0, Math.min(10, participants.length));
+
+  // A porcentagem também é nova em cada execução.
+  const ranked = selected
+    .map((jid) => ({
+      jid,
+      score: Math.floor(Math.random() * 101),
+    }))
+    .sort((a, b) => b.score - a.score);
 
   if (!ranked.length) return reply("🏆 Não encontrei membros suficientes para montar o ranking.");
 
@@ -1168,7 +1182,7 @@ case "rankgostoso": {
     `      *${title}*\n` +
     `╰──────────────────╯\n\n` +
     `${lines}\n\n` +
-    `🌸 Ranking persistente do Kobayashi Fun.`;
+    `🎲 Pessoas e porcentagens sorteadas novamente a cada ranking.`;
 
   return sendFunCard(conn, from, info, command, caption, ranked.map((x) => x.jid));
 }

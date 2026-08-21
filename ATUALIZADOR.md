@@ -79,3 +79,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Rankings usam mídias específicas quando disponíveis.
 - Cards locais continuam como fallback caso algum link externo falhe.
 - Banco salvo em `settings/FUN/imglinks.json` e mapeamento em `settings/FUN/mapa-imagens.json`.
+
+## v0.1.17-beta
+- Rankings do Modo Brincadeira agora sorteiam membros diferentes do grupo em cada execução.
+- Nenhum membro se repete dentro do mesmo ranking.
+- Porcentagens são aleatórias de 0% a 100% em toda execução.
+- O ranking é reordenado pela porcentagem sorteada.
+- Os comandos individuais continuam com o comportamento anterior.
