@@ -32,6 +32,41 @@ const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-li
 const WHITELIST_DB = path.join(process.cwd(), "files", "database", "lista-branca.json");
 
 const STICKER_CMD_DB = path.join(process.cwd(), "files", "database", "sticker-cmd.json");
+const WELCOME_DB = path.join(process.cwd(), "files", "database", "boas-vindas.json");
+
+function readWelcomeDb() {
+  try {
+    fs.mkdirSync(path.dirname(WELCOME_DB), { recursive: true });
+    if (!fs.existsSync(WELCOME_DB)) fs.writeFileSync(WELCOME_DB, "{}", "utf8");
+    return JSON.parse(fs.readFileSync(WELCOME_DB, "utf8"));
+  } catch { return {}; }
+}
+function writeWelcomeDb(db) {
+  fs.mkdirSync(path.dirname(WELCOME_DB), { recursive: true });
+  fs.writeFileSync(WELCOME_DB, JSON.stringify(db, null, 2), "utf8");
+}
+function getWelcomeConfig(groupJid) {
+  const db = readWelcomeDb();
+  const c = db[groupJid] || {};
+  return {
+    enabled: !!c.enabled,
+    welcome: c.welcome || "🌸 Bem-vindo(a), {user}!\n🐉 Você entrou em *{group}*.\n👥 Agora somos *{count}* membros.",
+    bye: c.bye || "🌸 Até mais, {user}.\n🐉 Você saiu de *{group}*.\n👥 Agora somos *{count}* membros."
+  };
+}
+function updateWelcomeConfig(groupJid, patch) {
+  const db=readWelcomeDb();
+  db[groupJid]={...(db[groupJid]||{}),...patch};
+  writeWelcomeDb(db);
+  return getWelcomeConfig(groupJid);
+}
+function renderWelcomeText(template,{userJid,groupName,count}) {
+  return String(template||"")
+    .replace(/\{user\}/gi,`@${String(userJid||"").split("@")[0]}`)
+    .replace(/\{group\}/gi,groupName||"Grupo")
+    .replace(/\{count\}/gi,String(count??"?"));
+}
+
 
 function readStickerCmdDb() {
   try {
@@ -1134,6 +1169,53 @@ case "bam": {
 break;
 //
 
+
+
+case "bemvindo":
+case "boasvindas": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const op=String(args[0]||"").toLowerCase();
+  const cfg=getWelcomeConfig(from);
+  if (!["on","off"].includes(op)) return reply(
+    `🌸 *BOAS-VINDAS*\n\nStatus: ${cfg.enabled?"🟢 Ativado":"🔒 Desativado"}\n\n`+
+    `🟢 ${prefix}bemvindo on\n🔒 ${prefix}bemvindo off\n📝 ${prefix}setbv texto\n👋 ${prefix}setbye texto\n🧪 ${prefix}testebv\n\n`+
+    `Variáveis: {user} {group} {count}`
+  );
+  updateWelcomeConfig(from,{enabled:op==="on"});
+  return reply(op==="on"?"🌸🐉 Boas-vindas ativadas!":"🔒🌸 Boas-vindas desativadas.");
+}
+break;
+
+case "setbv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!q.trim()) return reply(`📝 Use: *${prefix}setbv sua mensagem*\nVariáveis: {user} {group} {count}`);
+  updateWelcomeConfig(from,{welcome:q.trim()});
+  return reply("✅🌸 Mensagem de boas-vindas atualizada.");
+}
+break;
+
+case "setbye": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!q.trim()) return reply(`👋 Use: *${prefix}setbye sua mensagem*\nVariáveis: {user} {group} {count}`);
+  updateWelcomeConfig(from,{bye:q.trim()});
+  return reply("✅🌸 Mensagem de saída atualizada.");
+}
+break;
+
+case "testebv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const cfg=getWelcomeConfig(from);
+  const count=Array.isArray(groupMembers)?groupMembers.length:0;
+  const text=renderWelcomeText(cfg.welcome,{userJid:sender,groupName,count});
+  let pp=null; try { pp=await conn.profilePictureUrl(sender,"image"); } catch {}
+  if (pp) return conn.sendMessage(from,{image:{url:pp},caption:text,mentions:[sender]},{quoted:info});
+  return conn.sendMessage(from,{text,mentions:[sender]},{quoted:info});
+}
+break;
 
 // comandos de grupo • v0.1.18
 case "gp": {

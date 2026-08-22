@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.26-beta",
-  "description": "Kobayashi Bot Beta v0.1.26 - criação de figurinhas baseada no sistema do Nazuna",
+  "version": "0.1.27-beta",
+  "description": "Kobayashi Bot Beta v0.1.27 - sistema de boas-vindas",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

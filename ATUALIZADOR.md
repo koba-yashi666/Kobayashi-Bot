@@ -161,3 +161,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/s`, `/st`, `/stk`, `/sticker` e `/stickers` usam o novo motor.
 - Autosticker também usa o novo motor.
 - Metadados personalizados da Kobayashi preservados: usuário, grupo, bot e criador.
+
+## v0.1.27-beta — Boas-vindas
+- `/bemvindo on/off`
+- `/setbv`
+- `/setbye`
+- `/testebv`
+- Variáveis `{user}`, `{group}`, `{count}` e foto de perfil quando disponível.
