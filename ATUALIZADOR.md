@@ -152,3 +152,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Novo `/yutatoken TOKEN`, exclusivo do dono principal, para configurar sem editar arquivos.
 - Pesquisa por nome continua usando `yt-search`; o download é feito pela Yuta API.
 - Removida dependência do ytdl-core para o Play.
+
+## v0.1.26-beta — Sticker Engine Nazuna
+- Criação de figurinhas refeita com base no sistema do Nazuna enviado pelo proprietário.
+- Conversão WebP via FFmpeg/libwebp com compressão adaptativa.
+- Limite aproximado de 990 KB e até 8 tentativas reduzindo qualidade quando necessário.
+- Vídeos limitados a 9.9 segundos e 15 FPS.
+- `/s`, `/st`, `/stk`, `/sticker` e `/stickers` usam o novo motor.
+- Autosticker também usa o novo motor.
+- Metadados personalizados da Kobayashi preservados: usuário, grupo, bot e criador.

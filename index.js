@@ -7,6 +7,7 @@ NÃO VENDA, REVENDA OU COMERCIALIZE ESTA BASE
 SEM A AUTORIZAÇÃO DO AUTOR.*/
 
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
+import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { spawn } from "node:child_process";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -294,18 +295,11 @@ async function addStickerMetadata(webpBuffer, { userNick, groupName, botName, cr
 }
 
 async function imageToStickerWithMetadata(mediaBuffer, meta) {
-  const sharpModule = await import("sharp");
-  const sharp = sharpModule.default || sharpModule;
-
-  const webpBuffer = await sharp(mediaBuffer)
-    .resize(512, 512, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 }
-    })
-    .webp({ quality: 90 })
-    .toBuffer();
-
-  return addStickerMetadata(webpBuffer, meta);
+  return makeSticker(mediaBuffer, {
+    isVideo: false,
+    forceSquare: true,
+    metadata: meta
+  });
 }
 
 
@@ -910,11 +904,15 @@ if (
   try {
     const mediaBuffer = await downloadMediaMessage(info, "buffer", {});
     const cfg = readSettingsFile();
-    const stickerBuffer = await imageToStickerWithMetadata(mediaBuffer, {
-      userNick: pushname || sender.split("@")[0],
-      groupName,
-      botName: cfg.NomeDoBot || NomeDoBot,
-      creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+    const stickerBuffer = await makeSticker(mediaBuffer, {
+      isVideo: false,
+      forceSquare: true,
+      metadata: {
+        userNick: pushname || sender.split("@")[0],
+        groupName,
+        botName: cfg.NomeDoBot || NomeDoBot,
+        creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+      }
     });
 
     await conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
@@ -1569,74 +1567,62 @@ break;
 // comandos públicos
 case "stickers":
 case "sticker":
+case "stk":
+case "st":
 case "s": {
   reagir("🎨");
+
   const mediaTarget = getCurrentOrQuotedMedia(info);
-  if (!mediaTarget?.message) return reply(`🎨🌸 Envie uma *imagem/vídeo com ${prefix}s na legenda* ou responda uma mídia com o comando.`);
+  if (!mediaTarget?.message) {
+    return reply(
+      `🎨🌸 Envie uma imagem ou vídeo com *${prefix}s* na legenda\n` +
+      `ou responda à mídia com *${prefix}s*.\n\n` +
+      `🎞️ Vídeos: máximo de *9.9 segundos*.`
+    );
+  }
 
   try {
-    const quotedType = getContentType(mediaTarget.message);
-    if (!['imageMessage', 'videoMessage', 'stickerMessage'].includes(quotedType)) {
-      return reply(`🎨🌸 O arquivo respondido não é uma imagem, vídeo ou figurinha.`);
+    const mediaType = getContentType(mediaTarget.message);
+
+    if (!["imageMessage","videoMessage","stickerMessage"].includes(mediaType)) {
+      return reply("🎨🌸 Essa mídia não pode ser convertida em figurinha.");
     }
-
-    if (quotedType === 'stickerMessage') {
-      const originalSticker = await downloadMediaMessage(mediaTarget, 'buffer', {});
-      const cfg = readSettingsFile();
-      const stickerBuffer = await addStickerMetadata(originalSticker, {
-        userNick: pushname || sender.split("@")[0],
-        groupName: isGroup ? groupName : "Privado",
-        botName: cfg.NomeDoBot || NomeDoBot,
-        creatorName: cfg.creatorName || cfg.ownerName || ownerName,
-      });
-      return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
-    }
-
-    const mediaBuffer = await downloadMediaMessage(mediaTarget, 'buffer', {});
-    const sharpModule = await import('sharp');
-    const sharp = sharpModule.default || sharpModule;
-
-    if (quotedType === 'imageMessage') {
-      const cfg = readSettingsFile();
-      const stickerBuffer = await imageToStickerWithMetadata(mediaBuffer, {
-        userNick: pushname || sender.split("@")[0],
-        groupName: isGroup ? groupName : "Privado",
-        botName: cfg.NomeDoBot || NomeDoBot,
-        creatorName: cfg.creatorName || cfg.ownerName || ownerName,
-      });
-      return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
-    }
-
-    const tmpId = randomBytes(6).toString('hex');
-    const inputPath = path.join(os.tmpdir(), `koba-sticker-${tmpId}.mp4`);
-    const outputPath = path.join(os.tmpdir(), `koba-sticker-${tmpId}.webp`);
-    fsx.writeFileSync(inputPath, mediaBuffer);
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
-        .inputOptions(['-t 6'])
-        .outputOptions(['-vcodec libwebp', '-vf scale=512:512:force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=0x00000000', '-loop 0', '-an', '-vsync 0'])
-        .toFormat('webp')
-        .on('end', resolve)
-        .on('error', reject)
-        .save(outputPath);
-    });
-
-    const rawStickerBuffer = fsx.readFileSync(outputPath);
-    try { fsx.unlinkSync(inputPath); } catch {}
-    try { fsx.unlinkSync(outputPath); } catch {}
 
     const cfg = readSettingsFile();
-    const stickerBuffer = await addStickerMetadata(rawStickerBuffer, {
+    const metadata = {
       userNick: pushname || sender.split("@")[0],
       groupName: isGroup ? groupName : "Privado",
       botName: cfg.NomeDoBot || NomeDoBot,
       creatorName: cfg.creatorName || cfg.ownerName || ownerName,
+    };
+
+    if (mediaType === "stickerMessage") {
+      const original = await downloadMediaMessage(mediaTarget,"buffer",{});
+      const renamed = await applyStickerMetadata(original,metadata);
+      return conn.sendMessage(from,{sticker:renamed},{quoted:info});
+    }
+
+    if (mediaType === "videoMessage") {
+      const seconds = Number(mediaTarget.message?.videoMessage?.seconds || 0);
+      if (seconds > 9.9) {
+        return reply("🎞️🌸 O vídeo precisa ter no máximo *9.9 segundos* para virar figurinha.");
+      }
+    }
+
+    const buffer = await downloadMediaMessage(mediaTarget,"buffer",{});
+    const sticker = await makeSticker(buffer,{
+      isVideo: mediaType === "videoMessage",
+      forceSquare: true,
+      metadata
     });
-    return conn.sendMessage(from, { sticker: stickerBuffer }, { quoted: info });
+
+    return conn.sendMessage(from,{sticker},{quoted:info});
   } catch (e) {
-    console.error('Erro no comando stickers:', e);
-    return reply(`❌🌸 Não consegui transformar essa mídia em figurinha. Verifique se o FFmpeg está instalado para vídeos.`);
+    console.error("Erro na criação de sticker:",e);
+    return reply(
+      "❌🌸 Não consegui criar essa figurinha.\n\n" +
+      "Para vídeos, confirme que o FFmpeg está disponível na hospedagem."
+    );
   }
 }
 break;

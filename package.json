@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.25-beta",
-  "description": "Kobayashi Bot Beta v0.1.25 - Play via Yuta API (método Hutao)",
+  "version": "0.1.26-beta",
+  "description": "Kobayashi Bot Beta v0.1.26 - criação de figurinhas baseada no sistema do Nazuna",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
