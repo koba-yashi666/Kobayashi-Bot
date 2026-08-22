@@ -131,6 +131,42 @@ async function startConnect() {
 
     bindGroupCache(conn);
 
+    // KOBAYASHI WELCOME SYSTEM v0.1.27
+    conn.ev.on("group-participants.update", async (update) => {
+      try {
+        const groupJid=update?.id;
+        const participants=Array.isArray(update?.participants)?update.participants:[];
+        if (!groupJid || !participants.length || !["add","remove"].includes(update?.action)) return;
+    
+        const fsM=(await import("node:fs")).default;
+        const pathM=(await import("node:path")).default;
+        const dbFile=pathM.join(process.cwd(),"files","database","boas-vindas.json");
+        let db={};
+        try { if (fsM.existsSync(dbFile)) db=JSON.parse(fsM.readFileSync(dbFile,"utf8")); } catch {}
+        const cfg=db[groupJid]||{};
+        if (!cfg.enabled) return;
+    
+        let meta=null; try { meta=await conn.groupMetadata(groupJid); } catch {}
+        const groupName=meta?.subject||"Grupo";
+        const count=Array.isArray(meta?.participants)?meta.participants.length:"?";
+        const tpl=update.action==="add"
+          ? (cfg.welcome||"🌸 Bem-vindo(a), {user}!\n🐉 Você entrou em *{group}*.\n👥 Agora somos *{count}* membros.")
+          : (cfg.bye||"🌸 Até mais, {user}.\n🐉 Você saiu de *{group}*.\n👥 Agora somos *{count}* membros.");
+    
+        for (const jid of participants) {
+          const text=String(tpl)
+            .replace(/\{user\}/gi,`@${String(jid).split("@")[0]}`)
+            .replace(/\{group\}/gi,groupName)
+            .replace(/\{count\}/gi,String(count));
+          let pp=null; try { pp=await conn.profilePictureUrl(jid,"image"); } catch {}
+          if (pp) await conn.sendMessage(groupJid,{image:{url:pp},caption:text,mentions:[jid]});
+          else await conn.sendMessage(groupJid,{text,mentions:[jid]});
+        }
+      } catch (e) {
+        console.error("Erro no sistema de boas-vindas:",e?.message||e);
+      }
+    });
+
     if (!conn.authState?.creds?.registered) {
       const ok = await requestPairingCode(conn);
       if (!ok) return;
@@ -229,41 +265,4 @@ process.on("SIGINT", () => {
 startConnect().catch((error) => {
   console.error(colors.red("❌ Falha fatal:"), error?.message || error);
   process.exitCode = 1;
-});
-
-
-// KOBAYASHI WELCOME SYSTEM v0.1.27
-conn.ev.on("group-participants.update", async (update) => {
-  try {
-    const groupJid=update?.id;
-    const participants=Array.isArray(update?.participants)?update.participants:[];
-    if (!groupJid || !participants.length || !["add","remove"].includes(update?.action)) return;
-
-    const fsM=(await import("node:fs")).default;
-    const pathM=(await import("node:path")).default;
-    const dbFile=pathM.join(process.cwd(),"files","database","boas-vindas.json");
-    let db={};
-    try { if (fsM.existsSync(dbFile)) db=JSON.parse(fsM.readFileSync(dbFile,"utf8")); } catch {}
-    const cfg=db[groupJid]||{};
-    if (!cfg.enabled) return;
-
-    let meta=null; try { meta=await conn.groupMetadata(groupJid); } catch {}
-    const groupName=meta?.subject||"Grupo";
-    const count=Array.isArray(meta?.participants)?meta.participants.length:"?";
-    const tpl=update.action==="add"
-      ? (cfg.welcome||"🌸 Bem-vindo(a), {user}!\n🐉 Você entrou em *{group}*.\n👥 Agora somos *{count}* membros.")
-      : (cfg.bye||"🌸 Até mais, {user}.\n🐉 Você saiu de *{group}*.\n👥 Agora somos *{count}* membros.");
-
-    for (const jid of participants) {
-      const text=String(tpl)
-        .replace(/\{user\}/gi,`@${String(jid).split("@")[0]}`)
-        .replace(/\{group\}/gi,groupName)
-        .replace(/\{count\}/gi,String(count));
-      let pp=null; try { pp=await conn.profilePictureUrl(jid,"image"); } catch {}
-      if (pp) await conn.sendMessage(groupJid,{image:{url:pp},caption:text,mentions:[jid]});
-      else await conn.sendMessage(groupJid,{text,mentions:[jid]});
-    }
-  } catch (e) {
-    console.error("Erro no sistema de boas-vindas:",e?.message||e);
-  }
 });
