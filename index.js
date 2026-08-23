@@ -1236,6 +1236,77 @@ case "testebv": {
 }
 break;
 
+
+case "add":
+case "aceitar": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) {
+    return reply("❌🐉 Eu preciso ser *ADM do grupo* para aceitar solicitações.");
+  }
+
+  try {
+    // Lista as solicitações pendentes do grupo.
+    const pending = await conn.groupRequestParticipantsList(from);
+
+    if (!Array.isArray(pending) || !pending.length) {
+      return reply("🌸 Não há solicitações pendentes para entrar no grupo.");
+    }
+
+    // /add sem argumento = aprova todas.
+    // /add número ou @menção = tenta aprovar somente aquela solicitação.
+    let targets = pending.map((item) => item?.jid || item?.id).filter(Boolean);
+
+    const mentioned =
+      info?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
+      null;
+
+    const numero = String(q || "").replace(/\D/g, "");
+
+    if (mentioned) {
+      targets = targets.filter((jid) => jid === mentioned);
+    } else if (numero) {
+      targets = targets.filter(
+        (jid) => String(jid).split("@")[0] === numero
+      );
+    }
+
+    if (!targets.length) {
+      return reply(
+        "⚠️ Não encontrei essa pessoa entre as solicitações pendentes."
+      );
+    }
+
+    const result = await conn.groupRequestParticipantsUpdate(
+      from,
+      targets,
+      "approve"
+    );
+
+    // O Welcome Pro recebe os aprovados diretamente daqui.
+    // Isso evita depender apenas do evento emitido pelo WhatsApp.
+    if (typeof conn.kobayashiQueueWelcome === "function") {
+      await conn.kobayashiQueueWelcome(from, targets, sender);
+    }
+
+    const qtd = targets.length;
+
+    return reply(
+      `🌸🐉 *${qtd} ${qtd === 1 ? "solicitação aceita" : "solicitações aceitas"}!*\n\n` +
+      `Os novos membros foram enviados para a fila do *Welcome Pro*.`
+    );
+
+  } catch (error) {
+    console.error("[ADD REQUESTS]", error?.message || error);
+
+    return reply(
+      `❌ Não consegui aceitar as solicitações do grupo.\n\n` +
+      `Verifique se eu continuo como ADM e se existem solicitações pendentes.`
+    );
+  }
+}
+break;
+
 // comandos de grupo • v0.1.18
 case "gp": {
   if (!isGroup) return reply(mess.onlyGroup());

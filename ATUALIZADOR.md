@@ -187,3 +187,16 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Versão incrementada para que o updater reconheça a correção.
 - Mantido o tratamento de `group-participants.update` dentro de `conn.ev.process`.
 - Mantido log `[WELCOME PRO] Evento recebido` para diagnóstico.
+
+## v0.1.30-beta — /add + Welcome Pro
+- Novo `/add numero`, exclusivo para administradores do grupo.
+- O bot precisa ser administrador para executar a adição.
+- A entrada confirmada pelo WhatsApp cai naturalmente no evento `group-participants.update`, então o novo membro entra na fila do Welcome Pro.
+- Tratamento básico de retorno e privacidade do WhatsApp.
+
+## v0.1.31-beta — Solicitações + Welcome Fix
+- `/add` agora aprova todas as solicitações pendentes do grupo.
+- `/add numero` ou `/add @membro` tenta aprovar apenas uma solicitação específica.
+- Welcome Pro ganhou fila reutilizável e `emitOwnEvents: true`.
+- `/add` envia os aprovados diretamente à fila de boas-vindas, sem depender apenas do evento do WhatsApp.
+- Entradas normais continuam sendo capturadas por `group-participants.update`.

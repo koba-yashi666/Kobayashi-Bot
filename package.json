@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.29-beta",
-  "description": "Kobayashi Bot Beta v0.1.29 - Welcome Pro Fix reconhecido pelo updater",
+  "version": "0.1.31-beta",
+  "description": "Kobayashi Bot Beta v0.1.31 - aceitar solicitações + Welcome Pro corrigido",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
