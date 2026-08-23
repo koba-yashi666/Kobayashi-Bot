@@ -22,6 +22,7 @@ import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./li
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/autoSticker.js";
 import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
 import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
+const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
 // 🐉 Configuração principal
@@ -1807,6 +1808,157 @@ case "play": {
       `❌🌸 Não consegui preparar essa música agora. Tente novamente em alguns instantes.`
     );
   }
+}
+break;
+
+
+case "statusbot":
+case "diagnostico":
+case "diagnóstico": {
+  const startedAt = Number(global.startTime || 0);
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const uptimeSeconds = startedAt > 0
+    ? Math.max(0, nowSeconds - startedAt)
+    : Math.floor(process.uptime());
+
+  const days = Math.floor(uptimeSeconds / 86400);
+  const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+  const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+  const seconds = uptimeSeconds % 60;
+
+  const uptimeText = [
+    days ? `${days}d` : null,
+    hours ? `${hours}h` : null,
+    minutes ? `${minutes}m` : null,
+    `${seconds}s`
+  ].filter(Boolean).join(" ");
+
+  const memory = process.memoryUsage();
+  const toMB = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+  let version = "desconhecida";
+  try {
+    const versionFile = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "version.json"),
+        "utf8"
+      )
+    );
+    version = versionFile?.version || version;
+  } catch {}
+
+  let groupsCount = "?";
+  try {
+    const groups = await conn.groupFetchAllParticipating();
+    groupsCount = Object.keys(groups || {}).length;
+  } catch {}
+
+  const startPing = Date.now();
+  try {
+    await conn.sendPresenceUpdate("available");
+  } catch {}
+  const pingMs = Date.now() - startPing;
+
+  const commandMatches = [...jsCommandSource.matchAll(/case\s+"([^"]+)":/g)];
+  const commandNames = new Set(commandMatches.map((m) => m[1]));
+
+  const checks = [];
+
+  // Welcome
+  try {
+    const welcomePath = path.join(
+      process.cwd(),
+      "files",
+      "database",
+      "boas-vindas.json"
+    );
+    checks.push(`🌸 Welcome: ${fs.existsSync(welcomePath) ? "✅ OK" : "⚪ sem banco"}`);
+  } catch {
+    checks.push("🌸 Welcome: ❌ erro");
+  }
+
+  // Horários
+  try {
+    const schedulePath = path.join(
+      process.cwd(),
+      "files",
+      "database",
+      "horarios-grupos.json"
+    );
+    checks.push(`⏰ Horários: ${fs.existsSync(schedulePath) ? "✅ OK" : "⚪ sem banco"}`);
+  } catch {
+    checks.push("⏰ Horários: ❌ erro");
+  }
+
+  // Lista branca
+  try {
+    const whitelistPath = path.join(
+      process.cwd(),
+      "files",
+      "database",
+      "lista-branca.json"
+    );
+    checks.push(`🤍 Lista Branca: ${fs.existsSync(whitelistPath) ? "✅ OK" : "⚪ sem banco"}`);
+  } catch {
+    checks.push("🤍 Lista Branca: ❌ erro");
+  }
+
+  // AutoSticker
+  try {
+    const autoStickerPath = path.join(
+      process.cwd(),
+      "files",
+      "database",
+      "autosticker.json"
+    );
+    checks.push(`🎨 AutoSticker: ${fs.existsSync(autoStickerPath) ? "✅ OK" : "⚪ sem banco"}`);
+  } catch {
+    checks.push("🎨 AutoSticker: ❌ erro");
+  }
+
+  // ADV
+  try {
+    const advPath = path.join(
+      process.cwd(),
+      "files",
+      "database",
+      "adv.json"
+    );
+    checks.push(`⚠️ ADV: ${fs.existsSync(advPath) ? "✅ OK" : "⚪ sem banco"}`);
+  } catch {
+    checks.push("⚠️ ADV: ❌ erro");
+  }
+
+  // Sticker Engine
+  checks.push(
+    `🎴 Sticker Engine: ${
+      fs.existsSync(path.join(process.cwd(), "lib", "stickerEngine.js"))
+        ? "✅ OK"
+        : "❌ ausente"
+    }`
+  );
+
+  const statusText =
+    `╭══════ ❀ 🐉 ❀ ══════╮\n` +
+    `     *STATUS DO BOT*\n` +
+    `╰══════ ❀ 🌸 ❀ ══════╯\n\n` +
+    `🤖 *Bot:* ${NomeDoBot}\n` +
+    `💮 *Versão:* ${version}\n` +
+    `🫧 *Ping:* ${pingMs} ms\n` +
+    `⏱️ *Uptime:* ${uptimeText}\n` +
+    `👥 *Grupos:* ${groupsCount}\n` +
+    `🧩 *Comandos reconhecidos:* ${commandNames.size}\n\n` +
+    `╭──〔 💾 MEMÓRIA 〕──────╮\n` +
+    `│ RSS: ${toMB(memory.rss)}\n` +
+    `│ Heap: ${toMB(memory.heapUsed)} / ${toMB(memory.heapTotal)}\n` +
+    `│ External: ${toMB(memory.external)}\n` +
+    `╰────── ❀ ─────────────╯\n\n` +
+    `╭──〔 🛠️ SISTEMAS 〕─────╮\n` +
+    `${checks.map((x) => `│ ${x}`).join("\n")}\n` +
+    `╰────── ❀ ─────────────╯\n\n` +
+    `🌸 Kobayashi Bot • Diagnóstico interno`;
+
+  return reply(statusText);
 }
 break;
 

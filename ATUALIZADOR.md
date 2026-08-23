@@ -244,3 +244,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Mensagens de erro de stickers foram simplificadas para o usuário final.
 - Mensagem de logout deixou de expor pasta interna de autenticação.
 - Adicionado `docs/ESTRUTURA.md` com o mapa da base.
+
+## v0.1.38-beta — StatusBot
+- Novo `/statusbot` (aliases: `/diagnostico`, `/diagnóstico`).
+- Mostra versão, ping, uptime, quantidade de grupos e total de comandos reconhecidos.
+- Mostra uso de memória do processo.
+- Verifica presença dos bancos/sistemas principais sem expor caminhos internos ao usuário.
+- Adicionado ao painel de sistema do Menu Dono.

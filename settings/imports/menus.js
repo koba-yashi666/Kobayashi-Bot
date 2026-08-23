@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.37-beta */
+/* KOBAYASHI BOT • v0.1.38-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.37-beta
+💮 Versão › 0.1.38-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -108,6 +108,8 @@ return `╭══════ ❀ 核心 ❀ ══════╮
 ╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 🔑 ${prefix}yutatoken TOKEN
 │    ↳ Configurar serviço do Play
+│ 🐉 ${prefix}statusbot
+│    ↳ Diagnóstico do bot
 │ 💮 ${prefix}version
 │ 🫧 ${prefix}update
 │ 🎀 ${prefix}statusatt

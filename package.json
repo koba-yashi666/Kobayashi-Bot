@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.37-beta",
-  "description": "Kobayashi Bot Beta v0.1.37 - organização estrutural e limpeza visual",
+  "version": "0.1.38-beta",
+  "description": "Kobayashi Bot Beta v0.1.38 - StatusBot e diagnóstico",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
