@@ -200,3 +200,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Welcome Pro ganhou fila reutilizável e `emitOwnEvents: true`.
 - `/add` envia os aprovados diretamente à fila de boas-vindas, sem depender apenas do evento do WhatsApp.
 - Entradas normais continuam sendo capturadas por `group-participants.update`.
+
+## v0.1.32-beta — Welcome Bridge Fix
+- Welcome agora possui dois caminhos de evento: `conn.ev.on` e `conn.ev.process`, com deduplicação.
+- `/add` chama diretamente a fila de boas-vindas após aprovar solicitações.
+- Envio possui fallback sem `mentions`, útil para JIDs/LIDs problemáticos.
+- Novo `/statusbv` para conferir status do banco e se as funções do Welcome estão ligadas ao socket.
+- Logs detalhados `[WELCOME]` adicionados para localizar qualquer falha restante.

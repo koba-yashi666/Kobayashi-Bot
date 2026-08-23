@@ -1178,6 +1178,28 @@ break;
 
 
 
+
+case "statusbv":
+case "debugbv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const cfg = getWelcomeConfig(from);
+
+  return reply(
+    `╭──────「 🌸 」──────╮\n` +
+    `    *STATUS WELCOME*\n` +
+    `╰──────────────────╯\n\n` +
+    `🏠 Grupo: ${from}\n` +
+    `📢 Status: ${cfg.enabled ? "🟢 ATIVADO" : "🔴 DESATIVADO"}\n` +
+    `⏱️ Tempo: ${cfg.delaySeconds}s\n` +
+    `🔌 Fila: ${typeof conn.kobayashiQueueWelcome === "function" ? "✅ OK" : "❌ AUSENTE"}\n` +
+    `📨 Envio direto: ${typeof conn.kobayashiSendWelcomeNow === "function" ? "✅ OK" : "❌ AUSENTE"}\n\n` +
+    `🧪 Use *${prefix}testebv* para testar o texto.`
+  );
+}
+break;
+
 case "bemvindo":
 case "boasvindas": {
   if (!isGroup) return reply(mess.onlyGroup());
@@ -1283,10 +1305,27 @@ case "aceitar": {
       "approve"
     );
 
-    // O Welcome Pro recebe os aprovados diretamente daqui.
-    // Isso evita depender apenas do evento emitido pelo WhatsApp.
+    // Aguarda o WhatsApp concluir a aprovação.
+    await delay(2000);
+
+    // O /add aciona a fila diretamente, sem depender do evento do WhatsApp.
     if (typeof conn.kobayashiQueueWelcome === "function") {
-      await conn.kobayashiQueueWelcome(from, targets, sender);
+      await conn.kobayashiQueueWelcome(
+        from,
+        targets,
+        sender
+      );
+    } else if (typeof conn.kobayashiSendWelcomeNow === "function") {
+      // Fallback extremo: envia imediatamente.
+      await conn.kobayashiSendWelcomeNow(
+        from,
+        targets,
+        sender
+      );
+    } else {
+      console.error(
+        "[WELCOME] Nenhuma função de boas-vindas foi encontrada no socket."
+      );
     }
 
     const qtd = targets.length;
