@@ -133,15 +133,13 @@ async function startConnect() {
     bindGroupCache(conn);
 
     // ==========================================
-    // 🌸 KOBAYASHI WELCOME BRIDGE • v0.1.32
+    // 🌸 KOBAYASHI WELCOME • BASE NAZUNA v0.1.33
     // ==========================================
-    const welcomeQueues = new Map();
     const welcomeRecentEvents = new Map();
 
-    async function readWelcomeConfigRuntime(groupJid) {
+    async function loadWelcomeSettings(groupJid) {
       const fsM = (await import("node:fs")).default;
       const pathM = (await import("node:path")).default;
-
       const dbFile = pathM.join(
         process.cwd(),
         "files",
@@ -149,426 +147,170 @@ async function startConnect() {
         "boas-vindas.json"
       );
 
-      let db = {};
-
       try {
-        if (fsM.existsSync(dbFile)) {
-          db = JSON.parse(
-            fsM.readFileSync(dbFile, "utf8")
-          );
-        }
-      } catch (error) {
-        console.error(
-          "[WELCOME] Erro ao ler boas-vindas.json:",
-          error?.message || error
-        );
-      }
-
-      return db?.[groupJid] || {};
-    }
-
-    async function sendWelcomeBatch(
-      groupJid,
-      members,
-      acceptedBy = null
-    ) {
-      try {
-        const cfg = await readWelcomeConfigRuntime(groupJid);
-
-        console.log(
-          `[WELCOME] Preparando envio | grupo=${groupJid} | enabled=${Boolean(cfg.enabled)} | membros=${members.length}`
-        );
-
-        if (!cfg.enabled) {
-          console.log(
-            `[WELCOME] Ignorado: sistema está desativado para ${groupJid}`
-          );
-          return false;
-        }
-
-        let metadata = null;
-
-        try {
-          metadata = await conn.groupMetadata(groupJid);
-        } catch (error) {
-          console.error(
-            "[WELCOME] Não consegui ler metadata:",
-            error?.message || error
-          );
-        }
-
-        const groupName =
-          metadata?.subject ||
-          "Grupo";
-
-        const total =
-          Array.isArray(metadata?.participants)
-            ? metadata.participants.length
-            : "?";
-
-        const cleanMembers =
-          [...new Set(
-            (members || [])
-              .filter(Boolean)
-          )];
-
-        if (!cleanMembers.length) {
-          console.log("[WELCOME] Nenhum membro válido para enviar.");
-          return false;
-        }
-
-        const amount = cleanMembers.length;
-
-        const memberLines =
-          cleanMembers
-            .map(
-              (jid) =>
-                `@${String(jid).split("@")[0]}`
-            )
-            .join("\n");
-
-        const membersText =
-          `${memberLines}\n` +
-          `> [ ${amount} ${
-            amount === 1
-              ? "Membro Novo"
-              : "Membros Novos"
-          } 🪪 ]`;
-
-        const title =
-          cfg.title ||
-          "🐉 ─ ⋆ 🌸 ⟨ KOBAYASHI BOT ⟩ 🌸 ⋆ ─ 🐉";
-
-        const welcome =
-          cfg.welcome ||
-          "🌸 𝑶𝒉𝒂𝒚𝒐! Sejam bem-vindos(as) ao grupo!";
-
-        const rules =
-          cfg.rules ||
-          "📖 Leia as regras completas na descrição do grupo.";
-
-        const partners =
-          cfg.partners ||
-          "🌸 Nenhuma parceria configurada.";
-
-        const footer =
-          cfg.footer ||
-          "🐉 KOBAYASHI BOT";
-
-        const adminText =
-          acceptedBy
-            ? `@${String(acceptedBy).split("@")[0]}`
-            : "não identificado";
-
-        const welcomeRendered =
-          String(welcome)
-            .replace(/\{group\}/gi, groupName)
-            .replace(/\{count\}/gi, String(total))
-            .replace(/\{quantidade\}/gi, String(amount))
-            .replace(/\{membros\}/gi, membersText)
-            .replace(/\{adm\}/gi, adminText)
-            .replace(/\{rejeitados\}/gi, "0");
-
-        let text =
-          `${title}\n` +
-          `${welcomeRendered}\n\n` +
-          `${rules}\n\n` +
-          `🐾 ── 𖥸 ─── ⋆ ✧ ⋆ ─── 𖥸 ── 🐾\n` +
-          `🧁 *Jardim de Parcerias* 🧁\n` +
-          `${partners}\n\n` +
-          `${membersText}\n\n`;
-
-        if (cfg.showAcceptedBy !== false) {
-          text +=
-            `> Aceito/Add por ${adminText}\n`;
-        }
-
-        if (cfg.showRejected !== false) {
-          text +=
-            `> _E rejeitei 0 solicitações irregulares._\n`;
-        }
-
-        text += `\n${footer}`;
-
-        const mentions = [
-          ...cleanMembers,
-          ...(acceptedBy ? [acceptedBy] : [])
-        ];
-
-        try {
-          await conn.sendMessage(
-            groupJid,
-            {
-              text,
-              mentions
-            }
-          );
-        } catch (mentionError) {
-          // Alguns JIDs vindos de solicitação podem vir como LID.
-          // Se a marcação falhar, o texto ainda precisa ser enviado.
-          console.error(
-            "[WELCOME] Falha com mentions; tentando texto simples:",
-            mentionError?.message || mentionError
-          );
-
-          await conn.sendMessage(
-            groupJid,
-            { text }
-          );
-        }
-
-        console.log(
-          `[WELCOME] ✅ Mensagem enviada para ${amount} membro(s) em ${groupName}`
-        );
-
-        return true;
-
-      } catch (error) {
-        console.error(
-          "[WELCOME] ❌ Falha final no envio:",
-          error?.stack || error?.message || error
-        );
-
-        return false;
+        if (!fsM.existsSync(dbFile)) return {};
+        const db = JSON.parse(fsM.readFileSync(dbFile, "utf8"));
+        return db?.[groupJid] || {};
+      } catch (e) {
+        console.error("[WELCOME NAZUNA] Erro ao ler banco:", e?.message || e);
+        return {};
       }
     }
 
-    async function queueWelcome(
-      groupJid,
-      participants,
-      acceptedBy = null
-    ) {
-      const cfg =
-        await readWelcomeConfigRuntime(groupJid);
-
-      if (!cfg.enabled) {
-        console.log(
-          `[WELCOME] Fila ignorada: ${groupJid} está OFF`
-        );
-        return false;
+    function formatWelcomeText(template, replacements) {
+      let text = String(template || "");
+      for (const [key, value] of Object.entries(replacements)) {
+        text = text.split(key).join(String(value));
       }
-
-      const delaySeconds =
-        Math.max(
-          3,
-          Math.min(
-            120,
-            Number(cfg.delaySeconds || 15)
-          )
-        );
-
-      const current =
-        welcomeQueues.get(groupJid) || {
-          members: [],
-          admins: [],
-          timer: null
-        };
-
-      for (const jid of participants || []) {
-        if (
-          jid &&
-          !current.members.includes(jid)
-        ) {
-          current.members.push(jid);
-        }
-      }
-
-      if (
-        acceptedBy &&
-        !current.admins.includes(acceptedBy)
-      ) {
-        current.admins.push(acceptedBy);
-      }
-
-      if (current.timer) {
-        clearTimeout(current.timer);
-      }
-
-      current.timer =
-        setTimeout(
-          async () => {
-            const queued =
-              welcomeQueues.get(groupJid);
-
-            welcomeQueues.delete(groupJid);
-
-            if (!queued?.members?.length) {
-              return;
-            }
-
-            await sendWelcomeBatch(
-              groupJid,
-              queued.members,
-              queued.admins?.[0] || null
-            );
-          },
-          delaySeconds * 1000
-        );
-
-      welcomeQueues.set(
-        groupJid,
-        current
-      );
-
-      console.log(
-        `[WELCOME] 🕒 ${current.members.length} membro(s) na fila; envio em ${delaySeconds}s`
-      );
-
-      return true;
+      return text;
     }
 
-    async function handleWelcomeEvent(update) {
+    async function createWelcomeMessage(groupMetadata, participants, settings, acceptedBy = null) {
+      const mentions = [...participants, ...(acceptedBy ? [acceptedBy] : [])];
+      const amount = participants.length;
+      const memberTags = participants
+        .map((p) => `@${String(p).split("@")[0]}`)
+        .join("\n");
+
+      const membersText =
+        `${memberTags}\n` +
+        `> [ ${amount} ${amount === 1 ? "Membro Novo" : "Membros Novos"} 🪪 ]`;
+
+      const replacements = {
+        "{user}": participants.length === 1 ? `@${String(participants[0]).split("@")[0]}` : memberTags,
+        "{group}": groupMetadata?.subject || "Grupo",
+        "{count}": Array.isArray(groupMetadata?.participants) ? groupMetadata.participants.length : "?",
+        "{membros}": membersText,
+        "{quantidade}": amount,
+        "{adm}": acceptedBy ? `@${String(acceptedBy).split("@")[0]}` : "não identificado",
+        "{rejeitados}": 0,
+      };
+
+      const title = settings.title || "🐉 ─ ⋆ 🌸 ⟨ KOBAYASHI BOT ⟩ 🌸 ⋆ ─ 🐉";
+      const welcome = settings.welcome || "🌸 𝑶𝒉𝒂𝒚𝒐! Sejam bem-vindos(as) ao grupo!";
+      const rules = settings.rules || "📖 Leia as regras completas na descrição do grupo.";
+      const partners = settings.partners || "🌸 Nenhuma parceria configurada.";
+      const footer = settings.footer || "🐉 KOBAYASHI BOT";
+
+      let text =
+        `${title}\n` +
+        `${formatWelcomeText(welcome, replacements)}\n\n` +
+        `${formatWelcomeText(rules, replacements)}\n\n` +
+        `🐾 ── 𖥸 ─── ⋆ ✧ ⋆ ─── 𖥸 ── 🐾\n` +
+        `🧁 *Jardim de Parcerias* 🧁\n` +
+        `${formatWelcomeText(partners, replacements)}\n\n` +
+        `${membersText}\n\n`;
+
+      if (settings.showAcceptedBy !== false) {
+        text += `> Aceito/Add por ${replacements["{adm}"]}\n`;
+      }
+
+      if (settings.showRejected !== false) {
+        text += `> _E rejeitei 0 solicitações irregulares._\n`;
+      }
+
+      text += `\n${footer}`;
+
+      return { text, mentions };
+    }
+
+    async function handleGroupParticipantsUpdate(inf) {
       try {
-        const groupJid = update?.id;
+        const from = inf?.id || inf?.jid || null;
+        if (!from) return;
 
-        const participants =
-          Array.isArray(update?.participants)
-            ? update.participants
-            : [];
+        let participants = Array.isArray(inf?.participants)
+          ? inf.participants.filter(Boolean)
+          : [];
 
-        const action = update?.action;
+        if (!participants.length) return;
 
-        if (
-          !groupJid ||
-          !participants.length ||
-          !["add", "remove"].includes(action)
-        ) {
-          return;
-        }
+        const botId = String(conn.user?.id || "").split(":")[0];
+        participants = participants.filter(
+          (p) => !String(p).startsWith(botId)
+        );
+        if (!participants.length) return;
 
-        // Evita duplicar quando o mesmo evento chega por .on e .process.
-        const eventKey =
-          `${groupJid}|${action}|${participants
-            .map(String)
-            .sort()
-            .join(",")}`;
-
+        const eventKey = `${from}|${inf.action}|${participants.map(String).sort().join(",")}`;
         const now = Date.now();
-        const previous =
-          welcomeRecentEvents.get(eventKey) || 0;
+        const last = welcomeRecentEvents.get(eventKey) || 0;
+        if (now - last < 10000) {
+          console.log(`[WELCOME NAZUNA] Evento duplicado ignorado: ${eventKey}`);
+          return;
+        }
+        welcomeRecentEvents.set(eventKey, now);
+        setTimeout(() => welcomeRecentEvents.delete(eventKey), 15000);
 
-        if (
-          now - previous < 5000
-        ) {
-          console.log(
-            `[WELCOME] Evento duplicado ignorado: ${eventKey}`
-          );
+        const groupMetadata = await conn.groupMetadata(from).catch(() => null);
+        if (!groupMetadata) {
+          console.log(`[WELCOME NAZUNA] Metadata indisponível: ${from}`);
           return;
         }
 
-        welcomeRecentEvents.set(
-          eventKey,
-          now
-        );
-
-        setTimeout(
-          () =>
-            welcomeRecentEvents.delete(
-              eventKey
-            ),
-          10000
-        );
+        const settings = await loadWelcomeSettings(from);
 
         console.log(
-          `[WELCOME] Evento recebido: action=${action} group=${groupJid} members=${participants.length}`
+          `[WELCOME NAZUNA] action=${inf.action} group=${from} enabled=${Boolean(settings.enabled)} participants=${participants.length}`
         );
 
-        if (action === "add") {
-          await queueWelcome(
-            groupJid,
-            participants,
-            update?.author ||
-              update?.actor ||
-              null
-          );
+        if (!settings.enabled) return;
 
-          return;
-        }
-
-        // Saída continua individual.
-        const cfg =
-          await readWelcomeConfigRuntime(groupJid);
-
-        if (!cfg.enabled) return;
-
-        let metadata = null;
-
-        try {
-          metadata =
-            await conn.groupMetadata(
-              groupJid
+        switch (inf.action) {
+          case "add": {
+            const acceptedBy = inf?.author || inf?.actor || null;
+            const message = await createWelcomeMessage(
+              groupMetadata,
+              participants,
+              settings,
+              acceptedBy
             );
-        } catch {}
 
-        const groupName =
-          metadata?.subject || "Grupo";
+            try {
+              await conn.sendMessage(from, message);
+            } catch (e) {
+              // Fallback do Nazuna adaptado: se mentions/JID der problema, envia texto puro.
+              console.error("[WELCOME NAZUNA] Falha com mentions, tentando texto:", e?.message || e);
+              await conn.sendMessage(from, { text: message.text });
+            }
 
-        const count =
-          Array.isArray(
-            metadata?.participants
-          )
-            ? metadata.participants.length
-            : "?";
+            console.log(`[WELCOME NAZUNA] ✅ Welcome enviado para ${participants.length} membro(s)`);
+            break;
+          }
 
-        const bye =
-          cfg.bye ||
-          "🌸 Até mais, {user}. Esperamos te ver novamente em *{group}*.";
+          case "remove": {
+            const count = Array.isArray(groupMetadata?.participants)
+              ? groupMetadata.participants.length
+              : "?";
+            const bye = settings.bye || "🌸 Até mais, {user}. Esperamos te ver novamente em *{group}*.";
 
-        for (const jid of participants) {
-          const text =
-            String(bye)
-              .replace(
-                /\{user\}/gi,
-                `@${String(jid).split("@")[0]}`
-              )
-              .replace(
-                /\{group\}/gi,
-                groupName
-              )
-              .replace(
-                /\{count\}/gi,
-                String(count)
-              );
+            const replacements = {
+              "{user}": participants.map((p) => `@${String(p).split("@")[0]}`).join(", "),
+              "{group}": groupMetadata.subject || "Grupo",
+              "{count}": count,
+            };
 
-          try {
-            await conn.sendMessage(
-              groupJid,
-              {
-                text,
-                mentions: [jid]
-              }
-            );
-          } catch {
-            await conn.sendMessage(
-              groupJid,
-              { text }
-            );
+            const text = formatWelcomeText(bye, replacements);
+            try {
+              await conn.sendMessage(from, { text, mentions: participants });
+            } catch {
+              await conn.sendMessage(from, { text });
+            }
+            break;
           }
         }
-
-      } catch (error) {
-        console.error(
-          "[WELCOME] Erro no handler:",
-          error?.stack || error?.message || error
-        );
+      } catch (e) {
+        console.error("[WELCOME NAZUNA] Erro no handler:", e?.stack || e?.message || e);
       }
     }
 
-    // Pontes usadas pelo /add e por diagnóstico.
-    conn.kobayashiQueueWelcome =
-      queueWelcome;
+    // Exposto para o /add, igualando o fluxo do comando ao evento real.
+    conn.kobayashiHandleGroupParticipantsUpdate = handleGroupParticipantsUpdate;
 
-    conn.kobayashiSendWelcomeNow =
-      sendWelcomeBatch;
-
-    conn.kobayashiHandleWelcomeEvent =
-      handleWelcomeEvent;
-
-    // Caminho 1: listener normal do Baileys.
-    conn.ev.on(
-      "group-participants.update",
-      handleWelcomeEvent
-    );
+    // Mesmo padrão estrutural do Nazuna: listener direto no evento do Baileys.
+    conn.ev.on("group-participants.update", async (inf) => {
+      console.log("[WELCOME NAZUNA] Evento group-participants.update recebido");
+      await handleGroupParticipantsUpdate(inf);
+    });
 
     if (!conn.authState?.creds?.registered) {
       const ok = await requestPairingCode(conn);
@@ -635,13 +377,6 @@ async function startConnect() {
             await conn.sendPresenceUpdate("available");
             break;
         }
-      }
-
-      // Caminho 2: também trata o evento pelo processador em lote.
-      if (events["group-participants.update"]) {
-        await conn.kobayashiHandleWelcomeEvent(
-          events["group-participants.update"]
-        );
       }
 
       if (events["messages.upsert"]) {

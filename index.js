@@ -1193,8 +1193,7 @@ case "debugbv": {
     `🏠 Grupo: ${from}\n` +
     `📢 Status: ${cfg.enabled ? "🟢 ATIVADO" : "🔴 DESATIVADO"}\n` +
     `⏱️ Tempo: ${cfg.delaySeconds}s\n` +
-    `🔌 Fila: ${typeof conn.kobayashiQueueWelcome === "function" ? "✅ OK" : "❌ AUSENTE"}\n` +
-    `📨 Envio direto: ${typeof conn.kobayashiSendWelcomeNow === "function" ? "✅ OK" : "❌ AUSENTE"}\n\n` +
+    `🔌 Handler Nazuna: ${typeof conn.kobayashiHandleGroupParticipantsUpdate === "function" ? "✅ OK" : "❌ AUSENTE"}\n\n` +
     `🧪 Use *${prefix}testebv* para testar o texto.`
   );
 }
@@ -1268,16 +1267,15 @@ case "aceitar": {
   }
 
   try {
-    // Lista as solicitações pendentes do grupo.
     const pending = await conn.groupRequestParticipantsList(from);
 
     if (!Array.isArray(pending) || !pending.length) {
       return reply("🌸 Não há solicitações pendentes para entrar no grupo.");
     }
 
-    // /add sem argumento = aprova todas.
-    // /add número ou @menção = tenta aprovar somente aquela solicitação.
-    let targets = pending.map((item) => item?.jid || item?.id).filter(Boolean);
+    let targets = pending
+      .map((item) => item?.jid || item?.id)
+      .filter(Boolean);
 
     const mentioned =
       info?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
@@ -1294,53 +1292,42 @@ case "aceitar": {
     }
 
     if (!targets.length) {
-      return reply(
-        "⚠️ Não encontrei essa pessoa entre as solicitações pendentes."
-      );
+      return reply("⚠️ Não encontrei essa pessoa entre as solicitações pendentes.");
     }
 
-    const result = await conn.groupRequestParticipantsUpdate(
+    await conn.groupRequestParticipantsUpdate(
       from,
       targets,
       "approve"
     );
 
-    // Aguarda o WhatsApp concluir a aprovação.
-    await delay(2000);
+    // Aguarda o WhatsApp concluir a aprovação e usa o MESMO handler do evento real.
+    await delay(1800);
 
-    // O /add aciona a fila diretamente, sem depender do evento do WhatsApp.
-    if (typeof conn.kobayashiQueueWelcome === "function") {
-      await conn.kobayashiQueueWelcome(
-        from,
-        targets,
-        sender
-      );
-    } else if (typeof conn.kobayashiSendWelcomeNow === "function") {
-      // Fallback extremo: envia imediatamente.
-      await conn.kobayashiSendWelcomeNow(
-        from,
-        targets,
-        sender
-      );
+    if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
+      await conn.kobayashiHandleGroupParticipantsUpdate({
+        id: from,
+        action: "add",
+        participants: targets,
+        author: sender,
+        source: "command-add"
+      });
     } else {
-      console.error(
-        "[WELCOME] Nenhuma função de boas-vindas foi encontrada no socket."
-      );
+      console.error("[WELCOME NAZUNA] Handler não encontrado no socket.");
     }
 
     const qtd = targets.length;
 
     return reply(
       `🌸🐉 *${qtd} ${qtd === 1 ? "solicitação aceita" : "solicitações aceitas"}!*\n\n` +
-      `Os novos membros foram enviados para a fila do *Welcome Pro*.`
+      `O sistema de boas-vindas foi acionado para os novos membros.`
     );
 
   } catch (error) {
-    console.error("[ADD REQUESTS]", error?.message || error);
-
+    console.error("[ADD REQUESTS]", error?.stack || error?.message || error);
     return reply(
       `❌ Não consegui aceitar as solicitações do grupo.\n\n` +
-      `Verifique se eu continuo como ADM e se existem solicitações pendentes.`
+      `Confira se eu continuo como ADM e se existem solicitações pendentes.`
     );
   }
 }

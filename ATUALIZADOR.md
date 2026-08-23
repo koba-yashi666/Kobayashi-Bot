@@ -207,3 +207,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Envio possui fallback sem `mentions`, útil para JIDs/LIDs problemáticos.
 - Novo `/statusbv` para conferir status do banco e se as funções do Welcome estão ligadas ao socket.
 - Logs detalhados `[WELCOME]` adicionados para localizar qualquer falha restante.
+
+## v0.1.33-beta — Welcome Nazuna
+- Sistema de boas-vindas reconstruído seguindo a arquitetura do Nazuna enviado: `createGroupMessage` + `handleGroupParticipantsUpdate` + listener direto `group-participants.update`.
+- Removida a fila/bridge experimental das versões anteriores.
+- `/add` chama o mesmo handler usado pelas entradas reais após aprovar solicitações.
+- Mantidos texto customizado, regras, parcerias, múltiplos membros e ADM que aprovou.
+- Fallback para envio sem mentions em caso de JID/LID problemático.
+- Logs `[WELCOME NAZUNA]` adicionados.

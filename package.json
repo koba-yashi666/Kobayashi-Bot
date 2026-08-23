@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.32-beta",
-  "description": "Kobayashi Bot Beta v0.1.32 - Welcome Bridge Fix",
+  "version": "0.1.33-beta",
+  "description": "Kobayashi Bot Beta v0.1.33 - Welcome baseado no sistema do Nazuna",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
