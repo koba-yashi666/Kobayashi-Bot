@@ -182,3 +182,8 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `group-participants.update` agora é tratado dentro de `conn.ev.process`, junto aos demais eventos do Baileys.
 - Adicionado log `[WELCOME PRO] Evento recebido` para confirmar entradas/saídas na hospedagem.
 - Mantida fila de agrupamento e configurações por grupo.
+
+## v0.1.29-beta — Welcome Pro Fix
+- Versão incrementada para que o updater reconheça a correção.
+- Mantido o tratamento de `group-participants.update` dentro de `conn.ev.process`.
+- Mantido log `[WELCOME PRO] Evento recebido` para diagnóstico.
