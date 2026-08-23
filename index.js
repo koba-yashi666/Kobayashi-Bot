@@ -8,7 +8,6 @@ SEM A AUTORIZAÇÃO DO AUTOR.*/
 
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
-import { spawn } from "node:child_process";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
@@ -16,235 +15,26 @@ import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
 import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdmins, logos, baileysVersion, fetch, axios, fs as fsx, os, path, randomBytes, ffmpeg } from "./settings/imports/consts.js";
 
 import { getGroupMetadata } from "./lib/groupCache.js";
+import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/groupSchedule.js";
+import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText } from "./lib/features/welcomeConfig.js";
+import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickerCommands.js";
+import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/whitelist.js";
+import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/autoSticker.js";
+import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
+import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
 
-const settings = JSON.parse(fs.readFileSync(new URL("./settings/settings.json", import.meta.url)));
+// ─────────────────────────────────────────────
+// 🐉 Configuração principal
+// ─────────────────────────────────────────────
+const settings = JSON.parse(
+  fs.readFileSync(new URL("./settings/settings.json", import.meta.url))
+);
 
 const { prefix, NomeDoBot, ownerNumber, ownerName } = settings;
 
-const ADV_DB = path.join(process.cwd(), "files", "database", "adv.json");
-
 const FUN_DB = path.join(process.cwd(), "files", "database", "brincadeiras.json");
 
-const AUTOSTICKER_DB = path.join(process.cwd(), "files", "database", "autosticker.json");
-
 const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-links.json");
-
-const WHITELIST_DB = path.join(process.cwd(), "files", "database", "lista-branca.json");
-
-const STICKER_CMD_DB = path.join(process.cwd(), "files", "database", "sticker-cmd.json");
-
-const GROUP_SCHEDULE_DB = path.join(
-  process.cwd(),
-  "files",
-  "database",
-  "horarios-grupos.json"
-);
-
-function readGroupScheduleDb() {
-  try {
-    fs.mkdirSync(path.dirname(GROUP_SCHEDULE_DB), { recursive: true });
-
-    if (!fs.existsSync(GROUP_SCHEDULE_DB)) {
-      fs.writeFileSync(
-        GROUP_SCHEDULE_DB,
-        JSON.stringify({}, null, 2),
-        "utf8"
-      );
-    }
-
-    return JSON.parse(
-      fs.readFileSync(
-        GROUP_SCHEDULE_DB,
-        "utf8"
-      )
-    );
-  } catch {
-    return {};
-  }
-}
-
-function writeGroupScheduleDb(db) {
-  fs.mkdirSync(
-    path.dirname(GROUP_SCHEDULE_DB),
-    { recursive: true }
-  );
-
-  fs.writeFileSync(
-    GROUP_SCHEDULE_DB,
-    JSON.stringify(db, null, 2),
-    "utf8"
-  );
-}
-
-function normalizeClockTime(value = "") {
-  const text = String(value).trim();
-
-  const match =
-    text.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
-
-  if (!match) return null;
-
-  return `${match[1].padStart(2,"0")}:${match[2]}`;
-}
-
-function updateGroupSchedule(groupJid, patch) {
-  const db = readGroupScheduleDb();
-
-  if (!db[groupJid]) {
-    db[groupJid] = {};
-  }
-
-  db[groupJid] = {
-    ...db[groupJid],
-    ...patch
-  };
-
-  writeGroupScheduleDb(db);
-
-  return db[groupJid];
-}
-
-const WELCOME_DB = path.join(process.cwd(), "files", "database", "boas-vindas.json");
-
-function readWelcomeDb() {
-  try {
-    fs.mkdirSync(path.dirname(WELCOME_DB), { recursive: true });
-    if (!fs.existsSync(WELCOME_DB)) fs.writeFileSync(WELCOME_DB, JSON.stringify({}, null, 2), "utf8");
-    return JSON.parse(fs.readFileSync(WELCOME_DB, "utf8"));
-  } catch { return {}; }
-}
-function writeWelcomeDb(db) {
-  fs.mkdirSync(path.dirname(WELCOME_DB), { recursive: true });
-  fs.writeFileSync(WELCOME_DB, JSON.stringify(db, null, 2), "utf8");
-}
-function getWelcomeConfig(groupJid) {
-  const db=readWelcomeDb(); const c=db[groupJid]||{};
-  return {
-    enabled:!!c.enabled,
-    delaySeconds:Number.isFinite(Number(c.delaySeconds))?Math.max(3,Math.min(120,Number(c.delaySeconds))):15,
-    title:c.title||"🐉 ─ ⋆ 🌸 ⟨ KOBAYASHI BOT ⟩ 🌸 ⋆ ─ 🐉",
-    welcome:c.welcome||"🌸 𝑶𝒉𝒂𝒚𝒐! Sejam bem-vindos(as) ao grupo!",
-    bye:c.bye||"🌸 Até mais, {user}. Esperamos te ver novamente em *{group}*.",
-    rules:c.rules||"📖 Leia as regras completas na descrição do grupo.",
-    partners:c.partners||"🌸 Nenhuma parceria configurada.",
-    footer:c.footer||"🐉 KOBAYASHI BOT",
-    showAcceptedBy:c.showAcceptedBy!==false,
-    showRejected:c.showRejected!==false
-  };
-}
-function updateWelcomeConfig(groupJid, patch) {
-  const db=readWelcomeDb(); if(!db[groupJid]) db[groupJid]={}; db[groupJid]={...db[groupJid],...patch}; writeWelcomeDb(db); return getWelcomeConfig(groupJid);
-}
-function renderWelcomeText(template, vars={}) {
-  const {userJid,groupName,count,membersText,quantity,adminJid,rejected}=vars;
-  const user=userJid?`@${String(userJid).split("@")[0]}`:"";
-  const admin=adminJid?`@${String(adminJid).split("@")[0]}`:"Não identificado";
-  return String(template||"")
-    .replace(/\{user\}/gi,user).replace(/\{group\}/gi,groupName||"Grupo")
-    .replace(/\{count\}/gi,String(count??"?")).replace(/\{membros\}/gi,membersText||"")
-    .replace(/\{quantidade\}/gi,String(quantity??0)).replace(/\{adm\}/gi,admin)
-    .replace(/\{rejeitados\}/gi,String(rejected??0));
-}
-
-
-function readStickerCmdDb() {
-  try {
-    fs.mkdirSync(path.dirname(STICKER_CMD_DB), { recursive: true });
-    if (!fs.existsSync(STICKER_CMD_DB)) {
-      fs.writeFileSync(STICKER_CMD_DB, JSON.stringify({}, null, 2), "utf8");
-    }
-    return JSON.parse(fs.readFileSync(STICKER_CMD_DB, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function writeStickerCmdDb(db) {
-  fs.mkdirSync(path.dirname(STICKER_CMD_DB), { recursive: true });
-  fs.writeFileSync(STICKER_CMD_DB, JSON.stringify(db, null, 2), "utf8");
-}
-
-function stickerHashFromMessage(message = {}) {
-  const sticker = message?.stickerMessage;
-  const hash = sticker?.fileSha256;
-  if (!hash) return null;
-
-  try {
-    return Buffer.from(hash).toString("base64");
-  } catch {
-    return null;
-  }
-}
-
-function getStickerMappedCommand(message = {}) {
-  const hash = stickerHashFromMessage(message);
-  if (!hash) return null;
-  const db = readStickerCmdDb();
-  return db[hash] || null;
-}
-
-function setStickerMappedCommand(message = {}, commandText) {
-  const hash = stickerHashFromMessage(message);
-  if (!hash) return false;
-  const db = readStickerCmdDb();
-  db[hash] = commandText;
-  writeStickerCmdDb(db);
-  return true;
-}
-
-function removeStickerMappedCommand(message = {}) {
-  const hash = stickerHashFromMessage(message);
-  if (!hash) return false;
-  const db = readStickerCmdDb();
-  if (!(hash in db)) return false;
-  delete db[hash];
-  writeStickerCmdDb(db);
-  return true;
-}
-
-
-
-function readWhitelistDb() {
-  try {
-    fs.mkdirSync(path.dirname(WHITELIST_DB), { recursive: true });
-    if (!fs.existsSync(WHITELIST_DB)) {
-      fs.writeFileSync(WHITELIST_DB, JSON.stringify({}, null, 2), "utf8");
-    }
-    return JSON.parse(fs.readFileSync(WHITELIST_DB, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function writeWhitelistDb(db) {
-  fs.mkdirSync(path.dirname(WHITELIST_DB), { recursive: true });
-  fs.writeFileSync(WHITELIST_DB, JSON.stringify(db, null, 2), "utf8");
-}
-
-function getWhitelist(groupJid) {
-  const db = readWhitelistDb();
-  return Array.isArray(db[groupJid]) ? db[groupJid] : [];
-}
-
-function isWhitelisted(groupJid, jid) {
-  return getWhitelist(groupJid).includes(jid);
-}
-
-function addWhitelist(groupJid, jid) {
-  const db = readWhitelistDb();
-  if (!Array.isArray(db[groupJid])) db[groupJid] = [];
-  if (!db[groupJid].includes(jid)) db[groupJid].push(jid);
-  writeWhitelistDb(db);
-}
-
-function removeWhitelist(groupJid, jid) {
-  const db = readWhitelistDb();
-  if (!Array.isArray(db[groupJid])) db[groupJid] = [];
-  db[groupJid] = db[groupJid].filter((x) => x !== jid);
-  writeWhitelistDb(db);
-}
-
-
 
 function readProtectionDb() {
   try {
@@ -341,79 +131,6 @@ async function addAutomaticWarning(conn, groupJid, target, reason, botIsAdmin, q
   }
 
   return { count, removed: false };
-}
-
-
-
-function readAutoStickerDb() {
-  try {
-    fs.mkdirSync(path.dirname(AUTOSTICKER_DB), { recursive: true });
-    if (!fs.existsSync(AUTOSTICKER_DB)) {
-      fs.writeFileSync(AUTOSTICKER_DB, JSON.stringify({}, null, 2), "utf8");
-    }
-    return JSON.parse(fs.readFileSync(AUTOSTICKER_DB, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function setAutoSticker(groupJid, enabled) {
-  const db = readAutoStickerDb();
-  db[groupJid] = Boolean(enabled);
-  fs.writeFileSync(AUTOSTICKER_DB, JSON.stringify(db, null, 2), "utf8");
-  return db[groupJid];
-}
-
-function isAutoStickerEnabled(groupJid) {
-  const db = readAutoStickerDb();
-  return db[groupJid] === true;
-}
-
-async function addStickerMetadata(webpBuffer, { userNick, groupName, botName, creatorName }) {
-  try {
-    const webpModule = await import("node-webpmux");
-    const WebpImage = webpModule.Image || webpModule.default?.Image;
-    if (!WebpImage) return webpBuffer;
-
-    const packName =
-      `Criador: ${userNick || "Usuário"}\n` +
-      `Grupo: ${groupName || "Privado"}`;
-
-    const publisher =
-      `${botName || "Kobayashi Bot"}\n` +
-      `Criador: ${creatorName || "Kobayashi"}`;
-
-    const json = Buffer.from(JSON.stringify({
-      "sticker-pack-id": "kobayashi-bot",
-      "sticker-pack-name": packName,
-      "sticker-pack-publisher": publisher,
-      "emojis": ["🐉", "🌸"]
-    }), "utf8");
-
-    const exif = Buffer.concat([
-      Buffer.from([0x49,0x49,0x2A,0x00,0x08,0x00,0x00,0x00,0x01,0x00,0x41,0x57,0x07,0x00]),
-      Buffer.alloc(4),
-      Buffer.from([0x16,0x00,0x00,0x00]),
-      json
-    ]);
-    exif.writeUIntLE(json.length, 14, 4);
-
-    const img = new WebpImage();
-    await img.load(webpBuffer);
-    img.exif = exif;
-    return await img.save(null);
-  } catch (e) {
-    console.error("Erro ao aplicar metadados da figurinha:", e?.message || e);
-    return webpBuffer;
-  }
-}
-
-async function imageToStickerWithMetadata(mediaBuffer, meta) {
-  return makeSticker(mediaBuffer, {
-    isVideo: false,
-    forceSquare: true,
-    metadata: meta
-  });
 }
 
 
@@ -557,73 +274,6 @@ async function sendFunCard(conn, from, info, card, caption, mentions = []) {
 }
 
 
-
-const SETTINGS_FILE = new URL("./settings/settings.json", import.meta.url);
-
-function readSettingsFile() {
-  return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
-}
-
-function writeSettingsFile(next) {
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2), "utf8");
-}
-
-
-function getConfiguredLeaders() {
-  try {
-    const cfg = readSettingsFile();
-    const values = Array.isArray(cfg.leaders) ? cfg.leaders : [];
-    return values
-      .map((n) => onlyDigits(n))
-      .filter(Boolean)
-      .slice(0, 5)
-      .map((n) => `${n}@s.whatsapp.net`);
-  } catch {
-    return [];
-  }
-}
-
-function isMainOwnerJid(jid) {
-  try {
-    const cfg = readSettingsFile();
-    const owner = onlyDigits(cfg.ownerNumber || "");
-    return Boolean(owner) && jid === `${owner}@s.whatsapp.net`;
-  } catch {
-    return false;
-  }
-}
-
-function isLeaderJid(jid) {
-  return getConfiguredLeaders().includes(jid);
-}
-
-function onlyDigits(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
-
-
-function ensureAdvDb() {
-  try {
-    fs.mkdirSync(path.dirname(ADV_DB), { recursive: true });
-    if (!fs.existsSync(ADV_DB)) fs.writeFileSync(ADV_DB, "{}", "utf8");
-  } catch {}
-}
-
-function readAdvDb() {
-  ensureAdvDb();
-  try {
-    const data = JSON.parse(fs.readFileSync(ADV_DB, "utf8"));
-    return data && typeof data === "object" ? data : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeAdvDb(data) {
-  ensureAdvDb();
-  fs.writeFileSync(ADV_DB, JSON.stringify(data, null, 2), "utf8");
-}
 
 function getQuotedMessage(info) {
   const context = info.message?.extendedTextMessage?.contextInfo ||
@@ -1981,7 +1631,7 @@ case "stickercmds": {
     return reply("🛡️ Apenas administradores do grupo podem consultar essa lista.");
   }
 
-  const db = readStickerCmdDb();
+  const db = listStickerMappedCommands();
   const entries = Object.entries(db);
 
   if (!entries.length) {
@@ -2026,11 +1676,9 @@ case "play": {
 
     if (!yutaToken || yutaToken === "COLOQUE_SEU_TOKEN_YUTA_AQUI") {
       return reply(
-        `🔑🌸 *YUTA API NÃO CONFIGURADA*\n\n` +
-        `O Play agora usa o mesmo backend de download do Hutao.\n\n` +
-        `Configure seu token em:\n` +
-        `*settings/settings.json*\n\n` +
-        `"yutaToken": "SEU_TOKEN_AQUI"`
+        `🎧🌸 *PLAY NÃO CONFIGURADO*\n\n` +
+        `O serviço de música ainda não foi configurado pelo dono do bot.\n\n` +
+        `👑 Dono: use *${prefix}yutatoken TOKEN* para ativar o Play.`
       );
     }
 
@@ -2073,7 +1721,7 @@ case "play": {
         `🎙️ Canal: ${video.author?.name || video.author || "Desconhecido"}\n` +
         `⏱️ Duração: ${video.timestamp || "—"}\n` +
         `🔗 ${video.url}\n\n` +
-        `🌸 Baixando pela Yuta API...`
+        `🌸 Preparando seu áudio...`
     }, { quoted: info });
 
     // Rota de áudio usada pelo sistema do Hutao V10.
@@ -2148,16 +1796,15 @@ case "play": {
 
     await reagir("🌸");
   } catch (e) {
-    console.error("Erro no /play Yuta:", e);
+    console.error("[PLAY] Erro ao preparar áudio:", e);
     const errorText = String(e?.message || e || "");
 
     if (/401|403|token|authorization|unauthorized/i.test(errorText)) {
-      return reply("🔑❌ A Yuta API recusou o token. Confira o `yutaToken` nas configurações.");
+      return reply("🔑❌ O serviço de música recusou a configuração atual. O dono precisa atualizar o token do Play.");
     }
 
     return reply(
-      `❌🌸 Não consegui baixar essa música pela Yuta API.\n\n` +
-      `Detalhe: ${errorText.slice(0,180)}`
+      `❌🌸 Não consegui preparar essa música agora. Tente novamente em alguns instantes.`
     );
   }
 }
@@ -2220,7 +1867,7 @@ case "s": {
     console.error("Erro na criação de sticker:",e);
     return reply(
       "❌🌸 Não consegui criar essa figurinha.\n\n" +
-      "Para vídeos, confirme que o FFmpeg está disponível na hospedagem."
+      "Tente novamente com outra imagem ou um vídeo mais curto."
     );
   }
 }

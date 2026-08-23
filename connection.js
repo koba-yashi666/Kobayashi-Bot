@@ -561,7 +561,7 @@ async function startConnect() {
               }, 3000);
             } else {
               reconnecting = false;
-              console.log(colors.red("Sessão encerrada (logout). Apague files/database/qr-code e pareie novamente."));
+              console.log(colors.red("Sessão encerrada. Limpe a autenticação do bot e faça um novo pareamento."));
             }
             break;
           }

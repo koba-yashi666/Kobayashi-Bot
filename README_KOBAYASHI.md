@@ -1,3 +1,20 @@
+# 🐉🌸 Kobayashi Bot
+
+> Base em desenvolvimento — preparação para a v0.2.0.
+
+## Estrutura atual
+A partir da v0.1.37, os sistemas internos começaram a ser separados por responsabilidade para reduzir o tamanho do `index.js` e facilitar manutenção.
+
+- `lib/core` → utilidades compartilhadas
+- `lib/config` → configurações
+- `lib/features` → recursos independentes
+- `lib/moderation` → moderação
+- `docs/ESTRUTURA.md` → mapa técnico da base
+
+As mensagens enviadas aos usuários foram limpas para evitar mostrar detalhes internos como hospedagem, caminhos de arquivos e nomes de serviços usados por trás do bot.
+
+---
+
 # 🐉🌸 Kobayashi Bot — Beta v0.1.2
 
 ## Correção da inicialização no Pterodactyl

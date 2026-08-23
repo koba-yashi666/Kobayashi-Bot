@@ -235,3 +235,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/rm_closegp`: remove o horário de fechamento automático do grupo.
 - `/rm_opengp`: remove o horário de abertura automática do grupo.
 - Ambos são exclusivos para administradores e avisam quando não existe horário configurado.
+
+## v0.1.37-beta — Organização Base
+- Iniciada a reorganização estrutural para a futura v0.2.0.
+- Criados `lib/core`, `lib/config`, `lib/features`, `lib/moderation` e `docs`.
+- Horários de grupo, Welcome Config, Sticker Commands, Lista Branca, AutoSticker, settings e ADV foram extraídos do `index.js` para módulos próprios.
+- Mensagens do Play deixaram de expor backend/API, hospedagem ou caminhos internos.
+- Mensagens de erro de stickers foram simplificadas para o usuário final.
+- Mensagem de logout deixou de expor pasta interna de autenticação.
+- Adicionado `docs/ESTRUTURA.md` com o mapa da base.

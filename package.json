@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.36-beta",
-  "description": "Kobayashi Bot Beta v0.1.36 - remover horários automáticos de grupo",
+  "version": "0.1.37-beta",
+  "description": "Kobayashi Bot Beta v0.1.37 - organização estrutural e limpeza visual",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
