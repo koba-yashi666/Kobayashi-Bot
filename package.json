@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.27-beta",
-  "description": "Kobayashi Bot Beta v0.1.27 - sistema de boas-vindas",
+  "version": "0.1.28-beta",
+  "description": "Kobayashi Bot Beta v0.1.28 - Welcome Pro",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

@@ -168,3 +168,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/setbye`
 - `/testebv`
 - Variáveis `{user}`, `{group}`, `{count}` e foto de perfil quando disponível.
+
+## v0.1.28-beta — Welcome Pro
+- Entradas agrupadas por fila.
+- `/tempobv 3-120`.
+- `/setregrasbv`.
+- `/setparceriasbv`.
+- Variáveis `{membros}`, `{quantidade}`, `{adm}`, `{rejeitados}`.
+- Tenta identificar o ADM via evento do WhatsApp quando disponível.
+- Rejeitados ficam em 0 quando o WhatsApp não informa esse dado.

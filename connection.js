@@ -131,39 +131,122 @@ async function startConnect() {
 
     bindGroupCache(conn);
 
-    // KOBAYASHI WELCOME SYSTEM v0.1.27
+
+    // KOBAYASHI WELCOME PRO • v0.1.28
+    const welcomeQueues = new Map();
+
     conn.ev.on("group-participants.update", async (update) => {
       try {
-        const groupJid=update?.id;
-        const participants=Array.isArray(update?.participants)?update.participants:[];
-        if (!groupJid || !participants.length || !["add","remove"].includes(update?.action)) return;
-    
-        const fsM=(await import("node:fs")).default;
-        const pathM=(await import("node:path")).default;
-        const dbFile=pathM.join(process.cwd(),"files","database","boas-vindas.json");
-        let db={};
-        try { if (fsM.existsSync(dbFile)) db=JSON.parse(fsM.readFileSync(dbFile,"utf8")); } catch {}
-        const cfg=db[groupJid]||{};
+        const groupJid = update?.id;
+        const participants = Array.isArray(update?.participants) ? update.participants : [];
+        if (!groupJid || !participants.length) return;
+
+        const fsM = (await import("node:fs")).default;
+        const pathM = (await import("node:path")).default;
+        const dbFile = pathM.join(process.cwd(), "files", "database", "boas-vindas.json");
+
+        let db = {};
+        try {
+          if (fsM.existsSync(dbFile)) db = JSON.parse(fsM.readFileSync(dbFile, "utf8"));
+        } catch {}
+
+        const cfg = db?.[groupJid] || {};
         if (!cfg.enabled) return;
-    
-        let meta=null; try { meta=await conn.groupMetadata(groupJid); } catch {}
-        const groupName=meta?.subject||"Grupo";
-        const count=Array.isArray(meta?.participants)?meta.participants.length:"?";
-        const tpl=update.action==="add"
-          ? (cfg.welcome||"🌸 Bem-vindo(a), {user}!\n🐉 Você entrou em *{group}*.\n👥 Agora somos *{count}* membros.")
-          : (cfg.bye||"🌸 Até mais, {user}.\n🐉 Você saiu de *{group}*.\n👥 Agora somos *{count}* membros.");
-    
-        for (const jid of participants) {
-          const text=String(tpl)
-            .replace(/\{user\}/gi,`@${String(jid).split("@")[0]}`)
-            .replace(/\{group\}/gi,groupName)
-            .replace(/\{count\}/gi,String(count));
-          let pp=null; try { pp=await conn.profilePictureUrl(jid,"image"); } catch {}
-          if (pp) await conn.sendMessage(groupJid,{image:{url:pp},caption:text,mentions:[jid]});
-          else await conn.sendMessage(groupJid,{text,mentions:[jid]});
+
+        if (update.action === "remove") {
+          let meta = null;
+          try { meta = await conn.groupMetadata(groupJid); } catch {}
+
+          const groupName = meta?.subject || "Grupo";
+          const count = Array.isArray(meta?.participants) ? meta.participants.length : "?";
+          const bye = cfg.bye || "🌸 Até mais, {user}. Esperamos te ver novamente em *{group}*.";
+
+          for (const jid of participants) {
+            const text = String(bye)
+              .replace(/\{user\}/gi, `@${String(jid).split("@")[0]}`)
+              .replace(/\{group\}/gi, groupName)
+              .replace(/\{count\}/gi, String(count));
+
+            await conn.sendMessage(groupJid, { text, mentions: [jid] });
+          }
+          return;
         }
+
+        if (update.action !== "add") return;
+
+        const delaySeconds = Math.max(3, Math.min(120, Number(cfg.delaySeconds || 15)));
+        const current = welcomeQueues.get(groupJid) || {
+          members: [],
+          admins: [],
+          rejected: 0,
+          timer: null,
+        };
+
+        for (const jid of participants) {
+          if (!current.members.includes(jid)) current.members.push(jid);
+        }
+
+        const author = update?.author || update?.actor || null;
+        if (author && !current.admins.includes(author)) current.admins.push(author);
+
+        if (current.timer) clearTimeout(current.timer);
+
+        current.timer = setTimeout(async () => {
+          try {
+            const queued = welcomeQueues.get(groupJid);
+            welcomeQueues.delete(groupJid);
+            if (!queued?.members?.length) return;
+
+            let meta = null;
+            try { meta = await conn.groupMetadata(groupJid); } catch {}
+
+            const groupName = meta?.subject || "Grupo";
+            const total = Array.isArray(meta?.participants) ? meta.participants.length : "?";
+            const amount = queued.members.length;
+            const acceptedBy = queued.admins?.[0] || null;
+
+            const membersLines = queued.members
+              .map((jid) => `@${String(jid).split("@")[0]}`)
+              .join("\n");
+
+            const membersText = `${membersLines}\n> [ ${amount} ${amount === 1 ? "Membro Novo" : "Membros Novos"} 🪪 ]`;
+
+            const title = cfg.title || "🐉 ─ ⋆ 🌸 ⟨ KOBAYASHI BOT ⟩ 🌸 ⋆ ─ 🐉";
+            const welcome = cfg.welcome || "🌸 𝑶𝒉𝒂𝒚𝒐! Sejam bem-vindos(as) ao grupo!";
+            const rules = cfg.rules || "📖 Leia as regras completas na descrição do grupo.";
+            const partners = cfg.partners || "🌸 Nenhuma parceria configurada.";
+            const footer = cfg.footer || "🐉 KOBAYASHI BOT";
+
+            let text = `${title}\n${String(welcome)
+              .replace(/\{group\}/gi, groupName)
+              .replace(/\{count\}/gi, String(total))
+              .replace(/\{quantidade\}/gi, String(amount))
+              .replace(/\{membros\}/gi, membersText)
+              .replace(/\{adm\}/gi, acceptedBy ? `@${String(acceptedBy).split("@")[0]}` : "Não identificado")
+              .replace(/\{rejeitados\}/gi, String(queued.rejected || 0))}\n\n${rules}\n\n🐾 ── 𖥸 ─── ⋆ ✧ ⋆ ─── 𖥸 ── 🐾\n🧁 *Jardim de Parcerias* 🧁\n${partners}\n\n${membersText}\n\n`;
+
+            if (cfg.showAcceptedBy !== false) {
+              text += `> Aceito/Add por ${acceptedBy ? `@${String(acceptedBy).split("@")[0]}` : "não identificado"}\n`;
+            }
+
+            if (cfg.showRejected !== false) {
+              text += `> _E rejeitei ${queued.rejected || 0} solicitações irregulares._\n`;
+            }
+
+            text += `\n${footer}`;
+
+            await conn.sendMessage(groupJid, {
+              text,
+              mentions: [...queued.members, ...(acceptedBy ? [acceptedBy] : [])],
+            });
+          } catch (e) {
+            console.error("Erro ao enviar Welcome Pro:", e?.message || e);
+          }
+        }, delaySeconds * 1000);
+
+        welcomeQueues.set(groupJid, current);
       } catch (e) {
-        console.error("Erro no sistema de boas-vindas:",e?.message||e);
+        console.error("Erro no Welcome Pro:", e?.message || e);
       }
     });
 

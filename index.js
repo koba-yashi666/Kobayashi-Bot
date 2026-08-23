@@ -37,7 +37,7 @@ const WELCOME_DB = path.join(process.cwd(), "files", "database", "boas-vindas.js
 function readWelcomeDb() {
   try {
     fs.mkdirSync(path.dirname(WELCOME_DB), { recursive: true });
-    if (!fs.existsSync(WELCOME_DB)) fs.writeFileSync(WELCOME_DB, "{}", "utf8");
+    if (!fs.existsSync(WELCOME_DB)) fs.writeFileSync(WELCOME_DB, JSON.stringify({}, null, 2), "utf8");
     return JSON.parse(fs.readFileSync(WELCOME_DB, "utf8"));
   } catch { return {}; }
 }
@@ -46,25 +46,32 @@ function writeWelcomeDb(db) {
   fs.writeFileSync(WELCOME_DB, JSON.stringify(db, null, 2), "utf8");
 }
 function getWelcomeConfig(groupJid) {
-  const db = readWelcomeDb();
-  const c = db[groupJid] || {};
+  const db=readWelcomeDb(); const c=db[groupJid]||{};
   return {
-    enabled: !!c.enabled,
-    welcome: c.welcome || "🌸 Bem-vindo(a), {user}!\n🐉 Você entrou em *{group}*.\n👥 Agora somos *{count}* membros.",
-    bye: c.bye || "🌸 Até mais, {user}.\n🐉 Você saiu de *{group}*.\n👥 Agora somos *{count}* membros."
+    enabled:!!c.enabled,
+    delaySeconds:Number.isFinite(Number(c.delaySeconds))?Math.max(3,Math.min(120,Number(c.delaySeconds))):15,
+    title:c.title||"🐉 ─ ⋆ 🌸 ⟨ KOBAYASHI BOT ⟩ 🌸 ⋆ ─ 🐉",
+    welcome:c.welcome||"🌸 𝑶𝒉𝒂𝒚𝒐! Sejam bem-vindos(as) ao grupo!",
+    bye:c.bye||"🌸 Até mais, {user}. Esperamos te ver novamente em *{group}*.",
+    rules:c.rules||"📖 Leia as regras completas na descrição do grupo.",
+    partners:c.partners||"🌸 Nenhuma parceria configurada.",
+    footer:c.footer||"🐉 KOBAYASHI BOT",
+    showAcceptedBy:c.showAcceptedBy!==false,
+    showRejected:c.showRejected!==false
   };
 }
 function updateWelcomeConfig(groupJid, patch) {
-  const db=readWelcomeDb();
-  db[groupJid]={...(db[groupJid]||{}),...patch};
-  writeWelcomeDb(db);
-  return getWelcomeConfig(groupJid);
+  const db=readWelcomeDb(); if(!db[groupJid]) db[groupJid]={}; db[groupJid]={...db[groupJid],...patch}; writeWelcomeDb(db); return getWelcomeConfig(groupJid);
 }
-function renderWelcomeText(template,{userJid,groupName,count}) {
+function renderWelcomeText(template, vars={}) {
+  const {userJid,groupName,count,membersText,quantity,adminJid,rejected}=vars;
+  const user=userJid?`@${String(userJid).split("@")[0]}`:"";
+  const admin=adminJid?`@${String(adminJid).split("@")[0]}`:"Não identificado";
   return String(template||"")
-    .replace(/\{user\}/gi,`@${String(userJid||"").split("@")[0]}`)
-    .replace(/\{group\}/gi,groupName||"Grupo")
-    .replace(/\{count\}/gi,String(count??"?"));
+    .replace(/\{user\}/gi,user).replace(/\{group\}/gi,groupName||"Grupo")
+    .replace(/\{count\}/gi,String(count??"?")).replace(/\{membros\}/gi,membersText||"")
+    .replace(/\{quantidade\}/gi,String(quantity??0)).replace(/\{adm\}/gi,admin)
+    .replace(/\{rejeitados\}/gi,String(rejected??0));
 }
 
 
@@ -1175,45 +1182,57 @@ case "bemvindo":
 case "boasvindas": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  const op=String(args[0]||"").toLowerCase();
-  const cfg=getWelcomeConfig(from);
-  if (!["on","off"].includes(op)) return reply(
-    `🌸 *BOAS-VINDAS*\n\nStatus: ${cfg.enabled?"🟢 Ativado":"🔒 Desativado"}\n\n`+
-    `🟢 ${prefix}bemvindo on\n🔒 ${prefix}bemvindo off\n📝 ${prefix}setbv texto\n👋 ${prefix}setbye texto\n🧪 ${prefix}testebv\n\n`+
-    `Variáveis: {user} {group} {count}`
-  );
+  const op=String(args[0]||"").toLowerCase(); const cfg=getWelcomeConfig(from);
+  if(!["on","off"].includes(op)) return reply(`🌸 *WELCOME PRO*\n\nStatus: ${cfg.enabled?"🟢 Ativado":"🔒 Desativado"}\n⏱️ Agrupamento: *${cfg.delaySeconds}s*\n\n🟢 ${prefix}bemvindo on\n🔒 ${prefix}bemvindo off\n📝 ${prefix}setbv texto\n📖 ${prefix}setregrasbv texto\n🤝 ${prefix}setparceriasbv texto\n👋 ${prefix}setbye texto\n⏱️ ${prefix}tempobv 15\n🧪 ${prefix}testebv\n\nVariáveis: {user} {group} {count} {membros} {quantidade} {adm} {rejeitados}`);
   updateWelcomeConfig(from,{enabled:op==="on"});
-  return reply(op==="on"?"🌸🐉 Boas-vindas ativadas!":"🔒🌸 Boas-vindas desativadas.");
+  return reply(op==="on"?"🌸🐉 Welcome Pro ativado!":"🔒🌸 Welcome Pro desativado.");
 }
 break;
 
 case "setbv": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  if (!q.trim()) return reply(`📝 Use: *${prefix}setbv sua mensagem*\nVariáveis: {user} {group} {count}`);
-  updateWelcomeConfig(from,{welcome:q.trim()});
-  return reply("✅🌸 Mensagem de boas-vindas atualizada.");
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if(!q.trim()) return reply(`📝 Use: *${prefix}setbv sua mensagem*`);
+  updateWelcomeConfig(from,{welcome:q.trim()}); return reply("✅🌸 Texto principal atualizado.");
+}
+break;
+
+case "setregrasbv":
+case "regrasbv": {
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if(!q.trim()) return reply(`📖 Use: *${prefix}setregrasbv suas regras*`);
+  updateWelcomeConfig(from,{rules:q.trim()}); return reply("✅📖 Regras da recepção atualizadas.");
+}
+break;
+
+case "setparceriasbv":
+case "parceriasbv": {
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if(!q.trim()) return reply(`🤝 Use: *${prefix}setparceriasbv seus links/parcerias*`);
+  updateWelcomeConfig(from,{partners:q.trim()}); return reply("✅🤝 Jardim de parcerias atualizado.");
 }
 break;
 
 case "setbye": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  if (!q.trim()) return reply(`👋 Use: *${prefix}setbye sua mensagem*\nVariáveis: {user} {group} {count}`);
-  updateWelcomeConfig(from,{bye:q.trim()});
-  return reply("✅🌸 Mensagem de saída atualizada.");
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if(!q.trim()) return reply(`👋 Use: *${prefix}setbye sua mensagem*`);
+  updateWelcomeConfig(from,{bye:q.trim()}); return reply("✅👋 Mensagem de saída atualizada.");
+}
+break;
+
+case "tempobv": {
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const seconds=Number(args[0]);
+  if(!Number.isFinite(seconds)||seconds<3||seconds>120) return reply(`⏱️ Use um tempo entre *3 e 120 segundos*. Ex.: *${prefix}tempobv 15*`);
+  updateWelcomeConfig(from,{delaySeconds:Math.floor(seconds)}); return reply(`✅⏱️ Entradas serão agrupadas por *${Math.floor(seconds)} segundos*.`);
 }
 break;
 
 case "testebv": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  const cfg=getWelcomeConfig(from);
-  const count=Array.isArray(groupMembers)?groupMembers.length:0;
-  const text=renderWelcomeText(cfg.welcome,{userJid:sender,groupName,count});
-  let pp=null; try { pp=await conn.profilePictureUrl(sender,"image"); } catch {}
-  if (pp) return conn.sendMessage(from,{image:{url:pp},caption:text,mentions:[sender]},{quoted:info});
-  return conn.sendMessage(from,{text,mentions:[sender]},{quoted:info});
+  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const cfg=getWelcomeConfig(from); const total=Array.isArray(groupMembers)?groupMembers.length:0;
+  const membersText=`@${sender.split("@")[0]}\n> [ 1 Membro Novo 🪪 ]`;
+  const preview=`${cfg.title}\n${renderWelcomeText(cfg.welcome,{groupName,count:total,membersText,quantity:1,adminJid:sender,rejected:0})}\n\n${cfg.rules}\n\n🐾 ── 𖥸 ─── ⋆ ✧ ⋆ ─── 𖥸 ── 🐾\n🧁 *Jardim de Parcerias* 🧁\n${cfg.partners}\n\n${membersText}\n\n> Aceito/Add por @${sender.split("@")[0]}\n> _E rejeitei 0 solicitações irregulares._\n\n${cfg.footer}`;
+  return conn.sendMessage(from,{text:preview,mentions:[sender]},{quoted:info});
 }
 break;
 
