@@ -251,3 +251,15 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Mostra uso de memória do processo.
 - Verifica presença dos bancos/sistemas principais sem expor caminhos internos ao usuário.
 - Adicionado ao painel de sistema do Menu Dono.
+
+## v0.1.39-beta — Painéis + Modularização
+- Novo roteador modular em `commands/registry.js`.
+- Criadas pastas `commands/general`, `commands/group`, `commands/admin` e `commands/owner`.
+- Novo sistema central de permissões em `lib/core/permissions.js`.
+- `/configgp`: painel das configurações do grupo.
+- `/configbot`: painel global seguro para o dono.
+- `/help`: ajuda dos comandos modulares.
+- `/logadm on/off/ver`: logs administrativos por grupo.
+- `/backupdb` e `/backupdb listar`: backup interno das configurações.
+- Ban, ADV, aprovação de solicitações, proteções e horários passam a gerar logs quando ativados.
+- Estrutura documentada para migração gradual até a v0.2.0.

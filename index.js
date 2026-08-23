@@ -22,6 +22,9 @@ import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./li
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/autoSticker.js";
 import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
 import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
+import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js";
+import { createPermissions, permissionName } from "./lib/core/permissions.js";
+import { addAdminLog } from "./lib/features/adminLogs.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -688,6 +691,70 @@ if (
 }
 
 if (isCmd) {
+  const modularPermissions = createPermissions({
+    sender,
+    isGroup,
+    groupAdmins: Array.isArray(groupAdmins) ? groupAdmins : [],
+    isMainOwner: SoDonoPrincipal,
+    isLeader: SoLider,
+    isPremium: false,
+  });
+
+  let modularVersion = "desconhecida";
+  try {
+    modularVersion = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "version.json"),
+        "utf8"
+      )
+    )?.version || modularVersion;
+  } catch {}
+
+  let modularGroupsCount = "?";
+  try {
+    const groups = await conn.groupFetchAllParticipating();
+    modularGroupsCount = Object.keys(groups || {}).length;
+  } catch {}
+
+  const switchCommandNames = new Set(
+    [...jsCommandSource.matchAll(/case\s+"([^"]+)":/g)]
+      .map((m) => m[1])
+  );
+
+  const modularCatalog = getCommandHelpCatalog();
+  const modularCommandNames = new Set(
+    modularCatalog.flatMap((item) => [item.name, ...(item.aliases || [])])
+  );
+
+  const modularHandled = await runModularCommand(command, {
+    conn,
+    info,
+    from,
+    sender,
+    command,
+    args,
+    q,
+    prefix,
+    reply,
+    reagir,
+    isGroup,
+    isBotGroupAdmins,
+    groupName,
+    groupMembers,
+    groupAdmins: Array.isArray(groupAdmins) ? groupAdmins : [],
+    permissions: modularPermissions,
+    permissionName: permissionName(modularPermissions.level),
+    version: modularVersion,
+    groupsCount: modularGroupsCount,
+    commandCount: new Set([...switchCommandNames, ...modularCommandNames]).size,
+    getGroupProtection,
+    isFunModeEnabled,
+  });
+
+  if (modularHandled) {
+    continue;
+  }
+
 switch (command) {
 
 
@@ -811,6 +878,12 @@ case "antitelegram": {
 
   const mode = modeMap[command];
   const enabled = toggleGroupProtection(from, mode.key);
+
+  addAdminLog(from, {
+    type: mode.key,
+    actor: sender,
+    detail: enabled ? "Proteção ativada" : "Proteção desativada",
+  });
 
   return reply(
     `╭──────「 ${mode.icon} 」──────╮\n` +
@@ -1041,6 +1114,12 @@ case "aceitar": {
 
     const qtd = targets.length;
 
+    addAdminLog(from, {
+      type: "add",
+      actor: sender,
+      detail: `${qtd} solicitação(ões) aprovada(s)`,
+    });
+
     return reply(
       `🌸🐉 *${qtd} ${qtd === 1 ? "solicitação aceita" : "solicitações aceitas"}!*\n\n` +
       `O sistema de boas-vindas foi acionado para os novos membros.`
@@ -1148,6 +1227,12 @@ case "opengp": {
     { open: horario }
   );
 
+  addAdminLog(from, {
+    type: "opengp",
+    actor: sender,
+    detail: `Abertura programada para ${horario}`,
+  });
+
   return reply(
     `✅🟢 Grupo programado para abrir todos os dias às *${horario}*.\n\n` +
     `🌸 Horário padrão: *America/Sao_Paulo*.`
@@ -1192,6 +1277,12 @@ case "closegp": {
     from,
     { close: horario }
   );
+
+  addAdminLog(from, {
+    type: "closegp",
+    actor: sender,
+    detail: `Fechamento programado para ${horario}`,
+  });
 
   return reply(
     `✅🔒 Grupo programado para fechar todos os dias às *${horario}*.\n\n` +
@@ -2040,6 +2131,14 @@ case "banc": {
   try {
     const targetNumber = target.split('@')[0];
     await conn.groupParticipantsUpdate(from, [target], 'remove');
+
+    addAdminLog(from, {
+      type: "ban",
+      actor: sender,
+      target,
+      detail: "Membro removido do grupo",
+    });
+
     return conn.sendMessage(from, {
       text: `🐉🌸 *Membro removido!*\n\n👤 @${targetNumber}\n🛡️ Ação realizada por: @${sender.split('@')[0]}`,
       mentions: [target, sender],
@@ -2076,6 +2175,13 @@ Exemplo: ${prefix}adv @membro motivo`);
 
   const count = db[from][target].count;
   writeAdvDb(db);
+
+  addAdminLog(from, {
+    type: "adv",
+    actor: sender,
+    target,
+    detail: `${count}/3 • ${reason}`,
+  });
 
   if (count < 3) {
     return conn.sendMessage(from, {

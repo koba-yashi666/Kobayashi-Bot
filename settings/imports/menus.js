@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.38-beta */
+/* KOBAYASHI BOT • v0.1.39-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.38-beta
+💮 Versão › 0.1.39-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -45,6 +45,9 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 │ 🗑️ ${prefix}rm_opengp
 │ 🔗 ${prefix}linkgp
 │ 🔒 ${prefix}gp f
+│ ⚙️ ${prefix}configgp
+│    ↳ Painel do grupo
+│ 📋 ${prefix}logadm on/off/ver
 │ 🐉 ${prefix}grupoinfo
 │ 🎨 ${prefix}autosticker
 ╰────── ❀ ─────────────╯
@@ -108,6 +111,10 @@ return `╭══════ ❀ 核心 ❀ ══════╮
 ╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 🔑 ${prefix}yutatoken TOKEN
 │    ↳ Configurar serviço do Play
+│ 👑 ${prefix}configbot
+│    ↳ Painel geral seguro
+│ 💾 ${prefix}backupdb
+│    ↳ Backup das configurações
 │ 🐉 ${prefix}statusbot
 │    ↳ Diagnóstico do bot
 │ 💮 ${prefix}version
@@ -147,6 +154,8 @@ return `╭══════ ❀ 🪷 ❀ ══════╮
 ╰══════ ❀ 🐉 ❀ ══════╯
 
 ╭──〔 🌸 INFORMAÇÕES 〕────╮
+│ 📖 ${prefix}help
+│    ↳ Ajuda dos comandos modulares
 │ 🫧 ${prefix}ping
 │ 🐉 ${prefix}criador
 │ 🎀 ${prefix}dono

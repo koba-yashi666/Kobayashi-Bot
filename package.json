@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.38-beta",
-  "description": "Kobayashi Bot Beta v0.1.38 - StatusBot e diagnóstico",
+  "version": "0.1.39-beta",
+  "description": "Kobayashi Bot Beta v0.1.39 - painéis, permissões, logs, backup e modularização",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
