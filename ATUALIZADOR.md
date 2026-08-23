@@ -177,3 +177,8 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Variáveis `{membros}`, `{quantidade}`, `{adm}`, `{rejeitados}`.
 - Tenta identificar o ADM via evento do WhatsApp quando disponível.
 - Rejeitados ficam em 0 quando o WhatsApp não informa esse dado.
+
+### Fix Welcome Pro v0.1.28
+- `group-participants.update` agora é tratado dentro de `conn.ev.process`, junto aos demais eventos do Baileys.
+- Adicionado log `[WELCOME PRO] Evento recebido` para confirmar entradas/saídas na hospedagem.
+- Mantida fila de agrupamento e configurações por grupo.
