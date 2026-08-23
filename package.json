@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.35-beta",
-  "description": "Kobayashi Bot Beta v0.1.35 - horários de grupo, linkgp e letras",
+  "version": "0.1.36-beta",
+  "description": "Kobayashi Bot Beta v0.1.36 - remover horários automáticos de grupo",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

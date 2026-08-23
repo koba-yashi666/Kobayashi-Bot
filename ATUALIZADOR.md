@@ -230,3 +230,8 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/linkgp`: envia o link do grupo; somente ADM.
 - `/letra Artista - Música`: busca letra usando lyrics.ovh.
 - Scheduler verifica horários a cada 30 segundos em `America/Sao_Paulo`.
+
+## v0.1.36-beta — Remover horários de grupo
+- `/rm_closegp`: remove o horário de fechamento automático do grupo.
+- `/rm_opengp`: remove o horário de abertura automática do grupo.
+- Ambos são exclusivos para administradores e avisam quando não existe horário configurado.

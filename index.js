@@ -1406,6 +1406,59 @@ case "aceitar": {
 break;
 
 
+
+case "rm_closegp":
+case "rmclosegp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const atual =
+    readGroupScheduleDb()?.[from]?.close || null;
+
+  if (!atual) {
+    return reply(
+      "🌸 Não existe nenhum horário de fechamento automático configurado neste grupo."
+    );
+  }
+
+  updateGroupSchedule(
+    from,
+    { close: null }
+  );
+
+  return reply(
+    `✅🔓 *Fechamento automático removido!*\n\n` +
+    `O horário *${atual}* foi apagado e o grupo não será mais fechado automaticamente.`
+  );
+}
+break;
+
+case "rm_opengp":
+case "rmopengp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const atual =
+    readGroupScheduleDb()?.[from]?.open || null;
+
+  if (!atual) {
+    return reply(
+      "🌸 Não existe nenhum horário de abertura automática configurado neste grupo."
+    );
+  }
+
+  updateGroupSchedule(
+    from,
+    { open: null }
+  );
+
+  return reply(
+    `✅🔓 *Abertura automática removida!*\n\n` +
+    `O horário *${atual}* foi apagado e o grupo não será mais aberto automaticamente.`
+  );
+}
+break;
+
 case "opengp": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
