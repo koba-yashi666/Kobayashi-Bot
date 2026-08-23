@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.33-beta",
-  "description": "Kobayashi Bot Beta v0.1.33 - Welcome baseado no sistema do Nazuna",
+  "version": "0.1.34-beta",
+  "description": "Kobayashi Bot Beta v0.1.34 - correção Welcome duplicado e object Object",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

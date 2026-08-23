@@ -215,3 +215,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Mantidos texto customizado, regras, parcerias, múltiplos membros e ADM que aprovou.
 - Fallback para envio sem mentions em caso de JID/LID problemático.
 - Logs `[WELCOME NAZUNA]` adicionados.
+
+## v0.1.34-beta — Welcome Duplicate Fix
+- Corrigido Welcome sendo enviado duas vezes após `/add`.
+- Eventos do Baileys agora normalizam participantes retornados como objetos.
+- Corrigido `@[object Object]` no texto.
+- `author/actor` também é normalizado antes de mostrar quem aceitou/adicionou.
+- Deduplicação existente agora compara os mesmos JIDs tanto no `/add` quanto no evento real.

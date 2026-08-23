@@ -137,6 +137,40 @@ async function startConnect() {
     // ==========================================
     const welcomeRecentEvents = new Map();
 
+
+    function normalizeWelcomeJid(value) {
+      if (!value) return null;
+
+      if (typeof value === "string") {
+        return value;
+      }
+
+      if (typeof value === "object") {
+        const candidate =
+          value.jid ||
+          value.id ||
+          value.participant ||
+          value.phoneNumber ||
+          value.lid ||
+          null;
+
+        return typeof candidate === "string"
+          ? candidate
+          : null;
+      }
+
+      return null;
+    }
+
+    function normalizeWelcomeParticipants(values = []) {
+      return [...new Set(
+        (Array.isArray(values) ? values : [])
+          .map(normalizeWelcomeJid)
+          .filter(Boolean)
+      )];
+    }
+
+
     async function loadWelcomeSettings(groupJid) {
       const fsM = (await import("node:fs")).default;
       const pathM = (await import("node:path")).default;
@@ -166,6 +200,9 @@ async function startConnect() {
     }
 
     async function createWelcomeMessage(groupMetadata, participants, settings, acceptedBy = null) {
+      participants = normalizeWelcomeParticipants(participants);
+      acceptedBy = normalizeWelcomeJid(acceptedBy);
+
       const mentions = [...participants, ...(acceptedBy ? [acceptedBy] : [])];
       const amount = participants.length;
       const memberTags = participants
@@ -219,15 +256,17 @@ async function startConnect() {
         const from = inf?.id || inf?.jid || null;
         if (!from) return;
 
-        let participants = Array.isArray(inf?.participants)
-          ? inf.participants.filter(Boolean)
-          : [];
+        let participants = normalizeWelcomeParticipants(
+          Array.isArray(inf?.participants)
+            ? inf.participants
+            : []
+        );
 
         if (!participants.length) return;
 
         const botId = String(conn.user?.id || "").split(":")[0];
         participants = participants.filter(
-          (p) => !String(p).startsWith(botId)
+          (p) => !String(p).split("@")[0].startsWith(botId)
         );
         if (!participants.length) return;
 
@@ -257,7 +296,9 @@ async function startConnect() {
 
         switch (inf.action) {
           case "add": {
-            const acceptedBy = inf?.author || inf?.actor || null;
+            const acceptedBy = normalizeWelcomeJid(
+              inf?.author || inf?.actor || null
+            );
             const message = await createWelcomeMessage(
               groupMetadata,
               participants,
