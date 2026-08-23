@@ -222,3 +222,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Corrigido `@[object Object]` no texto.
 - `author/actor` também é normalizado antes de mostrar quem aceitou/adicionou.
 - Deduplicação existente agora compara os mesmos JIDs tanto no `/add` quanto no evento real.
+
+## v0.1.35-beta — Group Schedule + Letra
+- `/opengp HH:MM`: programa abertura diária do grupo.
+- `/closegp HH:MM`: programa fechamento diário.
+- `/opengp off` e `/closegp off`: removem os horários.
+- `/linkgp`: envia o link do grupo; somente ADM.
+- `/letra Artista - Música`: busca letra usando lyrics.ovh.
+- Scheduler verifica horários a cada 30 segundos em `America/Sao_Paulo`.

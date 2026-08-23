@@ -32,6 +32,78 @@ const PROTECTION_DB = path.join(process.cwd(), "files", "database", "protecao-li
 const WHITELIST_DB = path.join(process.cwd(), "files", "database", "lista-branca.json");
 
 const STICKER_CMD_DB = path.join(process.cwd(), "files", "database", "sticker-cmd.json");
+
+const GROUP_SCHEDULE_DB = path.join(
+  process.cwd(),
+  "files",
+  "database",
+  "horarios-grupos.json"
+);
+
+function readGroupScheduleDb() {
+  try {
+    fs.mkdirSync(path.dirname(GROUP_SCHEDULE_DB), { recursive: true });
+
+    if (!fs.existsSync(GROUP_SCHEDULE_DB)) {
+      fs.writeFileSync(
+        GROUP_SCHEDULE_DB,
+        JSON.stringify({}, null, 2),
+        "utf8"
+      );
+    }
+
+    return JSON.parse(
+      fs.readFileSync(
+        GROUP_SCHEDULE_DB,
+        "utf8"
+      )
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeGroupScheduleDb(db) {
+  fs.mkdirSync(
+    path.dirname(GROUP_SCHEDULE_DB),
+    { recursive: true }
+  );
+
+  fs.writeFileSync(
+    GROUP_SCHEDULE_DB,
+    JSON.stringify(db, null, 2),
+    "utf8"
+  );
+}
+
+function normalizeClockTime(value = "") {
+  const text = String(value).trim();
+
+  const match =
+    text.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+
+  if (!match) return null;
+
+  return `${match[1].padStart(2,"0")}:${match[2]}`;
+}
+
+function updateGroupSchedule(groupJid, patch) {
+  const db = readGroupScheduleDb();
+
+  if (!db[groupJid]) {
+    db[groupJid] = {};
+  }
+
+  db[groupJid] = {
+    ...db[groupJid],
+    ...patch
+  };
+
+  writeGroupScheduleDb(db);
+
+  return db[groupJid];
+}
+
 const WELCOME_DB = path.join(process.cwd(), "files", "database", "boas-vindas.json");
 
 function readWelcomeDb() {
@@ -1328,6 +1400,282 @@ case "aceitar": {
     return reply(
       `❌ Não consegui aceitar as solicitações do grupo.\n\n` +
       `Confira se eu continuo como ADM e se existem solicitações pendentes.`
+    );
+  }
+}
+break;
+
+
+case "opengp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const raw =
+    String(args[0] || "").toLowerCase();
+
+  if (["off","remover","remove","0"].includes(raw)) {
+    updateGroupSchedule(
+      from,
+      { open: null }
+    );
+
+    return reply(
+      "🔒🌸 Horário de abertura automática removido."
+    );
+  }
+
+  const horario =
+    normalizeClockTime(args[0]);
+
+  if (!horario) {
+    const atual =
+      readGroupScheduleDb()?.[from]?.open || null;
+
+    return reply(
+      `🟢🌸 *ABERTURA AUTOMÁTICA*\n\n` +
+      `Atual: ${atual ? `*${atual}*` : "não configurada"}\n\n` +
+      `Use:\n*${prefix}opengp 08:00*\n\n` +
+      `Para remover:\n*${prefix}opengp off*`
+    );
+  }
+
+  updateGroupSchedule(
+    from,
+    { open: horario }
+  );
+
+  return reply(
+    `✅🟢 Grupo programado para abrir todos os dias às *${horario}*.\n\n` +
+    `🌸 Horário padrão: *America/Sao_Paulo*.`
+  );
+}
+break;
+
+case "closegp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const raw =
+    String(args[0] || "").toLowerCase();
+
+  if (["off","remover","remove","0"].includes(raw)) {
+    updateGroupSchedule(
+      from,
+      { close: null }
+    );
+
+    return reply(
+      "🔓🌸 Horário de fechamento automático removido."
+    );
+  }
+
+  const horario =
+    normalizeClockTime(args[0]);
+
+  if (!horario) {
+    const atual =
+      readGroupScheduleDb()?.[from]?.close || null;
+
+    return reply(
+      `🔒🐉 *FECHAMENTO AUTOMÁTICO*\n\n` +
+      `Atual: ${atual ? `*${atual}*` : "não configurado"}\n\n` +
+      `Use:\n*${prefix}closegp 23:00*\n\n` +
+      `Para remover:\n*${prefix}closegp off*`
+    );
+  }
+
+  updateGroupSchedule(
+    from,
+    { close: horario }
+  );
+
+  return reply(
+    `✅🔒 Grupo programado para fechar todos os dias às *${horario}*.\n\n` +
+    `🌸 Horário padrão: *America/Sao_Paulo*.`
+  );
+}
+break;
+
+case "opengp_off": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  updateGroupSchedule(
+    from,
+    { open: null }
+  );
+
+  return reply(
+    "🔒🌸 Horário de abertura automática removido."
+  );
+}
+break;
+
+case "linkgp":
+case "linkgrupo": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) {
+    return reply(
+      "❌🐉 Eu preciso ser ADM para gerar o link do grupo."
+    );
+  }
+
+  try {
+    const code =
+      await conn.groupInviteCode(from);
+
+    const link =
+      `https://chat.whatsapp.com/${code}`;
+
+    return reply(
+      `╭──────「 🔗 」──────╮\n` +
+      `      *LINK DO GRUPO*\n` +
+      `╰──────────────────╯\n\n` +
+      `${link}\n\n` +
+      `🌸 Compartilhe com responsabilidade.`
+    );
+  } catch (error) {
+    console.error(
+      "[LINKGP]",
+      error?.message || error
+    );
+
+    return reply(
+      "❌ Não consegui gerar o link do grupo."
+    );
+  }
+}
+break;
+
+case "letra":
+case "lyrics": {
+  const busca =
+    String(q || "").trim();
+
+  if (!busca) {
+    return reply(
+      `🎵🌸 *LETRA DE MÚSICA*\n\n` +
+      `Use:\n*${prefix}letra artista - música*\n\n` +
+      `Exemplo:\n*${prefix}letra Linkin Park - Numb*`
+    );
+  }
+
+  try {
+    await reagir("🎵");
+
+    let artista = "";
+    let musica = "";
+
+    if (busca.includes(" - ")) {
+      const partes =
+        busca.split(" - ");
+
+      artista =
+        partes.shift()?.trim() || "";
+
+      musica =
+        partes.join(" - ").trim();
+    } else {
+      // Sem separador, tenta usar o primeiro termo como artista.
+      const partes =
+        busca.split(/\s+/);
+
+      artista =
+        partes.shift() || "";
+
+      musica =
+        partes.join(" ");
+    }
+
+    if (!artista || !musica) {
+      return reply(
+        `🌸 Separe artista e música com " - ".\n\n` +
+        `Ex.: *${prefix}letra Adele - Hello*`
+      );
+    }
+
+    const url =
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(artista)}/${encodeURIComponent(musica)}`;
+
+    const response =
+      await fetch(url);
+
+    if (!response.ok) {
+      return reply(
+        "🌸 Não encontrei a letra dessa música."
+      );
+    }
+
+    const data =
+      await response.json();
+
+    const letra =
+      String(data?.lyrics || "").trim();
+
+    if (!letra) {
+      return reply(
+        "🌸 Não encontrei a letra dessa música."
+      );
+    }
+
+    const maxChars = 3500;
+
+    if (letra.length <= maxChars) {
+      return reply(
+        `╭──────「 🎵 」──────╮\n` +
+        `        *LETRA*\n` +
+        `╰──────────────────╯\n\n` +
+        `🎙️ *${artista}*\n` +
+        `🎶 *${musica}*\n\n` +
+        `${letra}\n\n` +
+        `🌸 Kobayashi Bot`
+      );
+    }
+
+    const partes = [];
+    for (
+      let i = 0;
+      i < letra.length;
+      i += maxChars
+    ) {
+      partes.push(
+        letra.slice(
+          i,
+          i + maxChars
+        )
+      );
+    }
+
+    for (
+      let i = 0;
+      i < partes.length;
+      i++
+    ) {
+      await conn.sendMessage(
+        from,
+        {
+          text:
+            `${i === 0
+              ? `🎙️ *${artista}*\n🎶 *${musica}*\n\n`
+              : ""
+            }${partes[i]}\n\n` +
+            `🌸 Parte ${i+1}/${partes.length}`
+        },
+        { quoted: info }
+      );
+    }
+
+    return;
+
+  } catch (error) {
+    console.error(
+      "[LETRA]",
+      error?.message || error
+    );
+
+    return reply(
+      "❌🌸 Não consegui buscar a letra agora."
     );
   }
 }

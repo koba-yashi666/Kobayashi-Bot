@@ -132,6 +132,172 @@ async function startConnect() {
 
     bindGroupCache(conn);
 
+
+    // ==========================================
+    // 🕰️ KOBAYASHI GROUP SCHEDULER • v0.1.35
+    // ==========================================
+    const scheduleLastRun = new Map();
+
+    function getSaoPauloClock() {
+      const formatter =
+        new Intl.DateTimeFormat(
+          "pt-BR",
+          {
+            timeZone: "America/Sao_Paulo",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }
+        );
+
+      const parts =
+        Object.fromEntries(
+          formatter
+            .formatToParts(new Date())
+            .filter((p) => p.type !== "literal")
+            .map((p) => [p.type,p.value])
+        );
+
+      return {
+        time: `${parts.hour}:${parts.minute}`,
+        date: `${parts.year}-${parts.month}-${parts.day}`
+      };
+    }
+
+    async function runGroupSchedules() {
+      try {
+        const fsM =
+          (await import("node:fs")).default;
+
+        const pathM =
+          (await import("node:path")).default;
+
+        const dbFile =
+          pathM.join(
+            process.cwd(),
+            "files",
+            "database",
+            "horarios-grupos.json"
+          );
+
+        if (!fsM.existsSync(dbFile)) {
+          return;
+        }
+
+        let db = {};
+
+        try {
+          db =
+            JSON.parse(
+              fsM.readFileSync(
+                dbFile,
+                "utf8"
+              )
+            );
+        } catch {
+          return;
+        }
+
+        const clock =
+          getSaoPauloClock();
+
+        for (
+          const [groupJid,cfg]
+          of Object.entries(db)
+        ) {
+          if (!cfg) continue;
+
+          const tasks = [
+            {
+              type: "open",
+              time: cfg.open,
+              setting: "not_announcement",
+              message:
+                "🟢🌸 *Grupo aberto automaticamente!*\n\nTodos os membros podem enviar mensagens novamente."
+            },
+            {
+              type: "close",
+              time: cfg.close,
+              setting: "announcement",
+              message:
+                "🔒🐉 *Grupo fechado automaticamente!*\n\nSomente administradores podem enviar mensagens."
+            }
+          ];
+
+          for (const task of tasks) {
+            if (
+              !task.time ||
+              task.time !== clock.time
+            ) {
+              continue;
+            }
+
+            const runKey =
+              `${groupJid}|${task.type}|${clock.date}|${clock.time}`;
+
+            if (
+              scheduleLastRun.has(runKey)
+            ) {
+              continue;
+            }
+
+            scheduleLastRun.set(
+              runKey,
+              Date.now()
+            );
+
+            try {
+              await conn.groupSettingUpdate(
+                groupJid,
+                task.setting
+              );
+
+              await conn.sendMessage(
+                groupJid,
+                { text: task.message }
+              );
+
+              console.log(
+                `[GROUP SCHEDULER] ${task.type} executado em ${groupJid} às ${clock.time}`
+              );
+            } catch (error) {
+              console.error(
+                `[GROUP SCHEDULER] Falha ${task.type}:`,
+                error?.message || error
+              );
+            }
+          }
+        }
+
+        // Limpeza simples das chaves antigas.
+        if (scheduleLastRun.size > 500) {
+          scheduleLastRun.clear();
+        }
+
+      } catch (error) {
+        console.error(
+          "[GROUP SCHEDULER]",
+          error?.message || error
+        );
+      }
+    }
+
+    const groupScheduleInterval =
+      setInterval(
+        runGroupSchedules,
+        30_000
+      );
+
+    // Executa uma verificação ao iniciar.
+    setTimeout(
+      runGroupSchedules,
+      5_000
+    );
+
+
     // ==========================================
     // 🌸 KOBAYASHI WELCOME • BASE NAZUNA v0.1.33
     // ==========================================

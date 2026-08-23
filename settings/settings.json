@@ -6,7 +6,7 @@
   "channeldl": "",
   "channel": "",
   "newsletterName": "🐉🌸 Kobayashi Bot • Canal Oficial",
-  "version": "0.1.34-beta",
+  "version": "0.1.35-beta",
   "theme": "🐉🌸 Kobayashi Bot",
   "botNumber": "",
   "antiPv": false,
@@ -15,5 +15,6 @@
   "creatorGithub": "koba-yashi666",
   "creatorInstagram": "Koba.yashi666",
   "leaders": [],
-  "yutaToken": "COLOQUE_SEU_TOKEN_YUTA_AQUI"
+  "yutaToken": "COLOQUE_SEU_TOKEN_YUTA_AQUI",
+  "groupScheduleTimezone": "America/Sao_Paulo"
 }
