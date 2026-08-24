@@ -27,6 +27,7 @@ import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
 import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
+import { getYuriProtection, toggleYuriProtection, registerFlood, resetFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -2311,6 +2312,74 @@ case "inativos": {
       `\n\n📅 Sem mensagens registradas há pelo menos *${days} dias*.\n` +
       `📌 Apenas membros com histórico conhecido entram nesta lista.`,
     mentions: inactive
+  }, { quoted: info });
+}
+break;
+
+
+case "antiflood":
+case "antidel":
+case "antiedit": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const key = command;
+  const enabled = toggleYuriProtection(from, key);
+
+  return reply(
+    `${enabled ? "✅" : "⚪"} *${key.toUpperCase()}* ${enabled ? "ativado" : "desativado"} neste grupo.`
+  );
+}
+break;
+
+case "mutar":
+case "mute": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
+  const target = ctx?.mentionedJid?.[0] || ctx?.participant;
+
+  if (!target) return reply(`🌸 Use *${prefix}mutar @membro* ou responda a mensagem dele.`);
+
+  muteUser(from, target);
+
+  return conn.sendMessage(from, {
+    text: `🔇 @${String(target).split("@")[0]} foi mutado pela Kobayashi.\nAs mensagens dele serão apagadas enquanto o mute estiver ativo.`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "desmutar":
+case "unmute": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
+  const target = ctx?.mentionedJid?.[0] || ctx?.participant;
+
+  if (!target) return reply(`🌸 Use *${prefix}desmutar @membro* ou responda a mensagem dele.`);
+
+  unmuteUser(from, target);
+
+  return conn.sendMessage(from, {
+    text: `🔊 @${String(target).split("@")[0]} foi desmutado.`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "hidetag": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const mentions = (groupMembers || []).map(p => p?.id).filter(Boolean);
+  const text = String(q || "").trim() || "🐉🌸 Atenção, pessoal!";
+
+  return conn.sendMessage(from, {
+    text,
+    mentions
   }, { quoted: info });
 }
 break;

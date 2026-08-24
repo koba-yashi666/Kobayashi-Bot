@@ -297,3 +297,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Novo `/checkme` e `/checkme @membro` para consulta individual.
 - `/inativos N` não classifica mais usuários sem histórico como inativos.
 - A lista de inativos considera apenas membros com atividade previamente registrada e cuja última mensagem ultrapassou o período escolhido.
+
+## v0.1.44-beta — Yuri Pack 1
+- `/antiflood`: proteção contra rajadas de mensagens.
+- `/antidel`: ativa/desativa aviso de mensagem apagada.
+- `/antiedit`: ativa/desativa aviso de mensagem editada.
+- `/mutar @membro`: apaga novas mensagens do membro mutado.
+- `/desmutar @membro`: remove o mute.
+- `/hidetag texto`: envia mensagem mencionando silenciosamente os membros.
+- ADMs, líderes e dono são ignorados pelo AntiFlood.
