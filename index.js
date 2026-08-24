@@ -16,7 +16,7 @@ import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdm
 
 import { getGroupMetadata } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/groupSchedule.js";
-import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText } from "./lib/features/welcomeConfig.js";
+import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink } from "./lib/features/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickerCommands.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/whitelist.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/autoSticker.js";
@@ -1018,6 +1018,39 @@ case "regrasbv": {
   if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
   if(!q.trim()) return reply(`📖 Use: *${prefix}setregrasbv suas regras*`);
   updateWelcomeConfig(from,{rules:q.trim()}); return reply("✅📖 Regras da recepção atualizadas.");
+}
+break;
+
+
+case "rmparceriabv":
+case "rmparceriabv":
+case "removerparceriabv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const link = String(q || "").trim();
+
+  if (!link) {
+    return reply(
+      `🌸 *REMOVER PARCERIA DO BEM-VINDO*\n\n` +
+      `Envie o link que deseja remover:\n\n` +
+      `*${prefix}rmparceriabv https://exemplo.com/parceria*\n\n` +
+      `🐉 A Kobayashi remove somente a parceria que contém esse link.`
+    );
+  }
+
+  const result = removePartnerLink(from, link);
+
+  if (!result.removed) {
+    return reply(
+      `⚠️ Não encontrei esse link nas parcerias cadastradas do Welcome.`
+    );
+  }
+
+  return reply(
+    `✅🤝 *Parceria removida do Welcome!*\n\n` +
+    `O link enviado foi retirado da lista de parcerias deste grupo.`
+  );
 }
 break;
 

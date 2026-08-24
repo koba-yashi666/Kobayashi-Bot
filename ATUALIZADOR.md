@@ -263,3 +263,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/backupdb` e `/backupdb listar`: backup interno das configurações.
 - Ban, ADV, aprovação de solicitações, proteções e horários passam a gerar logs quando ativados.
 - Estrutura documentada para migração gradual até a v0.2.0.
+
+## v0.1.40-beta — Remover parceria do Welcome
+- Novo `/rmparceriabv link`, exclusivo para administradores.
+- Remove apenas a linha/parceria que contém o link informado.
+- Mantém as outras parcerias cadastradas.
+- Se nenhuma parceria restar, volta para a mensagem padrão.
+- Incluída também a correção do import de `adminLogs.js` da v0.1.39.
