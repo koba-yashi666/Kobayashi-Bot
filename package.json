@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.42-beta",
-  "description": "Kobayashi Bot Beta v0.1.42 - AFK e atividade de grupos",
+  "version": "0.1.43-beta",
+  "description": "Kobayashi Bot Beta v0.1.43 - correções AFK e atividade",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

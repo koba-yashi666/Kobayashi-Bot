@@ -288,3 +288,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/inativos 7`: lista membros sem atividade registrada no período; apenas ADM.
 - O rastreador usa cache e gravação periódica para reduzir escrita em disco.
 - Mantida a correção `DB_FILE` do Welcome.
+
+## v0.1.43-beta — Correção AFK + Atividade
+- Corrigida detecção de menções e respostas para usuários AFK.
+- AFK agora é removido automaticamente quando o usuário volta a falar.
+- `/atividade` agora é o ranking geral, do maior para o menor número de mensagens.
+- `/topativos` continua como alias de `/atividade`.
+- Novo `/checkme` e `/checkme @membro` para consulta individual.
+- `/inativos N` não classifica mais usuários sem histórico como inativos.
+- A lista de inativos considera apenas membros com atividade previamente registrada e cuja última mensagem ultrapassou o período escolhido.

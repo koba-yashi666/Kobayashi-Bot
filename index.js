@@ -2196,54 +2196,73 @@ case "afk": {
 }
 break;
 
-case "atividade": {
-  if (!isGroup) return reply(mess.onlyGroup());
-
-  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
-  const target =
-    ctx?.mentionedJid?.[0] ||
-    ctx?.participant ||
-    sender;
-
-  const row = getUserActivity(from, target);
-  const last =
-    row.lastSeen > 0
-      ? formatAfkDuration(Date.now() - row.lastSeen) + " atrás"
-      : "sem registro";
-
-  return conn.sendMessage(from, {
-    text:
-      `╭──────「 📊 」──────╮\n` +
-      `      *ATIVIDADE*\n` +
-      `╰──────────────────╯\n\n` +
-      `👤 @${String(target).split("@")[0]}\n` +
-      `💬 Mensagens registradas: *${row.messages}*\n` +
-      `🕒 Última atividade: *${last}*\n\n` +
-      `🌸 A contagem começou quando este sistema foi ativado.`,
-    mentions: [target]
-  }, { quoted: info });
-}
-break;
-
+case "atividade":
 case "topativos": {
   if (!isGroup) return reply(mess.onlyGroup());
 
-  const top = getTopActivity(from, 10);
-  if (!top.length) return reply("🌸 Ainda não tenho atividade suficiente registrada neste grupo.");
+  const top = getTopActivity(from, 30);
 
-  const mentions = top.map(x => x.jid);
-  const rows = top.map((x, i) =>
-    `${i + 1}. @${String(x.jid).split("@")[0]} — *${x.messages}* mensagens`
-  ).join("\n");
+  if (!top.length) {
+    return reply(
+      "🌸 Ainda não tenho atividade suficiente registrada neste grupo."
+    );
+  }
+
+  const mentions = top.map((x) => x.jid);
+
+  const rows = top.map((x, i) => {
+    const pos = String(i + 1).padStart(2, "0");
+    return `${pos}. @${String(x.jid).split("@")[0]} — *${x.messages}*`;
+  }).join("\n");
 
   return conn.sendMessage(from, {
     text:
       `╭══════ ❀ 📊 ❀ ══════╮\n` +
-      `       *TOP ATIVOS*\n` +
+      `    *ATIVIDADE DO GRUPO*\n` +
       `╰══════ ❀ 🐉 ❀ ══════╯\n\n` +
+      `🏆 *Ranking por mensagens*\n\n` +
       `${rows}\n\n` +
-      `🌸 Ranking baseado nas mensagens registradas pela Kobayashi.`,
+      `💬 Do membro com mais mensagens para o com menos.\n` +
+      `🌸 Para consultar você ou alguém específico, use *${prefix}checkme* ou *${prefix}checkme @membro*.\n` +
+      `📌 A contagem considera apenas mensagens registradas desde a ativação do sistema.`,
     mentions
+  }, { quoted: info });
+}
+break;
+
+case "checkme": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  const contextInfo =
+    info?.message?.extendedTextMessage?.contextInfo ||
+    info?.message?.imageMessage?.contextInfo ||
+    info?.message?.videoMessage?.contextInfo ||
+    {};
+
+  const target =
+    contextInfo?.mentionedJid?.[0] ||
+    contextInfo?.participant ||
+    sender;
+
+  const row = getUserActivity(from, target);
+  const top = getTopActivity(from, 1000);
+  const position = top.findIndex((x) => x.jid === target) + 1;
+
+  const last =
+    row.lastSeen > 0
+      ? `${formatAfkDuration(Date.now() - row.lastSeen)} atrás`
+      : "sem registro";
+
+  return conn.sendMessage(from, {
+    text:
+      `╭──────「 👤📊 」──────╮\n` +
+      `        *CHECKME*\n` +
+      `╰────────────────────╯\n\n` +
+      `👤 @${String(target).split("@")[0]}\n` +
+      `💬 Mensagens: *${row.messages}*\n` +
+      `🏆 Posição: *${position > 0 ? `#${position}` : "sem ranking"}*\n` +
+      `🕒 Última atividade: *${last}*`,
+    mentions: [target]
   }, { quoted: info });
 }
 break;
@@ -2252,18 +2271,31 @@ case "inativos": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
-  const rawDays = Number(String(args?.[0] || "7").replace(/\D/g, "")) || 7;
+  const rawDays =
+    Number(String(args?.[0] || "7").replace(/\D/g, "")) || 7;
+
   const days = Math.max(1, Math.min(90, rawDays));
 
-  const memberJids = (groupMembers || [])
-    .map(p => p?.id)
-    .filter(Boolean)
-    .filter(jid => !String(jid).includes(String(conn?.user?.id || "").split(":")[0]));
+  const botNumber = String(conn?.user?.id || "")
+    .split(":")[0]
+    .split("@")[0];
 
-  const inactive = getInactive(from, memberJids, days).slice(0, 50);
+  const memberJids = (groupMembers || [])
+    .map((p) => p?.id)
+    .filter(Boolean)
+    .filter((jid) => String(jid).split("@")[0] !== botNumber);
+
+  const inactive = getInactive(
+    from,
+    memberJids,
+    days
+  ).slice(0, 50);
 
   if (!inactive.length) {
-    return reply(`✅🌸 Não encontrei membros sem atividade registrada nos últimos *${days} dias*.`);
+    return reply(
+      `✅🌸 Não encontrei membros com histórico registrado que estejam sem atividade há *${days} dias*.\n\n` +
+      `📌 A Kobayashi não considera como inativo quem ainda não possui histórico suficiente no sistema.`
+    );
   }
 
   return conn.sendMessage(from, {
@@ -2271,9 +2303,13 @@ case "inativos": {
       `╭──────「 💤 」──────╮\n` +
       `       *INATIVOS*\n` +
       `╰──────────────────╯\n\n` +
-      inactive.map((jid, i) => `${i + 1}. @${String(jid).split("@")[0]}`).join("\n") +
-      `\n\n📅 Sem atividade registrada há *${days} dias*.\n` +
-      `⚠️ Membros anteriores à ativação do sistema podem aparecer como sem registro.`,
+      inactive
+        .map((jid, i) =>
+          `${i + 1}. @${String(jid).split("@")[0]}`
+        )
+        .join("\n") +
+      `\n\n📅 Sem mensagens registradas há pelo menos *${days} dias*.\n` +
+      `📌 Apenas membros com histórico conhecido entram nesta lista.`,
     mentions: inactive
   }, { quoted: info });
 }

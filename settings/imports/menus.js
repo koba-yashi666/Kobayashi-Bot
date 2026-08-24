@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.42-beta */
+/* KOBAYASHI BOT • v0.1.43-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.42-beta
+💮 Versão › 0.1.43-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -157,7 +157,8 @@ return `╭══════ ❀ 🪷 ❀ ══════╮
 
 ╭──〔 🌸 INFORMAÇÕES 〕────╮
 │ 💤 ${prefix}afk motivo
-│ 📊 ${prefix}atividade @
+│ 📊 ${prefix}atividade
+│ 👤 ${prefix}checkme @
 │ 🏆 ${prefix}topativos
 │ 📖 ${prefix}help
 │    ↳ Ajuda dos comandos modulares
