@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.41-beta",
-  "description": "Kobayashi Bot Beta v0.1.41 - múltiplas parcerias no Welcome",
+  "version": "0.1.42-beta",
+  "description": "Kobayashi Bot Beta v0.1.42 - AFK e atividade de grupos",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

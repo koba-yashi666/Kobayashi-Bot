@@ -278,3 +278,13 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Evita cadastrar exatamente a mesma parceria duas vezes.
 - `/rmparceriabv link` continua removendo apenas a parceria informada.
 - Mantida a correção `DB_FILE` no `welcomeConfig.js`.
+
+## v0.1.42-beta — AFK + Atividade
+- `/afk motivo`: marca o membro como ausente.
+- Ao mencionar ou responder alguém AFK, a Kobayashi informa motivo e tempo.
+- O AFK é removido automaticamente quando a pessoa volta a falar.
+- `/atividade @membro`: mostra mensagens registradas e última atividade.
+- `/topativos`: ranking dos 10 membros mais ativos.
+- `/inativos 7`: lista membros sem atividade registrada no período; apenas ADM.
+- O rastreador usa cache e gravação periódica para reduzir escrita em disco.
+- Mantida a correção `DB_FILE` do Welcome.

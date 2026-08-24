@@ -25,6 +25,8 @@ import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
 import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js";
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
+import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
+import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -425,7 +427,45 @@ const SoLider = isLeaderJid(sender);
 const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
 if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
-  if (isCmd) {
+  
+// KOBAYASHI AFK + ACTIVITY v0.1.42
+if (isGroup && sender) {
+  trackActivity(from, sender);
+
+  // Se o próprio usuário voltou a falar, remove o AFK.
+  const ownAfk = getAfk(sender);
+  if (ownAfk && command !== "afk") {
+    const elapsed = formatAfkDuration(Date.now() - Number(ownAfk.since || Date.now()));
+    removeAfk(sender);
+    await conn.sendMessage(from, {
+      text: `🌸 @${String(sender).split("@")[0]} voltou do AFK.\n⏱️ Ficou ausente por *${elapsed}*.`,
+      mentions: [sender]
+    }, { quoted: info }).catch(() => {});
+  }
+
+  // Avisa quando alguém menciona/responde uma pessoa em AFK.
+  const mentioned = [
+    ...(info?.message?.extendedTextMessage?.contextInfo?.mentionedJid || []),
+    info?.message?.extendedTextMessage?.contextInfo?.participant || null
+  ].filter(Boolean);
+
+  const uniqueMentioned = [...new Set(mentioned)].filter(jid => jid !== sender);
+
+  for (const jid of uniqueMentioned.slice(0, 5)) {
+    const afk = getAfk(jid);
+    if (!afk) continue;
+    const elapsed = formatAfkDuration(Date.now() - Number(afk.since || Date.now()));
+    await conn.sendMessage(from, {
+      text:
+        `💤 @${String(jid).split("@")[0]} está AFK.\n` +
+        `📝 Motivo: *${afk.reason || "Sem motivo informado"}*\n` +
+        `⏱️ Há: *${elapsed}*`,
+      mentions: [jid]
+    }, { quoted: info }).catch(() => {});
+  }
+}
+
+if (isCmd) {
     await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
   }
   continue;
@@ -2138,6 +2178,104 @@ case "diagnóstico": {
     `🌸 Kobayashi Bot • Diagnóstico interno`;
 
   return reply(statusText);
+}
+break;
+
+
+case "afk": {
+  if (!isGroup) return reply("🐉🌸 O AFK funciona dentro dos grupos.");
+  const reason = String(q || "").trim() || "Sem motivo informado";
+  setAfk(sender, reason);
+  return conn.sendMessage(from, {
+    text:
+      `💤 @${String(sender).split("@")[0]} agora está AFK.\n` +
+      `📝 Motivo: *${reason}*\n\n` +
+      `🌸 Eu aviso quem tentar chamar você.`,
+    mentions: [sender]
+  }, { quoted: info });
+}
+break;
+
+case "atividade": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
+  const target =
+    ctx?.mentionedJid?.[0] ||
+    ctx?.participant ||
+    sender;
+
+  const row = getUserActivity(from, target);
+  const last =
+    row.lastSeen > 0
+      ? formatAfkDuration(Date.now() - row.lastSeen) + " atrás"
+      : "sem registro";
+
+  return conn.sendMessage(from, {
+    text:
+      `╭──────「 📊 」──────╮\n` +
+      `      *ATIVIDADE*\n` +
+      `╰──────────────────╯\n\n` +
+      `👤 @${String(target).split("@")[0]}\n` +
+      `💬 Mensagens registradas: *${row.messages}*\n` +
+      `🕒 Última atividade: *${last}*\n\n` +
+      `🌸 A contagem começou quando este sistema foi ativado.`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "topativos": {
+  if (!isGroup) return reply(mess.onlyGroup());
+
+  const top = getTopActivity(from, 10);
+  if (!top.length) return reply("🌸 Ainda não tenho atividade suficiente registrada neste grupo.");
+
+  const mentions = top.map(x => x.jid);
+  const rows = top.map((x, i) =>
+    `${i + 1}. @${String(x.jid).split("@")[0]} — *${x.messages}* mensagens`
+  ).join("\n");
+
+  return conn.sendMessage(from, {
+    text:
+      `╭══════ ❀ 📊 ❀ ══════╮\n` +
+      `       *TOP ATIVOS*\n` +
+      `╰══════ ❀ 🐉 ❀ ══════╯\n\n` +
+      `${rows}\n\n` +
+      `🌸 Ranking baseado nas mensagens registradas pela Kobayashi.`,
+    mentions
+  }, { quoted: info });
+}
+break;
+
+case "inativos": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const rawDays = Number(String(args?.[0] || "7").replace(/\D/g, "")) || 7;
+  const days = Math.max(1, Math.min(90, rawDays));
+
+  const memberJids = (groupMembers || [])
+    .map(p => p?.id)
+    .filter(Boolean)
+    .filter(jid => !String(jid).includes(String(conn?.user?.id || "").split(":")[0]));
+
+  const inactive = getInactive(from, memberJids, days).slice(0, 50);
+
+  if (!inactive.length) {
+    return reply(`✅🌸 Não encontrei membros sem atividade registrada nos últimos *${days} dias*.`);
+  }
+
+  return conn.sendMessage(from, {
+    text:
+      `╭──────「 💤 」──────╮\n` +
+      `       *INATIVOS*\n` +
+      `╰──────────────────╯\n\n` +
+      inactive.map((jid, i) => `${i + 1}. @${String(jid).split("@")[0]}`).join("\n") +
+      `\n\n📅 Sem atividade registrada há *${days} dias*.\n` +
+      `⚠️ Membros anteriores à ativação do sistema podem aparecer como sem registro.`,
+    mentions: inactive
+  }, { quoted: info });
 }
 break;
 
