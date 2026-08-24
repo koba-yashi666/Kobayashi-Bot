@@ -1056,9 +1056,64 @@ break;
 
 case "setparceriasbv":
 case "parceriasbv": {
-  if (!isGroup) return reply(mess.onlyGroup()); if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  if(!q.trim()) return reply(`🤝 Use: *${prefix}setparceriasbv seus links/parcerias*`);
-  updateWelcomeConfig(from,{partners:q.trim()}); return reply("✅🤝 Jardim de parcerias atualizado.");
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const novaParceria = String(q || "").trim();
+
+  if (!novaParceria) {
+    return reply(
+      `🤝🌸 *ADICIONAR PARCERIA AO WELCOME*\n\n` +
+      `Use:\n*${prefix}setparceriasbv Nome da parceria\\nhttps://link-da-parceria.com*\n\n` +
+      `Você pode usar o comando várias vezes.\n` +
+      `Cada nova parceria será adicionada sem apagar as anteriores.`
+    );
+  }
+
+  const cfgAtual = getWelcomeConfig(from);
+
+  let atuais = String(cfgAtual.partners || "").trim();
+
+  // Remove o texto padrão antes de começar a lista real.
+  if (
+    !atuais ||
+    atuais === "🌸 Nenhuma parceria configurada."
+  ) {
+    atuais = "";
+  }
+
+  // Evita cadastrar exatamente o mesmo bloco duas vezes.
+  const blocosAtuais = atuais
+    ? atuais.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean)
+    : [];
+
+  if (blocosAtuais.includes(novaParceria)) {
+    return reply(
+      "⚠️🤝 Essa parceria já está cadastrada no Welcome deste grupo."
+    );
+  }
+
+  const atualizado = atuais
+    ? `${atuais}\n\n${novaParceria}`
+    : novaParceria;
+
+  updateWelcomeConfig(
+    from,
+    { partners: atualizado }
+  );
+
+  const total = atualizado
+    .split(/\n\s*\n/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .length;
+
+  return reply(
+    `✅🤝 *Parceria adicionada!*\n\n` +
+    `🧁 Jardim de Parcerias: *${total} cadastrada(s)*\n\n` +
+    `🌸 As parcerias anteriores foram mantidas.\n` +
+    `Para remover uma específica, use *${prefix}rmparceriabv link*.`
+  );
 }
 break;
 

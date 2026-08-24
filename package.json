@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.40-beta",
-  "description": "Kobayashi Bot Beta v0.1.40 - remover parceria do Welcome",
+  "version": "0.1.41-beta",
+  "description": "Kobayashi Bot Beta v0.1.41 - múltiplas parcerias no Welcome",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

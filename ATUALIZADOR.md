@@ -270,3 +270,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Mantém as outras parcerias cadastradas.
 - Se nenhuma parceria restar, volta para a mensagem padrão.
 - Incluída também a correção do import de `adminLogs.js` da v0.1.39.
+
+## v0.1.41-beta — Parcerias múltiplas
+- `/setparceriasbv` agora adiciona novas parcerias sem apagar as anteriores.
+- Pode ser usado várias vezes para montar o Jardim de Parcerias.
+- Aceita nome + link em múltiplas linhas no mesmo cadastro.
+- Evita cadastrar exatamente a mesma parceria duas vezes.
+- `/rmparceriabv link` continua removendo apenas a parceria informada.
+- Mantida a correção `DB_FILE` no `welcomeConfig.js`.
