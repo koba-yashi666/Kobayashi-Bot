@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.44-beta",
-  "description": "Kobayashi Bot Beta v0.1.44 - Yuri Pack 1",
+  "version": "0.1.45-beta",
+  "description": "Kobayashi Bot Beta v0.1.45 - correção Yuri Pack 1",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

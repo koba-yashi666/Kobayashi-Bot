@@ -27,7 +27,7 @@ import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
 import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
-import { getYuriProtection, toggleYuriProtection, registerFlood, resetFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
+import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -230,6 +230,78 @@ function getFunMediaUrl(card) {
   const { bank, map } = readFunImageBank();
   const key = map?.[card];
   return key ? bank?.[key] || null : null;
+}
+
+
+function getSimpleMessageText(message = {}) {
+  return (
+    message?.conversation ||
+    message?.extendedTextMessage?.text ||
+    message?.imageMessage?.caption ||
+    message?.videoMessage?.caption ||
+    message?.documentMessage?.caption ||
+    message?.documentWithCaptionMessage?.message?.documentMessage?.caption ||
+    ""
+  );
+}
+
+async function replayCachedMessage(conn, from, cachedMessage, title, senderJid = null) {
+  if (!cachedMessage) return false;
+
+  const mentions = senderJid ? [senderJid] : [];
+  const senderLine = senderJid
+    ? `\n👤 Autor: @${String(senderJid).split("@")[0]}`
+    : "";
+
+  const text = getSimpleMessageText(cachedMessage);
+
+  if (cachedMessage.imageMessage?.url) {
+    try {
+      await conn.sendMessage(from, {
+        image: { url: cachedMessage.imageMessage.url },
+        caption:
+          `${title}${senderLine}\n\n` +
+          `${cachedMessage.imageMessage.caption || ""}`,
+        mentions,
+      });
+      return true;
+    } catch {}
+  }
+
+  if (cachedMessage.videoMessage?.url) {
+    try {
+      await conn.sendMessage(from, {
+        video: { url: cachedMessage.videoMessage.url },
+        caption:
+          `${title}${senderLine}\n\n` +
+          `${cachedMessage.videoMessage.caption || ""}`,
+        mentions,
+      });
+      return true;
+    } catch {}
+  }
+
+  if (cachedMessage.stickerMessage?.url) {
+    try {
+      await conn.sendMessage(from, {
+        sticker: { url: cachedMessage.stickerMessage.url },
+      });
+      await conn.sendMessage(from, {
+        text: `${title}${senderLine}`,
+        mentions,
+      });
+      return true;
+    } catch {}
+  }
+
+  await conn.sendMessage(from, {
+    text:
+      `${title}${senderLine}\n\n` +
+      `${text || "Mensagem sem texto recuperável."}`,
+    mentions,
+  });
+
+  return true;
 }
 
 async function sendFunCard(conn, from, info, card, caption, mentions = []) {
@@ -482,6 +554,94 @@ const menc_info = info.message?.extendedTextMessage?.contextInfo;
 const numDigitado = inputToJid(q);
 const menc_jid2 = info.message?.extendedTextMessage?.contextInfo?.mentionedJid;
 const menc_os2 = menc_info?.participant || menc_info?.mentionedJid?.[0] || numDigitado || null;
+
+// ==========================================
+// 🐉 YURI PACK 1 • RUNTIME FIX v0.1.45
+// ==========================================
+if (isGroup && sender) {
+  // MUTE persistente: apaga mensagens de membros mutados.
+  if (
+    isMuted(from, sender) &&
+    !isGroupAdmins &&
+    !info.key.fromMe
+  ) {
+    if (isBotGroupAdmins) {
+      await conn.sendMessage(from, {
+        delete: {
+          remoteJid: from,
+          fromMe: false,
+          id: info.key.id,
+          participant:
+            info.key.participant ||
+            info.key.participantAlt ||
+            sender,
+        },
+      }).catch(() => {});
+    }
+
+    continue;
+  }
+
+  // AntiFlood no estilo Yuri: limita a frequência de COMANDOS.
+  if (
+    isCmd &&
+    !isGroupAdmins &&
+    !info.key.fromMe
+  ) {
+    const flood = checkCommandFlood(from, sender);
+
+    if (flood.blocked) {
+      await reply(
+        `⏳ Calma aí! Aguarde *${flood.waitSeconds}s* antes de usar outro comando.`
+      );
+      continue;
+    }
+  }
+
+  // AntiDelete / AntiEdit no mesmo tipo de evento usado pelo Yuri.
+  const protocol =
+    info.message?.protocolMessage ||
+    info.message?.editedMessage?.message?.protocolMessage ||
+    null;
+
+  if (protocol) {
+    const protection = getYuriProtection(from);
+    const originalId = protocol?.key?.id;
+    const cached = originalId
+      ? conn.kobayashiGetCachedMessage?.(originalId)
+      : null;
+
+    if (
+      protocol.type === 0 &&
+      protection.antidel &&
+      cached
+    ) {
+      await replayCachedMessage(
+        conn,
+        from,
+        cached,
+        "🗑️ *ANTI-DELETE*\nUma mensagem apagada foi recuperada.",
+        protocol?.key?.participant || null
+      ).catch(() => {});
+      continue;
+    }
+
+    if (
+      protocol.type === 14 &&
+      protection.antiedit &&
+      cached
+    ) {
+      await replayCachedMessage(
+        conn,
+        from,
+        cached,
+        "✏️ *ANTI-EDIT*\nMensagem original antes da edição:",
+        protocol?.key?.participant || null
+      ).catch(() => {});
+      // Não damos continue: a edição atual ainda pode seguir normalmente.
+    }
+  }
+}
 
 const MessageType =
 type == "audioMessage" ? "Áudio" :
@@ -2317,7 +2477,55 @@ case "inativos": {
 break;
 
 
-case "antiflood":
+case "antiflood": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const value = String(args?.[0] || "").trim().toLowerCase();
+
+  if (!value) {
+    const cfg = getYuriProtection(from);
+
+    return reply(
+      `🚨 *ANTI-FLOOD DE COMANDOS*\n\n` +
+      `Status: ${cfg.antiflood ? "🟢 ON" : "⚪ OFF"}\n` +
+      `Intervalo: *${cfg.floodInterval}s*\n\n` +
+      `Use:\n` +
+      `*${prefix}antiflood 5*\n` +
+      `*${prefix}antiflood off*`
+    );
+  }
+
+  if (value === "off") {
+    configureAntiFlood(from, null);
+
+    return reply(
+      "⚪🚨 AntiFlood de comandos desativado."
+    );
+  }
+
+  const seconds = Number(value);
+
+  if (
+    !Number.isFinite(seconds) ||
+    seconds < 1 ||
+    seconds > 300
+  ) {
+    return reply(
+      `🌸 Informe um intervalo entre *1 e 300 segundos*.\n` +
+      `Ex.: *${prefix}antiflood 5*`
+    );
+  }
+
+  configureAntiFlood(from, Math.floor(seconds));
+
+  return reply(
+    `✅🚨 AntiFlood ativado.\n` +
+    `Membros deverão esperar *${Math.floor(seconds)}s* entre comandos.`
+  );
+}
+break;
+
 case "antidel":
 case "antiedit": {
   if (!isGroup) return reply(mess.onlyGroup());
@@ -2327,7 +2535,12 @@ case "antiedit": {
   const enabled = toggleYuriProtection(from, key);
 
   return reply(
-    `${enabled ? "✅" : "⚪"} *${key.toUpperCase()}* ${enabled ? "ativado" : "desativado"} neste grupo.`
+    `${enabled ? "✅" : "⚪"} *${key.toUpperCase()}* ` +
+    `${enabled ? "ativado" : "desativado"} neste grupo.\n\n` +
+    `${key === "antidel"
+      ? "🗑️ Mensagens apagadas recentes poderão ser recuperadas."
+      : "✏️ A Kobayashi mostrará a mensagem original quando detectar uma edição."
+    }`
   );
 }
 break;
@@ -2336,50 +2549,85 @@ case "mutar":
 case "mute": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
 
-  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
-  const target = ctx?.mentionedJid?.[0] || ctx?.participant;
+  const target = menc_os2;
 
-  if (!target) return reply(`🌸 Use *${prefix}mutar @membro* ou responda a mensagem dele.`);
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}mutar @membro* ou responda à mensagem dele.`
+    );
+  }
+
+  if (groupAdmins.includes(target)) {
+    return reply("🛡️ Não vou mutar outro administrador.");
+  }
 
   muteUser(from, target);
 
   return conn.sendMessage(from, {
-    text: `🔇 @${String(target).split("@")[0]} foi mutado pela Kobayashi.\nAs mensagens dele serão apagadas enquanto o mute estiver ativo.`,
+    text:
+      `🔇 @${String(target).split("@")[0]} foi mutado.\n\n` +
+      `As novas mensagens desse membro serão apagadas enquanto o mute estiver ativo.`,
     mentions: [target]
   }, { quoted: info });
 }
 break;
 
 case "desmutar":
+case "desmute":
 case "unmute": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
-  const ctx = info?.message?.extendedTextMessage?.contextInfo || {};
-  const target = ctx?.mentionedJid?.[0] || ctx?.participant;
+  const target = menc_os2;
 
-  if (!target) return reply(`🌸 Use *${prefix}desmutar @membro* ou responda a mensagem dele.`);
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}desmutar @membro* ou responda à mensagem dele.`
+    );
+  }
 
-  unmuteUser(from, target);
+  const existed = unmuteUser(from, target);
+
+  if (!existed) {
+    return reply("🌸 Esse membro não está mutado.");
+  }
 
   return conn.sendMessage(from, {
-    text: `🔊 @${String(target).split("@")[0]} foi desmutado.`,
+    text:
+      `🔊 @${String(target).split("@")[0]} foi desmutado e pode falar novamente.`,
     mentions: [target]
   }, { quoted: info });
 }
 break;
 
-case "hidetag": {
+case "hidetag":
+case "totag": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
-  const mentions = (groupMembers || []).map(p => p?.id).filter(Boolean);
-  const text = String(q || "").trim() || "🐉🌸 Atenção, pessoal!";
+  const mentions = (groupMembers || [])
+    .map((p) => p?.id)
+    .filter(Boolean);
+
+  if (!mentions.length) {
+    return reply("🌸 Não consegui carregar os membros do grupo.");
+  }
+
+  const quoted =
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
+    null;
+
+  const messageText =
+    String(q || "").trim() ||
+    quoted?.conversation ||
+    quoted?.extendedTextMessage?.text ||
+    "🐉🌸 Atenção, pessoal!";
 
   return conn.sendMessage(from, {
-    text,
-    mentions
+    text: messageText,
+    mentions,
   }, { quoted: info });
 }
 break;

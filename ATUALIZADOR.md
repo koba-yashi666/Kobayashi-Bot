@@ -306,3 +306,12 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/desmutar @membro`: remove o mute.
 - `/hidetag texto`: envia mensagem mencionando silenciosamente os membros.
 - ADMs, líderes e dono são ignorados pelo AntiFlood.
+
+## v0.1.45-beta — Yuri Pack 1 Fix
+- Corrigido erro de escopo que impedia os comandos do Pack 1 de processarem em grupos.
+- `/antiflood 5` agora segue o sistema do Yuri: intervalo entre comandos; `/antiflood off` desativa.
+- `/mutar` agora é persistente em JSON e exige que a Kobayashi seja ADM.
+- `/desmutar` também aceita `/desmute` e `/unmute`.
+- `/hidetag` foi refeito usando a lista real de participantes do grupo.
+- AntiDelete e AntiEdit passaram a observar `protocolMessage`, como no YuriBot.
+- A conexão expõe apenas o cache recente necessário para recuperar mensagens apagadas/editadas.

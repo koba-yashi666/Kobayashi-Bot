@@ -24,7 +24,6 @@ import {
   banner2,
   banner3,
 } from "./settings/imports/consts.js";
-import { getYuriProtection } from "./lib/features/yuriProtection.js";
 
 const AUTH_DIR = "./files/database/qr-code";
 const msgStore = new NodeCache({ stdTTL: 10 * 60, useClones: false });
@@ -132,6 +131,9 @@ async function startConnect() {
     });
 
     bindGroupCache(conn);
+
+    // Permite aos sistemas AntiDelete/AntiEdit consultar mensagens recentes.
+    conn.kobayashiGetCachedMessage = (id) => msgStore.get(id) || null;
 
 
     // ==========================================
@@ -598,51 +600,6 @@ async function startConnect() {
         await start(upsert, conn);
       }
 
-
-      if (events["messages.update"]) {
-        for (const item of events["messages.update"] || []) {
-          try {
-            const key = item?.key;
-            const jid = key?.remoteJid;
-            if (!jid || !jid.endsWith("@g.us")) continue;
-
-            const cfg = getYuriProtection(jid);
-            const update = item?.update || {};
-
-            if (cfg.antiedit && update?.message) {
-              const original = msgStore.get(key?.id);
-              if (original) {
-                await conn.sendMessage(jid, {
-                  text: "✏️ *ANTI-EDIT*\nUma mensagem foi editada neste grupo."
-                }).catch(() => {});
-              }
-            }
-          } catch {}
-        }
-      }
-
-
-      if (events["messages.delete"]) {
-        try {
-          const payload = events["messages.delete"];
-          const keys = Array.isArray(payload?.keys) ? payload.keys : [];
-
-          for (const key of keys) {
-            const jid = key?.remoteJid;
-            if (!jid || !jid.endsWith("@g.us")) continue;
-
-            const cfg = getYuriProtection(jid);
-            if (!cfg.antidel) continue;
-
-            const old = msgStore.get(key?.id);
-            if (!old) continue;
-
-            await conn.sendMessage(jid, {
-              text: "🗑️ *ANTI-DELETE*\nUma mensagem foi apagada neste grupo."
-            }).catch(() => {});
-          }
-        } catch {}
-      }
 
       if (events["creds.update"]) {
         await saveCreds();
