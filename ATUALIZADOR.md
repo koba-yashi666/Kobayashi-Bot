@@ -322,3 +322,7 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - Cada grupo mantém sua própria foto.
 - A foto é salva em `files/database/welcome-media`.
 - Textos, parcerias e demais configurações do Welcome permanecem intactos.
+
+## v0.1.47-beta — Lucy
+- `/lucy`: envia a imagem da Lucy com uma porcentagem aleatória de 0% a 100%.
+- Imagem incluída localmente em `media/lucy.jpg`.

@@ -2719,6 +2719,18 @@ case "rmfotobv": {
 }
 break;
 
+case "lucy": {
+  const porcentagem = Math.floor(Math.random() * 101);
+
+  return conn.sendMessage(from, {
+    image: { url: "./media/lucy.jpg" },
+    caption:
+      `😈 *LUCY METER* 😈\n\n` +
+      `🔥 O nível de safadeza da Lucy é *${porcentagem}%*`
+  }, { quoted: info });
+}
+break;
+
 // comandos públicos
 case "stickers":
 case "sticker":

@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.46-beta",
-  "description": "Kobayashi Bot Beta v0.1.46 - Foto personalizada do Welcome",
+  "version": "0.1.47-beta",
+  "description": "Kobayashi Bot Beta v0.1.47 - Comando Lucy",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
