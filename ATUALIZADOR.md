@@ -315,3 +315,10 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/hidetag` foi refeito usando a lista real de participantes do grupo.
 - AntiDelete e AntiEdit passaram a observar `protocolMessage`, como no YuriBot.
 - A conexão expõe apenas o cache recente necessário para recuperar mensagens apagadas/editadas.
+
+## v0.1.46-beta — Foto do Bem-vindo
+- `/fotobv`: ADM define uma foto personalizada enviando uma imagem com o comando na legenda ou respondendo uma imagem.
+- `/rmfotobv`: remove a foto personalizada.
+- Cada grupo mantém sua própria foto.
+- A foto é salva em `files/database/welcome-media`.
+- Textos, parcerias e demais configurações do Welcome permanecem intactos.

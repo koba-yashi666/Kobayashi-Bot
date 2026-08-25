@@ -16,7 +16,7 @@ import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdm
 
 import { getGroupMetadata } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/groupSchedule.js";
-import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink } from "./lib/features/welcomeConfig.js";
+import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickerCommands.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/whitelist.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/autoSticker.js";
@@ -2629,6 +2629,93 @@ case "totag": {
     text: messageText,
     mentions,
   }, { quoted: info });
+}
+break;
+
+
+case "fotobv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const quotedImage =
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.viewOnceMessage?.message?.imageMessage ||
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.viewOnceMessageV2?.message?.imageMessage ||
+    null;
+
+  const directImage =
+    info?.message?.imageMessage ||
+    info?.message?.viewOnceMessage?.message?.imageMessage ||
+    info?.message?.viewOnceMessageV2?.message?.imageMessage ||
+    null;
+
+  const imageMessage = directImage || quotedImage;
+
+  if (!imageMessage) {
+    return reply(
+      `🖼️🌸 *FOTO DO BEM-VINDO*\n\n` +
+      `Envie uma imagem com *${prefix}fotobv* na legenda\n` +
+      `ou responda uma imagem usando *${prefix}fotobv*.`
+    );
+  }
+
+  try {
+    const { downloadContentFromMessage } = await import("@whiskeysockets/baileys");
+    const stream = await downloadContentFromMessage(imageMessage, "image");
+    let buffer = Buffer.alloc(0);
+
+    for await (const chunk of stream) {
+      buffer = Buffer.concat([buffer, chunk]);
+    }
+
+    if (!buffer.length) throw new Error("Imagem vazia");
+
+    const fsM = (await import("node:fs")).default;
+    const pathM = (await import("node:path")).default;
+    const dir = pathM.join(process.cwd(), "files", "database", "welcome-media");
+    fsM.mkdirSync(dir, { recursive: true });
+
+    const safeGroup = String(from).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filePath = pathM.join(dir, `${safeGroup}.jpg`);
+
+    fsM.writeFileSync(filePath, buffer);
+    setWelcomePhoto(from, filePath);
+
+    return conn.sendMessage(from, {
+      image: buffer,
+      caption:
+        `✅🌸 *Foto do bem-vindo definida!*\n\n` +
+        `🐉 Esta imagem será usada quando o Welcome deste grupo for enviado.`
+    }, { quoted: info });
+  } catch (e) {
+    console.error("Erro /fotobv:", e?.message || e);
+    return reply("❌ Não consegui salvar essa imagem. Tente enviar a foto novamente.");
+  }
+}
+break;
+
+case "rmfotobv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const cfg = getWelcomeConfig(from);
+  const oldPhoto = String(cfg?.welcomePhoto || "").trim();
+
+  if (!oldPhoto) {
+    return reply("🌸 Este grupo não possui uma foto personalizada de bem-vindo.");
+  }
+
+  try {
+    const fsM = (await import("node:fs")).default;
+    if (fsM.existsSync(oldPhoto)) fsM.unlinkSync(oldPhoto);
+  } catch {}
+
+  removeWelcomePhoto(from);
+
+  return reply(
+    `🗑️🌸 *Foto do bem-vindo removida!*\n\n` +
+    `🐉 O Welcome voltou ao comportamento padrão.`
+  );
 }
 break;
 
