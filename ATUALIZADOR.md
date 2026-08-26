@@ -326,3 +326,11 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 ## v0.1.47-beta — Lucy
 - `/lucy`: envia a imagem da Lucy com uma porcentagem aleatória de 0% a 100%.
 - Imagem incluída localmente em `media/lucy.jpg`.
+
+## v0.1.48-beta — AntiFake + BanFake
+- `/antifake on/off`: remove automaticamente novos números estrangeiros identificáveis.
+- `/banfake`: verifica membros atuais e remove estrangeiros identificáveis.
+- DDI padrão permitido: `+55` (Brasil).
+- Administradores não são removidos automaticamente.
+- Identificadores `@lid` sem telefone confiável são ignorados para evitar falsos positivos.
+- O Nazuna analisado possui a configuração `antifake`, mas não trazia a implementação operacional completa; o sistema foi adaptado para a arquitetura atual da Kobayashi.

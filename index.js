@@ -28,6 +28,7 @@ import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
 import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
+import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -2728,6 +2729,122 @@ case "lucy": {
       `😈 *LUCY METER* 😈\n\n` +
       `🔥 O nível de safadeza da Lucy é *${porcentagem}%*`
   }, { quoted: info });
+}
+break;
+
+
+case "antifake": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  if (!isBotGroupAdmins) {
+    return reply(
+      "❌🐉 Eu preciso ser ADM para usar o AntiFake."
+    );
+  }
+
+  const raw = String(args?.[0] || "").toLowerCase();
+  const cfg = getAntiFakeConfig(from);
+
+  if (!raw) {
+    return reply(
+      `╭──────「 🛡️🌎 」──────╮\n` +
+      `         *ANTI-FAKE*\n` +
+      `╰─────────────────────╯\n\n` +
+      `Status: ${cfg.enabled ? "🟢 ON" : "⚪ OFF"}\n` +
+      `🇧🇷 DDI permitido: *+55*\n\n` +
+      `• *${prefix}antifake on*\n` +
+      `• *${prefix}antifake off*\n\n` +
+      `🌸 Quando ativado, novos números estrangeiros identificáveis são removidos automaticamente.`
+    );
+  }
+
+  if (!["on", "off"].includes(raw)) {
+    return reply(
+      `🌸 Use *${prefix}antifake on* ou *${prefix}antifake off*.`
+    );
+  }
+
+  const enabled = raw === "on";
+
+  setAntiFakeEnabled(from, enabled);
+
+  return reply(
+    enabled
+      ? `✅🛡️ *AntiFake ativado!*\n\n🇧🇷 Apenas números identificáveis com DDI +55 passam pelo filtro automático.`
+      : `⚪🛡️ *AntiFake desativado.*`
+  );
+}
+break;
+
+case "banfake": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  if (!isBotGroupAdmins) {
+    return reply(
+      "❌🐉 Eu preciso ser ADM para remover membros."
+    );
+  }
+
+  const foreign = findForeignParticipants(
+    from,
+    groupMembers || []
+  );
+
+  if (!foreign.length) {
+    return reply(
+      `✅🌸 Não encontrei números estrangeiros identificáveis no grupo.\n\n` +
+      `📌 Contas @lid sem telefone visível são ignoradas para evitar banimentos errados.`
+    );
+  }
+
+  const adminSet = new Set(groupAdmins || []);
+
+  const targets = foreign
+    .map((item) => item.jid)
+    .filter((jid) => !adminSet.has(jid));
+
+  if (!targets.length) {
+    return reply(
+      "🌸 Os números estrangeiros encontrados são administradores. Não removi ninguém automaticamente."
+    );
+  }
+
+  let removed = 0;
+  let failed = 0;
+
+  for (let i = 0; i < targets.length; i += 5) {
+    const batch = targets.slice(i, i + 5);
+
+    try {
+      await conn.groupParticipantsUpdate(
+        from,
+        batch,
+        "remove"
+      );
+
+      removed += batch.length;
+    } catch (error) {
+      failed += batch.length;
+
+      console.error(
+        "[BANFAKE]",
+        error?.message || error
+      );
+    }
+
+    await delay(800);
+  }
+
+  return reply(
+    `╭──────「 🧹🌎 」──────╮\n` +
+    `        *BANFAKE*\n` +
+    `╰─────────────────────╯\n\n` +
+    `✅ Removidos: *${removed}*\n` +
+    `❌ Falhas: *${failed}*\n\n` +
+    `🇧🇷 Filtro atual: DDI +55 permitido.`
+  );
 }
 break;
 

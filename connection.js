@@ -24,6 +24,7 @@ import {
   banner2,
   banner3,
 } from "./settings/imports/consts.js";
+import { getAntiFakeConfig, checkAntiFakeParticipant } from "./lib/features/antiFake.js";
 
 const AUTH_DIR = "./files/database/qr-code";
 const msgStore = new NodeCache({ stdTTL: 10 * 60, useClones: false });
@@ -460,6 +461,70 @@ async function startConnect() {
         console.log(
           `[WELCOME NAZUNA] action=${inf.action} group=${from} enabled=${Boolean(settings.enabled)} participants=${participants.length}`
         );
+
+        // ==========================================
+        // 🛡️ ANTIFAKE • KOBAYASHI v0.1.48
+        // Executa mesmo que o Welcome esteja OFF.
+        // ==========================================
+        if (inf.action === "add") {
+          try {
+            const antiFake = getAntiFakeConfig(from);
+
+            if (antiFake.enabled) {
+              const adminSet = new Set(
+                (groupMetadata?.participants || [])
+                  .filter((p) => p?.admin)
+                  .map((p) => p?.id)
+              );
+
+              const targets = [];
+
+              for (const jid of participants) {
+                const check = checkAntiFakeParticipant(
+                  from,
+                  jid
+                );
+
+                if (
+                  check.known &&
+                  !check.allowed &&
+                  check.jid &&
+                  !adminSet.has(check.jid)
+                ) {
+                  targets.push(check.jid);
+                }
+              }
+
+              if (targets.length) {
+                await conn.groupParticipantsUpdate(
+                  from,
+                  targets,
+                  "remove"
+                );
+
+                await conn.sendMessage(from, {
+                  text:
+                    `🛡️🌎 *ANTI-FAKE*\n\n` +
+                    `${targets.length} número(s) estrangeiro(s) foram removidos automaticamente.\n` +
+                    `🇧🇷 DDI permitido: +55.`
+                }).catch(() => {});
+
+                participants = participants.filter(
+                  (jid) => !targets.includes(jid)
+                );
+
+                if (!participants.length) {
+                  return;
+                }
+              }
+            }
+          } catch (error) {
+            console.error(
+              "[ANTIFAKE]",
+              error?.message || error
+            );
+          }
+        }
 
         if (!settings.enabled) return;
 
