@@ -29,6 +29,8 @@ import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "
 import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
+import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
+import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -468,7 +470,13 @@ if (!body && type === "stickerMessage") {
 }
 
 const isCmd = body.startsWith(prefix);
-const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
+const rawCommand = isCmd
+  ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase()
+  : null;
+
+const command = isCmd
+  ? resolveCommandAlias(rawCommand)
+  : null;
 
 const args = body.trim().split(/ +/).slice(1);
 const q = args.join(" ");
@@ -546,6 +554,51 @@ if (isCmd) {
 }
 
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
+
+// ==========================================
+// 🐉 YURI PACK 2 • CONTROLE DE COMANDOS
+// ==========================================
+if (isCmd && command) {
+  const globalBlock = getGlobalCommandBlock(command);
+
+  if (
+    globalBlock &&
+    !SoDonoPrincipal
+  ) {
+    await reply(
+      `⛔ *Comando bloqueado globalmente.*\n\n` +
+      `🧩 Comando: *${prefix}${command}*\n` +
+      `📝 Motivo: *${globalBlock.reason || "Sem motivo informado"}*`
+    );
+    continue;
+  }
+
+  if (isGroup) {
+    const commandCfg = getGroupCommandConfig(from);
+
+    if (
+      commandCfg.soadm &&
+      !isGroupAdmins &&
+      !SoDono
+    ) {
+      continue;
+    }
+
+    if (
+      isGroupCommandBlocked(from, command) &&
+      !isGroupAdmins &&
+      !SoDono
+    ) {
+      await reply(
+        `⛔ Este comando foi bloqueado pelos administradores deste grupo.`
+      );
+      continue;
+    }
+  }
+
+  trackCommandUsage(command, sender);
+}
+
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
@@ -2849,6 +2902,332 @@ case "banfake": {
 }
 break;
 
+
+case "soadm":
+case "onlyadm":
+case "soadmin": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const enabled = !getGroupCommandConfig(from).soadm;
+  setSoAdm(from, enabled);
+
+  return reply(
+    enabled
+      ? `✅🛡️ *Modo Só ADM ativado!*\n\nApenas administradores poderão usar os comandos da Kobayashi neste grupo.`
+      : `⚪🛡️ *Modo Só ADM desativado!*\n\nOs membros podem usar os comandos novamente.`
+  );
+}
+break;
+
+case "blockcmd": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const target = String(args?.[0] || "")
+    .replace(prefix, "")
+    .trim();
+
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}blockcmd comando*\n` +
+      `Ex.: *${prefix}blockcmd sticker*`
+    );
+  }
+
+  const normalizedTarget = resolveCommandAlias(target);
+
+  const protectedCommands = new Set([
+    "blockcmd",
+    "unblockcmd",
+    "soadm",
+    "configgp",
+  ]);
+
+  if (protectedCommands.has(normalizedTarget)) {
+    return reply(
+      "🛡️ Esse comando de administração não pode ser bloqueado no grupo."
+    );
+  }
+
+  blockGroupCommand(from, normalizedTarget);
+
+  return reply(
+    `✅⛔ *${prefix}${normalizedTarget}* foi bloqueado para membros.\n` +
+    `ADMs continuam podendo usar normalmente.`
+  );
+}
+break;
+
+case "unblockcmd": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const target = String(args?.[0] || "")
+    .replace(prefix, "")
+    .trim();
+
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}unblockcmd comando*.`
+    );
+  }
+
+  const normalizedTarget = resolveCommandAlias(target);
+  const removed = unblockGroupCommand(
+    from,
+    normalizedTarget
+  );
+
+  return reply(
+    removed
+      ? `✅🔓 *${prefix}${normalizedTarget}* foi desbloqueado neste grupo.`
+      : `🌸 Esse comando não estava bloqueado neste grupo.`
+  );
+}
+break;
+
+case "blockcmdg": {
+  if (!SoDonoPrincipal) {
+    return reply(
+      "👑 Apenas o dono principal pode bloquear comandos globalmente."
+    );
+  }
+
+  const target = String(args?.[0] || "")
+    .replace(prefix, "")
+    .trim();
+
+  const reason = args?.slice(1).join(" ").trim() ||
+    "Sem motivo informado";
+
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}blockcmdg comando motivo*.`
+    );
+  }
+
+  const normalizedTarget = resolveCommandAlias(target);
+
+  const protectedCommands = new Set([
+    "update",
+    "atualizar",
+    "blockcmdg",
+    "unblockcmdg",
+    "version",
+    "versao",
+    "v",
+  ]);
+
+  if (protectedCommands.has(normalizedTarget)) {
+    return reply(
+      "🛡️ Esse comando crítico não pode ser bloqueado globalmente."
+    );
+  }
+
+  blockGlobalCommand(
+    normalizedTarget,
+    reason
+  );
+
+  return reply(
+    `✅🚫 *${prefix}${normalizedTarget}* foi bloqueado globalmente.\n` +
+    `📝 Motivo: *${reason}*`
+  );
+}
+break;
+
+case "unblockcmdg": {
+  if (!SoDonoPrincipal) {
+    return reply(
+      "👑 Apenas o dono principal pode desbloquear comandos globalmente."
+    );
+  }
+
+  const target = String(args?.[0] || "")
+    .replace(prefix, "")
+    .trim();
+
+  if (!target) {
+    return reply(
+      `🌸 Use *${prefix}unblockcmdg comando*.`
+    );
+  }
+
+  const normalizedTarget = resolveCommandAlias(target);
+  const removed = unblockGlobalCommand(
+    normalizedTarget
+  );
+
+  return reply(
+    removed
+      ? `✅🔓 *${prefix}${normalizedTarget}* foi desbloqueado globalmente.`
+      : `🌸 Esse comando não estava bloqueado globalmente.`
+  );
+}
+break;
+
+case "addalias": {
+  if (!SoDonoPrincipal) {
+    return reply(
+      "👑 Apenas o dono principal pode criar aliases."
+    );
+  }
+
+  if (!q || !q.includes("/")) {
+    return reply(
+      `📛 Use *${prefix}addalias apelido/comando*\n` +
+      `Ex.: *${prefix}addalias h/hidetag*`
+    );
+  }
+
+  const [alias, target] = q
+    .split("/")
+    .map((x) => x.trim());
+
+  const result = addCommandAlias(
+    alias,
+    target
+  );
+
+  if (!result.ok) {
+    return reply(
+      result.reason === "exists"
+        ? `⚠️ O alias *${prefix}${alias}* já existe.`
+        : "🌸 Alias ou comando inválido."
+    );
+  }
+
+  return reply(
+    `✅📛 Alias criado!\n\n` +
+    `*${prefix}${result.alias}* → *${prefix}${result.command}*`
+  );
+}
+break;
+
+case "delalias": {
+  if (!SoDonoPrincipal) {
+    return reply(
+      "👑 Apenas o dono principal pode remover aliases."
+    );
+  }
+
+  const index = Number(args?.[0]);
+
+  if (!Number.isInteger(index)) {
+    return reply(
+      `🌸 Use *${prefix}delalias número*.\n` +
+      `Veja os números em *${prefix}aliaslist*.`
+    );
+  }
+
+  const removed = removeCommandAlias(index);
+
+  return reply(
+    removed
+      ? `🗑️ Alias *${prefix}${removed.alias}* → *${prefix}${removed.command}* removido.`
+      : "🌸 Número de alias inválido."
+  );
+}
+break;
+
+case "aliaslist":
+case "listaliases": {
+  if (!SoDonoPrincipal) {
+    return reply(
+      "👑 Apenas o dono principal pode consultar os aliases."
+    );
+  }
+
+  const aliases = listCommandAliases();
+
+  if (!aliases.length) {
+    return reply(
+      "📜 Nenhum alias personalizado cadastrado."
+    );
+  }
+
+  return reply(
+    `╭──────「 📛 」──────╮\n` +
+    `        *ALIASES*\n` +
+    `╰──────────────────╯\n\n` +
+    aliases.map(
+      (item, i) =>
+        `${i + 1}. *${prefix}${item.alias}* → *${prefix}${item.command}*`
+    ).join("\n")
+  );
+}
+break;
+
+case "topcmds": {
+  const top = getMostUsedCommands(10);
+
+  if (!top.length) {
+    return reply(
+      "🌸 Ainda não existem estatísticas de comandos suficientes."
+    );
+  }
+
+  return reply(
+    `╭══════ ❀ 📊 ❀ ══════╮\n` +
+    `       *TOP COMANDOS*\n` +
+    `╰══════ ❀ 🐉 ❀ ══════╯\n\n` +
+    top.map(
+      (item, i) =>
+        `${i + 1}. *${prefix}${item.name}* — ${item.count} uso(s) • ${item.uniqueUsers} usuário(s)`
+    ).join("\n") +
+    `\n\n📈 Total registrado: *${getTotalCommandUsage()}* usos.`
+  );
+}
+break;
+
+case "totalcmd": {
+  const target = resolveCommandAlias(
+    String(args?.[0] || command)
+      .replace(prefix, "")
+      .trim()
+  );
+
+  if (!args?.[0]) {
+    return reply(
+      `🌸 Use *${prefix}totalcmd comando*.\n` +
+      `Ex.: *${prefix}totalcmd play*`
+    );
+  }
+
+  const stats = getCommandStats(target);
+
+  if (!stats) {
+    return reply(
+      `📊 Ainda não há uso registrado para *${prefix}${target}*.`
+    );
+  }
+
+  return reply(
+    `╭──────「 📊 」──────╮\n` +
+    `      *TOTAL CMD*\n` +
+    `╰──────────────────╯\n\n` +
+    `🧩 Comando: *${prefix}${stats.name}*\n` +
+    `🔢 Usos: *${stats.count}*\n` +
+    `👥 Usuários únicos: *${stats.uniqueUsers}*\n` +
+    `🕒 Último uso: *${stats.lastUsed ? new Date(stats.lastUsed).toLocaleString("pt-BR") : "—"}*`
+  );
+}
+break;
+
+case "novidades":
+case "changelog": {
+  const notes = getReleaseNotes();
+
+  return reply(
+    formatReleaseNotes(
+      notes,
+      { prefix }
+    )
+  );
+}
+break;
+
 // comandos públicos
 case "stickers":
 case "sticker":
@@ -3683,12 +4062,26 @@ case "atualizar": {
     await reply(
       `✅🌸 *ATUALIZAÇÃO CONCLUÍDA!*\n\n` +
       `📦 Nova versão: *${result.remote}*\n` +
-      `📁 Arquivos atualizados: *${result.files}*\n\n` +
-      `🐉 Reiniciando o Kobayashi Bot...`
+      `📁 Arquivos atualizados: *${result.files}*`
     );
 
+    if (result.releaseNotes) {
+      await reply(
+        formatReleaseNotes(
+          result.releaseNotes,
+          { prefix }
+        )
+      );
+    } else {
+      await reply(
+        `🌸 Atualização instalada. Use *${prefix}novidades* após reiniciar para consultar as mudanças.`
+      );
+    }
+
+    await reply("🐉 Reiniciando o Kobayashi Bot...");
+
     // npm start usa start.sh; ao encerrar, o loop inicia a versão nova.
-    setTimeout(() => process.exit(0), 2500);
+    setTimeout(() => process.exit(0), 3500);
     return;
   } catch (e) {
     console.error("Erro ao atualizar:", e);

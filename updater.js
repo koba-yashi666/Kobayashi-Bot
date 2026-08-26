@@ -186,6 +186,27 @@ function installDependencies() {
   }
 }
 
+
+function readInstalledReleaseNotes() {
+  try {
+    const file = path.join(ROOT, "release-notes.json");
+
+    if (!fs.existsSync(file)) {
+      return null;
+    }
+
+    const data = JSON.parse(
+      fs.readFileSync(file, "utf8")
+    );
+
+    return data && typeof data === "object"
+      ? data
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function applyUpdate({ force = false } = {}) {
   const status = await checkUpdate();
 
@@ -229,7 +250,8 @@ export async function applyUpdate({ force = false } = {}) {
       ...status,
       remote: getLocalVersion(),
       updated: true,
-      files: files.length
+      files: files.length,
+      releaseNotes: readInstalledReleaseNotes()
     };
   } catch (error) {
     try { restoreBackup(); } catch {}

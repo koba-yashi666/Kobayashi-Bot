@@ -54,6 +54,9 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 │ 🔇 ${prefix}mutar @
 │ 🔊 ${prefix}desmutar @
 │ 📢 ${prefix}hidetag texto
+│ 🛡️ ${prefix}soadm
+│ ⛔ ${prefix}blockcmd comando
+│ 🔓 ${prefix}unblockcmd comando
 │ ⚙️ ${prefix}configgp
 │    ↳ Painel do grupo
 │ 📋 ${prefix}logadm on/off/ver
@@ -121,6 +124,11 @@ return `╭══════ ❀ 核心 ❀ ══════╮
 ╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 🔑 ${prefix}yutatoken TOKEN
 │    ↳ Configurar serviço do Play
+│ 🚫 ${prefix}blockcmdg comando motivo
+│ 🔓 ${prefix}unblockcmdg comando
+│ 📛 ${prefix}addalias a/comando
+│ 🗑️ ${prefix}delalias número
+│ 📜 ${prefix}aliaslist
 │ 👑 ${prefix}configbot
 │    ↳ Painel geral seguro
 │ 💾 ${prefix}backupdb
@@ -168,6 +176,9 @@ return `╭══════ ❀ 🪷 ❀ ══════╮
 │ 📊 ${prefix}atividade
 │ 👤 ${prefix}checkme @
 │ 🏆 ${prefix}topativos
+│ 📊 ${prefix}topcmds
+│ 🔢 ${prefix}totalcmd comando
+│ ✨ ${prefix}novidades
 │ 📖 ${prefix}help
 │    ↳ Ajuda dos comandos modulares
 │ 🫧 ${prefix}ping

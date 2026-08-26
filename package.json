@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.49-beta",
-  "description": "Kobayashi Bot Beta v0.1.49 - AntiFake LID-aware inspirado no Hutao",
+  "version": "0.1.50-beta",
+  "description": "Kobayashi Bot Beta v0.1.50 - Yuri Pack 2 + novidades do updater",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

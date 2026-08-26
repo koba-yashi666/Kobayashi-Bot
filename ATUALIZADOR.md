@@ -342,3 +342,14 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - A remoção continua usando o JID original do participante, evitando conflito entre LID e PN.
 - Números cujo telefone não puder ser resolvido continuam ignorados para evitar falso positivo.
 - A correção foi motivada pela estrutura do HutaoBot v10, que também usa Baileys 7 e trabalha com o modelo moderno de identificadores.
+
+## v0.1.50-beta — Yuri Pack 2 + Update News
+- `/soadm`: somente ADMs usam comandos no grupo.
+- `/blockcmd` e `/unblockcmd`: bloqueio de comandos por grupo.
+- `/blockcmdg` e `/unblockcmdg`: bloqueio global pelo dono principal.
+- `/addalias`, `/delalias`, `/aliaslist`: aliases globais de comandos.
+- `/topcmds`: ranking de comandos mais usados.
+- `/totalcmd comando`: estatísticas de um comando.
+- `/novidades`: mostra os comandos e categorias da versão atual.
+- O `/update` passa a ler `release-notes.json` e, após instalar uma versão, mostra automaticamente os comandos adicionados separados por categoria antes de reiniciar.
+- Estatísticas usam cache e gravação periódica para reduzir escrita no armazenamento.
