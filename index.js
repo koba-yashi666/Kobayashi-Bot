@@ -2787,7 +2787,8 @@ case "banfake": {
     );
   }
 
-  const foreign = findForeignParticipants(
+  const foreign = await findForeignParticipants(
+    conn,
     from,
     groupMembers || []
   );

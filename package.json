@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.48-beta",
-  "description": "Kobayashi Bot Beta v0.1.48 - AntiFake e BanFake para números estrangeiros",
+  "version": "0.1.49-beta",
+  "description": "Kobayashi Bot Beta v0.1.49 - AntiFake LID-aware inspirado no Hutao",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

@@ -480,7 +480,8 @@ async function startConnect() {
               const targets = [];
 
               for (const jid of participants) {
-                const check = checkAntiFakeParticipant(
+                const check = await checkAntiFakeParticipant(
+                  conn,
                   from,
                   jid
                 );
