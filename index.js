@@ -3484,52 +3484,103 @@ Exemplo: ${prefix}rmadv @membro`);
 break;
 
 case "perfil": {
-  const target = getTargetFromMessage(info, sender);
+  const target = getTargetFromMessage(info, sender) || sender;
   const targetPN = await getPNForJid(conn, target, target);
-  const targetJid = targetPN || normalizeJid(target);
+  const targetJid = targetPN || normalizeJid(target) || target;
   const number = targetJid?.split('@')[0] || target?.split('@')[0] || 'desconhecido';
-  const isTargetOwner = targetJid === dono || target === dono;
+
   const targetParticipant = isGroup ? groupMembers.find((p) => {
     const raw = p?.id || p?.jid || p?.participant;
     return normalizeJid(raw) === targetJid || raw === target;
   }) : null;
 
+  const cfgPerfil = readSettingsFile();
+  const ownerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || '').replace(/\D/g, '');
+  const leaderNumbers = Array.isArray(cfgPerfil?.leaders)
+    ? cfgPerfil.leaders.map((x) => String(x || '').replace(/\D/g, '')).filter(Boolean)
+    : [];
+  const isTargetOwner = number === ownerNumber || targetJid === dono || target === dono;
+  const isTargetLeader = leaderNumbers.includes(number);
   const participantRole = targetParticipant?.admin;
-  const cargo = isTargetOwner
-    ? '🐉 Dono do Bot'
-    : participantRole === 'superadmin'
-      ? '👑 Dono do Grupo'
-      : participantRole
-        ? '🛡️ Administrador'
-        : '🌸 Membro';
-
-  const db = readAdvDb();
-  const advCountRaw = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
-  const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
-  const advBar = `${'🔴'.repeat(advCount)}${'⚪'.repeat(3 - advCount)}`;
-  const situacao = advCount === 0
-    ? '✅ Sem advertências'
-    : advCount === 1
-      ? '🟡 Atenção'
-      : advCount === 2
-        ? '🟠 Em risco de ban'
-        : '🔴 Limite atingido';
+  const isTargetAdmin = participantRole === 'admin' || participantRole === 'superadmin';
+  const isGroupOwner = participantRole === 'superadmin';
 
   const name = target === sender
     ? pushname || 'Usuário'
     : (targetParticipant?.name || targetParticipant?.notify || `Usuário ${number}`);
 
+  let bio = 'Não informada';
+  try {
+    if (typeof conn.fetchStatus === 'function') {
+      const statusData = await conn.fetchStatus(targetJid);
+      bio = String(statusData?.status || statusData?.[0]?.status || bio).trim() || bio;
+    }
+  } catch (_) {}
+  if (bio.length > 90) bio = `${bio.slice(0, 87)}...`;
+
+  const db = readAdvDb();
+  const advCountRaw = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
+  const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
+  const advBar = `${'🔴'.repeat(advCount)}${'⚪'.repeat(3 - advCount)}`;
+
+  const activity = isGroup ? getUserActivity(from, targetJid) : { messages: 0 };
+  const messageCount = Number(activity?.messages || 0);
+
+  // Os níveis são persistentes por grupo, usando o mesmo banco do Kobayashi Fun.
+  const gado = isGroup ? getOrCreateFunScore(from, 'gado', targetJid) : 0;
+  const beleza = isGroup ? getOrCreateFunScore(from, 'lindo', targetJid) : 0;
+  const gostosura = isGroup ? getOrCreateFunScore(from, 'gostoso', targetJid) : 0;
+  const romance = isGroup ? getOrCreateFunScore(from, 'shipoSolo', targetJid) : 0;
+
+  const badge = (value) => value ? '〘✅〙' : '〘❌〙';
+  const cargo = isTargetOwner
+    ? 'Dono do Bot'
+    : isGroupOwner
+      ? 'Dono do Grupo'
+      : isTargetAdmin
+        ? 'Administrador'
+        : isTargetLeader
+          ? 'Líder do Bot'
+          : 'Membro';
+
   const caption =
-    `╭━━━〔 🐉🌸 *PERFIL* 🌸🐉 〕━━━╮\n` +
-    `┃ 👤 *Nome:* ${name}\n` +
-    `┃ 📱 *Número:* +${number}\n` +
-    (isGroup
-      ? `┃ ${cargo}\n` +
-        `┃ ⚠️ *ADVs:* ${advCount}/3  ${advBar}\n` +
-        `┃ 📋 *Situação:* ${situacao}\n`
-      : '') +
-    `╰━━━━━━━━━━━━━━━━━━━━╯\n` +
-    `🌸 *Kobayashi Bot Beta*`;
+    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
+    `┝⋆⃟ۣۜ᭪➮ 𝐌𝐄𝐔 𝐏𝐄𝐑𝐅𝐈𝐋 『🥂』\n` +
+    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
+    `│╭━━───────━━╮\n` +
+    `│╎୨୧🌌 𝐍𝐎𝐌𝐄 - 『 ${name} 』\n` +
+    `│╎୨୧📱 𝐍𝐔𝐌𝐄𝐑𝐎 - 『 ${number} 』\n` +
+    `│╎୨୧💖 𝐁𝐈𝐎 - 『 ${bio} 』\n` +
+    `│╎୨୧🎭 𝐂𝐀𝐑𝐆𝐎 - 『 ${cargo} 』\n` +
+    `│┝─✰°❀•°✮•─✰°❀•°✮•𖦹५ॱ\n` +
+    `│╎୨୧👑 𝐃𝐎𝐍𝐎 -➮ ${badge(isTargetOwner)}\n` +
+    `│╎୨୧🩸 𝐋𝐈𝐃𝐄𝐑 -➮ ${badge(isTargetLeader)}\n` +
+    `│╎୨୧🔱 𝐀𝐃𝐌 -➮ ${badge(isTargetAdmin)}\n` +
+    `│╎୨୧⚠️ 𝐀𝐃𝐕 -➮ 〘 ${advCount}/3 ${advBar} 〙\n` +
+    `│╰━━───────━━╯\n` +
+    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n` +
+    `╎\n` +
+    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
+    `┝⋆⃟ۣۜ᭪➮ 𝐏𝐄𝐑𝐒𝐎𝐍𝐀𝐋𝐈𝐃𝐀𝐃𝐄 『💋』\n` +
+    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
+    `│╭━━───────━━╮\n` +
+    `│╎🐂 𝙉𝙄𝙑𝙀𝙇-𝙂𝘼𝘿𝙊 ⧽ ${gado}%\n` +
+    `│╎😍 𝙉𝙄𝙑𝙀𝙇-𝘽𝙀𝙇𝙀𝙕𝘼 ⧽ ${beleza}%\n` +
+    `│╎🥵 𝙉𝙄𝙑𝙀𝙇-𝙂𝙊𝙎𝙏𝙊𝙎𝙐𝙍𝘼 ⧽ ${gostosura}%\n` +
+    `│╎💞 𝙉𝙄𝙑𝙀𝙇-𝙍𝙊𝙈𝘼𝙉𝘾𝙀 ⧽ ${romance}%\n` +
+    `│╰━━───────━━╯\n` +
+    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n` +
+    `╎\n` +
+    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
+    `┝⋆⃟ۣۜ᭪➮ 𝐒𝐄𝐔𝐒 𝐃𝐀𝐃𝐎𝐒 『✨』\n` +
+    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
+    `│╭━━───────━━╮\n` +
+    `│╎░⃟⃛ ➮𝙼𝙴𝙽𝚂𝙰𝙶𝙴𝙽𝚂 ${messageCount} - 💬\n` +
+    `│╎░⃟⃛ ➮𝙰𝙳𝚅𝙴𝚁𝚃𝙴̂𝙽𝙲𝙸𝙰𝚂 ${advCount} - ⚠️\n` +
+    `│╰━━───────━━╯\n` +
+    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n\n` +
+    `🐉 𝐁𝐨𝐭: KӨBΛYΛƧΗI BӨƬ\n` +
+    `✰✰✰✰✰`;
 
   let profilePicture = null;
   try {

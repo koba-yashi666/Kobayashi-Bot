@@ -1,5 +1,5 @@
 {
-  "version": "0.1.53-beta",
+  "version": "0.1.54-beta",
   "title": "Perfil Visual • RMADV",
   "summary": "Melhora o /perfil com foto e informações visuais, mantendo o sistema /rmadv da v0.1.52.",
   "categories": [
@@ -28,5 +28,16 @@
     "Advertências agora aparecem como contador 0/3 com indicador visual e situação do membro.",
     "Se a foto não puder ser carregada, o perfil continua funcionando normalmente em texto.",
     "Mantido o /rmadv e o histórico de remoção de advertências da v0.1.52."
-  ]
+  ],
+  "latest": {
+    "version": "0.1.54-beta",
+    "title": "Perfil visual renovado",
+    "changes": [
+      "Novo /perfil inspirado em card completo de usuário",
+      "Foto de perfil e bio do WhatsApp quando disponíveis",
+      "Exibe cargo, dono, líder, ADM e advertências",
+      "Adiciona níveis persistentes de personalidade do Kobayashi Fun",
+      "Exibe total de mensagens registradas pelo sistema de atividade"
+    ]
+  }
 }
