@@ -30,6 +30,7 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 
 ╭──〔 🛡️ MODERAÇÃO 〕────╮
 │ ⚠️ ${prefix}adv @membro motivo
+│ 🌸 ${prefix}rmadv @membro
 │ 🔨 ${prefix}ban @membro
 │ 🤡 ${prefix}bam @membro
 │ 🎐 ${prefix}admins

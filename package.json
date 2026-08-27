@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.50-beta",
-  "description": "Kobayashi Bot Beta v0.1.50 - Yuri Pack 2 + novidades do updater",
+  "version": "0.1.53-beta",
+  "description": "Kobayashi Bot Beta v0.1.53 - Perfil Visual + RMADV",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

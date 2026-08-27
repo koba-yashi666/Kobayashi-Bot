@@ -353,3 +353,15 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/novidades`: mostra os comandos e categorias da versão atual.
 - O `/update` passa a ler `release-notes.json` e, após instalar uma versão, mostra automaticamente os comandos adicionados separados por categoria antes de reiniciar.
 - Estatísticas usam cache e gravação periódica para reduzir escrita no armazenamento.
+
+## v0.1.51-beta — Yuri Pack 2 Runtime Fix
+- Corrige o bloco de controle de comandos quebrado na v0.1.50.
+- Move a validação para depois da inicialização das permissões de grupo.
+- Mantém /update, /novidades, aliases, bloqueios e estatísticas.
+
+## v0.1.52-beta — RMADV
+- `/rmadv @membro`: remove 1 advertência do membro.
+- Também funciona respondendo à mensagem do usuário.
+- Somente administradores podem usar.
+- Atualiza `count` e remove a advertência mais recente de `history`.
+- Registra a ação no log administrativo.

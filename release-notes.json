@@ -1,77 +1,32 @@
 {
-  "version": "0.1.50-beta",
-  "title": "Yuri Pack 2 • Controle do Bot",
-  "summary": "Controle de comandos, aliases, estatísticas e melhorias no sistema de atualização.",
+  "version": "0.1.53-beta",
+  "title": "Perfil Visual • RMADV",
+  "summary": "Melhora o /perfil com foto e informações visuais, mantendo o sistema /rmadv da v0.1.52.",
   "categories": [
+    {
+      "name": "🌸 Geral",
+      "commands": [
+        {
+          "command": "/perfil [@membro]",
+          "description": "Mostra foto, cargo, nível de advertências e situação do membro."
+        }
+      ]
+    },
     {
       "name": "🛡️ Administração",
       "commands": [
         {
-          "command": "/soadm",
-          "description": "Ativa/desativa o uso de comandos somente por ADMs."
-        },
-        {
-          "command": "/blockcmd comando",
-          "description": "Bloqueia um comando para membros do grupo."
-        },
-        {
-          "command": "/unblockcmd comando",
-          "description": "Desbloqueia um comando no grupo."
-        }
-      ]
-    },
-    {
-      "name": "👑 Dono",
-      "commands": [
-        {
-          "command": "/blockcmdg comando motivo",
-          "description": "Bloqueia um comando globalmente."
-        },
-        {
-          "command": "/unblockcmdg comando",
-          "description": "Remove um bloqueio global."
-        },
-        {
-          "command": "/addalias apelido/comando",
-          "description": "Cria um apelido global para um comando."
-        },
-        {
-          "command": "/delalias número",
-          "description": "Remove um alias pela posição."
-        },
-        {
-          "command": "/aliaslist",
-          "description": "Lista os aliases configurados."
-        }
-      ]
-    },
-    {
-      "name": "📊 Estatísticas",
-      "commands": [
-        {
-          "command": "/topcmds",
-          "description": "Mostra os comandos mais usados."
-        },
-        {
-          "command": "/totalcmd comando",
-          "description": "Mostra estatísticas de um comando específico."
-        }
-      ]
-    },
-    {
-      "name": "🔄 Atualizações",
-      "commands": [
-        {
-          "command": "/novidades",
-          "description": "Mostra os comandos adicionados na versão atual e suas categorias."
+          "command": "/rmadv @membro",
+          "description": "Remove 1 advertência do membro marcado ou da mensagem respondida."
         }
       ]
     }
   ],
   "changes": [
-    "O /update passa a mostrar automaticamente as novidades e categorias depois de uma atualização.",
-    "Aliases são resolvidos antes do roteamento dos comandos.",
-    "Bloqueios globais podem ser ignorados pelo dono principal para manutenção.",
-    "Bloqueios do grupo não afetam os administradores."
+    "O /perfil agora envia a foto de perfil do usuário quando ela estiver disponível.",
+    "Cargo exibido com distinção entre Dono do Bot, Dono do Grupo, Administrador e Membro.",
+    "Advertências agora aparecem como contador 0/3 com indicador visual e situação do membro.",
+    "Se a foto não puder ser carregada, o perfil continua funcionando normalmente em texto.",
+    "Mantido o /rmadv e o histórico de remoção de advertências da v0.1.52."
   ]
 }

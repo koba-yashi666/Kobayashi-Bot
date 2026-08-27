@@ -3431,6 +3431,58 @@ Exemplo: ${prefix}adv @membro motivo`);
 }
 break;
 
+case "rmadv":
+case "rm_adv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const target = getTargetFromMessage(info, menc_os2);
+  if (!target) return reply(`⚠️🌸 Marque um membro ou responda à mensagem dele.
+Exemplo: ${prefix}rmadv @membro`);
+
+  const db = readAdvDb();
+  const record = db[from]?.[target];
+  const current = Number(record?.count || 0);
+
+  if (current <= 0) {
+    return conn.sendMessage(from, {
+      text: `🌸 @${target.split('@')[0]} não possui advertências registradas neste grupo.`,
+      mentions: [target],
+    }, { quoted: info });
+  }
+
+  const newCount = Math.max(current - 1, 0);
+  if (!Array.isArray(record.history)) record.history = [];
+  const removed = record.history.pop() || null;
+  record.count = newCount;
+
+  if (newCount === 0 && record.history.length === 0) {
+    delete db[from][target];
+    if (db[from] && Object.keys(db[from]).length === 0) delete db[from];
+  }
+
+  writeAdvDb(db);
+
+  addAdminLog(from, {
+    type: "rmadv",
+    actor: sender,
+    target,
+    detail: `${current}/3 → ${newCount}/3${removed?.reason ? ` • removida: ${removed.reason}` : ""}`,
+  });
+
+  return conn.sendMessage(from, {
+    text:
+      `♻️🌸 *ADVERTÊNCIA REMOVIDA*\n\n` +
+      `👤 Usuário: @${target.split('@')[0]}\n` +
+      `⚠️ Antes: *${current}/3*\n` +
+      `✅ Agora: *${newCount}/3*\n` +
+      (removed?.reason ? `📋 ADV removida: ${removed.reason}\n` : "") +
+      `🛡️ Removida por: @${sender.split('@')[0]}`,
+    mentions: [target, sender],
+  }, { quoted: info });
+}
+break;
+
 case "perfil": {
   const target = getTargetFromMessage(info, sender);
   const targetPN = await getPNForJid(conn, target, target);
@@ -3441,13 +3493,61 @@ case "perfil": {
     const raw = p?.id || p?.jid || p?.participant;
     return normalizeJid(raw) === targetJid || raw === target;
   }) : null;
-  const admin = !!targetParticipant?.admin;
+
+  const participantRole = targetParticipant?.admin;
+  const cargo = isTargetOwner
+    ? '🐉 Dono do Bot'
+    : participantRole === 'superadmin'
+      ? '👑 Dono do Grupo'
+      : participantRole
+        ? '🛡️ Administrador'
+        : '🌸 Membro';
+
   const db = readAdvDb();
-  const advCount = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
-  const name = target === sender ? pushname || 'Usuário' : (targetParticipant?.name || targetParticipant?.notify || `Usuário ${number}`);
+  const advCountRaw = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
+  const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
+  const advBar = `${'🔴'.repeat(advCount)}${'⚪'.repeat(3 - advCount)}`;
+  const situacao = advCount === 0
+    ? '✅ Sem advertências'
+    : advCount === 1
+      ? '🟡 Atenção'
+      : advCount === 2
+        ? '🟠 Em risco de ban'
+        : '🔴 Limite atingido';
+
+  const name = target === sender
+    ? pushname || 'Usuário'
+    : (targetParticipant?.name || targetParticipant?.notify || `Usuário ${number}`);
+
+  const caption =
+    `╭━━━〔 🐉🌸 *PERFIL* 🌸🐉 〕━━━╮\n` +
+    `┃ 👤 *Nome:* ${name}\n` +
+    `┃ 📱 *Número:* +${number}\n` +
+    (isGroup
+      ? `┃ ${cargo}\n` +
+        `┃ ⚠️ *ADVs:* ${advCount}/3  ${advBar}\n` +
+        `┃ 📋 *Situação:* ${situacao}\n`
+      : '') +
+    `╰━━━━━━━━━━━━━━━━━━━━╯\n` +
+    `🌸 *Kobayashi Bot Beta*`;
+
+  let profilePicture = null;
+  try {
+    profilePicture = await conn.profilePictureUrl(targetJid || target, 'image');
+  } catch (_) {}
+
+  if (profilePicture) {
+    try {
+      return await conn.sendMessage(from, {
+        image: { url: profilePicture },
+        caption,
+        mentions: [target],
+      }, { quoted: info });
+    } catch (_) {}
+  }
 
   return conn.sendMessage(from, {
-    text: `🐉🌸 *PERFIL DO USUÁRIO*\n\n👤 Nome: *${name}*\n📱 Número: *${number}*\n${isGroup ? `👑 Cargo: *${isTargetOwner ? 'Dono do Bot' : admin ? 'Administrador' : 'Membro'}*\n⚠️ Advertências: *${advCount}*\n` : ''}🌸 Kobayashi Bot Beta`,
+    text: caption,
     mentions: [target],
   }, { quoted: info });
 }
@@ -3719,6 +3819,7 @@ case "info_adv": {
     `┃╎\n` +
     `┃╎୨୧ 📝 *Como usar:*\n` +
     `┃╎   ${prefix}adv @membro motivo\n` +
+    `┃╎   ${prefix}rmadv @membro — remove 1 ADV\n` +
     `┃╎\n` +
     `┃╎୨୧ 🛡️ Apenas administradores podem aplicar ADV.\n` +
     `┃╎୨୧ 🤖 A Kobayashi precisa ser ADM para remover no 3/3.\n` +
