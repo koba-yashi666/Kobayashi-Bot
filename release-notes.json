@@ -1,23 +1,22 @@
 {
-  "version": "0.1.55-beta",
-  "title": "Dragon Card • Activity Fix",
-  "summary": "Corrige o contador de mensagens e cria um /perfil original da Kobayashi.",
+  "version": "0.1.56-beta",
+  "title": "Activity & ADV Pack",
+  "summary": "Adiciona ranking de atividade, consulta individual e ferramentas de advertências.",
   "categories": [
-    {
-      "name": "🌸 Geral",
-      "commands": [
-        {
-          "command": "/perfil [@membro]",
-          "description": "Exibe o Dragon Card original da Kobayashi com cargo, atividade, ADVs e aura."
-        }
-      ]
-    },
     {
       "name": "📊 Atividade",
       "commands": [
         {
-          "command": "/atividade",
-          "description": "Ranking de mensagens corrigido para registrar mensagens de grupo normalmente."
+          "command": "/rank",
+          "description": "Mostra o Top 10 de membros mais ativos."
+        },
+        {
+          "command": "/topativos",
+          "description": "Atalho do ranking de atividade."
+        },
+        {
+          "command": "/atividade [@membro]",
+          "description": "Mostra mensagens, posição, classe e última atividade."
         }
       ]
     },
@@ -25,18 +24,23 @@
       "name": "🛡️ Administração",
       "commands": [
         {
-          "command": "/rmadv @membro",
-          "description": "Remove uma advertência do membro."
+          "command": "/advs [@membro]",
+          "description": "Consulta contador e histórico recente de advertências."
+        },
+        {
+          "command": "/listadv",
+          "description": "Lista membros com advertências ativas; somente ADMs."
         }
       ]
     }
   ],
   "changes": [
-    "Corrigido bug que deixava o rastreador de atividade preso dentro da condição Anti-PV.",
-    "Mensagens de grupos agora incrementam corretamente o banco atividade-grupos.json.",
-    "AFK também volta a ser processado corretamente em grupos.",
-    "Novo /perfil com identidade própria: Kobayashi Dragon Card.",
-    "Perfil mostra classe baseada em atividade, mensagens, última atividade, ADVs, cargo, bio e atributos de aura.",
-    "Mantido suporte a foto de perfil quando disponível."
+    "/rank e /topativos agora exibem Top 10.",
+    "/atividade virou consulta individual e aceita marcação/resposta.",
+    "/checkme mantido como alias de /atividade.",
+    "/advs exibe ficha e até 5 registros recentes.",
+    "/listadv lista membros com ADVs ativas.",
+    "Menu ADM atualizado.",
+    "/rmadv mantido."
   ]
 }

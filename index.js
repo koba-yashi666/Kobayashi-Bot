@@ -2411,72 +2411,51 @@ case "afk": {
 }
 break;
 
-case "atividade":
+case "rank":
 case "topativos": {
   if (!isGroup) return reply(mess.onlyGroup());
-
-  const top = getTopActivity(from, 30);
-
-  if (!top.length) {
-    return reply(
-      "🌸 Ainda não tenho atividade suficiente registrada neste grupo."
-    );
-  }
-
+  const top = getTopActivity(from, 10);
+  if (!top.length) return reply("🌸 Ainda não tenho atividade suficiente registrada neste grupo.");
+  const medals = ["🥇", "🥈", "🥉"];
   const mentions = top.map((x) => x.jid);
-
-  const rows = top.map((x, i) => {
-    const pos = String(i + 1).padStart(2, "0");
-    return `${pos}. @${String(x.jid).split("@")[0]} — *${x.messages}*`;
-  }).join("\n");
-
+  const rows = top.map((x, i) => `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *${x.messages} mensagens*`).join("\n");
   return conn.sendMessage(from, {
     text:
-      `╭══════ ❀ 📊 ❀ ══════╮\n` +
-      `    *ATIVIDADE DO GRUPO*\n` +
-      `╰══════ ❀ 🐉 ❀ ══════╯\n\n` +
-      `🏆 *Ranking por mensagens*\n\n` +
+      `╭━━〔 🐉 RANK KOBAYASHI 〕━━╮\n` +
+      `┃ 🌸 Os dragões mais ativos do grupo\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
       `${rows}\n\n` +
-      `💬 Do membro com mais mensagens para o com menos.\n` +
-      `🌸 Para consultar você ou alguém específico, use *${prefix}checkme* ou *${prefix}checkme @membro*.\n` +
-      `📌 A contagem considera apenas mensagens registradas desde a ativação do sistema.`,
+      `📊 Use *${prefix}atividade @membro* para consultar alguém.\n` +
+      `📌 Contagem registrada desde a ativação do sistema.`,
     mentions
   }, { quoted: info });
 }
 break;
 
+case "atividade":
 case "checkme": {
   if (!isGroup) return reply(mess.onlyGroup());
-
   const contextInfo =
     info?.message?.extendedTextMessage?.contextInfo ||
     info?.message?.imageMessage?.contextInfo ||
-    info?.message?.videoMessage?.contextInfo ||
-    {};
-
-  const target =
-    contextInfo?.mentionedJid?.[0] ||
-    contextInfo?.participant ||
-    sender;
-
+    info?.message?.videoMessage?.contextInfo || {};
+  const target = contextInfo?.mentionedJid?.[0] || contextInfo?.participant || sender;
   const row = getUserActivity(from, target);
   const top = getTopActivity(from, 1000);
   const position = top.findIndex((x) => x.jid === target) + 1;
-
-  const last =
-    row.lastSeen > 0
-      ? `${formatAfkDuration(Date.now() - row.lastSeen)} atrás`
-      : "sem registro";
-
+  const last = row.lastSeen > 0
+    ? new Date(row.lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+    : "sem registro";
+  const rankName = row.messages >= 5000 ? "Dragão Ancião" : row.messages >= 2000 ? "Dragão Celestial" : row.messages >= 750 ? "Dragão Carmesim" : row.messages >= 250 ? "Dragão Lunar" : row.messages >= 50 ? "Filhote de Dragão" : "Ovo de Dragão";
   return conn.sendMessage(from, {
     text:
-      `╭──────「 👤📊 」──────╮\n` +
-      `        *CHECKME*\n` +
-      `╰────────────────────╯\n\n` +
-      `👤 @${String(target).split("@")[0]}\n` +
-      `💬 Mensagens: *${row.messages}*\n` +
-      `🏆 Posição: *${position > 0 ? `#${position}` : "sem ranking"}*\n` +
-      `🕒 Última atividade: *${last}*`,
+      `╭━━〔 📊 ATIVIDADE 〕━━╮\n` +
+      `┃ 👤 @${String(target).split("@")[0]}\n` +
+      `┃ 💬 Mensagens: *${row.messages}*\n` +
+      `┃ 🏆 Posição: *${position > 0 ? `#${position}` : "sem ranking"}*\n` +
+      `┃ 🐲 Classe: *${rankName}*\n` +
+      `┃ 🕒 Última: *${last}*\n` +
+      `╰━━━━━━━━━━━━━━━━╯`,
     mentions: [target]
   }, { quoted: info });
 }
@@ -3428,6 +3407,54 @@ Exemplo: ${prefix}adv @membro motivo`);
       mentions: [target],
     }, { quoted: info });
   }
+}
+break;
+
+case "advs": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const target = getTargetFromMessage(info, sender) || sender;
+  const db = readAdvDb();
+  const record = db[from]?.[target];
+  const count = Math.max(0, Math.min(Number(record?.count || 0), 3));
+  const history = Array.isArray(record?.history) ? record.history.slice(-5).reverse() : [];
+  const status = count === 0 ? "✅ Ficha limpa" : count === 1 ? "🟡 Sob atenção" : count === 2 ? "🟠 Zona de risco" : "🔴 Limite atingido";
+  const lines = history.length ? history.map((h, i) => {
+    const date = h?.at ? new Date(h.at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'data desconhecida';
+    return `${i + 1}. ${h?.reason || 'Sem motivo'} — ${date}`;
+  }).join("\n") : "Nenhuma advertência no histórico.";
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 ⚠️ FICHA DE ADVs 〕━━╮\n` +
+      `┃ 👤 @${String(target).split('@')[0]}\n` +
+      `┃ ⚠️ Total: *${count}/3*\n` +
+      `┃ ${status}\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `📜 *Últimas advertências*\n${lines}`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "listadv":
+case "listaadv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const db = readAdvDb();
+  const rows = Object.entries(db[from] || {})
+    .map(([jid, rec]) => ({ jid, count: Number(rec?.count || 0) }))
+    .filter((x) => x.count > 0)
+    .sort((a, b) => b.count - a.count);
+  if (!rows.length) return reply("✅🌸 Nenhum membro possui advertências ativas neste grupo.");
+  const mentions = rows.map((x) => x.jid);
+  const textRows = rows.slice(0, 50).map((x, i) => `${i + 1}. @${x.jid.split('@')[0]} — *${Math.min(x.count, 3)}/3*`).join("\n");
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🛡️ ADVs DO GRUPO 〕━━╮\n` +
+      `┃ 👥 Membros advertidos: *${rows.length}*\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n${textRows}\n\n` +
+      `🔎 Use *${prefix}advs @membro* para ver os detalhes.`,
+    mentions
+  }, { quoted: info });
 }
 break;
 

@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.46-beta */
+/* KOBAYASHI BOT • v0.1.56-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.46-beta
+💮 Versão › 0.1.56-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -30,7 +30,9 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 
 ╭──〔 🛡️ MODERAÇÃO 〕────╮
 │ ⚠️ ${prefix}adv @membro motivo
-│ 🌸 ${prefix}rmadv @membro
+│ ♻️ ${prefix}rmadv @membro
+│ 🔎 ${prefix}advs @membro
+│ 📋 ${prefix}listadv
 │ 🔨 ${prefix}ban @membro
 │ 🤡 ${prefix}bam @membro
 │ 🎐 ${prefix}admins
@@ -46,6 +48,8 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 │ 🗑️ ${prefix}rm_opengp
 │ 🔗 ${prefix}linkgp
 │ 🔒 ${prefix}gp f
+│ 🏆 ${prefix}rank
+│ 📊 ${prefix}atividade @membro
 │ 💤 ${prefix}inativos 7
 │ 🚨 ${prefix}antiflood 5
 │ 🌎 ${prefix}antifake on/off
