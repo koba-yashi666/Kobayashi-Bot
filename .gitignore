@@ -6,3 +6,4 @@ files/database/*.json
 npm-debug.log*
 .koba-update-tmp/
 .koba-update-backup/
+.npm/
