@@ -31,6 +31,7 @@ import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkComma
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
 import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.js";
+import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -603,6 +604,45 @@ const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
 
+
+// ==========================================
+// 🐉 KOBAYASHI RENTAL SYSTEM • v0.1.57
+// ==========================================
+if (isCmd && command && !SoDonoPrincipal) {
+  const rentalSettings = getRentalSettings();
+  const rentalSafeCommands = new Set([
+    "planos", "plans", "ver_aluguel", "ver_alugel", "aluguel_info",
+    "dono", "owner", "criador", "version"
+  ]);
+
+  let blockedByRental = false;
+  let rentalState = null;
+
+  if (rentalSettings.globalRestrictionEnabled) {
+    if (!isGroup) {
+      blockedByRental = true;
+    } else {
+      rentalState = getRental(from);
+      blockedByRental = !rentalState.active;
+    }
+  } else if (rentalSettings.groupRestrictionEnabled && isGroup) {
+    rentalState = getRental(from);
+    blockedByRental = !rentalState.active;
+  }
+
+  if (blockedByRental && !rentalSafeCommands.has(command)) {
+    const expired = rentalState?.exists && !rentalState?.active;
+    await reply(
+      `🐉🌸 *KOBAYASHI • ACESSO RESTRITO*\n\n` +
+      `${expired ? "⏳ O aluguel deste grupo expirou." : "🔒 Este grupo não possui um aluguel ativo."}\n\n` +
+      `📦 Use *${prefix}planos* para consultar os planos.\n` +
+      `🔎 Use *${prefix}ver_aluguel* para consultar o status.\n` +
+      `👑 Fale com o proprietário do bot para liberar o acesso.`
+    );
+    continue;
+  }
+}
+
 const menc_prt = info.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || null;
 const menc_info = info.message?.extendedTextMessage?.contextInfo;
 const numDigitado = inputToJid(q);
@@ -1011,6 +1051,200 @@ if (isCmd) {
   }
 
 switch (command) {
+
+// ==========================================
+// 🐉 KOBAYASHI RENTAL SYSTEM • v0.1.57
+// ==========================================
+case "planos":
+case "plans": {
+  return reply(
+    `╭━━〔 🐉 *KOBAYASHI BOT • PLANOS* 〕━━╮\n` +
+    `┃ 🌸 *15 dias*  — R$ 12,00\n` +
+    `┃ 🐲 *30 dias*  — R$ 30,00\n` +
+    `┃ 🔥 *60 dias*  — R$ 55,00\n` +
+    `┃ 🎁 +10 dias de bônus no plano de 60 dias\n` +
+    `┃ 👑 *90 dias*  — R$ 90,00\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `🛡️ Administração, proteção, figurinhas, diversão e atualizações do Kobayashi Bot.\n` +
+    `📩 Entre em contato com o proprietário para contratar ou renovar.`
+  );
+}
+break;
+
+case "aluguel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getRentalSettings();
+    return reply(
+      `🐉 *CONTROLE DE ALUGUEL EM GRUPOS*\n\n` +
+      `📌 Estado: *${cfg.groupRestrictionEnabled ? "ATIVADO ✅" : "DESATIVADO ❌"}*\n\n` +
+      `Use: *${prefix}aluguel on* ou *${prefix}aluguel off*`
+    );
+  }
+  const cfg = setRentalRestriction("group", action === "on");
+  return reply(
+    `🐉🌸 Restrição de aluguel em grupos *${cfg.groupRestrictionEnabled ? "ATIVADA ✅" : "DESATIVADA ❌"}*.\n` +
+    `${cfg.groupRestrictionEnabled ? "Apenas grupos registrados ou permanentes poderão usar os comandos." : "Os grupos voltaram a usar o bot sem validação de aluguel."}`
+  );
+}
+break;
+
+case "aluguel_global":
+case "alugel_global": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode alterar a restrição global.");
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getRentalSettings();
+    return reply(
+      `🌐🐉 *ALUGUEL GLOBAL*\n\n` +
+      `📌 Estado: *${cfg.globalRestrictionEnabled ? "ATIVADO ✅" : "DESATIVADO ❌"}*\n\n` +
+      `Use: *${prefix}aluguel_global on* ou *${prefix}aluguel_global off*`
+    );
+  }
+  const cfg = setRentalRestriction("global", action === "on");
+  return reply(
+    `🌐🐉 Restrição global *${cfg.globalRestrictionEnabled ? "ATIVADA ✅" : "DESATIVADA ❌"}*.\n` +
+    `${cfg.globalRestrictionEnabled ? "Fora dos grupos autorizados, somente o dono poderá usar o bot." : "A restrição global foi removida."}`
+  );
+}
+break;
+
+case "rm_alugel":
+case "rm_aluguel":
+case "registrar_aluguel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  if (!isGroup) return reply(mess.onlyGroup());
+  const parsed = parseRentalDuration(args[0]);
+  if (!parsed) {
+    return reply(
+      `⏳ Informe o tempo do aluguel.\n\n` +
+      `Exemplos:\n` +
+      `• *${prefix}rm_alugel 15d*\n` +
+      `• *${prefix}rm_alugel 30d*\n` +
+      `• *${prefix}rm_alugel 60d*\n` +
+      `• *${prefix}rm_alugel 90d*`
+    );
+  }
+  const rental = registerRental(from, groupName, parsed.ms, sender);
+  return reply(
+    `✅🐉 *GRUPO REGISTRADO*\n\n` +
+    `🏷️ Grupo: *${groupName || "Sem nome"}*\n` +
+    `🆔 ID: *${from}*\n` +
+    `⏳ Tempo: *${formatRentalDuration(parsed.ms)}*\n` +
+    `📅 Início: *${formatRentalDate(rental.rentedAt)}*\n` +
+    `⌛ Expira: *${formatRentalDate(rental.expiresAt)}*`
+  );
+}
+break;
+
+case "rg_alugel":
+case "rg_aluguel":
+case "remover_aluguel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  if (!isGroup) return reply(mess.onlyGroup());
+  const state = getRental(from);
+  if (!state.exists) return reply("🌸 Este grupo não possui aluguel registrado.");
+  removeRental(from);
+  return reply(
+    `🗑️🐉 *ALUGUEL REMOVIDO*\n\n` +
+    `🏷️ Grupo: *${groupName || "Sem nome"}*\n` +
+    `🆔 ID: *${from}*\n` +
+    `🔒 O acesso será bloqueado se a restrição de aluguel estiver ativada.`
+  );
+}
+break;
+
+case "renovar_aluguel":
+case "renovar_alugel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  if (!isGroup) return reply(mess.onlyGroup());
+  const parsed = parseRentalDuration(args[0]);
+  if (!parsed) return reply(`⏳ Use: *${prefix}renovar_aluguel 30d*`);
+
+  const current = getRental(from);
+  if (current.permanent) return reply("♾️ Este grupo possui aluguel permanente e não precisa ser renovado.");
+
+  const result = renewRental(from, groupName, parsed.ms, sender);
+  return reply(
+    `♻️🐉 *ALUGUEL RENOVADO*\n\n` +
+    `🏷️ Grupo: *${groupName || "Sem nome"}*\n` +
+    `➕ Adicionado: *${formatRentalDuration(parsed.ms)}*\n` +
+    `⏳ Restante agora: *${formatRentalDuration(Number(result.rental.expiresAt) - Date.now())}*\n` +
+    `⌛ Nova expiração: *${formatRentalDate(result.rental.expiresAt)}*`
+  );
+}
+break;
+
+case "ver_aluguel":
+case "ver_alugel":
+case "aluguel_info": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const state = getRental(from);
+  if (!state.exists) {
+    return reply(
+      `🐉 *DADOS DO ALUGUEL*\n\n` +
+      `🏷️ Grupo: *${groupName || "Sem nome"}*\n` +
+      `🆔 ID: *${from}*\n` +
+      `📦 Status: *Não registrado ❌*`
+    );
+  }
+
+  const r = state.rental;
+  const status = state.permanent ? "Permanente ♾️" : state.active ? "Ativo ✅" : "Expirado ❌";
+  const remaining = state.permanent ? "Ilimitado ♾️" : formatRentalDuration(Number(r.expiresAt || 0) - Date.now());
+  return reply(
+    `╭━━〔 🐉 *DADOS DO ALUGUEL* 〕━━╮\n` +
+    `┃ 🏷️ Grupo: *${r.groupName || groupName || "Sem nome"}*\n` +
+    `┃ 🆔 ID: *${from}*\n` +
+    `┃ 📦 Status: *${status}*\n` +
+    `┃ ⏳ Restante: *${remaining}*\n` +
+    `┃ 📅 Alugado em: *${formatRentalDate(r.rentedAt)}*\n` +
+    `${state.permanent ? "┃ ♾️ Expiração: *Sem limite*\n" : `┃ ⌛ Expira em: *${formatRentalDate(r.expiresAt)}*\n`}` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+  );
+}
+break;
+
+case "lista_aluguel":
+case "lista_alugel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  const rentals = listRentals();
+  if (!rentals.length) return reply("🐉 Ainda não há grupos registrados no sistema de aluguel.");
+
+  const active = rentals.filter((x) => x.active);
+  const expired = rentals.filter((x) => !x.active);
+  const lines = rentals.slice(0, 50).map((item, i) => {
+    const status = item.permanent ? "♾️" : item.active ? "✅" : "❌";
+    const time = item.permanent ? "Permanente" : item.active ? formatRentalDuration(item.remainingMs) : "Expirado";
+    return `${i + 1}. ${status} *${item.groupName || "Grupo"}*\n   🆔 ${item.groupJid}\n   ⏳ ${time}`;
+  }).join("\n\n");
+
+  return reply(
+    `╭━━〔 📋 *LISTA DE ALUGUÉIS* 〕━━╮\n` +
+    `┃ ✅ Ativos: *${active.length}*\n` +
+    `┃ ❌ Expirados: *${expired.length}*\n` +
+    `┃ 📦 Total: *${rentals.length}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `${lines}${rentals.length > 50 ? "\n\n… Mostrando os primeiros 50 grupos." : ""}`
+  );
+}
+break;
+
+case "aluguel_permanente":
+case "alugel_permanente": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
+  if (!isGroup) return reply(mess.onlyGroup());
+  const rental = setPermanentRental(from, groupName, sender);
+  return reply(
+    `♾️🐉 *ALUGUEL PERMANENTE ATIVADO*\n\n` +
+    `🏷️ Grupo: *${groupName || "Sem nome"}*\n` +
+    `🆔 ID: *${from}*\n` +
+    `📅 Registrado em: *${formatRentalDate(rental.permanentSince || rental.rentedAt)}*\n\n` +
+    `✅ Este grupo possui uso livre e não expira.`
+  );
+}
+break;
 
 
 

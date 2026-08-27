@@ -1,46 +1,56 @@
 {
-  "version": "0.1.56-beta",
-  "title": "Activity & ADV Pack",
-  "summary": "Adiciona ranking de atividade, consulta individual e ferramentas de advertências.",
+  "version": "0.1.57-beta",
+  "title": "Rental System Pack",
+  "summary": "Adiciona sistema completo de aluguel por grupo e restrição global.",
   "categories": [
     {
-      "name": "📊 Atividade",
+      "name": "💰 Aluguel",
       "commands": [
         {
-          "command": "/rank",
-          "description": "Mostra o Top 10 de membros mais ativos."
+          "command": "/planos",
+          "description": "Mostra os planos de aluguel do Kobayashi Bot."
         },
         {
-          "command": "/topativos",
-          "description": "Atalho do ranking de atividade."
+          "command": "/aluguel on/off",
+          "description": "Ativa ou desativa a restrição de aluguel em grupos."
         },
         {
-          "command": "/atividade [@membro]",
-          "description": "Mostra mensagens, posição, classe e última atividade."
-        }
-      ]
-    },
-    {
-      "name": "🛡️ Administração",
-      "commands": [
-        {
-          "command": "/advs [@membro]",
-          "description": "Consulta contador e histórico recente de advertências."
+          "command": "/aluguel_global on/off",
+          "description": "Ativa ou desativa a restrição global do bot."
         },
         {
-          "command": "/listadv",
-          "description": "Lista membros com advertências ativas; somente ADMs."
+          "command": "/rm_alugel 30d",
+          "description": "Registra o grupo atual por um período."
+        },
+        {
+          "command": "/rg_alugel",
+          "description": "Remove o aluguel do grupo atual."
+        },
+        {
+          "command": "/renovar_aluguel 30d",
+          "description": "Adiciona tempo ao aluguel atual."
+        },
+        {
+          "command": "/ver_aluguel",
+          "description": "Exibe ID, status, tempo restante e datas do aluguel."
+        },
+        {
+          "command": "/lista_aluguel",
+          "description": "Lista todos os grupos registrados."
+        },
+        {
+          "command": "/aluguel_permanente",
+          "description": "Libera o grupo atual sem data de expiração."
         }
       ]
     }
   ],
   "changes": [
-    "/rank e /topativos agora exibem Top 10.",
-    "/atividade virou consulta individual e aceita marcação/resposta.",
-    "/checkme mantido como alias de /atividade.",
-    "/advs exibe ficha e até 5 registros recentes.",
-    "/listadv lista membros com ADVs ativas.",
-    "Menu ADM atualizado.",
-    "/rmadv mantido."
+    "Banco de aluguel persistente criado em files/database/alugueis.json.",
+    "Tempos aceitos: minutos, horas, dias e semanas (ex.: 30d, 12h, 2sem).",
+    "Renovação soma o novo período ao tempo restante; se expirado, conta a partir do momento da renovação.",
+    "Dono e líderes do bot ignoram o bloqueio de aluguel para evitar lockout.",
+    "/planos e /ver_aluguel continuam disponíveis mesmo quando o grupo está bloqueado.",
+    "Menu Dono atualizado com a nova área de aluguel."
   ]
 }

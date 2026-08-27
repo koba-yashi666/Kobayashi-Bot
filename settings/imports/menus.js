@@ -126,6 +126,18 @@ return `╭══════ ❀ 核心 ❀ ══════╮
 │ 📋 ${prefix}lideres
 ╰────── ❀ ─────────────╯
 
+╭──〔 💰 ALUGUEL 〕────────╮
+│ 📦 ${prefix}planos
+│ 🔒 ${prefix}aluguel on/off
+│ 🌐 ${prefix}aluguel_global on/off
+│ ✅ ${prefix}rm_alugel 30d
+│ 🗑️ ${prefix}rg_alugel
+│ ♻️ ${prefix}renovar_aluguel 30d
+│ 🔎 ${prefix}ver_aluguel
+│ 📋 ${prefix}lista_aluguel
+│ ♾️ ${prefix}aluguel_permanente
+╰────── ❀ ─────────────╯
+
 ╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 🔑 ${prefix}yutatoken TOKEN
 │    ↳ Configurar serviço do Play
