@@ -1,14 +1,23 @@
 {
-  "version": "0.1.54-beta",
-  "title": "Perfil Visual • RMADV",
-  "summary": "Melhora o /perfil com foto e informações visuais, mantendo o sistema /rmadv da v0.1.52.",
+  "version": "0.1.55-beta",
+  "title": "Dragon Card • Activity Fix",
+  "summary": "Corrige o contador de mensagens e cria um /perfil original da Kobayashi.",
   "categories": [
     {
       "name": "🌸 Geral",
       "commands": [
         {
           "command": "/perfil [@membro]",
-          "description": "Mostra foto, cargo, nível de advertências e situação do membro."
+          "description": "Exibe o Dragon Card original da Kobayashi com cargo, atividade, ADVs e aura."
+        }
+      ]
+    },
+    {
+      "name": "📊 Atividade",
+      "commands": [
+        {
+          "command": "/atividade",
+          "description": "Ranking de mensagens corrigido para registrar mensagens de grupo normalmente."
         }
       ]
     },
@@ -17,27 +26,17 @@
       "commands": [
         {
           "command": "/rmadv @membro",
-          "description": "Remove 1 advertência do membro marcado ou da mensagem respondida."
+          "description": "Remove uma advertência do membro."
         }
       ]
     }
   ],
   "changes": [
-    "O /perfil agora envia a foto de perfil do usuário quando ela estiver disponível.",
-    "Cargo exibido com distinção entre Dono do Bot, Dono do Grupo, Administrador e Membro.",
-    "Advertências agora aparecem como contador 0/3 com indicador visual e situação do membro.",
-    "Se a foto não puder ser carregada, o perfil continua funcionando normalmente em texto.",
-    "Mantido o /rmadv e o histórico de remoção de advertências da v0.1.52."
-  ],
-  "latest": {
-    "version": "0.1.54-beta",
-    "title": "Perfil visual renovado",
-    "changes": [
-      "Novo /perfil inspirado em card completo de usuário",
-      "Foto de perfil e bio do WhatsApp quando disponíveis",
-      "Exibe cargo, dono, líder, ADM e advertências",
-      "Adiciona níveis persistentes de personalidade do Kobayashi Fun",
-      "Exibe total de mensagens registradas pelo sistema de atividade"
-    ]
-  }
+    "Corrigido bug que deixava o rastreador de atividade preso dentro da condição Anti-PV.",
+    "Mensagens de grupos agora incrementam corretamente o banco atividade-grupos.json.",
+    "AFK também volta a ser processado corretamente em grupos.",
+    "Novo /perfil com identidade própria: Kobayashi Dragon Card.",
+    "Perfil mostra classe baseada em atividade, mensagens, última atividade, ADVs, cargo, bio e atributos de aura.",
+    "Mantido suporte a foto de perfil quando disponível."
+  ]
 }

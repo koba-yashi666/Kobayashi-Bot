@@ -509,9 +509,15 @@ const SoLider = isLeaderJid(sender);
 const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
 if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
-  
-// KOBAYASHI AFK + ACTIVITY v0.1.42
-if (isGroup && sender) {
+  if (isCmd) {
+    await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
+  }
+  continue;
+}
+
+// KOBAYASHI AFK + ACTIVITY v0.1.55
+// O tracker precisa rodar em grupos independentemente do Anti-PV.
+if (isGroup && sender && !info.key.fromMe) {
   trackActivity(from, sender);
 
   // Se o próprio usuário voltou a falar, remove o AFK.
@@ -545,12 +551,6 @@ if (isGroup && sender) {
       mentions: [jid]
     }, { quoted: info }).catch(() => {});
   }
-}
-
-if (isCmd) {
-    await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
-  }
-  continue;
 }
 
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
@@ -3495,11 +3495,12 @@ case "perfil": {
   }) : null;
 
   const cfgPerfil = readSettingsFile();
-  const ownerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || '').replace(/\D/g, '');
+  const perfilOwnerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || '').replace(/\D/g, '');
   const leaderNumbers = Array.isArray(cfgPerfil?.leaders)
     ? cfgPerfil.leaders.map((x) => String(x || '').replace(/\D/g, '')).filter(Boolean)
     : [];
-  const isTargetOwner = number === ownerNumber || targetJid === dono || target === dono;
+
+  const isTargetOwner = number === perfilOwnerNumber || targetJid === dono || target === dono;
   const isTargetLeader = leaderNumbers.includes(number);
   const participantRole = targetParticipant?.admin;
   const isTargetAdmin = participantRole === 'admin' || participantRole === 'superadmin';
@@ -3509,78 +3510,68 @@ case "perfil": {
     ? pushname || 'Usuário'
     : (targetParticipant?.name || targetParticipant?.notify || `Usuário ${number}`);
 
-  let bio = 'Não informada';
+  let bio = 'Sem recado público';
   try {
     if (typeof conn.fetchStatus === 'function') {
       const statusData = await conn.fetchStatus(targetJid);
       bio = String(statusData?.status || statusData?.[0]?.status || bio).trim() || bio;
     }
   } catch (_) {}
-  if (bio.length > 90) bio = `${bio.slice(0, 87)}...`;
+  if (bio.length > 80) bio = `${bio.slice(0, 77)}...`;
 
   const db = readAdvDb();
   const advCountRaw = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
   const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
-  const advBar = `${'🔴'.repeat(advCount)}${'⚪'.repeat(3 - advCount)}`;
+  const advStatus = advCount === 0 ? 'Ficha limpa' : advCount === 1 ? 'Sob atenção' : advCount === 2 ? 'Zona de risco' : 'Limite atingido';
 
-  const activity = isGroup ? getUserActivity(from, targetJid) : { messages: 0 };
+  const activity = isGroup ? getUserActivity(from, targetJid) : { messages: 0, lastSeen: 0 };
   const messageCount = Number(activity?.messages || 0);
+  const lastSeen = Number(activity?.lastSeen || 0);
+  const lastSeenText = lastSeen
+    ? new Date(lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+    : 'Ainda não registrada';
 
-  // Os níveis são persistentes por grupo, usando o mesmo banco do Kobayashi Fun.
   const gado = isGroup ? getOrCreateFunScore(from, 'gado', targetJid) : 0;
   const beleza = isGroup ? getOrCreateFunScore(from, 'lindo', targetJid) : 0;
-  const gostosura = isGroup ? getOrCreateFunScore(from, 'gostoso', targetJid) : 0;
-  const romance = isGroup ? getOrCreateFunScore(from, 'shipoSolo', targetJid) : 0;
+  const caos = isGroup ? getOrCreateFunScore(from, 'gostoso', targetJid) : 0;
 
-  const badge = (value) => value ? '〘✅〙' : '〘❌〙';
   const cargo = isTargetOwner
-    ? 'Dono do Bot'
+    ? 'Dono da Kobayashi'
     : isGroupOwner
-      ? 'Dono do Grupo'
+      ? 'Dono do grupo'
       : isTargetAdmin
         ? 'Administrador'
         : isTargetLeader
-          ? 'Líder do Bot'
+          ? 'Líder da Kobayashi'
           : 'Membro';
 
+  const dragonRank = messageCount >= 5000 ? 'Dragão Ancião'
+    : messageCount >= 2000 ? 'Dragão Celestial'
+    : messageCount >= 750 ? 'Dragão Carmesim'
+    : messageCount >= 250 ? 'Dragão Lunar'
+    : messageCount >= 50 ? 'Filhote de Dragão'
+    : 'Ovo de Dragão';
+
   const caption =
-    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
-    `┝⋆⃟ۣۜ᭪➮ 𝐌𝐄𝐔 𝐏𝐄𝐑𝐅𝐈𝐋 『🥂』\n` +
-    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
-    `│╭━━───────━━╮\n` +
-    `│╎୨୧🌌 𝐍𝐎𝐌𝐄 - 『 ${name} 』\n` +
-    `│╎୨୧📱 𝐍𝐔𝐌𝐄𝐑𝐎 - 『 ${number} 』\n` +
-    `│╎୨୧💖 𝐁𝐈𝐎 - 『 ${bio} 』\n` +
-    `│╎୨୧🎭 𝐂𝐀𝐑𝐆𝐎 - 『 ${cargo} 』\n` +
-    `│┝─✰°❀•°✮•─✰°❀•°✮•𖦹५ॱ\n` +
-    `│╎୨୧👑 𝐃𝐎𝐍𝐎 -➮ ${badge(isTargetOwner)}\n` +
-    `│╎୨୧🩸 𝐋𝐈𝐃𝐄𝐑 -➮ ${badge(isTargetLeader)}\n` +
-    `│╎୨୧🔱 𝐀𝐃𝐌 -➮ ${badge(isTargetAdmin)}\n` +
-    `│╎୨୧⚠️ 𝐀𝐃𝐕 -➮ 〘 ${advCount}/3 ${advBar} 〙\n` +
-    `│╰━━───────━━╯\n` +
-    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n` +
-    `╎\n` +
-    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
-    `┝⋆⃟ۣۜ᭪➮ 𝐏𝐄𝐑𝐒𝐎𝐍𝐀𝐋𝐈𝐃𝐀𝐃𝐄 『💋』\n` +
-    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
-    `│╭━━───────━━╮\n` +
-    `│╎🐂 𝙉𝙄𝙑𝙀𝙇-𝙂𝘼𝘿𝙊 ⧽ ${gado}%\n` +
-    `│╎😍 𝙉𝙄𝙑𝙀𝙇-𝘽𝙀𝙇𝙀𝙕𝘼 ⧽ ${beleza}%\n` +
-    `│╎🥵 𝙉𝙄𝙑𝙀𝙇-𝙂𝙊𝙎𝙏𝙊𝙎𝙐𝙍𝘼 ⧽ ${gostosura}%\n` +
-    `│╎💞 𝙉𝙄𝙑𝙀𝙇-𝙍𝙊𝙈𝘼𝙉𝘾𝙀 ⧽ ${romance}%\n` +
-    `│╰━━───────━━╯\n` +
-    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n` +
-    `╎\n` +
-    `╭━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╮\n` +
-    `┝⋆⃟ۣۜ᭪➮ 𝐒𝐄𝐔𝐒 𝐃𝐀𝐃𝐎𝐒 『✨』\n` +
-    `╰━✰°❀•°✮•| ⊱✿⊰ |•°•❀°✾✰━╯\n` +
-    `│╭━━───────━━╮\n` +
-    `│╎░⃟⃛ ➮𝙼𝙴𝙽𝚂𝙰𝙶𝙴𝙽𝚂 ${messageCount} - 💬\n` +
-    `│╎░⃟⃛ ➮𝙰𝙳𝚅𝙴𝚁𝚃𝙴̂𝙽𝙲𝙸𝙰𝚂 ${advCount} - ⚠️\n` +
-    `│╰━━───────━━╯\n` +
-    `╰━━━✰°❀•°✮°•❀°✾✰━━━╯\n\n` +
-    `🐉 𝐁𝐨𝐭: KӨBΛYΛƧΗI BӨƬ\n` +
-    `✰✰✰✰✰`;
+    `╭━━━〔 🐉 *KOBAYASHI DRAGON CARD* 〕━━━╮\n` +
+    `┃\n` +
+    `┃ 🌸 *${name}*\n` +
+    `┃ 📱 +${number}\n` +
+    `┃ 🎭 ${cargo}\n` +
+    `┃ 💬 “${bio}”\n` +
+    `┃\n` +
+    `┣━━〔 🐲 REGISTRO DO DRAGÃO 〕━━┫\n` +
+    `┃ 🏷️ Classe: *${dragonRank}*\n` +
+    `┃ 💬 Mensagens: *${messageCount}*\n` +
+    `┃ 🕒 Última atividade: *${lastSeenText}*\n` +
+    `┃ ⚠️ ADVs: *${advCount}/3* — ${advStatus}\n` +
+    `┃\n` +
+    `┣━━〔 ✨ AURA 〕━━━━━━━━━━━━┫\n` +
+    `┃ 🐂 Caos romântico: *${gado}%*\n` +
+    `┃ 🌸 Charme: *${beleza}%*\n` +
+    `┃ 🔥 Presença: *${caos}%*\n` +
+    `┃\n` +
+    `╰━━━〔 🌸 KOBAYASHI BOT 〕━━━━╯`;
 
   let profilePicture = null;
   try {
