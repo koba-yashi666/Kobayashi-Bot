@@ -6,19 +6,43 @@
     {
       "name": "🎴 Figurinhas",
       "commands": [
-        {"command": "/fig", "description": "Cria figurinha com a identidade Kobayashi Sticker Atelier."},
-        {"command": "/rename Autor | Pacote", "description": "Troca autor e pacote de uma figurinha respondida."},
-        {"command": "/roubar", "description": "Reempacota a figurinha usando automaticamente o nome de quem executou o comando."},
-        {"command": "/figurinhas 1-15", "description": "Envia um pacote aleatório usando o sistema de múltiplas fontes."}
+        {
+          "command": "/fig",
+          "description": "Cria figurinha com a identidade Kobayashi Sticker Atelier."
+        },
+        {
+          "command": "/rename Autor | Pacote",
+          "description": "Troca autor e pacote de uma figurinha respondida."
+        },
+        {
+          "command": "/roubar",
+          "description": "Reempacota a figurinha usando automaticamente o nome de quem executou o comando."
+        },
+        {
+          "command": "/figurinhas 1-15",
+          "description": "Envia um pacote aleatório usando o sistema de múltiplas fontes."
+        }
       ]
     },
     {
       "name": "🌐 Fontes de figurinhas",
       "commands": [
-        {"command": "/fontesfig", "description": "Mostra as fontes disponíveis e o modo atual."},
-        {"command": "/fontefig auto/ID", "description": "Dono escolhe uma fonte específica ou alternância automática."},
-        {"command": "/addfontefig Nome | URL | min | max", "description": "Dono adiciona uma fonte numérica por template {n}."},
-        {"command": "/delfontefig ID", "description": "Dono remove uma fonte personalizada."}
+        {
+          "command": "/fontesfig",
+          "description": "Mostra as fontes disponíveis e o modo atual."
+        },
+        {
+          "command": "/fontefig auto/ID",
+          "description": "Dono escolhe uma fonte específica ou alternância automática."
+        },
+        {
+          "command": "/addfontefig Nome | URL | min | max",
+          "description": "Dono adiciona uma fonte numérica por template {n}."
+        },
+        {
+          "command": "/delfontefig ID",
+          "description": "Dono remove uma fonte personalizada."
+        }
       ]
     }
   ],
@@ -30,6 +54,21 @@
     "O /figurinhas alterna entre fontes disponíveis no modo auto e registra as últimas figurinhas para reduzir repetições.",
     "Uma coleção local em files/stickers pode ser usada junto das fontes remotas.",
     "Fontes remotas extras podem ser cadastradas pelo dono usando URL com marcador {n}.",
-    "A fonte remota anterior foi preservada como fonte padrão principal." 
-  ]
+    "A fonte remota anterior foi preservada como fonte padrão principal."
+  ],
+  "0.2.0-beta": {
+    "version": "0.2.0-beta",
+    "title": "Administration Pro Pack",
+    "added": [
+      "/regras e /setregras",
+      "/anotacao e /anotacoes",
+      "/listanegra com remoção automática",
+      "/revogarlink",
+      "/banghost com prévia e confirmação"
+    ],
+    "improved": [
+      "Integração com logs administrativos",
+      "Reaproveita /promover, /rebaixar, /linkgp e /listabranca já existentes"
+    ]
+  }
 }

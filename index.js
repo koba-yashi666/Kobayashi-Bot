@@ -34,6 +34,7 @@ import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.j
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
+import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -559,6 +560,21 @@ if (isGroup && sender && !info.key.fromMe) {
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
+
+
+// ==========================================
+// 🛡️ ADMIN PRO • LISTA NEGRA v0.2.0
+// ==========================================
+if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoDono) {
+  if (isBotGroupAdmins) {
+    await conn.groupParticipantsUpdate(from, [sender], "remove").catch(() => {});
+  }
+  await conn.sendMessage(from, {
+    text: `⛔🐉 *LISTA NEGRA*\n\n@${sender.split("@")[0]} está bloqueado neste grupo.${isBotGroupAdmins ? "\n🔨 Remoção automática executada." : "\n⚠️ Preciso ser ADM para remover automaticamente."}`,
+    mentions: [sender]
+  }).catch(() => {});
+  continue;
+}
 
 // ==========================================
 // 🐉 YURI PACK 2 • CONTROLE DE COMANDOS
@@ -5163,6 +5179,144 @@ process.exit();
 }, 1200);
 break;
 //
+
+// 🛡️ ADMIN PRO v0.2.0
+case "regras": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const rules = getRules(from);
+  if (!rules) return reply(`📜🐉 *REGRAS DO GRUPO*\n\nNenhuma regra foi configurada ainda.\n\n🛡️ ADM: use *${prefix}setregras texto*`);
+  return reply(`╭━━〔 📜 *REGRAS DO GRUPO* 〕━━╮\n\n${rules}\n\n╰━━〔 🐉 KOBAYASHI BOT 〕━━╯`);
+}
+break;
+
+case "setregras": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!q.trim()) return reply(`📜 Use: *${prefix}setregras suas regras aqui*\n🗑️ Para apagar: *${prefix}delregras*`);
+  setRules(from, q, sender);
+  addAdminLog(from, { type: "setregras", actor: sender, detail: "Regras do grupo atualizadas" });
+  return reply("✅📜 Regras do grupo atualizadas com sucesso.");
+}
+break;
+
+case "delregras":
+case "rmregras": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  clearRules(from);
+  addAdminLog(from, { type: "delregras", actor: sender, detail: "Regras removidas" });
+  return reply("🗑️📜 Regras removidas.");
+}
+break;
+
+case "anotacao":
+case "anotar": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!q.trim()) return reply(`📝 Use: *${prefix}anotacao texto da anotação*`);
+  const note = addNote(from, q, sender);
+  addAdminLog(from, { type: "anotacao", actor: sender, detail: `Nota #${note.id} criada` });
+  return reply(`✅📝 Anotação *#${note.id}* salva.\n\n${note.text}`);
+}
+break;
+
+case "anotacoes":
+case "notas": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const notes = listNotes(from);
+  if (!notes.length) return reply("📝 Não há anotações administrativas neste grupo.");
+  const lines = notes.slice(-30).map(n => `*#${n.id}* • ${n.text}\n   👤 @${String(n.by||'').split('@')[0] || 'desconhecido'}`).join("\n\n");
+  const mentions = [...new Set(notes.map(n=>n.by).filter(Boolean))];
+  return conn.sendMessage(from, { text:`╭━━〔 📝 *ANOTAÇÕES ADM* 〕━━╮\n\n${lines}\n\n╰━━━━━━━━━━━━━━━━━━╯`, mentions }, { quoted: info });
+}
+break;
+
+case "delanotacao":
+case "rmanotacao": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const id = Number(args[0]);
+  if (!Number.isInteger(id)) return reply(`🗑️ Use: *${prefix}delanotacao 3*`);
+  const ok = removeNote(from, id);
+  return reply(ok ? `✅ Anotação *#${id}* removida.` : `❌ Não encontrei a anotação #${id}.`);
+}
+break;
+
+case "limparanotacoes": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const count = clearNotes(from);
+  return reply(`🧹 ${count} anotação(ões) removida(s).`);
+}
+break;
+
+case "listanegra":
+case "blacklist": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  const target = getTargetFromMessage(info, null) || inputToJid(args[1] || (action ? "" : q));
+  if (!action) {
+    const list = getBlacklist(from);
+    if (!list.length) return reply(`⛔ *LISTA NEGRA*\n\nNenhum usuário bloqueado.\n\n➕ ${prefix}listanegra add @membro motivo\n➖ ${prefix}listanegra del @membro`);
+    const lines=list.map((jid,i)=>{ const m=getBlacklistMeta(from,jid); return `${i+1}. @${jid.split('@')[0]}${m?.reason?` — ${m.reason}`:''}`; }).join('\n');
+    return conn.sendMessage(from,{text:`╭━━〔 ⛔ *LISTA NEGRA* 〕━━╮\n\n${lines}\n\n╰━━━━━━━━━━━━━━━━━━╯`,mentions:list},{quoted:info});
+  }
+  if (!["add","adicionar","+","del","remover","remove","-"].includes(action)) return reply(`⛔ Use:\n${prefix}listanegra add @membro motivo\n${prefix}listanegra del @membro\n${prefix}listanegra`);
+  if (!target) return reply("👤 Marque ou responda a mensagem do usuário.");
+  if (target === dono || isMainOwnerJid(target)) return reply("👑 O dono principal não pode entrar na lista negra.");
+  if (["add","adicionar","+"].includes(action)) {
+    const reason = args.slice(2).join(" ") || "Sem motivo informado";
+    addBlacklist(from,target,sender,reason);
+    if (isBotGroupAdmins) await conn.groupParticipantsUpdate(from,[target],"remove").catch(()=>{});
+    addAdminLog(from,{type:"blacklist_add",actor:sender,target,detail:reason});
+    return conn.sendMessage(from,{text:`⛔ @${target.split('@')[0]} adicionado à lista negra.\n📝 Motivo: *${reason}*${isBotGroupAdmins?'\n🔨 Removido do grupo.':''}`,mentions:[target]},{quoted:info});
+  }
+  const ok=removeBlacklist(from,target);
+  return conn.sendMessage(from,{text:ok?`✅ @${target.split('@')[0]} removido da lista negra.`:`⚠️ @${target.split('@')[0]} não estava na lista negra.`,mentions:[target]},{quoted:info});
+}
+break;
+
+case "revogarlink":
+case "resetlink": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+  try {
+    await conn.groupRevokeInvite(from);
+    addAdminLog(from,{type:"revogarlink",actor:sender,detail:"Link de convite revogado"});
+    return reply("✅🔗 Link antigo revogado. Use /linkgp para gerar/ver o novo link.");
+  } catch (e) { console.error('[REVOGARLINK]',e?.message||e); return reply("❌ Não consegui revogar o link do grupo."); }
+}
+break;
+
+case "banghost": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+  const days = Math.max(1, Math.min(90, Number(args[0]) || 30));
+  const limit = Date.now() - days*24*60*60*1000;
+  const candidates = [];
+  for (const p of groupMembers) {
+    const jid = p.id || p.jid;
+    if (!jid || groupAdmins.includes(jid) || jid===botNumber || jid===dono) continue;
+    const a = getUserActivity(from,jid);
+    const last = Number(a?.lastActivity || a?.lastMessageAt || 0);
+    const msgs = Number(a?.messages || a?.count || 0);
+    if ((!last && msgs===0) || (last && last < limit)) candidates.push(jid);
+  }
+  if (!candidates.length) return reply(`👻 Nenhum ghost encontrado com *${days} dias* de inatividade.`);
+  if (String(args[1]||'').toLowerCase() !== 'confirmar') {
+    const preview=candidates.slice(0,20).map((j,i)=>`${i+1}. @${j.split('@')[0]}`).join('\n');
+    return conn.sendMessage(from,{text:`👻 *BANGHOST — PRÉVIA*\n\nCritério: sem atividade há *${days} dias*\nEncontrados: *${candidates.length}*\n\n${preview}${candidates.length>20?'\n…':''}\n\n⚠️ Para remover, use:\n*${prefix}banghost ${days} confirmar*`,mentions:candidates.slice(0,20)},{quoted:info});
+  }
+  const batch=candidates.slice(0,50);
+  await conn.groupParticipantsUpdate(from,batch,'remove').catch(()=>{});
+  addAdminLog(from,{type:'banghost',actor:sender,detail:`${batch.length} ghosts removidos • ${days} dias`});
+  return reply(`👻🔨 *BANGHOST concluído*\n\nRemovidos: *${batch.length}*\nCritério: *${days} dias sem atividade*.`);
+}
+break;
 
 // adm
 case "promover":
