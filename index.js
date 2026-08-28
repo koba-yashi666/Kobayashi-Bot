@@ -2834,6 +2834,28 @@ case "xp": {
 }
 break;
 
+case "categoriaslevel":
+case "categoriasnivel":
+case "classeslevel": {
+  return reply(
+    `╭━━〔 🐉 CATEGORIAS DRAGON LEVEL 〕━━╮\n` +
+    `┃ 🥚 *Níveis 1–5*   • Ovo de Dragão\n` +
+    `┃ 🐣 *Níveis 6–10*  • Filhote de Dragão\n` +
+    `┃ 🌸 *Níveis 11–15* • Dragão Aprendiz\n` +
+    `┃ 🐉 *Níveis 16–20* • Jovem Dragão\n` +
+    `┃ ⚡ *Níveis 21–25* • Dragão Ascendente\n` +
+    `┃ 🌙 *Níveis 26–30* • Dragão Lunar\n` +
+    `┃ 🔥 *Níveis 31–35* • Dragão Carmesim\n` +
+    `┃ 👑 *Níveis 36–40* • Dragão Imperial\n` +
+    `┃ 🌌 *Níveis 41–45* • Dragão Cósmico\n` +
+    `┃ 🌠 *Níveis 46–49* • Dragão Lendário\n` +
+    `┃ 🐲 *Nível 50*      • Dragão Primordial\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `✨ O título muda automaticamente conforme você evolui.`
+  );
+}
+break;
+
 case "ranknivel":
 case "toplevel":
 case "rankxp": {
@@ -2862,6 +2884,7 @@ case "nivelinfo": {
   return reply(
     `╭━━〔 🐲 SISTEMA DE NÍVEIS 〕━━╮\n` +
     `┃ 🎯 O sistema possui *50 níveis*.\n` +
+    `┃ 🐉 São *10 categorias* + título especial no nível 50.\n` +
     `┃ ⭐ Do nível *1 ao 10*: 100 XP por nível.\n` +
     `┃ 📈 Após o nível 10, a exigência aumenta gradualmente.\n` +
     `┃ 💬 Conversas válidas rendem *5–12 XP*.\n` +
@@ -4790,6 +4813,9 @@ reply(
   `│\n` +
   `│ 📊 *${prefix}nivelinfo*\n` +
   `│ └ Entenda XP, classes e progressão\n` +
+  `│\n` +
+  `│ 🐲 *${prefix}categoriaslevel*\n` +
+  `│ └ Veja todas as categorias de nível\n` +
   `│\n` +
   `│ ⚙️ *${prefix}level on*  • ADM\n` +
   `│ └ Ativa o sistema de níveis\n` +
