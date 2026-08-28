@@ -33,6 +33,7 @@ import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand
 import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
+import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -2260,50 +2261,96 @@ case "togif": {
 }
 break;
 
+case "rename": {
+  const quoted = getQuotedMessage(info);
+  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+
+  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
+    return reply(
+      `🎴 Responda a uma figurinha com:\n\n` +
+      `*${prefix}rename Seu nome | Nome do pacote*\n\n` +
+      `Ex.: *${prefix}rename ${pushname || "Oni-chan"} | Minha coleção*`
+    );
+  }
+
+  const parts = String(q || "").split("|").map((x) => x.trim()).filter(Boolean);
+  if (parts.length < 2) {
+    return reply(
+      `🌸 Use assim:\n*${prefix}rename Seu nome | Nome do pacote*\n\n` +
+      `O primeiro campo vira o autor e o segundo vira o pacote.`
+    );
+  }
+
+  try {
+    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    const authorName = parts[0].slice(0, 60);
+    const packName = parts.slice(1).join(" | ").slice(0, 80);
+    const result = await applyStickerMetadata(stickerBuffer, {
+      userNick: authorName,
+      packName: `🐉 ${packName}`,
+      publisher: `🌸 ${authorName} • Kobayashi Bot`,
+      packId: "kobayashi-rename",
+      emojis: ["🐉", "🌸", "✨"]
+    });
+    return conn.sendMessage(from, { sticker: result }, { quoted: info });
+  } catch (e) {
+    console.error("Erro /rename:", e);
+    return reply("❌ Não consegui renomear essa figurinha.");
+  }
+}
+break;
+
+case "roubar":
+case "steal": {
+  const quoted = getQuotedMessage(info);
+  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+
+  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
+    return reply(`🎴 Responda a uma figurinha com *${prefix}roubar*.`);
+  }
+
+  try {
+    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    const authorName = String(pushname || sender.split("@")[0]).trim().slice(0, 60);
+    const result = await applyStickerMetadata(stickerBuffer, {
+      userNick: authorName,
+      packName: "🐉 Kobayashi • Minha Coleção",
+      publisher: `🌸 ${authorName}`,
+      packId: "kobayashi-roubar",
+      emojis: ["🐉", "🌸", "💜"]
+    });
+    return conn.sendMessage(from, { sticker: result }, { quoted: info });
+  } catch (e) {
+    console.error("Erro /roubar:", e);
+    return reply("❌ Não consegui pegar essa figurinha agora.");
+  }
+}
+break;
+
 case "take": {
   const quoted = getQuotedMessage(info);
   const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
 
   if (!target?.message || getContentType(target.message) !== "stickerMessage") {
     return reply(
-      `🎐 Responda a uma figurinha com:\n\n` +
-      `*${prefix}take Nome do pacote | Autor*\n\n` +
-      `Ex.: *${prefix}take Kobayashi Pack | ${pushname || "Usuário"}*`
+      `🎐 O *${prefix}take* antigo continua disponível.\n` +
+      `Responda a uma figurinha com *${prefix}take Pacote | Autor*.\n\n` +
+      `✨ Novo formato recomendado: *${prefix}rename Autor | Pacote*.`
     );
   }
 
   try {
     const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
     const parts = String(q || "").split("|").map((x) => x.trim());
-    const cfg = readSettingsFile();
-
     const packName = parts[0] || "Kobayashi Pack";
     const authorName = parts[1] || pushname || sender.split("@")[0];
-
-    const webpModule = await import("node-webpmux");
-    const WebpImage = webpModule.Image || webpModule.default?.Image;
-    if (!WebpImage) return reply("❌ Não consegui carregar o editor de metadados.");
-
-    const jsonMeta = Buffer.from(JSON.stringify({
-      "sticker-pack-id": "kobayashi-take",
-      "sticker-pack-name": packName,
-      "sticker-pack-publisher": authorName,
-      "emojis": ["🐉","🌸"]
-    }), "utf8");
-
-    const exif = Buffer.concat([
-      Buffer.from([0x49,0x49,0x2A,0x00,0x08,0x00,0x00,0x00,0x01,0x00,0x41,0x57,0x07,0x00]),
-      Buffer.alloc(4),
-      Buffer.from([0x16,0x00,0x00,0x00]),
-      jsonMeta
-    ]);
-    exif.writeUIntLE(jsonMeta.length, 14, 4);
-
-    const img = new WebpImage();
-    await img.load(stickerBuffer);
-    img.exif = exif;
-    const result = await img.save(null);
-
+    const result = await applyStickerMetadata(stickerBuffer, {
+      userNick: authorName,
+      packName: `🐉 ${packName}`,
+      publisher: `🌸 ${authorName} • Kobayashi Bot`,
+      packId: "kobayashi-take",
+      emojis: ["🐉", "🌸"]
+    });
     return conn.sendMessage(from, { sticker: result }, { quoted: info });
   } catch (e) {
     console.error("Erro /take:", e);
@@ -3622,6 +3669,7 @@ case "changelog": {
 break;
 
 // comandos públicos
+case "fig":
 case "stickers":
 case "sticker":
 case "stk":
@@ -4115,33 +4163,31 @@ case "packfig": {
       );
     }
 
-    const usedNumbers = new Set();
     let successCount = 0;
     let failCount = 0;
+    const sourceHits = {};
 
     for (let i = 0; i < quantidade; i++) {
       try {
-        let randomNum;
-        do {
-          randomNum = Math.floor(Math.random() * 8051);
-        } while (usedNumbers.has(randomNum));
+        const fetched = await getRandomStickerBuffer({ axios, timeout: 30000 });
+        const randomMetadata = {
+          userNick: pushname || sender.split("@")[0],
+          packName: "🌸 Kobayashi • Random Collection",
+          publisher: "🐉 Kobayashi Bot • Multi Source",
+          packId: "kobayashi-random",
+          emojis: ["🐉", "🌸", "🎴"]
+        };
+        const isWebp = fetched.buffer?.slice(0,4).toString() === "RIFF" && fetched.buffer?.slice(8,12).toString() === "WEBP";
+        const personalized = isWebp
+          ? await applyStickerMetadata(fetched.buffer, randomMetadata)
+          : await makeSticker(fetched.buffer, { isVideo: false, forceSquare: true, metadata: randomMetadata });
 
-        usedNumbers.add(randomNum);
-
-        const stickerUrl =
-          `https://raw.githubusercontent.com/badDevelopper/Testfigu/main/fig (${randomNum}).webp`;
-
-        const response = await axios.get(stickerUrl, {
-          responseType: "arraybuffer",
-          timeout: 120000,
-        });
-
-        await conn.sendMessage(destino, {
-          sticker: Buffer.from(response.data),
-        });
+        await conn.sendMessage(destino, { sticker: personalized });
+        sourceHits[fetched.source?.name || fetched.source?.id || "Fonte"] =
+          (sourceHits[fetched.source?.name || fetched.source?.id || "Fonte"] || 0) + 1;
 
         successCount++;
-        await delay(800);
+        await delay(650);
       } catch (stickerError) {
         console.error(`Erro ao buscar/enviar figurinha ${i + 1}:`, stickerError?.message || stickerError);
         failCount++;
@@ -4163,8 +4209,10 @@ case "packfig": {
 ` +
         `${failCount ? `⚠️ Falhas: *${failCount}*
 ` : ""}` +
+        `${Object.keys(sourceHits).length ? `🌐 Fontes usadas: *${Object.entries(sourceHits).map(([name,count]) => `${name} (${count})`).join(", ")}*
+` : ""}` +
         `
-🐉 *Kobayashi Bot*`,
+🐉 *Kobayashi Bot • Multi Source*`,
     });
   } catch (e) {
     console.error("Erro no comando figurinhas:", e);
@@ -4178,6 +4226,71 @@ case "packfig": {
 }
 break;
 //
+
+// fontes de figurinhas • v0.1.59
+case "fontesfig":
+case "fontesfigurinha": {
+  const db = listStickerSources();
+  const lines = db.sources.map((src) => {
+    const selected = db.mode === src.id ? " 🎯" : "";
+    const status = src.enabled === false ? "🔴" : "🟢";
+    const detail = src.type === "template" ? `${src.min}-${src.max}` : "pasta local";
+    return `${status} *${src.id}*${selected}\n   ↳ ${src.name} • ${detail}`;
+  }).join("\n");
+  return reply(
+    `╭━━〔 🎴 FONTES DE FIGURINHAS 〕━━╮\n` +
+    `┃ Modo: *${db.mode === "auto" ? "Automático 🔄" : db.mode}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━╯\n\n${lines}\n\n` +
+    `🌸 No modo automático a Kobayashi alterna entre as fontes disponíveis e evita repetir as últimas figurinhas.\n` +
+    `📁 Você também pode colocar .webp/.png/.jpg em *files/stickers/*.\n\n` +
+    `👑 Dono: *${prefix}fontefig auto* ou *${prefix}fontefig ID*`
+  );
+}
+break;
+
+case "fontefig": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const mode = String(args?.[0] || "").trim().toLowerCase();
+  if (!mode) return reply(`🎴 Use *${prefix}fontefig auto* ou *${prefix}fontefig ID*.`);
+  try {
+    const db = setStickerSourceMode(mode);
+    return reply(`✅ Fonte de figurinhas definida para *${db.mode === "auto" ? "automático" : db.mode}*.`);
+  } catch (e) {
+    return reply(`❌ ${e?.message || "Não consegui selecionar essa fonte."}`);
+  }
+}
+break;
+
+case "addfontefig": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const parts = String(q || "").split("|").map((x) => x.trim());
+  if (parts.length < 4) {
+    return reply(
+      `🌐 Use:\n*${prefix}addfontefig Nome | URL com {n} | mínimo | máximo*\n\n` +
+      `Ex.: *${prefix}addfontefig MinhaFonte | https://site.com/sticker-{n}.webp | 1 | 500*`
+    );
+  }
+  try {
+    const src = addStickerTemplateSource({ name: parts[0], url: parts[1], min: Number(parts[2]), max: Number(parts[3]) });
+    return reply(`✅ Fonte adicionada!\n\n🆔 *${src.id}*\n🌐 ${src.name}\n🔢 ${src.min}-${src.max}`);
+  } catch (e) {
+    return reply(`❌ ${e?.message || "Não consegui adicionar essa fonte."}`);
+  }
+}
+break;
+
+case "delfontefig": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const id = String(args?.[0] || "").trim().toLowerCase();
+  if (!id) return reply(`🗑️ Use *${prefix}delfontefig ID*.`);
+  try {
+    removeStickerSource(id);
+    return reply(`✅ Fonte *${id}* removida.`);
+  } catch (e) {
+    return reply(`❌ ${e?.message || "Não consegui remover essa fonte."}`);
+  }
+}
+break;
 
 // informações • v0.1.11
 case "admins":

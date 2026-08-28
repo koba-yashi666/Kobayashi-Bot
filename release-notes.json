@@ -1,57 +1,35 @@
 {
-  "version": "0.1.58-beta",
-  "title": "Anti-Trava Pack",
-  "summary": "Adiciona proteção configurável contra menções em massa, textões abusivos, flood de mensagens e payloads anormais.",
+  "version": "0.1.59-beta",
+  "title": "Sticker Upgrade Pack",
+  "summary": "Renova o sistema de figurinhas com /rename, /roubar, identidade própria da Kobayashi, múltiplas fontes e anti-repetição.",
   "categories": [
     {
-      "name": "🛡️ Anti-Trava",
+      "name": "🎴 Figurinhas",
       "commands": [
-        {
-          "command": "/antitrava on/off",
-          "description": "Liga ou desliga o sistema principal e mostra o status."
-        },
-        {
-          "command": "/antimencao on/off",
-          "description": "Protege contra marcações em massa."
-        },
-        {
-          "command": "/limitemencao 10",
-          "description": "Define quantas menções uma mensagem pode ter."
-        },
-        {
-          "command": "/antitextao on/off",
-          "description": "Detecta textos excessivos, caracteres invisíveis e repetições anormais."
-        },
-        {
-          "command": "/limitetexto 4000",
-          "description": "Define o limite de caracteres por mensagem."
-        },
-        {
-          "command": "/antifloodmsg on/off",
-          "description": "Protege contra muitas mensagens em poucos segundos."
-        },
-        {
-          "command": "/limiteflood 6",
-          "description": "Define o limite do flood de mensagens."
-        },
-        {
-          "command": "/punirtrava adv/ban/alerta",
-          "description": "Escolhe a punição aplicada quando o Anti-Trava dispara."
-        },
-        {
-          "command": "/modoemergencia on/off",
-          "description": "Em ataques graves, fecha o grupo temporariamente quando o bot é ADM."
-        }
+        {"command": "/fig", "description": "Cria figurinha com a identidade Kobayashi Sticker Atelier."},
+        {"command": "/rename Autor | Pacote", "description": "Troca autor e pacote de uma figurinha respondida."},
+        {"command": "/roubar", "description": "Reempacota a figurinha usando automaticamente o nome de quem executou o comando."},
+        {"command": "/figurinhas 1-15", "description": "Envia um pacote aleatório usando o sistema de múltiplas fontes."}
+      ]
+    },
+    {
+      "name": "🌐 Fontes de figurinhas",
+      "commands": [
+        {"command": "/fontesfig", "description": "Mostra as fontes disponíveis e o modo atual."},
+        {"command": "/fontefig auto/ID", "description": "Dono escolhe uma fonte específica ou alternância automática."},
+        {"command": "/addfontefig Nome | URL | min | max", "description": "Dono adiciona uma fonte numérica por template {n}."},
+        {"command": "/delfontefig ID", "description": "Dono remove uma fonte personalizada."}
       ]
     }
   ],
   "changes": [
-    "Anti-Trava atua também sobre mensagens de administradores; não existe imunidade automática para ADM.",
-    "Tentativa de apagar a mensagem ofensiva quando a Kobayashi é administradora.",
-    "Punição configurável entre ADV, ban e somente alerta.",
-    "Detecção adicional de caracteres invisíveis, repetições gigantes e payloads protocolários anormais.",
-    "Modo de emergência é opcional e vem desligado por padrão; quando ativado, fecha o grupo por 20 segundos em ataques considerados graves.",
-    "O AntiFlood antigo continua sendo o limitador de comandos; /antifloodmsg é a proteção nova para mensagens comuns.",
-    "Proteção depende dos eventos que o WhatsApp/Baileys entrega ao bot; Status do grupo que não gerar evento manipulável não pode ser apagado pela Kobayashi."
+    "Metadados padrão renovados para Kobayashi • Sticker Atelier.",
+    "O comando /fig agora é alias oficial de criação de figurinhas.",
+    "O /take antigo foi mantido para compatibilidade, mas /rename é o formato recomendado.",
+    "O /roubar usa o nome de quem executou o comando como autor automaticamente.",
+    "O /figurinhas alterna entre fontes disponíveis no modo auto e registra as últimas figurinhas para reduzir repetições.",
+    "Uma coleção local em files/stickers pode ser usada junto das fontes remotas.",
+    "Fontes remotas extras podem ser cadastradas pelo dono usando URL com marcador {n}.",
+    "A fonte remota anterior foi preservada como fonte padrão principal." 
   ]
 }

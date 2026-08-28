@@ -173,15 +173,23 @@ return `╭══════ ❀ 🎴 ❀ ══════╮
 ╰══════ ❀ 🌸 ❀ ══════╯
 
 ╭──〔 🌸 CRIAÇÃO 〕───────╮
-│ 🖼️ ${prefix}stickers
+│ 🖼️ ${prefix}fig / ${prefix}s
 │ 🎴 ${prefix}figurinhas 1-15
 │ 🎨 ${prefix}autosticker
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🪄 FERRAMENTAS 〕────╮
+│ 🏷️ ${prefix}rename Autor | Pacote
+│ 🐲 ${prefix}roubar
 │ 🌄 ${prefix}toimg
 │ 🎞️ ${prefix}togif
-│ 🎐 ${prefix}take Pacote | Autor
+╰────── ❀ ─────────────╯
+
+╭──〔 🌐 FONTES 〕─────────╮
+│ 🎴 ${prefix}fontesfig
+│ 👑 ${prefix}fontefig auto/ID
+│ 👑 ${prefix}addfontefig Nome | URL | min | max
+│ 👑 ${prefix}delfontefig ID
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🎴 STICKER CMD 〕────╮
