@@ -26,7 +26,7 @@ import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
-import { trackActivity, getUserActivity, getTopActivity, getInactive } from "./lib/features/activityTracker.js";
+import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp } from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
@@ -522,7 +522,17 @@ if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDo
 // KOBAYASHI AFK + ACTIVITY v0.1.55
 // O tracker precisa rodar em grupos independentemente do Anti-PV.
 if (isGroup && sender && !info.key.fromMe) {
-  trackActivity(from, sender);
+  const levelEvent = trackActivity(from, sender, { text: body, isCommand: isCmd });
+  if (levelEvent?.levelUp) {
+    await conn.sendMessage(from, {
+      text:
+        `🐉✨ *LEVEL UP!*\n\n` +
+        `@${String(sender).split("@")[0]} chegou ao *nível ${levelEvent.level}*!\n` +
+        `🏷️ ${levelEvent.title}\n\n` +
+        `Continue participando do grupo para evoluir.`,
+      mentions: [sender]
+    }, { quoted: info }).catch(() => {});
+  }
 
   // Se o próprio usuário voltou a falar, remove o AFK.
   const ownAfk = getAfk(sender);
@@ -2777,6 +2787,74 @@ case "afk": {
 }
 break;
 
+case "nivel":
+case "level":
+case "xp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const contextInfo =
+    info?.message?.extendedTextMessage?.contextInfo ||
+    info?.message?.imageMessage?.contextInfo ||
+    info?.message?.videoMessage?.contextInfo || {};
+  const target = contextInfo?.mentionedJid?.[0] || contextInfo?.participant || sender;
+  const row = getUserActivity(from, target);
+  const filled = Math.max(0, Math.min(10, Math.round(row.progress / 10)));
+  const bar = "▰".repeat(filled) + "▱".repeat(10 - filled);
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🐉 DRAGON LEVEL 〕━━╮\n` +
+      `┃ 👤 @${String(target).split("@")[0]}\n` +
+      `┃ 🏷️ ${row.title}\n` +
+      `┃ ⭐ Nível: *${row.level}*\n` +
+      `┃ ✨ XP total: *${row.xp}*\n` +
+      `┃ 💬 Mensagens: *${row.messages}*\n` +
+      `┃\n` +
+      `┃ ${bar} *${row.progress}%*\n` +
+      `┃ 📈 ${row.currentXp}/${row.neededXp} XP para o próximo nível\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "ranknivel":
+case "toplevel":
+case "rankxp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const top = getTopLevel(from, 10);
+  if (!top.length) return reply("🐉 Ainda não há XP registrado neste grupo.");
+  const medals = ["🥇", "🥈", "🥉"];
+  const mentions = top.map((x) => x.jid);
+  const rows = top.map((x, i) =>
+    `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *Nv.${x.level}* • ${x.xp} XP`
+  ).join("\n");
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🏆 RANK DE NÍVEIS 〕━━╮\n` +
+      `┃ Os dragões que mais evoluíram\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `${rows}\n\n` +
+      `✨ XP vem de participação real; comandos e spam não contam.`,
+    mentions
+  }, { quoted: info });
+}
+break;
+
+case "sistemanivel":
+case "nivelinfo": {
+  return reply(
+    `╭━━〔 🐲 SISTEMA DE NÍVEIS 〕━━╮\n` +
+    `┃ 💬 Converse normalmente para ganhar XP.\n` +
+    `┃ ⏱️ Há cooldown entre ganhos de XP.\n` +
+    `┃ ♻️ Repetir a mesma mensagem não dá XP.\n` +
+    `┃ 🤖 Comandos não geram XP.\n` +
+    `┃ 📝 Mensagens maiores podem render um pouco mais.\n` +
+    `┃ 🏆 Use *${prefix}ranknivel* para ver o Top 10.\n` +
+    `┃ 🐉 Use *${prefix}nivel* para ver sua evolução.\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+  );
+}
+break;
+
 case "rank":
 case "topativos": {
   if (!isGroup) return reply(mess.onlyGroup());
@@ -2812,7 +2890,7 @@ case "checkme": {
   const last = row.lastSeen > 0
     ? new Date(row.lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
     : "sem registro";
-  const rankName = row.messages >= 5000 ? "Dragão Ancião" : row.messages >= 2000 ? "Dragão Celestial" : row.messages >= 750 ? "Dragão Carmesim" : row.messages >= 250 ? "Dragão Lunar" : row.messages >= 50 ? "Filhote de Dragão" : "Ovo de Dragão";
+  const rankName = row.title || "🥚 Ovo de Dragão";
   return conn.sendMessage(from, {
     text:
       `╭━━〔 📊 ATIVIDADE 〕━━╮\n` +
@@ -2820,6 +2898,7 @@ case "checkme": {
       `┃ 💬 Mensagens: *${row.messages}*\n` +
       `┃ 🏆 Posição: *${position > 0 ? `#${position}` : "sem ranking"}*\n` +
       `┃ 🐲 Classe: *${rankName}*\n` +
+      `┃ ⭐ Nível: *${row.level}* • ${row.xp} XP\n` +
       `┃ 🕒 Última: *${last}*\n` +
       `╰━━━━━━━━━━━━━━━━╯`,
     mentions: [target]
@@ -4050,12 +4129,10 @@ case "perfil": {
           ? 'Líder da Kobayashi'
           : 'Membro';
 
-  const dragonRank = messageCount >= 5000 ? 'Dragão Ancião'
-    : messageCount >= 2000 ? 'Dragão Celestial'
-    : messageCount >= 750 ? 'Dragão Carmesim'
-    : messageCount >= 250 ? 'Dragão Lunar'
-    : messageCount >= 50 ? 'Filhote de Dragão'
-    : 'Ovo de Dragão';
+  const levelInfo = getLevelInfoFromXp(activity?.xp || 0);
+  const dragonRank = levelInfo.title;
+  const levelBlocks = Math.max(0, Math.min(10, Math.round(levelInfo.progress / 10)));
+  const levelBar = "▰".repeat(levelBlocks) + "▱".repeat(10 - levelBlocks);
 
   const caption =
     `╭━━━〔 🐉 *KOBAYASHI DRAGON CARD* 〕━━━╮\n` +
@@ -4067,6 +4144,8 @@ case "perfil": {
     `┃\n` +
     `┣━━〔 🐲 REGISTRO DO DRAGÃO 〕━━┫\n` +
     `┃ 🏷️ Classe: *${dragonRank}*\n` +
+    `┃ ⭐ Nível: *${levelInfo.level}* • ${levelInfo.xp} XP\n` +
+    `┃ 📈 ${levelBar} ${levelInfo.progress}%\n` +
     `┃ 💬 Mensagens: *${messageCount}*\n` +
     `┃ 🕒 Última atividade: *${lastSeenText}*\n` +
     `┃ ⚠️ ADVs: *${advCount}/3* — ${advStatus}\n` +

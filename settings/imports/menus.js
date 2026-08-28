@@ -1,4 +1,4 @@
-/* KOBAYASHI BOT • v0.1.58-beta */
+/* KOBAYASHI BOT • v0.1.46-beta */
 export const menuPrincipal = (NomeDoBot, sender, ownerName, prefix) => {
 return `╭═══════ ❀ 小林 ❀ ═══════╮
        ୨୧ *KOBAYASHI BOT* ୨୧
@@ -9,7 +9,7 @@ return `╭═══════ ❀ 小林 ❀ ═══════╮
 🪷 Bot › ${NomeDoBot}
 🌺 Dono › ${ownerName}
 🪭 Prefixo › ${prefix}
-💮 Versão › 0.1.58-beta
+💮 Versão › 0.1.46-beta
 
 ╭───〔 🌸 MENUS 〕────────╮
 │ 🛡️ ${prefix}menuadm
@@ -30,9 +30,6 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 
 ╭──〔 🛡️ MODERAÇÃO 〕────╮
 │ ⚠️ ${prefix}adv @membro motivo
-│ ♻️ ${prefix}rmadv @membro
-│ 🔎 ${prefix}advs @membro
-│ 📋 ${prefix}listadv
 │ 🔨 ${prefix}ban @membro
 │ 🤡 ${prefix}bam @membro
 │ 🎐 ${prefix}admins
@@ -48,8 +45,6 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 │ 🗑️ ${prefix}rm_opengp
 │ 🔗 ${prefix}linkgp
 │ 🔒 ${prefix}gp f
-│ 🏆 ${prefix}rank
-│ 📊 ${prefix}atividade @membro
 │ 💤 ${prefix}inativos 7
 │ 🚨 ${prefix}antiflood 5
 │ 🌎 ${prefix}antifake on/off
@@ -83,15 +78,6 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🔐 PROTEÇÃO 〕──────╮
-│ 🚨 ${prefix}antitrava on/off
-│ 👥 ${prefix}antimencao on/off
-│ 🔢 ${prefix}limitemencao 10
-│ 📝 ${prefix}antitextao on/off
-│ 📏 ${prefix}limitetexto 4000
-│ 🌊 ${prefix}antifloodmsg on/off
-│ ⏱️ ${prefix}limiteflood 6
-│ ⚖️ ${prefix}punirtrava adv/ban/alerta
-│ 🚧 ${prefix}modoemergencia on/off
 │ 🚫 ${prefix}antilink
 │ 🔗 ${prefix}antilinkgp
 │ ⚠️ ${prefix}antilinklight
@@ -135,18 +121,6 @@ return `╭══════ ❀ 核心 ❀ ══════╮
 │ 📋 ${prefix}lideres
 ╰────── ❀ ─────────────╯
 
-╭──〔 💰 ALUGUEL 〕────────╮
-│ 📦 ${prefix}planos
-│ 🔒 ${prefix}aluguel on/off
-│ 🌐 ${prefix}aluguel_global on/off
-│ ✅ ${prefix}rm_alugel 30d
-│ 🗑️ ${prefix}rg_alugel
-│ ♻️ ${prefix}renovar_aluguel 30d
-│ 🔎 ${prefix}ver_aluguel
-│ 📋 ${prefix}lista_aluguel
-│ ♾️ ${prefix}aluguel_permanente
-╰────── ❀ ─────────────╯
-
 ╭──〔 ⚙️ SISTEMA 〕────────╮
 │ 🔑 ${prefix}yutatoken TOKEN
 │    ↳ Configurar serviço do Play
@@ -173,23 +147,15 @@ return `╭══════ ❀ 🎴 ❀ ══════╮
 ╰══════ ❀ 🌸 ❀ ══════╯
 
 ╭──〔 🌸 CRIAÇÃO 〕───────╮
-│ 🖼️ ${prefix}fig / ${prefix}s
+│ 🖼️ ${prefix}stickers
 │ 🎴 ${prefix}figurinhas 1-15
 │ 🎨 ${prefix}autosticker
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🪄 FERRAMENTAS 〕────╮
-│ 🏷️ ${prefix}rename Autor | Pacote
-│ 🐲 ${prefix}roubar
 │ 🌄 ${prefix}toimg
 │ 🎞️ ${prefix}togif
-╰────── ❀ ─────────────╯
-
-╭──〔 🌐 FONTES 〕─────────╮
-│ 🎴 ${prefix}fontesfig
-│ 👑 ${prefix}fontefig auto/ID
-│ 👑 ${prefix}addfontefig Nome | URL | min | max
-│ 👑 ${prefix}delfontefig ID
+│ 🎐 ${prefix}take Pacote | Autor
 ╰────── ❀ ─────────────╯
 
 ╭──〔 🎴 STICKER CMD 〕────╮
@@ -207,6 +173,9 @@ return `╭══════ ❀ 🪷 ❀ ══════╮
 
 ╭──〔 🌸 INFORMAÇÕES 〕────╮
 │ 💤 ${prefix}afk motivo
+│ 🐉 ${prefix}nivel [@]
+│ 🏆 ${prefix}ranknivel
+│ ℹ️ ${prefix}nivelinfo
 │ 📊 ${prefix}atividade
 │ 👤 ${prefix}checkme @
 │ 🏆 ${prefix}topativos
