@@ -527,9 +527,11 @@ if (isGroup && sender && !info.key.fromMe) {
     await conn.sendMessage(from, {
       text:
         `🐉✨ *LEVEL UP!*\n\n` +
-        `@${String(sender).split("@")[0]} chegou ao *nível ${levelEvent.level}*!\n` +
+        `@${String(sender).split("@")[0]} subiu para o *nível ${levelEvent.level}*! 🎉\n` +
         `🏷️ ${levelEvent.title}\n\n` +
-        `Continue participando do grupo para evoluir.`,
+        (levelEvent.level >= 50
+          ? `👑 *NÍVEL MÁXIMO ALCANÇADO!* Você chegou ao topo do Dragon Level.`
+          : `✨ Continue conversando e usando a Kobayashi para evoluir.`),
       mentions: [sender]
     }, { quoted: info }).catch(() => {});
   }
@@ -2823,7 +2825,9 @@ case "xp": {
       `┃ 💬 Mensagens: *${row.messages}*\n` +
       `┃\n` +
       `┃ ${bar} *${row.progress}%*\n` +
-      `┃ 📈 ${row.currentXp}/${row.neededXp} XP para o próximo nível\n` +
+            (row.level >= 50
+        ? `┃ 👑 *Nível máximo alcançado!*\n`
+        : `┃ 📈 ${row.currentXp}/${row.neededXp} XP para o próximo nível\n`) +
       `╰━━━━━━━━━━━━━━━━━━╯`,
     mentions: [target]
   }, { quoted: info });
@@ -2857,6 +2861,9 @@ case "sistemanivel":
 case "nivelinfo": {
   return reply(
     `╭━━〔 🐲 SISTEMA DE NÍVEIS 〕━━╮\n` +
+    `┃ 🎯 O sistema possui *50 níveis*.\n` +
+    `┃ ⭐ Do nível *1 ao 10*: 100 XP por nível.\n` +
+    `┃ 📈 Após o nível 10, a exigência aumenta gradualmente.\n` +
     `┃ 💬 Conversas válidas rendem *5–12 XP*.\n` +
     `┃ 🤖 Usar a Kobayashi rende *14–18 XP*.\n` +
     `┃ ⏱️ Há cooldown entre ganhos para evitar farm.\n` +
@@ -4753,13 +4760,20 @@ case "rankgostoso": {
 break;
 //
 // menu
-case "menu":
-reagir("🐉");
-sendMenu(from, linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix), sender);
-await reply(
-  `🐉 *DRAGON LEVEL*\n` +
-  `└ ${prefix}menulevel — Níveis, XP e ranking do grupo`
-);
+case "menu": {
+  await conn.sendMessage(from, {
+    react: { text: "🐉", key: info.key }
+  }).catch(() => {});
+
+  const menuPrincipalComLevel =
+    linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix) +
+    `\n\n╭─〔 🐉 *DRAGON LEVEL* 〕\n` +
+    `│ ${prefix}menulevel\n` +
+    `│ └ Níveis, XP e ranking do grupo\n` +
+    `╰────────────────`;
+
+  await sendMenu(from, menuPrincipalComLevel, sender);
+}
 break;
 
 case "menulevel":
@@ -4786,6 +4800,9 @@ reply(
   `├━━〔 ✨ *COMO GANHAR XP* 〕━━┫\n` +
   `│ 💬 Conversando: *+5–12 XP*\n` +
   `│ 🐉 Usando a Kobayashi: *+14–18 XP*\n` +
+  `│ 🎯 Progressão: *1 → 50 níveis*\n` +
+  `│ ⭐ Nv.1–10: *100 XP por nível*\n` +
+  `│ 📈 Depois disso, o XP aumenta aos poucos\n` +
   `│ 🛡️ Anti-farm e cooldown ativos\n` +
   `│\n` +
   `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
