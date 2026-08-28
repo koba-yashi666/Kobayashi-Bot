@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.1.57-beta",
-  "description": "Kobayashi Bot Beta v0.1.53 - Perfil Visual + RMADV",
+  "version": "0.1.58-beta",
+  "description": "Kobayashi Bot Beta v0.1.58 - Anti-Trava Pack",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

@@ -1,56 +1,57 @@
 {
-  "version": "0.1.57-beta",
-  "title": "Rental System Pack",
-  "summary": "Adiciona sistema completo de aluguel por grupo e restrição global.",
+  "version": "0.1.58-beta",
+  "title": "Anti-Trava Pack",
+  "summary": "Adiciona proteção configurável contra menções em massa, textões abusivos, flood de mensagens e payloads anormais.",
   "categories": [
     {
-      "name": "💰 Aluguel",
+      "name": "🛡️ Anti-Trava",
       "commands": [
         {
-          "command": "/planos",
-          "description": "Mostra os planos de aluguel do Kobayashi Bot."
+          "command": "/antitrava on/off",
+          "description": "Liga ou desliga o sistema principal e mostra o status."
         },
         {
-          "command": "/aluguel on/off",
-          "description": "Ativa ou desativa a restrição de aluguel em grupos."
+          "command": "/antimencao on/off",
+          "description": "Protege contra marcações em massa."
         },
         {
-          "command": "/aluguel_global on/off",
-          "description": "Ativa ou desativa a restrição global do bot."
+          "command": "/limitemencao 10",
+          "description": "Define quantas menções uma mensagem pode ter."
         },
         {
-          "command": "/rm_alugel 30d",
-          "description": "Registra o grupo atual por um período."
+          "command": "/antitextao on/off",
+          "description": "Detecta textos excessivos, caracteres invisíveis e repetições anormais."
         },
         {
-          "command": "/rg_alugel",
-          "description": "Remove o aluguel do grupo atual."
+          "command": "/limitetexto 4000",
+          "description": "Define o limite de caracteres por mensagem."
         },
         {
-          "command": "/renovar_aluguel 30d",
-          "description": "Adiciona tempo ao aluguel atual."
+          "command": "/antifloodmsg on/off",
+          "description": "Protege contra muitas mensagens em poucos segundos."
         },
         {
-          "command": "/ver_aluguel",
-          "description": "Exibe ID, status, tempo restante e datas do aluguel."
+          "command": "/limiteflood 6",
+          "description": "Define o limite do flood de mensagens."
         },
         {
-          "command": "/lista_aluguel",
-          "description": "Lista todos os grupos registrados."
+          "command": "/punirtrava adv/ban/alerta",
+          "description": "Escolhe a punição aplicada quando o Anti-Trava dispara."
         },
         {
-          "command": "/aluguel_permanente",
-          "description": "Libera o grupo atual sem data de expiração."
+          "command": "/modoemergencia on/off",
+          "description": "Em ataques graves, fecha o grupo temporariamente quando o bot é ADM."
         }
       ]
     }
   ],
   "changes": [
-    "Banco de aluguel persistente criado em files/database/alugueis.json.",
-    "Tempos aceitos: minutos, horas, dias e semanas (ex.: 30d, 12h, 2sem).",
-    "Renovação soma o novo período ao tempo restante; se expirado, conta a partir do momento da renovação.",
-    "Dono e líderes do bot ignoram o bloqueio de aluguel para evitar lockout.",
-    "/planos e /ver_aluguel continuam disponíveis mesmo quando o grupo está bloqueado.",
-    "Menu Dono atualizado com a nova área de aluguel."
+    "Anti-Trava atua também sobre mensagens de administradores; não existe imunidade automática para ADM.",
+    "Tentativa de apagar a mensagem ofensiva quando a Kobayashi é administradora.",
+    "Punição configurável entre ADV, ban e somente alerta.",
+    "Detecção adicional de caracteres invisíveis, repetições gigantes e payloads protocolários anormais.",
+    "Modo de emergência é opcional e vem desligado por padrão; quando ativado, fecha o grupo por 20 segundos em ataques considerados graves.",
+    "O AntiFlood antigo continua sendo o limitador de comandos; /antifloodmsg é a proteção nova para mensagens comuns.",
+    "Proteção depende dos eventos que o WhatsApp/Baileys entrega ao bot; Status do grupo que não gerar evento manipulável não pode ser apagado pela Kobayashi."
   ]
 }

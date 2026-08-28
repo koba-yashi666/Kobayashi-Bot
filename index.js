@@ -32,6 +32,7 @@ import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
 import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
+import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -555,6 +556,8 @@ if (isGroup && sender && !info.key.fromMe) {
 }
 
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
+const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
+const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
 
 // ==========================================
 // 🐉 YURI PACK 2 • CONTROLE DE COMANDOS
@@ -600,9 +603,75 @@ if (isCmd && command) {
   trackCommandUsage(command, sender);
 }
 
-const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
+// ==========================================
+// 🛡️ KOBAYASHI ANTI-TRAVA • v0.1.58
+// ==========================================
+if (isGroup && sender && !info.key.fromMe && sender !== botNumber) {
+  const antiTravaCfg = getAntiTravaConfig(from);
+  const inspection = inspectPotentialTrava({
+    groupJid: from,
+    userJid: sender,
+    message: info.message,
+    text: body,
+    config: antiTravaCfg,
+  });
 
-const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
+  if (inspection.triggered) {
+    let deleted = false;
+    if (isBotGroupAdmins) {
+      deleted = await deleteDetectedMessage(conn, from, info);
+    }
+
+    let punishmentText = "Somente alerta";
+    const punishment = String(antiTravaCfg.punishment || "adv").toLowerCase();
+
+    if (punishment === "ban") {
+      if (isBotGroupAdmins) {
+        try {
+          await conn.groupParticipantsUpdate(from, [sender], "remove");
+          punishmentText = "Membro removido";
+        } catch (e) {
+          const result = await addAutomaticWarning(conn, from, sender, "Anti-Trava: " + inspection.reasons.join(", "), isBotGroupAdmins, info);
+          punishmentText = `Ban falhou • ADV ${result.count}/3`;
+        }
+      } else {
+        const result = await addAutomaticWarning(conn, from, sender, "Anti-Trava: " + inspection.reasons.join(", "), false, info);
+        punishmentText = `Sem ADM • ADV ${result.count}/3`;
+      }
+    } else if (punishment === "adv") {
+      const result = await addAutomaticWarning(conn, from, sender, "Anti-Trava: " + inspection.reasons.join(", "), isBotGroupAdmins, info);
+      punishmentText = result.removed ? "3/3 ADVs • removido" : `ADV ${result.count}/3`;
+    }
+
+    if (inspection.severe && antiTravaCfg.emergency && isBotGroupAdmins) {
+      const wasAnnouncement = Boolean(groupMetadata?.announce);
+      if (!wasAnnouncement) {
+        try {
+          await conn.groupSettingUpdate(from, "announcement");
+          const reopenMs = Math.max(5, Math.min(120, Number(antiTravaCfg.emergencySeconds) || 20)) * 1000;
+          setTimeout(async () => {
+            try { await conn.groupSettingUpdate(from, "not_announcement"); } catch {}
+          }, reopenMs).unref?.();
+        } catch (e) {
+          console.error("Erro ao ativar modo de emergência:", e?.message || e);
+        }
+      }
+    }
+
+    await conn.sendMessage(from, {
+      text:
+        `🚨🐉 *KOBAYASHI ANTI-TRAVA*\n\n` +
+        `👤 @${sender.split("@")[0]}\n` +
+        `🧨 Detectado: *${inspection.reasons.join(" • ")}*\n` +
+        `🗑️ Mensagem: *${deleted ? "apagada ✅" : isBotGroupAdmins ? "não consegui apagar ⚠️" : "preciso ser ADM ⚠️"}*\n` +
+        `⚖️ Ação: *${punishmentText}*` +
+        `${inspection.severe && antiTravaCfg.emergency ? `\n🚧 Modo de emergência acionado por ${antiTravaCfg.emergencySeconds}s.` : ""}`,
+      mentions: [sender],
+    }).catch(() => {});
+
+    continue;
+  }
+}
 
 
 // ==========================================
@@ -2743,6 +2812,117 @@ case "inativos": {
 }
 break;
 
+
+case "antitrava": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  if (!action || action === "status" || action === "ver") {
+    return reply(formatAntiTravaStatus(getAntiTravaConfig(from)) + `\n\nUse *${prefix}antitrava on* ou *${prefix}antitrava off*.`);
+  }
+  if (!["on", "off"].includes(action)) return reply(`🛡️ Use *${prefix}antitrava on* ou *${prefix}antitrava off*.`);
+  const cfg = updateAntiTravaConfig(from, { enabled: action === "on" });
+  return reply(formatAntiTravaStatus(cfg));
+}
+break;
+
+case "antimencao":
+case "antimencao": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getAntiTravaConfig(from);
+    return reply(`👥 *ANTI-MENÇÃO*\nStatus: *${cfg.antiMention ? "ON ✅" : "OFF ❌"}*\nLimite: *${cfg.mentionLimit}*\n\nUse *${prefix}antimencao on/off*.`);
+  }
+  const cfg = updateAntiTravaConfig(from, { antiMention: action === "on" });
+  return reply(`👥 Anti-menção *${cfg.antiMention ? "ativado ✅" : "desativado ❌"}*.\nLimite atual: *${cfg.mentionLimit}* menções.`);
+}
+break;
+
+case "limitemencao":
+case "limitemencoes": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const value = Number(args[0]);
+  if (!Number.isInteger(value) || value < 2 || value > 100) return reply(`👥 Informe um limite entre *2 e 100*.\nEx.: *${prefix}limitemencao 10*`);
+  updateAntiTravaConfig(from, { mentionLimit: value });
+  return reply(`✅ Limite de menções definido para *${value}* por mensagem.`);
+}
+break;
+
+case "antitextao":
+case "antitexto": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getAntiTravaConfig(from);
+    return reply(`📝 *ANTI-TEXTÃO*\nStatus: *${cfg.antiLongText ? "ON ✅" : "OFF ❌"}*\nLimite: *${cfg.textLimit}* caracteres.\n\nUse *${prefix}antitextao on/off*.`);
+  }
+  const cfg = updateAntiTravaConfig(from, { antiLongText: action === "on" });
+  return reply(`📝 Anti-textão *${cfg.antiLongText ? "ativado ✅" : "desativado ❌"}*.\nLimite atual: *${cfg.textLimit}* caracteres.`);
+}
+break;
+
+case "limitetexto": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const value = Number(args[0]);
+  if (!Number.isInteger(value) || value < 500 || value > 50000) return reply(`📝 Informe um limite entre *500 e 50000* caracteres.\nEx.: *${prefix}limitetexto 4000*`);
+  updateAntiTravaConfig(from, { textLimit: value });
+  return reply(`✅ Limite de texto definido para *${value} caracteres*.`);
+}
+break;
+
+case "antifloodmsg":
+case "antifloodmensagem": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getAntiTravaConfig(from);
+    return reply(`🌊 *ANTI-FLOOD DE MENSAGENS*\nStatus: *${cfg.antiFloodMessage ? "ON ✅" : "OFF ❌"}*\nLimite: *${cfg.floodLimit} mensagens/${cfg.floodWindowSeconds}s*.\n\nUse *${prefix}antifloodmsg on/off*.`);
+  }
+  const cfg = updateAntiTravaConfig(from, { antiFloodMessage: action === "on" });
+  return reply(`🌊 Anti-flood de mensagens *${cfg.antiFloodMessage ? "ativado ✅" : "desativado ❌"}*.`);
+}
+break;
+
+case "limiteflood": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const value = Number(args[0]);
+  if (!Number.isInteger(value) || value < 3 || value > 30) return reply(`🌊 Informe entre *3 e 30 mensagens*.\nEx.: *${prefix}limiteflood 6*`);
+  const cfg = updateAntiTravaConfig(from, { floodLimit: value });
+  return reply(`✅ Flood configurado para *${cfg.floodLimit} mensagens em ${cfg.floodWindowSeconds}s*.`);
+}
+break;
+
+case "punirtrava":
+case "punicao_trava": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const value = String(args[0] || "").toLowerCase();
+  if (!["adv", "ban", "alerta"].includes(value)) return reply(`⚖️ Escolha: *adv*, *ban* ou *alerta*.\nEx.: *${prefix}punirtrava adv*`);
+  const cfg = updateAntiTravaConfig(from, { punishment: value });
+  return reply(`⚖️ Punição do Anti-Trava definida como *${cfg.punishment.toUpperCase()}*.`);
+}
+break;
+
+case "modoemergencia":
+case "emergencia": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const action = String(args[0] || "").toLowerCase();
+  if (!["on", "off"].includes(action)) {
+    const cfg = getAntiTravaConfig(from);
+    return reply(`🚨 *MODO DE EMERGÊNCIA*\nStatus: *${cfg.emergency ? "ON ✅" : "OFF ❌"}*\nFechamento: *${cfg.emergencySeconds}s*.\n\nUse *${prefix}modoemergencia on/off*.`);
+  }
+  const cfg = updateAntiTravaConfig(from, { emergency: action === "on" });
+  return reply(`🚨 Modo de emergência *${cfg.emergency ? "ativado ✅" : "desativado ❌"}*.\nAtaques graves podem fechar o grupo por *${cfg.emergencySeconds}s*.`);
+}
+break;
 
 case "antiflood": {
   if (!isGroup) return reply(mess.onlyGroup());
