@@ -4756,6 +4756,40 @@ break;
 case "menu":
 reagir("🐉");
 sendMenu(from, linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix), sender);
+await reply(
+  `🐉 *DRAGON LEVEL*\n` +
+  `└ ${prefix}menulevel — Níveis, XP e ranking do grupo`
+);
+break;
+
+case "menulevel":
+case "menunivel":
+reagir("🐉");
+reply(
+  `╭━━〔 🐉 *DRAGON LEVEL* 〕━━╮\n` +
+  `│\n` +
+  `│ ✨ *${prefix}nivel*\n` +
+  `│ └ Veja seu nível, XP e progresso\n` +
+  `│\n` +
+  `│ 🏆 *${prefix}ranknivel*\n` +
+  `│ └ Ranking de níveis do grupo\n` +
+  `│\n` +
+  `│ 📊 *${prefix}nivelinfo*\n` +
+  `│ └ Entenda XP, classes e progressão\n` +
+  `│\n` +
+  `│ ⚙️ *${prefix}level on*  • ADM\n` +
+  `│ └ Ativa o sistema de níveis\n` +
+  `│\n` +
+  `│ 💤 *${prefix}level off* • ADM\n` +
+  `│ └ Desativa o sistema de níveis\n` +
+  `│\n` +
+  `├━━〔 ✨ *COMO GANHAR XP* 〕━━┫\n` +
+  `│ 💬 Conversando: *+5–12 XP*\n` +
+  `│ 🐉 Usando a Kobayashi: *+14–18 XP*\n` +
+  `│ 🛡️ Anti-farm e cooldown ativos\n` +
+  `│\n` +
+  `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
+);
 break;
 
 case "menuadm":
