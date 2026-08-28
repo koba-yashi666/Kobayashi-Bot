@@ -1,22 +1,19 @@
 {
-  "version": "0.3.0-beta",
-  "title": "Dragon Level System",
+  "version": "0.3.1-beta",
+  "title": "Dragon Level Control & XP Boost",
   "added": [
-    "/nivel (/level, /xp)",
-    "/ranknivel (/toplevel, /rankxp)",
-    "/nivelinfo (/sistemanivel)",
-    "XP por interação real nos grupos",
-    "Anti-farm por cooldown e repetição",
-    "Aviso automático de Level Up",
-    "Nível e progresso no /perfil"
+    "/level on e /level off por grupo",
+    "XP bônus ao usar comandos da Kobayashi"
   ],
   "changed": [
-    "/atividade agora exibe nível e XP",
-    "Classes de dragão agora evoluem pelo nível"
+    "Conversas válidas rendem 5–12 XP",
+    "Comandos rendem 14–18 XP",
+    "Anti-farm agora também protege XP ganho por comandos",
+    "/nivel mostra se o sistema está ativo no grupo"
   ],
   "notes": [
-    "Comandos não geram XP",
-    "Mensagens repetidas em curto período não geram XP",
-    "O contador de mensagens continua funcionando normalmente"
+    "O contador de mensagens continua funcionando mesmo com /level off",
+    "Grupos já existentes permanecem com o sistema de nível ativado por padrão",
+    "Cooldown impede farm de XP por spam de mensagens e comandos"
   ]
 }

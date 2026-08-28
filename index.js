@@ -26,7 +26,7 @@ import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
-import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp } from "./lib/features/activityTracker.js";
+import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled } from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
@@ -2791,6 +2791,19 @@ case "nivel":
 case "level":
 case "xp": {
   if (!isGroup) return reply(mess.onlyGroup());
+
+  const levelAction = String(args?.[0] || "").toLowerCase();
+  if (["on", "off"].includes(levelAction)) {
+    if (!isGroupAdmins) return reply(mess.onlyAdmins());
+    const enabled = levelAction === "on";
+    setLevelEnabled(from, enabled);
+    return reply(
+      enabled
+        ? "🐉✨ *Dragon Level ativado!*\nAgora conversar e usar os comandos da Kobayashi rende XP neste grupo."
+        : "🐉💤 *Dragon Level desativado.*\nAs mensagens continuam sendo contabilizadas, mas ninguém ganhará XP até um ADM usar /level on."
+    );
+  }
+
   const contextInfo =
     info?.message?.extendedTextMessage?.contextInfo ||
     info?.message?.imageMessage?.contextInfo ||
@@ -2804,6 +2817,7 @@ case "xp": {
       `╭━━〔 🐉 DRAGON LEVEL 〕━━╮\n` +
       `┃ 👤 @${String(target).split("@")[0]}\n` +
       `┃ 🏷️ ${row.title}\n` +
+      `┃ ⚙️ Sistema: *${isLevelEnabled(from) ? "ATIVO ✅" : "DESATIVADO 💤"}*\n` +
       `┃ ⭐ Nível: *${row.level}*\n` +
       `┃ ✨ XP total: *${row.xp}*\n` +
       `┃ 💬 Mensagens: *${row.messages}*\n` +
@@ -2833,7 +2847,7 @@ case "rankxp": {
       `┃ Os dragões que mais evoluíram\n` +
       `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
       `${rows}\n\n` +
-      `✨ XP vem de participação real; comandos e spam não contam.`,
+      `✨ Conversar rende XP e usar a Kobayashi rende bônus maior. Spam não conta.`,
     mentions
   }, { quoted: info });
 }
@@ -2843,11 +2857,11 @@ case "sistemanivel":
 case "nivelinfo": {
   return reply(
     `╭━━〔 🐲 SISTEMA DE NÍVEIS 〕━━╮\n` +
-    `┃ 💬 Converse normalmente para ganhar XP.\n` +
-    `┃ ⏱️ Há cooldown entre ganhos de XP.\n` +
-    `┃ ♻️ Repetir a mesma mensagem não dá XP.\n` +
-    `┃ 🤖 Comandos não geram XP.\n` +
-    `┃ 📝 Mensagens maiores podem render um pouco mais.\n` +
+    `┃ 💬 Conversas válidas rendem *5–12 XP*.\n` +
+    `┃ 🤖 Usar a Kobayashi rende *14–18 XP*.\n` +
+    `┃ ⏱️ Há cooldown entre ganhos para evitar farm.\n` +
+    `┃ ♻️ Repetir a mesma mensagem/comando não dá XP.\n` +
+    `┃ ⚙️ ADM: *${prefix}level on/off* ativa ou desativa por grupo.\n` +
     `┃ 🏆 Use *${prefix}ranknivel* para ver o Top 10.\n` +
     `┃ 🐉 Use *${prefix}nivel* para ver sua evolução.\n` +
     `╰━━━━━━━━━━━━━━━━━━━━━━╯`

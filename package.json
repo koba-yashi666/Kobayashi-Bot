@@ -1,6 +1,6 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.3.0-beta",
+  "version": "0.3.1-beta",
   "description": "Kobayashi Bot Beta v0.1.58 - Anti-Trava Pack",
   "main": "bootstrap.js",
   "type": "module",
