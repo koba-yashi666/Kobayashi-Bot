@@ -31,7 +31,7 @@ import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLeve
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
-import { getReleaseNotes, formatReleaseNotes } from "./lib/features/updateNews.js";
+import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePendingUpdateNews } from "./lib/features/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
@@ -513,6 +513,29 @@ const SoDonoPrincipal = sender === dono || isMainOwnerJid(sender);
 const SoLider = isLeaderJid(sender);
 const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
+
+// 🐉 UPDATE NEWS v0.3.6
+// Após um /update, a notícia fica pendente em disco. Na primeira atividade
+// recebida depois do reinício, a Kobayashi publica o resumo no chat que iniciou a atualização.
+const pendingUpdateNews = consumePendingUpdateNews();
+if (pendingUpdateNews?.targetJid) {
+  const currentNotes = getReleaseNotes();
+  const expectedVersion = String(pendingUpdateNews?.toVersion || "").trim();
+  const currentVersion = String(currentNotes?.version || getLocalVersion()).trim();
+
+  if (!expectedVersion || expectedVersion === currentVersion) {
+    const updateText =
+      `🐉🌸 *KOBAYASHI BOT ATUALIZADA!*\n\n` +
+      `📦 *Versão*\n${pendingUpdateNews?.fromVersion || "anterior"} → ${currentVersion}\n\n` +
+      formatReleaseNotes(currentNotes, { prefix });
+
+    await conn.sendMessage(
+      pendingUpdateNews.targetJid,
+      { text: updateText }
+    ).catch((e) => console.error("Erro ao enviar Update News:", e));
+  }
+}
+
 if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
   if (isCmd) {
     await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
@@ -4627,10 +4650,125 @@ case "menubn": {
     `│ 🔥 ${prefix}rankgostosa\n` +
     `│ 😏 ${prefix}rankgostoso\n` +
     `│\n` +
+    `├─ 💬 *FRASES & TEXTOS*\n` +
+    `│ 😂 ${prefix}piada\n` +
+    `│ 💡 ${prefix}conselho\n` +
+    `│ 🌟 ${prefix}motivacional\n` +
+    `│ 💖 ${prefix}elogio @membro\n` +
+    `│ 🧩 ${prefix}charada\n` +
+    `│\n` +
+    `├─ 🎲 *JOGOS RÁPIDOS*\n` +
+    `│ 🎯 ${prefix}chance pergunta\n` +
+    `│ ⏳ ${prefix}quando pergunta\n` +
+    `│ 🍀 ${prefix}sorte\n` +
+    `│ 🙈 ${prefix}eununca\n` +
+    `│ ⚔️ ${prefix}vab\n` +
+    `│ ✊ ${prefix}ppt pedra|papel|tesoura\n` +
+    `│\n` +
     `└ 🎭 ${prefix}modobrincadeira\n` +
     `   ↳ Somente ADM liga/desliga\n\n` +
     `🌸 Quando ativado, todos os membros podem brincar.`
   );
+}
+break;
+
+case "piada":
+case "conselho":
+case "motivacional":
+case "charada":
+case "eununca":
+case "vab":
+case "sorte":
+case "chance":
+case "quando":
+case "elogio":
+case "ppt": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+
+  const pick = (items) => items[Math.floor(Math.random() * items.length)];
+
+  const content = {
+    piada: [
+      "Por que o computador foi ao médico? Porque ele pegou um vírus. 💻😂",
+      "O que o zero disse para o oito? Belo cinto! 😂",
+      "Por que o livro de matemática ficou triste? Porque tinha muitos problemas. 📚"
+    ],
+    conselho: [
+      "Nem toda resposta precisa vir hoje. Às vezes continuar já é progresso. 🌱",
+      "Se algo parece grande demais, divide em uma tarefa pequena e começa por ela. 🐉",
+      "Não gaste toda sua energia tentando vencer discussões que não mudam sua vida. 🌸"
+    ],
+    motivacional: [
+      "🐉 Um passo pequeno ainda muda sua posição. Continua.",
+      "🌟 Consistência vence aquela empolgação que dura só um dia.",
+      "🔥 Você não precisa fazer tudo hoje; precisa só não abandonar tudo hoje."
+    ],
+    charada: [
+      "🧩 O que é, o que é: quanto mais você tira, maior fica?\n||Resposta: um buraco.||",
+      "🧩 O que sobe quando a chuva desce?\n||Resposta: o guarda-chuva.||",
+      "🧩 Tem dentes, mas não morde. O que é?\n||Resposta: um pente.||"
+    ],
+    eununca: [
+      "🙈 Eu nunca mandei mensagem e apaguei antes da pessoa ler.",
+      "🙈 Eu nunca fingi que não vi uma mensagem para responder depois.",
+      "🙈 Eu nunca virei a noite conversando com alguém."
+    ],
+    vab: [
+      "⚔️ Verdade: qual foi a última coisa que você pesquisou no celular?",
+      "⚔️ Verdade: qual hábito seu quase ninguém conhece?",
+      "🔥 Desafio: mande um emoji que descreva sua vida amorosa agora.",
+      "🔥 Desafio: escolha alguém do grupo e faça um elogio sincero."
+    ]
+  };
+
+  if (content[command]) {
+    return reply(pick(content[command]));
+  }
+
+  if (command === "sorte") {
+    const value = Math.floor(Math.random() * 101);
+    return reply(`🍀 *SORTE DO DIA*\n\nSua sorte hoje está em *${value}%*.`);
+  }
+
+  if (command === "chance") {
+    if (!q?.trim()) return reply(`🎯 Use: *${prefix}chance sua pergunta*`);
+    const value = Math.floor(Math.random() * 101);
+    return reply(`🎯 *CHANCE KOBAYASHI*\n\n❓ ${q.trim()}\n✨ Chance: *${value}%*`);
+  }
+
+  if (command === "quando") {
+    if (!q?.trim()) return reply(`⏳ Use: *${prefix}quando sua pergunta*`);
+    const answers = ["ainda hoje", "nos próximos dias", "esta semana", "em algumas semanas", "quando você menos esperar", "vai demorar um pouquinho"];
+    return reply(`⏳ *ORÁCULO KOBAYASHI*\n\n❓ ${q.trim()}\n🐉 Meu palpite: *${pick(answers)}*.`);
+  }
+
+  if (command === "elogio") {
+    const target = getTargetFromMessage(info, sender) || sender;
+    const compliments = [
+      "tem uma energia que deixa o grupo mais leve 🌸",
+      "parece ser alguém em quem dá para confiar 🐉",
+      "tem presença — quando aparece, dá para notar ✨",
+      "merece um pouco mais de reconhecimento hoje 💜"
+    ];
+    return conn.sendMessage(from, {
+      text: `💖 @${String(target).split("@")[0]} ${pick(compliments)}`,
+      mentions: [target]
+    }, { quoted: info });
+  }
+
+  if (command === "ppt") {
+    const choice = String(args?.[0] || "").toLowerCase();
+    const valid = ["pedra", "papel", "tesoura"];
+    if (!valid.includes(choice)) return reply(`✊ Use: *${prefix}ppt pedra|papel|tesoura*`);
+
+    const bot = pick(valid);
+    const wins = { pedra: "tesoura", papel: "pedra", tesoura: "papel" };
+    const result = choice === bot ? "🤝 Empate!" : wins[choice] === bot ? "🏆 Você ganhou!" : "🐉 Kobayashi ganhou!";
+    return reply(`✊ *PEDRA, PAPEL E TESOURA*\n\n👤 Você: *${choice}*\n🐉 Kobayashi: *${bot}*\n\n${result}`);
+  }
 }
 break;
 
@@ -4985,18 +5123,18 @@ case "atualizar": {
       `📁 Arquivos atualizados: *${result.files}*`
     );
 
-    if (result.releaseNotes) {
-      await reply(
-        formatReleaseNotes(
-          result.releaseNotes,
-          { prefix }
-        )
-      );
-    } else {
-      await reply(
-        `🌸 Atualização instalada. Use *${prefix}novidades* após reiniciar para consultar as mudanças.`
-      );
-    }
+    markPendingUpdateNews({
+      targetJid: from,
+      fromVersion: result.local,
+      toVersion: result.remote,
+      requestedBy: sender
+    });
+
+    await reply(
+      `📰 *Update News preparado!*\n` +
+      `Após reiniciar, a Kobayashi enviará aqui o resumo da nova versão.\n\n` +
+      `💡 Depois você também pode usar *${prefix}novidades*.`
+    );
 
     await reply("🐉 Reiniciando o Kobayashi Bot...");
 

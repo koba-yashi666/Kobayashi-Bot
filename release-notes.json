@@ -1,19 +1,29 @@
 {
-  "version": "0.3.5-beta",
-  "title": "Dragon Level Control & XP Boost",
+  "version": "0.3.6-beta",
+  "title": "Update News & Kobayashi Fun+",
   "added": [
-    "/level on e /level off por grupo",
-    "XP bônus ao usar comandos da Kobayashi"
+    "Sistema de notificação automática após /update e reinício",
+    "/piada, /conselho, /motivacional e /elogio",
+    "/charada, /eununca e /vab",
+    "/chance, /quando e /sorte",
+    "/ppt pedra|papel|tesoura"
+  ],
+  "menus": [
+    "/menubn ganhou as categorias Frases & Textos e Jogos Rápidos",
+    "/novidades passa a exibir comandos, menus, melhorias, correções e resumo da versão"
   ],
   "changed": [
-    "Conversas válidas rendem 5–12 XP",
-    "Comandos rendem 14–18 XP",
-    "Anti-farm agora também protege XP ganho por comandos",
-    "/nivel mostra se o sistema está ativo no grupo"
+    "O /update registra a versão anterior, a nova versão e o chat que solicitou a atualização",
+    "A notícia da atualização é enviada uma única vez após o bot voltar",
+    "Comandos novos do menubn respeitam o /modobrincadeira"
+  ],
+  "fixed": [
+    "Release notes agora possuem estrutura própria para menus e resumo",
+    "Evita repetir a mesma notificação de atualização em reinicializações posteriores"
   ],
   "notes": [
-    "O contador de mensagens continua funcionando mesmo com /level off",
-    "Grupos já existentes permanecem com o sistema de nível ativado por padrão",
-    "Cooldown impede farm de XP por spam de mensagens e comandos"
-  ]
+    "O anúncio pendente é entregue na primeira atividade processada pelo bot após o reinício",
+    "Os novos comandos de diversão não exigem dependências externas"
+  ],
+  "summary": "A v0.3.6 recupera o Update News da Kobayashi e transforma o /menubn em um menu mais completo. Além das brincadeiras e rankings existentes, entram frases, perguntas aleatórias e jogos rápidos, mantendo o controle de ADM pelo Modo Brincadeira."
 }
