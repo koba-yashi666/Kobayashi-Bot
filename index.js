@@ -37,7 +37,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
-import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins } from "./lib/features/dragonSocial.js";
+import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle } from "./lib/features/dragonSocial.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -4396,6 +4396,7 @@ case "perfil": {
   const levelInfo = getLevelInfoFromXp(activity?.xp || 0);
   const socialInfo = getEconomySummary(targetJid);
   const socialAchievements = getAchievements(targetJid, levelInfo.level);
+  const activeCosmeticTitle = getActiveTitle(targetJid);
   const dragonRank = levelInfo.title;
   const levelBlocks = Math.max(0, Math.min(10, Math.round(levelInfo.progress / 10)));
   const levelBar = "▰".repeat(levelBlocks) + "▱".repeat(10 - levelBlocks);
@@ -4410,6 +4411,7 @@ case "perfil": {
     `┃\n` +
     `┣━━〔 🐲 REGISTRO DO DRAGÃO 〕━━┫\n` +
     `┃ 🏷️ Classe: *${dragonRank}*\n` +
+    (activeCosmeticTitle ? `┃ 🎭 Título: *${activeCosmeticTitle}*\n` : "") +
     `┃ ⭐ Nível: *${levelInfo.level}* • ${levelInfo.xp} XP\n` +
     `┃ 📈 ${levelBar} ${levelInfo.progress}%\n` +
     `┃ 💬 Textos: *${textCount}*\n` +
@@ -4799,6 +4801,105 @@ break;
 
 
 // KOBAYASHI FUN • v0.1.15
+case "menuloja":
+case "menushop": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const items = getShopItems();
+  return reply(
+    `╭━━〔 🛒 *DRAGON SHOP* 〕━━╮\n\n` +
+    items.map((x, i) =>
+      `${x.icon} *${i + 1}. ${x.name}*\n` +
+      `🪙 ${x.price} moedas\n` +
+      `📝 ${x.description}\n` +
+      `🆔 ${x.id}`
+    ).join("\n\n") +
+    `\n\n╭─〔 📦 COMANDOS 〕\n` +
+    `│ ${prefix}comprar ID\n` +
+    `│ ${prefix}inventario\n` +
+    `│ ${prefix}equipar ID\n` +
+    `│ ${prefix}desequipartitulo\n` +
+    `│ ${prefix}abrircaixa\n` +
+    `╰────────────────`
+  );
+}
+break;
+
+case "comprar":
+case "buy": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const itemId = String(args?.[0] || "").toLowerCase();
+  if (!itemId) return reply(`🛒 Use *${prefix}menuloja* para ver os itens e depois *${prefix}comprar ID*.`);
+
+  const result = buyShopItem(sender, itemId);
+  if (!result.ok) return reply(`❌ ${result.reason}${Number.isFinite(result.coins) ? `\n🪙 Saldo: *${result.coins}*` : ""}`);
+
+  return reply(
+    `🛒🐉 *COMPRA REALIZADA!*\n\n` +
+    `${result.item.icon} ${result.item.name}\n` +
+    `💸 Valor: *${result.item.price} Dragon Coins*\n` +
+    `🪙 Saldo restante: *${result.coins}*`
+  );
+}
+break;
+
+case "inventario":
+case "inv": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const target = getTargetFromMessage(info, sender) || sender;
+  const inv = getInventory(target);
+
+  const itemText = inv.items.length
+    ? inv.items.map(x =>
+        `${x.icon} *${x.name}* ×${x.qty}${x.active ? " ✅ Equipado" : ""}`
+      ).join("\n")
+    : "📭 Inventário vazio.";
+
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🎒 *INVENTÁRIO DRAGON* 〕━━╮\n` +
+      `┃ 👤 @${String(target).split("@")[0]}\n` +
+      `┃ 🪙 Saldo: *${inv.coins}*\n` +
+      `┃ 🎁 Boosts Daily: *${inv.dailyBoosts}*\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      itemText,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "equipar":
+case "equipartitulo": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const itemId = String(args?.[0] || "").toLowerCase();
+  if (!itemId) return reply(`🎭 Use *${prefix}inventario* e depois *${prefix}equipar ID*.`);
+
+  const result = equipTitle(sender, itemId);
+  if (!result.ok) return reply(`❌ ${result.reason}`);
+  return reply(`✅🎭 Título equipado: *${result.title}*`);
+}
+break;
+
+case "desequipartitulo":
+case "untitle": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  unequipTitle(sender);
+  return reply("✅ Título cosmético removido do Dragon Card.");
+}
+break;
+
+case "abrircaixa":
+case "opencaixa": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const result = openDragonBox(sender);
+  if (!result.ok) return reply(`📦 ${result.reason}\nUse *${prefix}menuloja* para comprar uma.`);
+  return reply(
+    `📦✨ *CAIXA DE ESCAMAS ABERTA!*\n\n` +
+    `🪙 Você encontrou *${result.reward} Dragon Coins*!\n` +
+    `💰 Saldo atual: *${result.coins}*`
+  );
+}
+break;
+
 case "menusocial":
 case "menudragon": {
   if (!isGroup) return reply(mess.onlyGroup());
@@ -4820,7 +4921,8 @@ case "menudragon": {
     `• ${prefix}presente @membro\n` +
     `• ${prefix}amizade @membro\n\n` +
     `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.\n` +
-    `⭐ Subir de nível agora também rende Dragon Coins.`
+    `⭐ Subir de nível agora também rende Dragon Coins.\n` +
+    `🛒 Loja e inventário: *${prefix}menuloja*`
   );
 }
 break;
@@ -4861,6 +4963,7 @@ case "daily": {
     `🎁🐉 *DAILY COLETADO!*\n\n` +
     `🪙 Base: *${result.base}*\n` +
     `⭐ Bônus Nv.${result.level}: *+${result.levelBonus}*\n` +
+    (result.boostUsed ? `🎁 Boost de inventário: *+${result.boostBonus}*\n` : "") +
     `💰 Total recebido: *${result.reward} Dragon Coins*\n` +
     `🏦 Saldo: *${result.coins}*`
   );
@@ -5300,32 +5403,33 @@ case "menu": {
   }).catch(() => {});
 
   const versaoMenuAtual = getLocalVersion();
-  const menuBaseAtualizado = String(
-    linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix)
-  )
-    // Corrige versões antigas escritas diretamente no template do menu.
-    // A versão real é lida do version.json sempre que /menu é usado.
-    .replace(
-      /((?:vers[aã]o|version|v\.?)[^\n\d]{0,12})v?\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?/gi,
-      (_, label) => `${label}${versaoMenuAtual}`
-    );
 
-  const menuPrincipalComLevel =
-    menuBaseAtualizado +
-    `\n\n╭─〔 📦 *VERSÃO ATUAL* 〕\n` +
-    `│ ${versaoMenuAtual}\n` +
-    `│ └ Atualizada automaticamente a cada abertura do menu\n` +
-    `╰────────────────\n\n` +
-    `╭─〔 🐉 *DRAGON LEVEL* 〕\n` +
-    `│ ${prefix}menulevel\n` +
-    `│ └ Níveis, XP e ranking do grupo\n` +
-    `╰────────────────\n\n` +
+  const menuPrincipal =
+    `╭═══════ ❀ 小林 ❀ ═══════╮\n` +
+    `       ୨୧ *KOBAYASHI BOT* ୨୧\n` +
+    `          🐉 SYSTEM 🌸\n` +
+    `╰═══════ ❀ 🐉 ❀ ═══════╯\n\n` +
+    `🌷 Olá, @${String(sender).split("@")[0]}\n` +
+    `🪷 Bot › ${NomeDoBot}\n` +
+    `🌺 Dono › ${ownerName}\n` +
+    `🪭 Prefixo › ${prefix}\n` +
+    `💮 Versão › ${versaoMenuAtual}\n\n` +
+    `╭───〔 🌸 MENUS 〕────────╮\n` +
+    `│ 🛡️ ${prefix}menuadm\n` +
+    `│ 👑 ${prefix}menudono\n` +
+    `│ 🎭 ${prefix}menubn\n` +
+    `│ 🎴 ${prefix}menusticker\n` +
+    `│ 🪷 ${prefix}menugeral\n` +
+    `│ 🐉 ${prefix}menunivel\n` +
+    `│ 💞 ${prefix}menusocial\n` +
+    `│ 🛒 ${prefix}menuloja\n` +
+    `╰─────── ❀ ────────────╯\n\n` +
     `╭─〔 📢 *CANAL OFICIAL* 〕\n` +
     `│ https://whatsapp.com/channel/0029Vb8j6MyGk1FzGOr4EP3M\n` +
     `│ └ Novidades e atualizações da Kobayashi\n` +
     `╰────────────────`;
 
-  await sendMenu(from, menuPrincipalComLevel, sender);
+  await sendMenu(from, menuPrincipal, sender);
 }
 break;
 
