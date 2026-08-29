@@ -37,7 +37,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
-import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle } from "./lib/features/dragonSocial.js";
+import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage } from "./lib/features/dragonSocial.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -4833,8 +4833,12 @@ case "menuloja":
 case "menushop": {
   if (!isGroup) return reply(mess.onlyGroup());
   const items = getShopItems();
+  const shopUsage = getShopUsage(sender);
   return reply(
-    `╭━━〔 🛒 *DRAGON SHOP* 〕━━╮\n\n` +
+    `╭━━〔 🛒 *DRAGON SHOP* 〕━━╮\n` +
+    `┃ 🛍️ Compras hoje: *${shopUsage.used}/${shopUsage.limit}*\n` +
+    `┃ 🌅 Reset diário: *06:00*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
     items.map((x, i) =>
       `${x.icon} *${i + 1}. ${x.name}*\n` +
       `🪙 ${x.price} moedas\n` +
@@ -4865,7 +4869,9 @@ case "buy": {
     `🛒🐉 *COMPRA REALIZADA!*\n\n` +
     `${result.item.icon} ${result.item.name}\n` +
     `💸 Valor: *${result.item.price} Dragon Coins*\n` +
-    `🪙 Saldo restante: *${result.coins}*`
+    `🪙 Saldo restante: *${result.coins}*\n` +
+    `🛍️ Compras restantes hoje: *${result.shopRemaining}/${result.shopLimit}*\n` +
+    `🌅 A cota reseta às *06:00*.`
   );
 }
 break;

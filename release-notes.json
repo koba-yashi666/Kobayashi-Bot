@@ -1,22 +1,23 @@
 {
-  "version": "0.4.3-beta",
-  "title": "Dragon Level Seasons",
+  "version": "0.4.4-beta",
+  "title": "Dragon Shop Daily Limit",
   "added": [
-    "/zeraranknivel para iniciar nova temporada no grupo",
-    "/zeraranknivelg para iniciar nova temporada global",
-    "Reset preserva contadores de mensagens, fotos e figurinhas e limpa apenas XP/nível"
+    "Limite diário de 5 compras por usuário na Dragon Shop",
+    "Contador individual de compras restantes",
+    "Reset automático da cota todos os dias às 06:00 no horário de São Paulo"
   ],
   "menus": [
-    "Novos comandos de temporada adicionados ao /menunivel"
+    "/menuloja agora mostra compras usadas, limite e horário de reset"
   ],
   "changed": [
-    "Comandos de reset são exclusivos do dono principal por segurança"
+    "Somente compras concluídas consomem uma utilização diária",
+    "Tentativas sem moedas, item inválido ou título já possuído não gastam a cota"
   ],
   "fixed": [],
   "notes": [
-    "O reset do grupo afeta apenas o grupo atual",
-    "O reset global afeta os registros de nível de todos os grupos",
+    "A janela diária usa America/Sao_Paulo",
+    "Entre 00:00 e 05:59 ainda vale a cota do dia anterior",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.4.3 adiciona temporadas manuais ao Dragon Level. O dono pode zerar mensalmente o ranking de um grupo ou todo o ranking global sem apagar as estatísticas de atividade."
+  "summary": "A v0.4.4 adiciona limite de 5 compras diárias na Dragon Shop, com reset automático às 06:00 e contador individual."
 }
