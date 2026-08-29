@@ -38,6 +38,8 @@ import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, rem
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/dragonSocial.js";
+import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
+
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -4828,31 +4830,13 @@ break;
 //
 
 
-// KOBAYASHI FUN • v0.1.15
+// KOBAYASHI FUN • estabilizado v0.5.0
 case "menuloja":
 case "menushop": {
   if (!isGroup) return reply(mess.onlyGroup());
   const items = getShopItems();
   const shopUsage = getShopUsage(sender);
-  return reply(
-    `╭━━〔 🛒 *DRAGON SHOP* 〕━━╮\n` +
-    `┃ 🛍️ Compras hoje: *${shopUsage.used}/${shopUsage.limit}*\n` +
-    `┃ 🌅 Reset diário: *06:00*\n` +
-    `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-    items.map((x, i) =>
-      `${x.icon} *${i + 1}. ${x.name}*\n` +
-      `🪙 ${x.price} moedas\n` +
-      `📝 ${x.description}\n` +
-      `🆔 ${x.id}`
-    ).join("\n\n") +
-    `\n\n╭─〔 📦 COMANDOS 〕\n` +
-    `│ ${prefix}comprar ID\n` +
-    `│ ${prefix}inventario\n` +
-    `│ ${prefix}equipar ID\n` +
-    `│ ${prefix}desequipartitulo\n` +
-    `│ ${prefix}abrircaixa\n` +
-    `╰────────────────`
-  );
+  return reply(buildShopMenu(prefix, items, shopUsage));
 }
 break;
 
@@ -4968,29 +4952,7 @@ break;
 case "menusocial":
 case "menudragon": {
   if (!isGroup) return reply(mess.onlyGroup());
-  return reply(
-    `╭━━〔 🐉 *DRAGON SOCIAL* 〕━━╮\n\n` +
-    `💰 *ECONOMIA*\n` +
-    `• ${prefix}carteira [@]\n` +
-    `• ${prefix}daily\n` +
-    `• ${prefix}pagar @membro valor\n` +
-    `• ${prefix}rankcoins\n\n` +
-    `🏆 *CONQUISTAS*\n` +
-    `• ${prefix}conquistas [@]\n\n` +
-    `🎮 *JOGOS*\n` +
-    `• ${prefix}dado\n` +
-    `• ${prefix}moeda\n` +
-    `• ${prefix}ppt pedra|papel|tesoura\n\n` +
-    `💞 *SOCIAL*\n` +
-    `• ${prefix}cafune @membro\n` +
-    `• ${prefix}presente @membro\n` +
-    `• ${prefix}amizade @membro\n\n` +    `🛡️ *ANTI-FARM DIÁRIO*\n` +
-    `• ${prefix}antifarm\n` +
-    `• ${prefix}antifarm on/off • ADM\n\n` +
-    `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.\n` +
-    `⭐ Subir de nível agora também rende Dragon Coins.\n` +
-    `🛒 Loja e inventário: *${prefix}menuloja*`
-  );
+  return reply(buildSocialMenu(prefix));
 }
 break;
 
@@ -5041,7 +5003,8 @@ case "pagar":
 case "pay": {
   if (!isGroup) return reply(mess.onlyGroup());
   const target = getTargetFromMessage(info, null);
-  const amount = Number(String(args?.[args.length - 1] || "").replace(/\D/g, ""));
+  const amountRaw = String(args?.[args.length - 1] || "").trim();
+  const amount = /^\d+$/.test(amountRaw) ? Number(amountRaw) : 0;
   if (!target || target === sender) return reply(`💸 Marque alguém e informe o valor.\nEx.: *${prefix}pagar @membro 100*`);
   const result = transferCoins(sender, target, amount);
   if (!result.ok) return reply(`❌ ${result.reason}`);
@@ -5469,32 +5432,13 @@ case "menu": {
     react: { text: "🐉", key: info.key }
   }).catch(() => {});
 
-  const versaoMenuAtual = getLocalVersion();
-
-  const menuPrincipal =
-    `╭═══════ ❀ 小林 ❀ ═══════╮\n` +
-    `       ୨୧ *KOBAYASHI BOT* ୨୧\n` +
-    `          🐉 SYSTEM 🌸\n` +
-    `╰═══════ ❀ 🐉 ❀ ═══════╯\n\n` +
-    `🌷 Olá, @${String(sender).split("@")[0]}\n` +
-    `🪷 Bot › ${NomeDoBot}\n` +
-    `🌺 Dono › ${ownerName}\n` +
-    `🪭 Prefixo › ${prefix}\n` +
-    `💮 Versão › ${versaoMenuAtual}\n\n` +
-    `╭───〔 🌸 MENUS 〕────────╮\n` +
-    `│ 🛡️ ${prefix}menuadm\n` +
-    `│ 👑 ${prefix}menudono\n` +
-    `│ 🎭 ${prefix}menubn\n` +
-    `│ 🎴 ${prefix}menusticker\n` +
-    `│ 🪷 ${prefix}menugeral\n` +
-    `│ 🐉 ${prefix}menunivel\n` +
-    `│ 💞 ${prefix}menusocial\n` +
-    `│ 🛒 ${prefix}menuloja\n` +
-    `╰─────── ❀ ────────────╯\n\n` +
-    `╭─〔 📢 *CANAL OFICIAL* 〕\n` +
-    `│ https://whatsapp.com/channel/0029Vb8j6MyGk1FzGOr4EP3M\n` +
-    `│ └ Novidades e atualizações da Kobayashi\n` +
-    `╰────────────────`;
+  const menuPrincipal = buildMainMenu({
+    sender,
+    botName: NomeDoBot,
+    ownerName,
+    prefix,
+    version: getLocalVersion()
+  });
 
   await sendMenu(from, menuPrincipal, sender);
 }
@@ -5503,48 +5447,7 @@ break;
 case "menulevel":
 case "menunivel":
 reagir("🐉");
-reply(
-  `╭━━〔 🐉 *DRAGON LEVEL* 〕━━╮\n` +
-  `│\n` +
-  `│ ✨ *${prefix}nivel*\n` +
-  `│ └ Veja seu nível, XP e progresso\n` +
-  `│\n` +
-  `│ 🏆 *${prefix}ranknivel*\n` +
-  `│ └ Ranking de níveis do grupo\n` +
-  `│\n` +
-  `│ 🌍 *${prefix}ranknivelg*\n` +
-  `│ └ Top 10 global entre grupos com Level ativo\n` +
-  `│\n` +
-  `│ 📊 *${prefix}nivelinfo*\n` +
-  `│ └ Entenda XP, classes e progressão\n` +
-  `│\n` +
-  `│ 🐲 *${prefix}categoriaslevel*\n` +
-  `│ └ Veja todas as categorias de nível\n` +
-  `│\n` +
-  `│ ⚙️ *${prefix}level on*  • ADM\n` +
-  `│ └ Ativa o sistema de níveis\n` +
-  `│\n` +
-  `│ 💤 *${prefix}level off* • ADM\n` +
-  `│ └ Desativa o sistema de níveis\n` +
-  `│\n` +
-  `│ ♻️ *${prefix}zeraranknivel* • DONO\n` +
-  `│ └ Inicia uma nova temporada neste grupo\n` +
-  `│\n` +
-  `│ 🌍 *${prefix}zeraranknivelg* • DONO\n` +
-  `│ └ Zera o ranking global de níveis\n` +
-  `│\n` +
-  `├━━〔 ✨ *COMO GANHAR XP* 〕━━┫\n` +
-  `│ 💬 Texto: *+5–12 XP*\n` +
-  `│ 🖼️ Foto: *+10 XP*\n` +
-  `│ 🎨 Figurinha: *+7 XP*\n` +
-  `│ 🐉 Usando a Kobayashi: *+14–18 XP*\n` +
-  `│ 🎯 Progressão: *1 → 50 níveis*\n` +
-  `│ ⭐ Nv.1–10: *100 XP por nível*\n` +
-  `│ 📈 Depois disso, o XP aumenta aos poucos\n` +
-  `│ 🛡️ Anti-farm e cooldown ativos\n` +
-  `│\n` +
-  `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
-);
+reply(buildLevelMenu(prefix));
 break;
 
 case "menuadm":
