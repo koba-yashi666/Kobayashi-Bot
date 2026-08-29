@@ -1,28 +1,22 @@
 {
-  "version": "0.3.11-beta",
-  "title": "AntiLink Audit & Anti-PV Alerts",
+  "version": "0.3.12-beta",
+  "title": "AntiLink Owner Audit",
   "added": [
-    "Registro de Auditoria detalhado para ações do AntiLink",
-    "Anti-PV avisa automaticamente o dono sobre qualquer tentativa de contato",
-    "Anti-PV registra número, ID, tipo e conteúdo da mensagem recebida"
+    "Auditoria do AntiLink agora é enviada diretamente para o PV do dono",
+    "Reporte inclui alvo, grupo, ID da mensagem, conteúdo detectado e resultado da ação"
   ],
-  "menus": [
-    "/antipv agora mostra status e explica os alertas enviados ao dono"
-  ],
+  "menus": [],
   "changed": [
-    "AntiLink substitui a resposta genérica por registro de auditoria",
-    "AntiLink mostra alvo, grupo, ID, mensagem original e resultado da ação",
-    "AntiLink também grava o evento no histórico administrativo interno",
-    "Anti-PV deixa de avisar apenas quando existe comando e passa a detectar toda mensagem privada"
+    "Registro de Auditoria do AntiLink deixa de depender do envio no grupo",
+    "Grupo recebe apenas uma confirmação curta da moderação",
+    "AntiLink Light mantém aviso de ADV no grupo enquanto o relatório completo vai ao dono"
   ],
   "fixed": [
-    "Mensagens comuns enviadas no PV agora também geram alerta ao proprietário",
-    "Auditoria do AntiLink preserva o ID original antes da remoção"
+    "Corrigido AntiLink que executava a punição mas não entregava o reporte administrativo esperado"
   ],
   "notes": [
-    "Conteúdo muito longo é limitado no aviso para evitar spam",
-    "Mídias sem texto são identificadas por tipo, como foto, vídeo, áudio ou figurinha",
+    "O Anti-PV permanece inalterado",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.3.11 fortalece AntiLink e Anti-PV. O AntiLink gera um registro de auditoria completo para cada detecção e o Anti-PV envia ao dono os dados e o conteúdo de qualquer mensagem privada bloqueada."
+  "summary": "A v0.3.12 envia o relatório completo do AntiLink diretamente ao número do dono do bot, usando o mesmo padrão de notificação privada adotado pelo Anti-PV."
 }

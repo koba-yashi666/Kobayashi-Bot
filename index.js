@@ -446,6 +446,21 @@ function formatAntiLinkAudit({ sender, groupName, groupJid, messageId, messageTe
   );
 }
 
+async function notifyOwnerAntiLink(conn, ownerJid, data) {
+  if (!conn || !ownerJid || !data?.sender) return false;
+
+  try {
+    await conn.sendMessage(ownerJid, {
+      text: formatAntiLinkAudit(data),
+      mentions: [data.sender]
+    });
+    return true;
+  } catch (e) {
+    console.error("Erro ao enviar auditoria AntiLink ao dono:", e?.message || e);
+    return false;
+  }
+}
+
 async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageText, type }) {
   if (!conn || !ownerJid || !sender) return false;
 
@@ -1138,17 +1153,25 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
         ? `Mensagem removida • 3/3 ADVs • membro removido`
         : `Mensagem removida • ADV ${result.count}/3`;
 
-      await conn.sendMessage(from, {
-        text: formatAntiLinkAudit({
-          sender,
-          groupName,
-          groupJid: from,
-          messageId,
-          messageText: auditPreview,
-          actionResult
-        }),
-        mentions: [sender]
-      }).catch(() => {});
+      if (!result.removed) {
+        await conn.sendMessage(from, {
+          text:
+            `⚠️🌸 *ANTILINK LIGHT*\n\n` +
+            `👤 @${sender.split("@")[0]}\n` +
+            `🗑️ Link apagado.\n` +
+            `⚠️ Advertências: *${result.count}/3*`,
+          mentions: [sender]
+        }).catch(() => {});
+      }
+
+      await notifyOwnerAntiLink(conn, dono, {
+        sender,
+        groupName,
+        groupJid: from,
+        messageId,
+        messageText: auditPreview,
+        actionResult
+      });
     } else {
       let removed = false;
 
@@ -1167,17 +1190,23 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
             : "Mensagem removida • falha ao remover membro")
         : "Mensagem removida • bot sem ADM para remover membro";
 
-      await conn.sendMessage(from, {
-        text: formatAntiLinkAudit({
-          sender,
-          groupName,
-          groupJid: from,
-          messageId,
-          messageText: auditPreview,
-          actionResult
-        }),
-        mentions: [sender]
-      }).catch(() => {});
+      if (removed) {
+        await conn.sendMessage(from, {
+          text:
+            `🚫🐉 *AntiLink acionado*\n\n` +
+            `@${sender.split("@")[0]} foi removido por enviar link proibido.`,
+          mentions: [sender]
+        }).catch(() => {});
+      }
+
+      await notifyOwnerAntiLink(conn, dono, {
+        sender,
+        groupName,
+        groupJid: from,
+        messageId,
+        messageText: auditPreview,
+        actionResult
+      });
     }
 
     // Também registra no histórico administrativo interno.
