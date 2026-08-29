@@ -414,6 +414,62 @@ const onlyNumber = text.replace(/\D/g, "");
 return onlyNumber ? `${onlyNumber}@lid` : null;
 }
 
+function auditMessagePreview(info, body = "", type = "") {
+  const clean = String(body || "")
+    .replace(/\u0000/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (clean) return clean.slice(0, 900);
+
+  const message = info?.message || {};
+  if (message?.stickerMessage) return "[Figurinha]";
+  if (message?.imageMessage) return `[Foto${message.imageMessage.caption ? `: ${message.imageMessage.caption}` : ""}]`.slice(0, 900);
+  if (message?.videoMessage) return `[Vídeo${message.videoMessage.caption ? `: ${message.videoMessage.caption}` : ""}]`.slice(0, 900);
+  if (message?.audioMessage) return "[Áudio]";
+  if (message?.documentMessage) return `[Documento: ${message.documentMessage.fileName || "sem nome"}]`;
+  if (message?.contactMessage || message?.contactsArrayMessage) return "[Contato]";
+  if (message?.locationMessage || message?.liveLocationMessage) return "[Localização]";
+  if (message?.pollCreationMessage || message?.pollCreationMessageV3) return "[Enquete]";
+  return `[${type || "Mensagem sem texto"}]`;
+}
+
+function formatAntiLinkAudit({ sender, groupName, groupJid, messageId, messageText, actionResult = "" }) {
+  return (
+    `🚨 *Registro de Auditoria*\n\n` +
+    `- Ação: AntiLink\n` +
+    `- Alvo: @${String(sender || "").split("@")[0] || "desconhecido"}\n` +
+    `- Grupo: ${groupName || "Grupo"}\n` +
+    `- Id: ${messageId || "não disponível"}\n` +
+    `- Mensagem: ${messageText || "[sem conteúdo legível]"}` +
+    (actionResult ? `\n- Resultado: ${actionResult}` : "")
+  );
+}
+
+async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageText, type }) {
+  if (!conn || !ownerJid || !sender) return false;
+
+  const number = String(sender).split("@")[0] || "desconhecido";
+  const text =
+    `🚨 *ANTI-PV • NOVA INVASÃO*\n\n` +
+    `- Número: @${number}\n` +
+    `- Id: ${messageId || "não disponível"}\n` +
+    `- Tipo: ${type || "mensagem"}\n` +
+    `- Mensagem: ${messageText || "[sem conteúdo legível]"}\n\n` +
+    `🛡️ O Anti-PV bloqueou a interação automaticamente.`;
+
+  try {
+    await conn.sendMessage(ownerJid, {
+      text,
+      mentions: [sender]
+    });
+    return true;
+  } catch (e) {
+    console.error("Erro ao avisar dono sobre Anti-PV:", e?.message || e);
+    return false;
+  }
+}
+
 export default async function start(upsert, conn) {
 try {
 for (const info of upsert?.messages || []) {
@@ -541,9 +597,23 @@ if (pendingUpdateNews?.targetJid) {
 }
 
 if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
-  if (isCmd) {
-    await conn.sendMessage(from, { text: "🐉🌸 Meu privado está desativado pelo proprietário." }, { quoted: info });
-  }
+  const antiPvPreview = auditMessagePreview(info, body, type);
+
+  // Avisa o dono em QUALQUER tentativa de contato no PV, não apenas comandos.
+  await notifyOwnerAntiPv(conn, dono, {
+    sender,
+    messageId: info?.key?.id,
+    messageText: antiPvPreview,
+    type
+  });
+
+  // Mantém uma resposta curta ao invasor. Evita múltiplas mensagens do bot.
+  await conn.sendMessage(
+    from,
+    { text: "🛡️🐉 Meu privado está protegido pelo Anti-PV. O proprietário foi notificado." },
+    { quoted: info }
+  ).catch(() => {});
+
   continue;
 }
 
@@ -1023,7 +1093,7 @@ conn.sendMessage(from, { react: { text: reassao, key: info.key } });
 
 
 
-// ─── KOBAYASHI AUTOMOD • PROTEÇÃO DE LINKS ───
+// ─── KOBAYASHI AUTOMOD • PROTEÇÃO DE LINKS + AUDITORIA v0.3.11 ───
 if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender)) {
   const protection = getGroupProtection(from);
   const detected = detectLinkTypes(body);
@@ -1047,7 +1117,12 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
   }
 
   if (action) {
+    const auditPreview = auditMessagePreview(info, body, type);
+    const messageId = info?.key?.id || "não disponível";
+
     await deleteDetectedMessage(conn, from, info);
+
+    let actionResult = "Mensagem removida";
 
     if (action === "light") {
       const result = await addAutomaticWarning(
@@ -1059,45 +1134,61 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
         info
       );
 
-      if (!result.removed) {
-        await conn.sendMessage(from, {
-          text:
-            `⚠️🌸 *ANTILINK LIGHT*\n\n` +
-            `👤 @${sender.split("@")[0]}\n` +
-            `🗑️ Link apagado.\n` +
-            `⚠️ Advertências: *${result.count}/3*\n\n` +
-            `🐉 Na terceira advertência o membro poderá ser removido.`,
-          mentions: [sender],
-        }, { quoted: info });
-      }
+      actionResult = result.removed
+        ? `Mensagem removida • 3/3 ADVs • membro removido`
+        : `Mensagem removida • ADV ${result.count}/3`;
+
+      await conn.sendMessage(from, {
+        text: formatAntiLinkAudit({
+          sender,
+          groupName,
+          groupJid: from,
+          messageId,
+          messageText: auditPreview,
+          actionResult
+        }),
+        mentions: [sender]
+      }).catch(() => {});
     } else {
+      let removed = false;
+
       if (isBotGroupAdmins) {
         try {
           await conn.groupParticipantsUpdate(from, [sender], "remove");
-          await conn.sendMessage(from, {
-            text:
-              `🚫🐉 *KOBAYASHI AUTOMOD*\n\n` +
-              `🔗 Link bloqueado e mensagem apagada.\n` +
-              `🔨 @${sender.split("@")[0]} foi removido do grupo.`,
-            mentions: [sender],
-          }, { quoted: info });
+          removed = true;
         } catch (e) {
-          await conn.sendMessage(from, {
-            text:
-              `🚫🌸 Link bloqueado e apagado.\n\n` +
-              `⚠️ Não consegui remover @${sender.split("@")[0]}.`,
-            mentions: [sender],
-          }, { quoted: info });
+          console.error("Erro ao remover usuário pelo AntiLink:", e?.message || e);
         }
-      } else {
-        await conn.sendMessage(from, {
-          text:
-            `🚫🌸 Link bloqueado e apagado.\n\n` +
-            `⚠️ Preciso ser ADM para remover o membro.`,
-          mentions: [sender],
-        }, { quoted: info });
       }
+
+      actionResult = isBotGroupAdmins
+        ? (removed
+            ? "Mensagem removida • membro removido"
+            : "Mensagem removida • falha ao remover membro")
+        : "Mensagem removida • bot sem ADM para remover membro";
+
+      await conn.sendMessage(from, {
+        text: formatAntiLinkAudit({
+          sender,
+          groupName,
+          groupJid: from,
+          messageId,
+          messageText: auditPreview,
+          actionResult
+        }),
+        mentions: [sender]
+      }).catch(() => {});
     }
+
+    // Também registra no histórico administrativo interno.
+    addAdminLog(from, {
+      type: "antilink",
+      actor: botNumber,
+      target: sender,
+      detail:
+        `${reason} • ID ${messageId} • ${actionResult} • ` +
+        `Mensagem: ${auditPreview.slice(0, 300)}`
+    });
 
     continue;
   }
@@ -5680,13 +5771,25 @@ break;
 case "antipv": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
   const op = String(args[0] || "").toLowerCase();
-  if (!["on", "off"].includes(op))
-    return reply(`🛡️ Use *${prefix}antipv on* ou *${prefix}antipv off*.`);
+
+  if (!["on", "off"].includes(op)) {
+    const cfg = readSettingsFile();
+    return reply(
+      `🛡️ *ANTI-PV*\n\n` +
+      `Status: *${cfg.antiPv ? "ATIVADO ✅" : "DESATIVADO ❌"}*\n` +
+      `Quando ativo, qualquer pessoa que chamar a Kobayashi no privado terá a tentativa bloqueada e o dono receberá:\n` +
+      `• número/JID\n• ID da mensagem\n• tipo\n• conteúdo recebido\n\n` +
+      `Use *${prefix}antipv on* ou *${prefix}antipv off*.`
+    );
+  }
 
   const cfg = readSettingsFile();
   cfg.antiPv = op === "on";
   writeSettingsFile(cfg);
-  return reply(`🛡️🌸 Anti-PV *${cfg.antiPv ? "ativado" : "desativado"}* com sucesso.`);
+  return reply(
+    `🛡️🌸 Anti-PV *${cfg.antiPv ? "ativado" : "desativado"}* com sucesso.` +
+    (cfg.antiPv ? `\n📨 Alertas de invasão serão enviados ao PV do dono.` : "")
+  );
 }
 break;
 //

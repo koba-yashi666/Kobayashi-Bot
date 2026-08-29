@@ -1,26 +1,28 @@
 {
-  "version": "0.3.10-beta",
-  "title": "Sentinel Pairing Sync",
+  "version": "0.3.11-beta",
+  "title": "AntiLink Audit & Anti-PV Alerts",
   "added": [
-    "Sentinel passa a usar o mesmo modelo de conexão da Kobayashi principal",
-    "Cache de mensagens e retry dedicado à segunda sessão"
+    "Registro de Auditoria detalhado para ações do AntiLink",
+    "Anti-PV avisa automaticamente o dono sobre qualquer tentativa de contato",
+    "Anti-PV registra número, ID, tipo e conteúdo da mensagem recebida"
   ],
   "menus": [
-    "/sentinel parear mantém o mesmo comando e agora usa o fluxo corrigido"
+    "/antipv agora mostra status e explica os alertas enviados ao dono"
   ],
   "changed": [
-    "Autenticação Sentinel usa makeCacheableSignalKeyStore",
-    "Browser do Sentinel agora usa Browsers.ubuntu(\"Chrome\")",
-    "Timeouts e keep-alive espelham a conexão principal",
-    "Reconexão do Sentinel passa a tentar novamente em 3 segundos"
+    "AntiLink substitui a resposta genérica por registro de auditoria",
+    "AntiLink mostra alvo, grupo, ID, mensagem original e resultado da ação",
+    "AntiLink também grava o evento no histórico administrativo interno",
+    "Anti-PV deixa de avisar apenas quando existe comando e passa a detectar toda mensagem privada"
   ],
   "fixed": [
-    "Corrigido pareamento do segundo número que usava configuração diferente da conexão principal",
-    "Evita corrida entre socket antigo, reconexão e novo pedido de código"
+    "Mensagens comuns enviadas no PV agora também geram alerta ao proprietário",
+    "Auditoria do AntiLink preserva o ID original antes da remoção"
   ],
   "notes": [
-    "A sessão do Sentinel continua salva separadamente em files/database/sentinel-auth",
+    "Conteúdo muito longo é limitado no aviso para evitar spam",
+    "Mídias sem texto são identificadas por tipo, como foto, vídeo, áudio ou figurinha",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.3.10 corrige o pareamento do Kobayashi Sentinel usando a mesma estrutura de autenticação e socket utilizada pela conexão principal da Kobayashi."
+  "summary": "A v0.3.11 fortalece AntiLink e Anti-PV. O AntiLink gera um registro de auditoria completo para cada detecção e o Anti-PV envia ao dono os dados e o conteúdo de qualquer mensagem privada bloqueada."
 }
