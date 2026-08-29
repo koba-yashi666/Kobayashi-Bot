@@ -1,29 +1,24 @@
 {
-  "version": "0.3.6-beta",
-  "title": "Update News & Kobayashi Fun+",
+  "version": "0.3.7-beta",
+  "title": "Menu Version Sync",
   "added": [
-    "Sistema de notificação automática após /update e reinício",
-    "/piada, /conselho, /motivacional e /elogio",
-    "/charada, /eununca e /vab",
-    "/chance, /quando e /sorte",
-    "/ppt pedra|papel|tesoura"
+    "Bloco de versão atual dentro do menu principal",
+    "Atualização dinâmica da versão sempre que /menu é aberto"
   ],
   "menus": [
-    "/menubn ganhou as categorias Frases & Textos e Jogos Rápidos",
-    "/novidades passa a exibir comandos, menus, melhorias, correções e resumo da versão"
+    "/menu agora lê a versão diretamente do version.json",
+    "Versões antigas escritas no template são substituídas automaticamente"
   ],
   "changed": [
-    "O /update registra a versão anterior, a nova versão e o chat que solicitou a atualização",
-    "A notícia da atualização é enviada uma única vez após o bot voltar",
-    "Comandos novos do menubn respeitam o /modobrincadeira"
+    "/statusatt deixou de verificar a antiga v0.1.4-beta",
+    "Status de atualização agora compara a versão local com a versão publicada"
   ],
   "fixed": [
-    "Release notes agora possuem estrutura própria para menus e resumo",
-    "Evita repetir a mesma notificação de atualização em reinicializações posteriores"
+    "Corrigido menu mostrando número de versão antigo",
+    "Removida dependência de editar manualmente a versão exibida no menu"
   ],
   "notes": [
-    "O anúncio pendente é entregue na primeira atividade processada pelo bot após o reinício",
-    "Os novos comandos de diversão não exigem dependências externas"
+    "A versão é relida toda vez que alguém usa /menu, então acompanha futuras atualizações automaticamente"
   ],
-  "summary": "A v0.3.6 recupera o Update News da Kobayashi e transforma o /menubn em um menu mais completo. Além das brincadeiras e rankings existentes, entram frases, perguntas aleatórias e jogos rápidos, mantendo o controle de ADM pelo Modo Brincadeira."
+  "summary": "A v0.3.7 corrige a versão antiga exibida no menu e transforma a identificação da versão em dinâmica. A partir de agora, o /menu consulta a versão instalada sempre que é aberto, reduzindo o risco de informações desatualizadas após novos updates."
 }

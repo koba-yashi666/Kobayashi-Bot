@@ -4956,9 +4956,24 @@ case "menu": {
     react: { text: "🐉", key: info.key }
   }).catch(() => {});
 
+  const versaoMenuAtual = getLocalVersion();
+  const menuBaseAtualizado = String(
+    linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix)
+  )
+    // Corrige versões antigas escritas diretamente no template do menu.
+    // A versão real é lida do version.json sempre que /menu é usado.
+    .replace(
+      /((?:vers[aã]o|version|v\.?)[^\n\d]{0,12})v?\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?/gi,
+      (_, label) => `${label}${versaoMenuAtual}`
+    );
+
   const menuPrincipalComLevel =
-    linguagem.menuPrincipal(NomeDoBot, sender, ownerName, prefix) +
-    `\n\n╭─〔 🐉 *DRAGON LEVEL* 〕\n` +
+    menuBaseAtualizado +
+    `\n\n╭─〔 📦 *VERSÃO ATUAL* 〕\n` +
+    `│ ${versaoMenuAtual}\n` +
+    `│ └ Atualizada automaticamente a cada abertura do menu\n` +
+    `╰────────────────\n\n` +
+    `╭─〔 🐉 *DRAGON LEVEL* 〕\n` +
     `│ ${prefix}menulevel\n` +
     `│ └ Níveis, XP e ranking do grupo\n` +
     `╰────────────────\n\n` +
@@ -5049,13 +5064,13 @@ case "statusupdate": {
 
   try {
     const status = await checkUpdate();
-    const sincronizado = status.local === "0.1.4-beta";
+    const sincronizado = !status.available && String(status.local) === String(status.remote);
 
     return reply(
       `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
       `📦 Versão carregada: *${status.local}*\n` +
       `☁️ Versão no GitHub: *${status.remote}*\n` +
-      `🧪 Teste v0.1.4: *${sincronizado ? "APROVADO ✅" : "AINDA NÃO ATUALIZOU ⚠️"}*\n\n` +
+      `🔄 Sincronização: *${sincronizado ? "ATUALIZADO ✅" : "ATUALIZAÇÃO PENDENTE ⚠️"}*\n\n` +
       (status.available
         ? `🔄 Ainda existe uma atualização disponível no GitHub.`
         : `🌸 Kobayashi está sincronizada com a versão publicada.`)
@@ -5064,7 +5079,7 @@ case "statusupdate": {
     return reply(
       `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
       `📦 Versão carregada: *${getLocalVersion()}*\n` +
-      `🧪 Comando da *v0.1.4-beta* carregado com sucesso ✅\n` +
+      `📦 Versão local lida dinamicamente: *${getLocalVersion()}* ✅\n` +
       `⚠️ Só não consegui consultar o GitHub agora.`
     );
   }
