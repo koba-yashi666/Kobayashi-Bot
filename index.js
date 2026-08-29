@@ -37,7 +37,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
-import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage } from "./lib/features/dragonSocial.js";
+import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/dragonSocial.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -4934,6 +4934,37 @@ case "opencaixa": {
 }
 break;
 
+case "antifarm":
+case "antifarmdiario": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const action = String(args?.[0] || "status").toLowerCase();
+
+  if (action === "on" || action === "off") {
+    if (!isGroupAdmins) return reply(mess.onlyAdmins());
+    const enabled = setAntiFarmEnabled(from, action === "on");
+    return reply(
+      enabled
+        ? "🛡️🐉 *Anti-Farm Diário ativado neste grupo!*"
+        : "⚠️ *Anti-Farm Diário desativado neste grupo.*"
+    );
+  }
+
+  const cfg = getAntiFarmConfig(from);
+  const usage = getAntiFarmUsage(from, sender);
+  return reply(
+    `╭━━〔 🛡️ *ANTI-FARM DIÁRIO* 〕━━╮\n` +
+    `┃ Status: *${cfg.enabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
+    `┃ 🎮 Ações premiadas: *${usage.actions}/${usage.actionLimit}*\n` +
+    `┃ 🪙 Moedas de farm: *${usage.coins}/${usage.coinLimit}*\n` +
+    `┃ 🌅 Reset diário: *06:00*\n` +
+    `┃\n` +
+    `┃ ADM: ${prefix}antifarm on\n` +
+    `┃ ADM: ${prefix}antifarm off\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━╯`
+  );
+}
+break;
+
 case "menusocial":
 case "menudragon": {
   if (!isGroup) return reply(mess.onlyGroup());
@@ -4953,7 +4984,9 @@ case "menudragon": {
     `💞 *SOCIAL*\n` +
     `• ${prefix}cafune @membro\n` +
     `• ${prefix}presente @membro\n` +
-    `• ${prefix}amizade @membro\n\n` +
+    `• ${prefix}amizade @membro\n\n` +    `🛡️ *ANTI-FARM DIÁRIO*\n` +
+    `• ${prefix}antifarm\n` +
+    `• ${prefix}antifarm on/off • ADM\n\n` +
     `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.\n` +
     `⭐ Subir de nível agora também rende Dragon Coins.\n` +
     `🛒 Loja e inventário: *${prefix}menuloja*`
@@ -5063,13 +5096,7 @@ case "dado": {
   const win = value >= 5;
   const reward = win ? 15 : 3;
   const g = recordGame(sender, win ? "win" : "loss", reward, from);
-  return reply(
-    `🎲 Você tirou *${value}*!\n${win ? "🏆 Boa! Vitória." : "🐉 Dessa vez não."}\n` +
-    (g.antiFarm?.blocked
-      ? `🛡️ Limite diário de farm atingido. Nenhuma moeda concedida.\n`
-      : `🪙 +${g.reward} moedas • Saldo: *${g.coins}*\n`) +
-    `🌅 Anti-farm reseta às *06:00*.`
-  );
+  return reply(`🎲 Você tirou *${value}*!\n${win ? "🏆 Boa! Vitória." : "🐉 Dessa vez não."}\n${g.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `🪙 +${g.reward} moedas • Saldo: *${g.coins}*`}`);
 }
 break;
 
@@ -5080,12 +5107,7 @@ case "coinflip": {
   const side = Math.random() < .5 ? "Cara 🪙" : "Coroa 👑";
   const reward = 5;
   const g = recordGame(sender, "play", reward, from);
-  return reply(
-    `🪙 A moeda caiu em: *${side}*\n` +
-    (g.antiFarm?.blocked
-      ? `🛡️ Limite diário de farm atingido. Nenhuma moeda concedida.`
-      : `✨ +${g.reward} Dragon Coins • Saldo: *${g.coins}*`)
-  );
+  return reply(`🪙 A moeda caiu em: *${side}*\n${g.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `✨ +${g.reward} Dragon Coins • Saldo: *${g.coins}*`}`);
 }
 break;
 
@@ -5104,12 +5126,7 @@ case "amizade": {
   const [icon, phrase] = labels[command];
   const social = recordSocialInteraction(sender, target, from);
   return conn.sendMessage(from, {
-    text:
-      `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n` +
-      (social.antiFarm?.blocked
-        ? `🛡️ Limite diário de farm atingido. Sem moedas nesta interação.\n`
-        : `🪙 +${social.reward} Dragon Coins\n`) +
-      `🤝 Interações: *${social.socialInteractions}*`,
+    text: `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n${social.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `🪙 +${social.reward} Dragon Coins`} • Interações: *${social.socialInteractions}*`,
     mentions: [sender, target]
   }, { quoted: info });
 }

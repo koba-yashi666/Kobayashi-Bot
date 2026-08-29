@@ -1,26 +1,25 @@
 {
   "version": "0.4.5-beta",
-  "title": "Dragon Anti-Farm Diário",
+  "title": "Dragon Anti-Farm Diário — Correção",
   "added": [
-    "Anti-Farm diário por usuário e por grupo",
-    "Limite de 20 ações premiadas por ciclo",
-    "Limite de 250 Dragon Coins obtidas por recompensas repetíveis por ciclo",
-    "/antifarm para ver o consumo diário",
-    "/antifarm on e /antifarm off para ADMs",
-    "Reset automático às 06:00 no horário de São Paulo"
+    "/antifarm",
+    "/antifarm on",
+    "/antifarm off",
+    "Limite de 20 recompensas repetíveis por usuário/grupo",
+    "Teto de 250 Dragon Coins de farm por ciclo",
+    "Reset às 06:00 (São Paulo)"
   ],
   "menus": [
-    "/antifarm adicionado ao /menusocial"
+    "/antifarm e /antifarm on/off adicionados de verdade ao /menusocial"
   ],
   "changed": [
-    "Jogos e interações sociais passam a respeitar o Anti-Farm",
-    "Daily e recompensas de Level Up não entram no limite"
+    "/dado, /moeda e interações Dragon Social agora passam pelo Anti-Farm",
+    "Daily e Level Up continuam fora do limite"
   ],
-  "fixed": [],
+  "fixed": [
+    "Corrigida a v0.4.5 anterior que anunciava comandos sem incluí-los no código final"
+  ],
   "notes": [
-    "O limite é separado por usuário e por grupo",
-    "Recompensas podem ser parcialmente reduzidas ao atingir o teto de moedas",
-    "Não é necessário npm install"
-  ],
-  "summary": "A v0.4.5 protege a economia contra farm repetitivo em grupos, limitando recompensas de jogos e interações sem prejudicar Daily ou Level Up."
+    "Não precisa npm install"
+  ]
 }
