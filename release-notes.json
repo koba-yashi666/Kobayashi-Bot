@@ -1,26 +1,25 @@
 {
-  "version": "0.4.0-beta",
-  "title": "Dragon Social",
+  "version": "0.4.1-beta",
+  "title": "Dragon Level × Dragon Coins",
   "added": [
-    "Dragon Coins com carteira persistente",
-    "/daily com recompensa diária",
-    "/pagar para transferir moedas",
-    "/rankcoins global",
-    "Sistema inicial de conquistas",
-    "/dado e /moeda integrados à economia",
-    "/cafune, /presente e /amizade com estatísticas",
-    "/menusocial para centralizar a nova fase social"
+    "Subir de nível recompensa automaticamente com Dragon Coins",
+    "Recompensa de level é única por nível para impedir duplicação",
+    "Daily recebe bônus baseado no Dragon Level",
+    "Conquistas de nível 10, 25 e 50",
+    "Dragon Card /perfil agora mostra moedas, conquistas, jogos e interações"
   ],
   "menus": [
-    "Menu Kobayashi Fun agora aponta para /menusocial"
+    "/menusocial informa que Level agora rende Dragon Coins"
   ],
   "changed": [
-    "A linha v0.4.x inaugura Games & Social com sistemas persistentes e modulares"
+    "Daily passa a exibir valor base, bônus do nível e total recebido",
+    "/carteira passa a mostrar total de conquistas incluindo as de nível"
   ],
   "fixed": [],
   "notes": [
-    "Dados ficam em files/database/dragon-social.json",
+    "Recompensa por Level: 20 + (nível × 5) Dragon Coins",
+    "Bônus do Daily: +3 moedas por nível acima do nível 1",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.4.0 inaugura Dragon Social: economia Dragon Coins, Daily, transferências, ranking, conquistas, jogos e interações sociais persistentes."
+  "summary": "A v0.4.1 conecta Dragon Level e Dragon Social. Evoluir rende moedas, o Daily cresce conforme o nível e o perfil passa a concentrar progressão, economia, conquistas e atividade."
 }

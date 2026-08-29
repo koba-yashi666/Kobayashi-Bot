@@ -37,7 +37,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
-import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary } from "./lib/features/dragonSocial.js";
+import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins } from "./lib/features/dragonSocial.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -650,11 +650,16 @@ if (isGroup && sender && !info.key.fromMe) {
     activityType
   });
   if (levelEvent?.levelUp) {
+    const levelReward = awardLevelUpCoins(sender, levelEvent.level);
+
     await conn.sendMessage(from, {
       text:
         `🐉✨ *LEVEL UP!*\n\n` +
         `@${String(sender).split("@")[0]} subiu para o *nível ${levelEvent.level}*! 🎉\n` +
-        `🏷️ ${levelEvent.title}\n\n` +
+        `🏷️ ${levelEvent.title}\n` +
+        (levelReward.awarded
+          ? `🪙 Recompensa: *+${levelReward.reward} Dragon Coins*\n💰 Saldo: *${levelReward.coins}*\n\n`
+          : `\n`) +
         (levelEvent.level >= 50
           ? `👑 *NÍVEL MÁXIMO ALCANÇADO!* Você chegou ao topo do Dragon Level.`
           : `✨ Continue conversando e usando a Kobayashi para evoluir.`),
@@ -4389,6 +4394,8 @@ case "perfil": {
           : 'Membro';
 
   const levelInfo = getLevelInfoFromXp(activity?.xp || 0);
+  const socialInfo = getEconomySummary(targetJid);
+  const socialAchievements = getAchievements(targetJid, levelInfo.level);
   const dragonRank = levelInfo.title;
   const levelBlocks = Math.max(0, Math.min(10, Math.round(levelInfo.progress / 10)));
   const levelBar = "▰".repeat(levelBlocks) + "▱".repeat(10 - levelBlocks);
@@ -4412,6 +4419,12 @@ case "perfil": {
     (legacyCount > 0 ? `┃ 📦 Registros anteriores: *${legacyCount}*\n` : "") +
     `┃ 🕒 Última atividade: *${lastSeenText}*\n` +
     `┃ ⚠️ ADVs: *${advCount}/3* — ${advStatus}\n` +
+    `┃\n` +
+    `┣━━〔 💰 DRAGON SOCIAL 〕━━━━┫\n` +
+    `┃ 🪙 Dragon Coins: *${socialInfo.coins}*\n` +
+    `┃ 🏆 Conquistas: *${socialAchievements.unlocked.length}/${socialAchievements.total}*\n` +
+    `┃ 🎮 Jogos: *${socialInfo.games.played}* • 🏅 ${socialInfo.games.wins} vitórias\n` +
+    `┃ 🤝 Interações: *${socialInfo.socialInteractions}*\n` +
     `┃\n` +
     `┣━━〔 ✨ AURA 〕━━━━━━━━━━━━┫\n` +
     `┃ 🐂 Caos romântico: *${gado}%*\n` +
@@ -4806,7 +4819,8 @@ case "menudragon": {
     `• ${prefix}cafune @membro\n` +
     `• ${prefix}presente @membro\n` +
     `• ${prefix}amizade @membro\n\n` +
-    `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.`
+    `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.\n` +
+    `⭐ Subir de nível agora também rende Dragon Coins.`
   );
 }
 break;
@@ -4817,6 +4831,8 @@ case "saldo": {
   if (!isGroup) return reply(mess.onlyGroup());
   const target = getTargetFromMessage(info, sender) || sender;
   const p = getSocialProfile(target);
+  const levelRow = getUserActivity(from, target);
+  const walletAchievements = getAchievements(target, levelRow?.level || 1);
   return conn.sendMessage(from, {
     text:
       `╭━━〔 💰 *DRAGON WALLET* 〕━━╮\n` +
@@ -4825,7 +4841,7 @@ case "saldo": {
       `┃ 🎮 Vitórias: *${p.games.wins}*\n` +
       `┃ 💀 Derrotas: *${p.games.losses}*\n` +
       `┃ 🤝 Interações: *${p.socialInteractions}*\n` +
-      `┃ 🏆 Conquistas: *${getAchievements(target).unlocked.length}*\n` +
+      `┃ 🏆 Conquistas: *${walletAchievements.unlocked.length}/${walletAchievements.total}*\n` +
       `╰━━━━━━━━━━━━━━━━━━╯`,
     mentions: [target]
   }, { quoted: info });
@@ -4834,13 +4850,20 @@ break;
 
 case "daily": {
   if (!isGroup) return reply(mess.onlyGroup());
-  const result = claimDaily(sender);
+  const levelRow = getUserActivity(from, sender);
+  const result = claimDaily(sender, levelRow?.level || 1);
   if (!result.ok) {
     const hours = Math.floor(result.remainingMs / 3600000);
     const mins = Math.ceil((result.remainingMs % 3600000) / 60000);
     return reply(`⏳ Você já coletou o Daily de hoje.\nVolte em *${hours}h ${mins}min*.`);
   }
-  return reply(`🎁🐉 *DAILY COLETADO!*\n\n🪙 +*${result.reward} Dragon Coins*\n💰 Saldo: *${result.coins}*`);
+  return reply(
+    `🎁🐉 *DAILY COLETADO!*\n\n` +
+    `🪙 Base: *${result.base}*\n` +
+    `⭐ Bônus Nv.${result.level}: *+${result.levelBonus}*\n` +
+    `💰 Total recebido: *${result.reward} Dragon Coins*\n` +
+    `🏦 Saldo: *${result.coins}*`
+  );
 }
 break;
 
@@ -4882,7 +4905,8 @@ case "conquistas":
 case "achievements": {
   if (!isGroup) return reply(mess.onlyGroup());
   const target = getTargetFromMessage(info, sender) || sender;
-  const a = getAchievements(target);
+  const levelRow = getUserActivity(from, target);
+  const a = getAchievements(target, levelRow?.level || 1);
   return conn.sendMessage(from, {
     text:
       `╭━━〔 🏆 *CONQUISTAS* 〕━━╮\n` +
