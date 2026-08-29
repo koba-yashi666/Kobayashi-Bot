@@ -1,24 +1,27 @@
 {
-  "version": "0.3.7-beta",
-  "title": "Menu Version Sync",
+  "version": "0.3.8-beta",
+  "title": "Dragon Level Media & Activity Counters",
   "added": [
-    "Bloco de versão atual dentro do menu principal",
-    "Atualização dinâmica da versão sempre que /menu é aberto"
+    "Fotos agora rendem XP no Dragon Level",
+    "Figurinhas agora rendem XP no Dragon Level",
+    "Contadores separados para textos, fotos e figurinhas"
   ],
   "menus": [
-    "/menu agora lê a versão diretamente do version.json",
-    "Versões antigas escritas no template são substituídas automaticamente"
+    "/menulevel atualizado com XP de texto, foto e figurinha"
   ],
   "changed": [
-    "/statusatt deixou de verificar a antiga v0.1.4-beta",
-    "Status de atualização agora compara a versão local com a versão publicada"
+    "/nivel mostra textos, fotos e figurinhas separadamente",
+    "/atividade mostra textos, fotos, figurinhas e total",
+    "/rank e /topativos exibem a composição da atividade",
+    "/perfil mostra a atividade separada por tipo"
   ],
   "fixed": [
-    "Corrigido menu mostrando número de versão antigo",
-    "Removida dependência de editar manualmente a versão exibida no menu"
+    "Mídias sem legenda deixam de ficar fora do ganho de XP",
+    "Contagem de atividade não mistura mais novos textos, fotos e figurinhas"
   ],
   "notes": [
-    "A versão é relida toda vez que alguém usa /menu, então acompanha futuras atualizações automaticamente"
+    "Fotos rendem 10 XP e figurinhas 7 XP, respeitando cooldown anti-farm",
+    "Registros anteriores à v0.3.8 são preservados como 'Registros anteriores', pois o banco antigo não salvava o tipo da mensagem"
   ],
-  "summary": "A v0.3.7 corrige a versão antiga exibida no menu e transforma a identificação da versão em dinâmica. A partir de agora, o /menu consulta a versão instalada sempre que é aberto, reduzindo o risco de informações desatualizadas após novos updates."
+  "summary": "A v0.3.8 expande o Dragon Level para reconhecer fotos e figurinhas e melhora as estatísticas de atividade. A partir desta versão, a Kobayashi registra separadamente textos, fotos e figurinhas sem perder o histórico antigo."
 }

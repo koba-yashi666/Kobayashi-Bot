@@ -546,7 +546,19 @@ if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDo
 // KOBAYASHI AFK + ACTIVITY v0.1.55
 // O tracker precisa rodar em grupos independentemente do Anti-PV.
 if (isGroup && sender && !info.key.fromMe) {
-  const levelEvent = trackActivity(from, sender, { text: body, isCommand: isCmd });
+  const rawActivityType = getContentType(info.message || {});
+  const activityType =
+    rawActivityType === "imageMessage"
+      ? "image"
+      : rawActivityType === "stickerMessage"
+        ? "sticker"
+        : "text";
+
+  const levelEvent = trackActivity(from, sender, {
+    text: body,
+    isCommand: isCmd,
+    activityType
+  });
   if (levelEvent?.levelUp) {
     await conn.sendMessage(from, {
       text:
@@ -2846,7 +2858,10 @@ case "xp": {
       `┃ ⚙️ Sistema: *${isLevelEnabled(from) ? "ATIVO ✅" : "DESATIVADO 💤"}*\n` +
       `┃ ⭐ Nível: *${row.level}*\n` +
       `┃ ✨ XP total: *${row.xp}*\n` +
-      `┃ 💬 Mensagens: *${row.messages}*\n` +
+      `┃ 💬 Textos: *${row.textMessages}*\n` +
+      `┃ 🖼️ Fotos: *${row.images}*\n` +
+      `┃ 🎨 Figurinhas: *${row.stickers}*\n` +
+      (row.legacyMessages > 0 ? `┃ 📦 Registros anteriores: *${row.legacyMessages}*\n` : "") +
       `┃\n` +
       `┃ ${bar} *${row.progress}%*\n` +
             (row.level >= 50
@@ -2959,7 +2974,10 @@ case "topativos": {
   if (!top.length) return reply("🌸 Ainda não tenho atividade suficiente registrada neste grupo.");
   const medals = ["🥇", "🥈", "🥉"];
   const mentions = top.map((x) => x.jid);
-  const rows = top.map((x, i) => `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *${x.messages} mensagens*`).join("\n");
+  const rows = top.map((x, i) =>
+    `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — ` +
+    `💬 ${x.textMessages} • 🖼️ ${x.images} • 🎨 ${x.stickers} • 📊 ${x.messages}`
+  ).join("\n");
   return conn.sendMessage(from, {
     text:
       `╭━━〔 🐉 RANK KOBAYASHI 〕━━╮\n` +
@@ -2992,7 +3010,11 @@ case "checkme": {
     text:
       `╭━━〔 📊 ATIVIDADE 〕━━╮\n` +
       `┃ 👤 @${String(target).split("@")[0]}\n` +
-      `┃ 💬 Mensagens: *${row.messages}*\n` +
+      `┃ 💬 Textos: *${row.textMessages}*\n` +
+      `┃ 🖼️ Fotos: *${row.images}*\n` +
+      `┃ 🎨 Figurinhas: *${row.stickers}*\n` +
+      `┃ 📊 Total: *${row.messages}*\n` +
+      (row.legacyMessages > 0 ? `┃ 📦 Registros anteriores: *${row.legacyMessages}*\n` : "") +
       `┃ 🏆 Posição: *${position > 0 ? `#${position}` : "sem ranking"}*\n` +
       `┃ 🐲 Classe: *${rankName}*\n` +
       `┃ ⭐ Nível: *${row.level}* • ${row.xp} XP\n` +
@@ -4205,8 +4227,14 @@ case "perfil": {
   const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
   const advStatus = advCount === 0 ? 'Ficha limpa' : advCount === 1 ? 'Sob atenção' : advCount === 2 ? 'Zona de risco' : 'Limite atingido';
 
-  const activity = isGroup ? getUserActivity(from, targetJid) : { messages: 0, lastSeen: 0 };
+  const activity = isGroup
+    ? getUserActivity(from, targetJid)
+    : { messages: 0, textMessages: 0, images: 0, stickers: 0, legacyMessages: 0, lastSeen: 0 };
   const messageCount = Number(activity?.messages || 0);
+  const textCount = Number(activity?.textMessages || 0);
+  const imageCount = Number(activity?.images || 0);
+  const stickerCount = Number(activity?.stickers || 0);
+  const legacyCount = Number(activity?.legacyMessages || 0);
   const lastSeen = Number(activity?.lastSeen || 0);
   const lastSeenText = lastSeen
     ? new Date(lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
@@ -4243,7 +4271,11 @@ case "perfil": {
     `┃ 🏷️ Classe: *${dragonRank}*\n` +
     `┃ ⭐ Nível: *${levelInfo.level}* • ${levelInfo.xp} XP\n` +
     `┃ 📈 ${levelBar} ${levelInfo.progress}%\n` +
-    `┃ 💬 Mensagens: *${messageCount}*\n` +
+    `┃ 💬 Textos: *${textCount}*\n` +
+    `┃ 🖼️ Fotos: *${imageCount}*\n` +
+    `┃ 🎨 Figurinhas: *${stickerCount}*\n` +
+    `┃ 📊 Total: *${messageCount}*\n` +
+    (legacyCount > 0 ? `┃ 📦 Registros anteriores: *${legacyCount}*\n` : "") +
     `┃ 🕒 Última atividade: *${lastSeenText}*\n` +
     `┃ ⚠️ ADVs: *${advCount}/3* — ${advStatus}\n` +
     `┃\n` +
@@ -5014,7 +5046,9 @@ reply(
   `│ └ Desativa o sistema de níveis\n` +
   `│\n` +
   `├━━〔 ✨ *COMO GANHAR XP* 〕━━┫\n` +
-  `│ 💬 Conversando: *+5–12 XP*\n` +
+  `│ 💬 Texto: *+5–12 XP*\n` +
+  `│ 🖼️ Foto: *+10 XP*\n` +
+  `│ 🎨 Figurinha: *+7 XP*\n` +
   `│ 🐉 Usando a Kobayashi: *+14–18 XP*\n` +
   `│ 🎯 Progressão: *1 → 50 níveis*\n` +
   `│ ⭐ Nv.1–10: *100 XP por nível*\n` +
