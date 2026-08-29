@@ -5062,8 +5062,14 @@ case "dado": {
   const value = 1 + Math.floor(Math.random() * 6);
   const win = value >= 5;
   const reward = win ? 15 : 3;
-  const g = recordGame(sender, win ? "win" : "loss", reward);
-  return reply(`🎲 Você tirou *${value}*!\n${win ? "🏆 Boa! Vitória." : "🐉 Dessa vez não."}\n🪙 +${reward} moedas • Saldo: *${g.coins}*`);
+  const g = recordGame(sender, win ? "win" : "loss", reward, from);
+  return reply(
+    `🎲 Você tirou *${value}*!\n${win ? "🏆 Boa! Vitória." : "🐉 Dessa vez não."}\n` +
+    (g.antiFarm?.blocked
+      ? `🛡️ Limite diário de farm atingido. Nenhuma moeda concedida.\n`
+      : `🪙 +${g.reward} moedas • Saldo: *${g.coins}*\n`) +
+    `🌅 Anti-farm reseta às *06:00*.`
+  );
 }
 break;
 
@@ -5073,8 +5079,13 @@ case "coinflip": {
   if (!isFunModeEnabled(from)) return reply(`🔒 Ative o Modo Brincadeira com *${prefix}modobrincadeira*.`);
   const side = Math.random() < .5 ? "Cara 🪙" : "Coroa 👑";
   const reward = 5;
-  const g = recordGame(sender, "play", reward);
-  return reply(`🪙 A moeda caiu em: *${side}*\n✨ +${reward} Dragon Coins • Saldo: *${g.coins}*`);
+  const g = recordGame(sender, "play", reward, from);
+  return reply(
+    `🪙 A moeda caiu em: *${side}*\n` +
+    (g.antiFarm?.blocked
+      ? `🛡️ Limite diário de farm atingido. Nenhuma moeda concedida.`
+      : `✨ +${g.reward} Dragon Coins • Saldo: *${g.coins}*`)
+  );
 }
 break;
 
@@ -5091,9 +5102,14 @@ case "amizade": {
     amizade: ["🤝", "celebrou a amizade com"]
   };
   const [icon, phrase] = labels[command];
-  const social = recordSocialInteraction(sender, target);
+  const social = recordSocialInteraction(sender, target, from);
   return conn.sendMessage(from, {
-    text: `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n🪙 +2 Dragon Coins • Interações: *${social.socialInteractions}*`,
+    text:
+      `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n` +
+      (social.antiFarm?.blocked
+        ? `🛡️ Limite diário de farm atingido. Sem moedas nesta interação.\n`
+        : `🪙 +${social.reward} Dragon Coins\n`) +
+      `🤝 Interações: *${social.socialInteractions}*`,
     mentions: [sender, target]
   }, { quoted: info });
 }

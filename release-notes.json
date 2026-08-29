@@ -1,23 +1,26 @@
 {
-  "version": "0.4.4-beta",
-  "title": "Dragon Shop Daily Limit",
+  "version": "0.4.5-beta",
+  "title": "Dragon Anti-Farm Diário",
   "added": [
-    "Limite diário de 5 compras por usuário na Dragon Shop",
-    "Contador individual de compras restantes",
-    "Reset automático da cota todos os dias às 06:00 no horário de São Paulo"
+    "Anti-Farm diário por usuário e por grupo",
+    "Limite de 20 ações premiadas por ciclo",
+    "Limite de 250 Dragon Coins obtidas por recompensas repetíveis por ciclo",
+    "/antifarm para ver o consumo diário",
+    "/antifarm on e /antifarm off para ADMs",
+    "Reset automático às 06:00 no horário de São Paulo"
   ],
   "menus": [
-    "/menuloja agora mostra compras usadas, limite e horário de reset"
+    "/antifarm adicionado ao /menusocial"
   ],
   "changed": [
-    "Somente compras concluídas consomem uma utilização diária",
-    "Tentativas sem moedas, item inválido ou título já possuído não gastam a cota"
+    "Jogos e interações sociais passam a respeitar o Anti-Farm",
+    "Daily e recompensas de Level Up não entram no limite"
   ],
   "fixed": [],
   "notes": [
-    "A janela diária usa America/Sao_Paulo",
-    "Entre 00:00 e 05:59 ainda vale a cota do dia anterior",
+    "O limite é separado por usuário e por grupo",
+    "Recompensas podem ser parcialmente reduzidas ao atingir o teto de moedas",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.4.4 adiciona limite de 5 compras diárias na Dragon Shop, com reset automático às 06:00 e contador individual."
+  "summary": "A v0.4.5 protege a economia contra farm repetitivo em grupos, limitando recompensas de jogos e interações sem prejudicar Daily ou Level Up."
 }
