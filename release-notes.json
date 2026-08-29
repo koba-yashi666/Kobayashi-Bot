@@ -1,27 +1,28 @@
 {
-  "version": "0.3.8-beta",
-  "title": "Dragon Level Media & Activity Counters",
+  "version": "0.3.9-beta",
+  "title": "Kobayashi Sentinel",
   "added": [
-    "Fotos agora rendem XP no Dragon Level",
-    "Figurinhas agora rendem XP no Dragon Level",
-    "Contadores separados para textos, fotos e figurinhas"
+    "Segunda sessão WhatsApp dedicada ao modo Sentinela",
+    "/sentinel parear para conectar o segundo número",
+    "/sentinel on e /sentinel off por grupo",
+    "/sentinel status, /sentinel delay e /sentinel log",
+    "Comparação por ID entre mensagens vistas pelo membro e pela conta ADM"
   ],
   "menus": [
-    "/menulevel atualizado com XP de texto, foto e figurinha"
+    "/menudono ganhou acesso ao Kobayashi Sentinel"
   ],
   "changed": [
-    "/nivel mostra textos, fotos e figurinhas separadamente",
-    "/atividade mostra textos, fotos, figurinhas e total",
-    "/rank e /topativos exibem a composição da atividade",
-    "/perfil mostra a atividade separada por tipo"
+    "Eventos da conta principal são registrados antes da leitura do conteúdo da mensagem",
+    "Links recebidos apenas pela conta membro entram em validação automática",
+    "O autor é protegido contra falso positivo se for ADM, dono ou Lista Branca"
   ],
   "fixed": [
-    "Mídias sem legenda deixam de ficar fora do ganho de XP",
-    "Contagem de atividade não mistura mais novos textos, fotos e figurinhas"
+    "Cria uma rota alternativa de detecção para mensagens que não chegam à sessão ADM"
   ],
   "notes": [
-    "Fotos rendem 10 XP e figurinhas 7 XP, respeitando cooldown anti-farm",
-    "Registros anteriores à v0.3.8 são preservados como 'Registros anteriores', pois o banco antigo não salvava o tipo da mensagem"
+    "A conta Sentinela deve permanecer como membro comum e nunca receber ADM",
+    "Por segurança, o ban automático v0.3.9 só ocorre quando a mensagem invisível contém padrão de link detectável",
+    "A exclusão da mensagem é tentada pela chave original, mas depende de o WhatsApp aceitar a deleção pela sessão ADM"
   ],
-  "summary": "A v0.3.8 expande o Dragon Level para reconhecer fotos e figurinhas e melhora as estatísticas de atividade. A partir desta versão, a Kobayashi registra separadamente textos, fotos e figurinhas sem perder o histórico antigo."
+  "summary": "A v0.3.9 adiciona o Kobayashi Sentinel: uma segunda conta sem ADM observa o grupo e compara os IDs das mensagens com a sessão principal. Quando um link aparece apenas para o membro comum, o sistema registra autor, grupo e mensagem, valida proteções e manda a Kobayashi ADM remover automaticamente o responsável."
 }

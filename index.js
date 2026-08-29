@@ -36,6 +36,7 @@ import { getRental, registerRental, renewRental, removeRental, setPermanentRenta
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
+import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -416,6 +417,9 @@ return onlyNumber ? `${onlyNumber}@lid` : null;
 export default async function start(upsert, conn) {
 try {
 for (const info of upsert?.messages || []) {
+// 🛰️ Kobayashi Sentinel: registra até eventos sem conteúdo.
+// Isso permite comparar o que a conta ADM recebeu com o que a conta membro recebeu.
+markPrincipalSeen(info);
 if (!info.message) continue;
 if (upsert.type === "append") continue;
 
@@ -608,6 +612,15 @@ if (isGroup && sender && !info.key.fromMe) {
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
+
+// 🛰️ KOBAYASHI SENTINEL • v0.3.9
+// Atualiza a conexão principal usada pelo executor. A conta sentinela nunca recebe poder de ADM.
+configureSentinelRuntime(conn, {
+  ownerJids: [dono],
+  resolveJid: async (raw, alt = null) =>
+    (await getPNForJid(conn, raw, alt)) || normalizeJid(alt || raw),
+  isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
+});
 
 
 // ==========================================
@@ -5065,11 +5078,125 @@ reagir("🛡️");
 reply(linguagem.menuAdm(prefix));
 break;
 
+
+case "sentinel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode configurar o Kobayashi Sentinel.");
+
+  const action = String(args?.[0] || "status").toLowerCase();
+
+  if (action === "status") {
+    const s = getSentinelStatus(from);
+    return reply(
+      `╭━━〔 🛰️ KOBAYASHI SENTINEL 〕━━╮\n` +
+      `┃ 🤖 Sessão: *${s.connected ? "ONLINE ✅" : s.registered ? "OFFLINE ⚠️" : "NÃO PAREADA"}*\n` +
+      `┃ 👁️ Neste grupo: *${s.groupEnabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
+      `┃ 🛡️ Modo: *links invisíveis*\n` +
+      `┃ ⏱️ Confirmação: *${s.delayMs} ms*\n` +
+      `┃ 📱 Sentinela: *${s.phoneNumber || "não configurado"}*\n` +
+      `┃\n` +
+      `┃ ${prefix}sentinel parear 55DDDNUMERO\n` +
+      `┃ ${prefix}sentinel on\n` +
+      `┃ ${prefix}sentinel off\n` +
+      `┃ ${prefix}sentinel delay 2000\n` +
+      `┃ ${prefix}sentinel log\n` +
+      `┃ ${prefix}sentinel desconectar\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (action === "parear" || action === "pair") {
+    const number = String(args?.[1] || "").replace(/\D/g, "");
+    if (number.length < 10 || number.length > 15) {
+      return reply(`📱 Use: *${prefix}sentinel parear 5511999999999*`);
+    }
+
+    await reply("🛰️ Preparando a conta Sentinela...");
+    try {
+      const result = await startSentinelPairing(number);
+      if (result.alreadyRegistered) {
+        return reply(
+          `✅ A conta Sentinela já possui sessão registrada.\n` +
+          `📱 Número: *${result.phoneNumber || number}*\n\n` +
+          `Use *${prefix}sentinel on* no grupo que deseja proteger.`
+        );
+      }
+
+      return reply(
+        `🛰️ *CÓDIGO DE PAREAMENTO SENTINEL*\n\n` +
+        `📱 Número: *${number}*\n` +
+        `🔑 Código: *${result.code}*\n\n` +
+        `No WhatsApp do segundo número:\n` +
+        `*Aparelhos conectados → Conectar com número de telefone*.\n\n` +
+        `⚠️ Essa conta deve permanecer como *membro comum*, sem ADM.`
+      );
+    } catch (e) {
+      return reply(`❌ Não consegui iniciar o pareamento do Sentinela.\n\n${e?.message || e}`);
+    }
+  }
+
+  if (action === "on" || action === "off") {
+    if (!isGroup) return reply(mess.onlyGroup());
+    const enabled = action === "on";
+    setSentinelGroupEnabled(from, enabled);
+
+    return reply(
+      enabled
+        ? `🛰️✅ *Kobayashi Sentinel ativado neste grupo.*\n\n` +
+          `A conta membro comum irá comparar mensagens com a Kobayashi ADM.\n` +
+          `Se um *link suspeito* aparecer apenas para o Sentinela, o autor será validado e removido automaticamente.`
+        : `🛰️❌ *Kobayashi Sentinel desativado neste grupo.*`
+    );
+  }
+
+  if (action === "delay") {
+    const value = Number(args?.[1]);
+    if (!Number.isFinite(value) || value < 1200 || value > 10000) {
+      return reply(`⏱️ Use um valor entre *1200 e 10000 ms*.\nEx.: *${prefix}sentinel delay 2000*`);
+    }
+    const delayMs = setSentinelDelay(value);
+    return reply(`⏱️ Confirmação do Sentinel definida para *${delayMs} ms*.`);
+  }
+
+  if (action === "log" || action === "logs") {
+    const logs = getSentinelLogs(isGroup ? from : null, 10);
+    if (!logs.length) return reply("🛰️ Ainda não existem detecções registradas.");
+
+    return reply(
+      `╭━━〔 🛰️ SENTINEL LOG 〕━━╮\n` +
+      logs.map((x, i) =>
+        `┃ ${i + 1}. ${x.action || "detectado"}\n` +
+        `┃ 👤 ${String(x.senderJid || "desconhecido").split("@")[0]}\n` +
+        `┃ 🆔 ${x.messageId || "—"}\n` +
+        `┃ 🕒 ${new Date(x.timestamp || Date.now()).toLocaleString("pt-BR")}`
+      ).join("\n┃\n") +
+      `\n╰━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (action === "desconectar" || action === "stop") {
+    const stopped = await stopSentinel();
+    return reply(
+      stopped
+        ? "🛰️ Sentinela desconectado. A sessão foi preservada para reconectar depois."
+        : "🛰️ O Sentinela já estava desconectado."
+    );
+  }
+
+  return reply(`🛰️ Use *${prefix}sentinel status* para ver as opções.`);
+}
+break;
+
 case "menuowner":
 case "menudono":
 if (!SoDono) return reply(mess.onlyOwner());
 reagir("👑");
-reply(linguagem.menuOwner(prefix));
+reply(
+  linguagem.menuOwner(prefix) +
+  `\n\n╭─〔 🛰️ *KOBAYASHI SENTINEL* 〕\n` +
+  `│ ${prefix}sentinel status\n` +
+  `│ └ Proteção por segunda conta membro\n` +
+  `╰────────────────`
+);
 break;
 
 case "menusticker":
