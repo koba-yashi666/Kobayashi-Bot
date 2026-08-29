@@ -1,6 +1,6 @@
 {
-  "version": "0.4.5-beta",
-  "title": "Dragon Anti-Farm Diário — Correção",
+  "version": "0.4.6-beta",
+  "title": "Dragon Anti-Farm Diário",
   "added": [
     "/antifarm",
     "/antifarm on",
@@ -17,7 +17,7 @@
     "Daily e Level Up continuam fora do limite"
   ],
   "fixed": [
-    "Corrigida a v0.4.5 anterior que anunciava comandos sem incluí-los no código final"
+    "Anti-Farm incluído corretamente no código e no /menusocial"
   ],
   "notes": [
     "Não precisa npm install"
