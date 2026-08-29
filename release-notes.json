@@ -1,30 +1,22 @@
 {
-  "version": "0.4.2-beta",
-  "title": "Dragon Shop & Inventory",
+  "version": "0.4.3-beta",
+  "title": "Dragon Level Seasons",
   "added": [
-    "/menuloja com catálogo Dragon Shop",
-    "/comprar para gastar Dragon Coins",
-    "/inventario para ver itens, títulos e boosts",
-    "/equipar para usar títulos cosméticos",
-    "/desequipartitulo para remover título ativo",
-    "/abrircaixa para abrir Caixa de Escamas",
-    "Boost Daily +75 consumível",
-    "Três títulos cosméticos para o Dragon Card",
-    "Caixa de Escamas com recompensa aleatória de 80 a 400 moedas"
+    "/zeraranknivel para iniciar nova temporada no grupo",
+    "/zeraranknivelg para iniciar nova temporada global",
+    "Reset preserva contadores de mensagens, fotos e figurinhas e limpa apenas XP/nível"
   ],
   "menus": [
-    "Menu principal simplificado no estilo Kobayashi solicitado",
-    "/menusocial e /menuloja adicionados ao menu principal",
-    "Regra de projeto: novos sistemas com menu próprio devem aparecer no menu principal"
+    "Novos comandos de temporada adicionados ao /menunivel"
   ],
   "changed": [
-    "Dragon Card /perfil agora mostra título cosmético equipado",
-    "Daily consome automaticamente um Boost Daily quando disponível"
+    "Comandos de reset são exclusivos do dono principal por segurança"
   ],
   "fixed": [],
   "notes": [
-    "Loja e inventário usam o mesmo files/database/dragon-social.json",
+    "O reset do grupo afeta apenas o grupo atual",
+    "O reset global afeta os registros de nível de todos os grupos",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.4.2 adiciona Dragon Shop e Inventário, permitindo gastar Dragon Coins em títulos, boosts e caixas. O menu principal também foi simplificado e passa a listar menus próprios dos novos sistemas."
+  "summary": "A v0.4.3 adiciona temporadas manuais ao Dragon Level. O dono pode zerar mensalmente o ranking de um grupo ou todo o ranking global sem apagar as estatísticas de atividade."
 }

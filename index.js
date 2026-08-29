@@ -26,7 +26,7 @@ import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
-import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel
+import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel, resetGroupLevelRank, resetGlobalLevelRank
 } from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
@@ -3034,6 +3034,34 @@ case "classeslevel": {
 }
 break;
 
+case "zeraranknivel": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode zerar o ranking de nível.");
+
+  const result = resetGroupLevelRank(from);
+  return reply(
+    `🏆🐉 *TEMPORADA DE NÍVEL ENCERRADA!*\n\n` +
+    `📍 Grupo: *${groupName || "Grupo"}*\n` +
+    `👥 Rankings zerados: *${result.users}*\n` +
+    `⭐ Todos começam novamente no nível 1 com 0 XP.\n\n` +
+    `🌸 Uma nova temporada do Dragon Level começou!`
+  );
+}
+break;
+
+case "zeraranknivelg": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode zerar o ranking global de nível.");
+
+  const result = resetGlobalLevelRank();
+  return reply(
+    `🌍🏆 *TEMPORADA GLOBAL ENCERRADA!*\n\n` +
+    `🏘️ Grupos processados: *${result.groups}*\n` +
+    `👥 Registros zerados: *${result.users}*\n` +
+    `⭐ O Dragon Level global começou uma nova temporada.`
+  );
+}
+break;
+
 case "ranknivelg":
 case "rankglobal":
 case "rankxpg": {
@@ -5459,6 +5487,12 @@ reply(
   `│\n` +
   `│ 💤 *${prefix}level off* • ADM\n` +
   `│ └ Desativa o sistema de níveis\n` +
+  `│\n` +
+  `│ ♻️ *${prefix}zeraranknivel* • DONO\n` +
+  `│ └ Inicia uma nova temporada neste grupo\n` +
+  `│\n` +
+  `│ 🌍 *${prefix}zeraranknivelg* • DONO\n` +
+  `│ └ Zera o ranking global de níveis\n` +
   `│\n` +
   `├━━〔 ✨ *COMO GANHAR XP* 〕━━┫\n` +
   `│ 💬 Texto: *+5–12 XP*\n` +
