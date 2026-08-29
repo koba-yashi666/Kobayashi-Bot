@@ -5126,7 +5126,8 @@ case "sentinel": {
         `📱 Número: *${number}*\n` +
         `🔑 Código: *${result.code}*\n\n` +
         `No WhatsApp do segundo número:\n` +
-        `*Aparelhos conectados → Conectar com número de telefone*.\n\n` +
+        `*Aparelhos conectados → Conectar um aparelho → Conectar com número de telefone*.\n\n` +
+        `✅ O pareamento agora usa o *mesmo método da conexão principal da Kobayashi*.\n` +
         `⚠️ Essa conta deve permanecer como *membro comum*, sem ADM.`
       );
     } catch (e) {
