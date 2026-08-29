@@ -26,7 +26,8 @@ import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
-import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled } from "./lib/features/activityTracker.js";
+import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel
+} from "./lib/features/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/antiFake.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/commandControl.js";
@@ -2856,6 +2857,34 @@ case "classeslevel": {
 }
 break;
 
+case "ranknivelg":
+case "rankglobal":
+case "rankxpg": {
+  const top = getGlobalTopLevel(10);
+  if (!top.length) {
+    return reply(
+      "🐉 Ainda não há XP suficiente nos grupos com o sistema de níveis ativado."
+    );
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const mentions = top.map((x) => x.jid);
+  const rows = top.map((x, i) =>
+    `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *Nv.${x.level}* • ${x.xp} XP • ${x.groups} grupo${x.groups === 1 ? "" : "s"}`
+  ).join("\n");
+
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🌍 RANK GLOBAL DE NÍVEL 〕━━╮\n` +
+      `┃ Top 10 de todos os grupos com Level ativo\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `${rows}\n\n` +
+      `🐉 O XP é somado entre todos os grupos onde o sistema de níveis está ativado.`,
+    mentions
+  }, { quoted: info });
+}
+break;
+
 case "ranknivel":
 case "toplevel":
 case "rankxp": {
@@ -2892,7 +2921,8 @@ case "nivelinfo": {
     `┃ ⏱️ Há cooldown entre ganhos para evitar farm.\n` +
     `┃ ♻️ Repetir a mesma mensagem/comando não dá XP.\n` +
     `┃ ⚙️ ADM: *${prefix}level on/off* ativa ou desativa por grupo.\n` +
-    `┃ 🏆 Use *${prefix}ranknivel* para ver o Top 10.\n` +
+    `┃ 🏆 Use *${prefix}ranknivel* para ver o Top 10 do grupo.\n` +
+    `┃ 🌍 Use *${prefix}ranknivelg* para ver o Top 10 global.\n` +
     `┃ 🐉 Use *${prefix}nivel* para ver sua evolução.\n` +
     `╰━━━━━━━━━━━━━━━━━━━━━━╯`
   );
@@ -4793,6 +4823,10 @@ case "menu": {
     `\n\n╭─〔 🐉 *DRAGON LEVEL* 〕\n` +
     `│ ${prefix}menulevel\n` +
     `│ └ Níveis, XP e ranking do grupo\n` +
+    `╰────────────────\n\n` +
+    `╭─〔 📢 *CANAL OFICIAL* 〕\n` +
+    `│ https://whatsapp.com/channel/0029Vb8j6MyGk1FzGOr4EP3M\n` +
+    `│ └ Novidades e atualizações da Kobayashi\n` +
     `╰────────────────`;
 
   await sendMenu(from, menuPrincipalComLevel, sender);
@@ -4810,6 +4844,9 @@ reply(
   `│\n` +
   `│ 🏆 *${prefix}ranknivel*\n` +
   `│ └ Ranking de níveis do grupo\n` +
+  `│\n` +
+  `│ 🌍 *${prefix}ranknivelg*\n` +
+  `│ └ Top 10 global entre grupos com Level ativo\n` +
   `│\n` +
   `│ 📊 *${prefix}nivelinfo*\n` +
   `│ └ Entenda XP, classes e progressão\n` +
