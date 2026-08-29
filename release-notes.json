@@ -1,22 +1,26 @@
 {
-  "version": "0.3.12-beta",
-  "title": "AntiLink Owner Audit",
+  "version": "0.4.0-beta",
+  "title": "Dragon Social",
   "added": [
-    "Auditoria do AntiLink agora é enviada diretamente para o PV do dono",
-    "Reporte inclui alvo, grupo, ID da mensagem, conteúdo detectado e resultado da ação"
+    "Dragon Coins com carteira persistente",
+    "/daily com recompensa diária",
+    "/pagar para transferir moedas",
+    "/rankcoins global",
+    "Sistema inicial de conquistas",
+    "/dado e /moeda integrados à economia",
+    "/cafune, /presente e /amizade com estatísticas",
+    "/menusocial para centralizar a nova fase social"
   ],
-  "menus": [],
+  "menus": [
+    "Menu Kobayashi Fun agora aponta para /menusocial"
+  ],
   "changed": [
-    "Registro de Auditoria do AntiLink deixa de depender do envio no grupo",
-    "Grupo recebe apenas uma confirmação curta da moderação",
-    "AntiLink Light mantém aviso de ADV no grupo enquanto o relatório completo vai ao dono"
+    "A linha v0.4.x inaugura Games & Social com sistemas persistentes e modulares"
   ],
-  "fixed": [
-    "Corrigido AntiLink que executava a punição mas não entregava o reporte administrativo esperado"
-  ],
+  "fixed": [],
   "notes": [
-    "O Anti-PV permanece inalterado",
+    "Dados ficam em files/database/dragon-social.json",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.3.12 envia o relatório completo do AntiLink diretamente ao número do dono do bot, usando o mesmo padrão de notificação privada adotado pelo Anti-PV."
+  "summary": "A v0.4.0 inaugura Dragon Social: economia Dragon Coins, Daily, transferências, ranking, conquistas, jogos e interações sociais persistentes."
 }

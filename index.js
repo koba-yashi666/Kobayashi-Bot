@@ -37,6 +37,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
+import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary } from "./lib/features/dragonSocial.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -4785,6 +4786,158 @@ break;
 
 
 // KOBAYASHI FUN • v0.1.15
+case "menusocial":
+case "menudragon": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  return reply(
+    `╭━━〔 🐉 *DRAGON SOCIAL* 〕━━╮\n\n` +
+    `💰 *ECONOMIA*\n` +
+    `• ${prefix}carteira [@]\n` +
+    `• ${prefix}daily\n` +
+    `• ${prefix}pagar @membro valor\n` +
+    `• ${prefix}rankcoins\n\n` +
+    `🏆 *CONQUISTAS*\n` +
+    `• ${prefix}conquistas [@]\n\n` +
+    `🎮 *JOGOS*\n` +
+    `• ${prefix}dado\n` +
+    `• ${prefix}moeda\n` +
+    `• ${prefix}ppt pedra|papel|tesoura\n\n` +
+    `💞 *SOCIAL*\n` +
+    `• ${prefix}cafune @membro\n` +
+    `• ${prefix}presente @membro\n` +
+    `• ${prefix}amizade @membro\n\n` +
+    `🐲 Dragon Coins, jogos e interações ficam salvos por usuário.`
+  );
+}
+break;
+
+case "carteira":
+case "coins":
+case "saldo": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const target = getTargetFromMessage(info, sender) || sender;
+  const p = getSocialProfile(target);
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 💰 *DRAGON WALLET* 〕━━╮\n` +
+      `┃ 👤 @${String(target).split("@")[0]}\n` +
+      `┃ 🪙 Dragon Coins: *${p.coins}*\n` +
+      `┃ 🎮 Vitórias: *${p.games.wins}*\n` +
+      `┃ 💀 Derrotas: *${p.games.losses}*\n` +
+      `┃ 🤝 Interações: *${p.socialInteractions}*\n` +
+      `┃ 🏆 Conquistas: *${getAchievements(target).unlocked.length}*\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "daily": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const result = claimDaily(sender);
+  if (!result.ok) {
+    const hours = Math.floor(result.remainingMs / 3600000);
+    const mins = Math.ceil((result.remainingMs % 3600000) / 60000);
+    return reply(`⏳ Você já coletou o Daily de hoje.\nVolte em *${hours}h ${mins}min*.`);
+  }
+  return reply(`🎁🐉 *DAILY COLETADO!*\n\n🪙 +*${result.reward} Dragon Coins*\n💰 Saldo: *${result.coins}*`);
+}
+break;
+
+case "pagar":
+case "pay": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const target = getTargetFromMessage(info, null);
+  const amount = Number(String(args?.[args.length - 1] || "").replace(/\D/g, ""));
+  if (!target || target === sender) return reply(`💸 Marque alguém e informe o valor.\nEx.: *${prefix}pagar @membro 100*`);
+  const result = transferCoins(sender, target, amount);
+  if (!result.ok) return reply(`❌ ${result.reason}`);
+  return conn.sendMessage(from, {
+    text:
+      `💸🐉 *TRANSFERÊNCIA DRAGON*\n\n` +
+      `@${sender.split("@")[0]} enviou *${result.amount} moedas* para @${target.split("@")[0]}.\n` +
+      `💰 Seu saldo: *${result.fromCoins}*`,
+    mentions: [sender, target]
+  }, { quoted: info });
+}
+break;
+
+case "rankcoins":
+case "topcoins": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const top = getCoinRank(10);
+  if (!top.length) return reply("🪙 Ainda não há Dragon Coins no ranking.");
+  const medals = ["🥇","🥈","🥉"];
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 💰 *RANK DRAGON COINS* 〕━━╮\n\n` +
+      top.map((x,i)=>`${medals[i] || `#${i+1}`} @${x.jid.split("@")[0]} — *${x.coins}* 🪙`).join("\n") +
+      `\n\n╰━━━━━━━━━━━━━━━━━━━━╯`,
+    mentions: top.map(x=>x.jid)
+  }, { quoted: info });
+}
+break;
+
+case "conquistas":
+case "achievements": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const target = getTargetFromMessage(info, sender) || sender;
+  const a = getAchievements(target);
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 🏆 *CONQUISTAS* 〕━━╮\n` +
+      `┃ 👤 @${target.split("@")[0]}\n` +
+      `┃ Desbloqueadas: *${a.unlocked.length}/${a.total}*\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯\n\n` +
+      a.items.map(x=>`${x.unlocked ? "✅" : "🔒"} ${x.icon} *${x.name}* — ${x.description}`).join("\n"),
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "dado": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) return reply(`🔒 Ative o Modo Brincadeira com *${prefix}modobrincadeira*.`);
+  const value = 1 + Math.floor(Math.random() * 6);
+  const win = value >= 5;
+  const reward = win ? 15 : 3;
+  const g = recordGame(sender, win ? "win" : "loss", reward);
+  return reply(`🎲 Você tirou *${value}*!\n${win ? "🏆 Boa! Vitória." : "🐉 Dessa vez não."}\n🪙 +${reward} moedas • Saldo: *${g.coins}*`);
+}
+break;
+
+case "moeda":
+case "coinflip": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) return reply(`🔒 Ative o Modo Brincadeira com *${prefix}modobrincadeira*.`);
+  const side = Math.random() < .5 ? "Cara 🪙" : "Coroa 👑";
+  const reward = 5;
+  const g = recordGame(sender, "play", reward);
+  return reply(`🪙 A moeda caiu em: *${side}*\n✨ +${reward} Dragon Coins • Saldo: *${g.coins}*`);
+}
+break;
+
+case "cafune":
+case "presente":
+case "amizade": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) return reply(`🔒 Ative o Modo Brincadeira com *${prefix}modobrincadeira*.`);
+  const target = getTargetFromMessage(info, null);
+  if (!target || target === sender) return reply("🌸 Marque outro membro.");
+  const labels = {
+    cafune: ["🌸", "fez um cafuné em"],
+    presente: ["🎁", "deu um presente para"],
+    amizade: ["🤝", "celebrou a amizade com"]
+  };
+  const [icon, phrase] = labels[command];
+  const social = recordSocialInteraction(sender, target);
+  return conn.sendMessage(from, {
+    text: `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n🪙 +2 Dragon Coins • Interações: *${social.socialInteractions}*`,
+    mentions: [sender, target]
+  }, { quoted: info });
+}
+break;
+
 case "menubn": {
   if (!isGroup) return reply(mess.onlyGroup());
 
@@ -4795,7 +4948,8 @@ case "menubn": {
     `╭────────「 🎭 」────────╮\n` +
     `      *KOBAYASHI FUN*\n` +
     `╰─────────────────────╯\n\n` +
-    `Status › *${status}*\n\n` +
+    `Status › *${status}*\n` +
+    `🐉 Dragon Social › *${prefix}menusocial*\n\n` +
     `┌─ 🌸 *BRINCADEIRAS*\n` +
     `│ 🌷 ${prefix}linda @membro\n` +
     `│ 🌺 ${prefix}lindo @membro\n` +
