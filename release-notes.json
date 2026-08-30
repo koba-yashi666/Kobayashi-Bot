@@ -1,19 +1,25 @@
 {
-  "version": "0.5.5-beta",
-  "title": "Kobayashi LID Audit",
+  "version": "0.6.0-beta",
+  "title": "Kobayashi Admin Center",
   "added": [
-    "Auditoria AntiLink agora captura e exibe o LID real do participante quando o WhatsApp o fornece"
+    "/paineladm, /admincenter e /centraladm como central administrativa",
+    "/statusgrupo e /statusgp com visão geral das proteções e sistemas do grupo",
+    "Novo módulo lib/ui/adminCenter.js",
+    "/paineladm adicionado ao menu principal"
   ],
-  "menus": [],
+  "menus": [
+    "/menu agora inclui /paineladm",
+    "/menuadm ganhou atalhos para /paineladm e /statusgrupo"
+  ],
   "changed": [
-    "Campo Id foi substituído por Lid no Kobayashi Audit"
+    "Administração passa a ter uma central visual própria sem substituir o menuadm completo"
   ],
   "fixed": [],
   "notes": [
-    "O bot tenta obter o LID por participant, participantAlt e metadados do grupo",
-    "Se a sessão do WhatsApp não fornecer um LID correspondente, o relatório mostra não disponível em vez de inventar um identificador",
-    "O ID da mensagem continua disponível internamente nos logs administrativos",
+    "Status do grupo consulta as configurações reais no momento do comando",
+    "Mostra AntiLink, AntiLink GP, Light, AntiTelegram, AntiTrava, AntiFarm, Level, Fun, AutoSticker, AntiDelete, AntiEdit, Sentinel, Anti-PV e Whitelist",
+    "Painel e status são restritos a administradores do grupo",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.5.5 troca o campo Id visual da auditoria pelo LID real do usuário, preservando o número formatado e o Ler mais."
+  "summary": "A v0.6.0 inaugura a fase Admin Center da Kobayashi com uma central limpa de administração e um painel de status em tempo real das proteções do grupo."
 }

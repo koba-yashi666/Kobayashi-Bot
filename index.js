@@ -40,6 +40,8 @@ import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSent
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/dragonSocial.js";
 import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
 
+import { buildAdminCenter, buildGroupStatus } from "./lib/ui/adminCenter.js";
+
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -5524,10 +5526,57 @@ reagir("🐉");
 reply(buildLevelMenu(prefix));
 break;
 
+case "paineladm":
+case "admincenter":
+case "centraladm": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  reagir("🛡️");
+  return reply(buildAdminCenter(prefix));
+}
+break;
+
+case "statusgrupo":
+case "statusgp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const protections = getGroupProtection(from);
+  const antiTrava = getAntiTravaConfig(from);
+  const antiFarm = getAntiFarmConfig(from);
+  const yuriProtection = getYuriProtection(from);
+  const sentinel = getSentinelStatus(from);
+  const settings = readSettingsFile();
+  const whitelist = getWhitelist(from);
+
+  return reply(buildGroupStatus({
+    groupName,
+    botIsAdmin: isBotGroupAdmins,
+    protections,
+    antiTrava,
+    antiFarm,
+    levelEnabled: isLevelEnabled(from),
+    funEnabled: isFunModeEnabled(from),
+    autoStickerEnabled: isAutoStickerEnabled(from),
+    antiDelete: Boolean(yuriProtection?.antidel),
+    antiEdit: Boolean(yuriProtection?.antiedit),
+    antiPv: Boolean(settings?.antiPv),
+    sentinel,
+    whitelistCount: Array.isArray(whitelist) ? whitelist.length : 0
+  }));
+}
+break;
+
 case "menuadm":
 if (!isGroup) return reply(mess.onlyGroup());
 reagir("🛡️");
-reply(linguagem.menuAdm(prefix));
+reply(
+  linguagem.menuAdm(prefix) +
+  `\n\n╭─〔 🛡️ *ADMIN CENTER* 〕\n` +
+  `│ ${prefix}paineladm\n` +
+  `│ ${prefix}statusgrupo\n` +
+  `╰────────────────`
+);
 break;
 
 
