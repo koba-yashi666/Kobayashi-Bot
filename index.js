@@ -418,34 +418,68 @@ return onlyNumber ? `${onlyNumber}@lid` : null;
 }
 
 function auditMessagePreview(info, body = "", type = "") {
-  const clean = String(body || "")
-    .replace(/\u0000/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const LIMIT = 120;
 
-  if (clean) return clean.slice(0, 900);
+  const compact = (value = "") => {
+    const clean = String(value || "")
+      .replace(/\u0000/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!clean) return "";
+    return clean.length > LIMIT
+      ? `${clean.slice(0, LIMIT).trimEnd()}...`
+      : clean;
+  };
+
+  const cleanBody = compact(body);
+  if (cleanBody) return cleanBody;
 
   const message = info?.message || {};
   if (message?.stickerMessage) return "[Figurinha]";
-  if (message?.imageMessage) return `[Foto${message.imageMessage.caption ? `: ${message.imageMessage.caption}` : ""}]`.slice(0, 900);
-  if (message?.videoMessage) return `[Vídeo${message.videoMessage.caption ? `: ${message.videoMessage.caption}` : ""}]`.slice(0, 900);
+
+  if (message?.imageMessage) {
+    const caption = compact(message.imageMessage.caption || "");
+    return caption ? `[Foto: ${caption}]` : "[Foto]";
+  }
+
+  if (message?.videoMessage) {
+    const caption = compact(message.videoMessage.caption || "");
+    return caption ? `[Vídeo: ${caption}]` : "[Vídeo]";
+  }
+
   if (message?.audioMessage) return "[Áudio]";
-  if (message?.documentMessage) return `[Documento: ${message.documentMessage.fileName || "sem nome"}]`;
+  if (message?.documentMessage) {
+    return compact(`[Documento: ${message.documentMessage.fileName || "sem nome"}]`);
+  }
   if (message?.contactMessage || message?.contactsArrayMessage) return "[Contato]";
   if (message?.locationMessage || message?.liveLocationMessage) return "[Localização]";
   if (message?.pollCreationMessage || message?.pollCreationMessageV3) return "[Enquete]";
+
   return `[${type || "Mensagem sem texto"}]`;
 }
 
-function formatAntiLinkAudit({ sender, groupName, groupJid, messageId, messageText, actionResult = "" }) {
+function formatAntiLinkAudit({
+  sender,
+  groupName,
+  groupJid,
+  messageId,
+  messageText,
+  actionResult = "",
+  action = "AntiLink"
+}) {
+  const preview = String(messageText || "[sem conteúdo legível]")
+    .replace(/\s+/g, " ")
+    .trim();
+
   return (
     `🚨 *Registro de Auditoria*\n\n` +
-    `- Ação: AntiLink\n` +
-    `- Alvo: @${String(sender || "").split("@")[0] || "desconhecido"}\n` +
-    `- Grupo: ${groupName || "Grupo"}\n` +
-    `- Id: ${messageId || "não disponível"}\n` +
-    `- Mensagem: ${messageText || "[sem conteúdo legível]"}` +
-    (actionResult ? `\n- Resultado: ${actionResult}` : "")
+    `• Ação: *${action}*\n` +
+    `• Alvo: @${String(sender || "").split("@")[0] || "desconhecido"}\n` +
+    `• Grupo: ${groupName || "Grupo"}\n` +
+    `• Id: ${groupJid || messageId || "não disponível"}\n` +
+    `• Mensagem:\n${preview}` +
+    (actionResult ? `\n• Resultado: ${actionResult}` : "")
   );
 }
 

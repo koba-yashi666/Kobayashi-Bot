@@ -1,32 +1,21 @@
 {
-  "version": "0.5.0-beta",
-  "title": "Stability & Polish",
-  "added": [
-    "Novo módulo lib/ui/menuTheme.js para centralizar a estética dos menus principais",
-    "Tema visual consistente inspirado no pack de decoração enviado"
-  ],
-  "menus": [
-    "/menu reorganizado e mais limpo",
-    "/menusocial reorganizado por seções",
-    "/menuloja padronizado",
-    "/menunivel simplificado e padronizado"
-  ],
+  "version": "0.5.1-beta",
+  "title": "Compact Audit",
+  "added": [],
+  "menus": [],
   "changed": [
-    "Gravações JSON do núcleo agora usam escrita temporária + rename para reduzir risco de arquivo corrompido",
-    "Sentinel processa apenas mensagens novas (notify) e ignora eventos com mais de 60 segundos",
-    "Caixa de Escamas foi balanceada para 80–300 Dragon Coins",
-    "Descrição do package.json atualizada para a versão real"
+    "Registro de Auditoria do AntiLink agora usa formato compacto",
+    "Mensagem detectada mostra no máximo 120 caracteres",
+    "Mensagens maiores terminam em ... em vez de exibir o conteúdo completo",
+    "Campo Id do relatório prioriza o JID do grupo"
   ],
   "fixed": [
-    "Boost Daily agora também é removido corretamente da quantidade exibida no inventário ao ser consumido",
-    "/pagar não transforma mais valores negativos ou textos inválidos em valores positivos",
-    "/banghost passa a usar lastSeen do Activity Tracker",
-    "Removidas referências visuais antigas de versão no bloco Kobayashi Fun"
+    "Relatórios enormes do AntiLink não ocupam mais toda a conversa do dono"
   ],
   "notes": [
-    "Versão focada em estabilidade, organização e acabamento; sem dependências novas",
-    "Não é necessário npm install",
-    "Banco de dados existente em files/database é preservado ao aplicar como atualização"
+    "Fotos e vídeos mostram somente uma prévia curta da legenda",
+    "Áudio, figurinha, documento e outros tipos usam descrição compacta",
+    "Não é necessário npm install"
   ],
-  "summary": "A v0.5.0 consolida a fase 0.4.x: menos código visual espalhado no index.js, menus consistentes, correções de economia e proteções extras contra eventos antigos do Sentinel."
+  "summary": "A v0.5.1 deixa a auditoria do AntiLink curta e legível, sem mostrar a mensagem completa."
 }

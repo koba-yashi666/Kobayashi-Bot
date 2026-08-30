@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.5.0-beta",
-  "description": "Kobayashi Bot Beta v0.5.0 - Stability & Polish",
+  "version": "0.5.1-beta",
+  "description": "Kobayashi Bot Beta v0.5.1 - Compact Audit",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
