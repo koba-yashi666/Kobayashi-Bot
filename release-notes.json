@@ -1,25 +1,20 @@
 {
-  "version": "0.6.0-beta",
-  "title": "Kobayashi Admin Center",
-  "added": [
-    "/paineladm, /admincenter e /centraladm como central administrativa",
-    "/statusgrupo e /statusgp com visão geral das proteções e sistemas do grupo",
-    "Novo módulo lib/ui/adminCenter.js",
-    "/paineladm adicionado ao menu principal"
-  ],
-  "menus": [
-    "/menu agora inclui /paineladm",
-    "/menuadm ganhou atalhos para /paineladm e /statusgrupo"
-  ],
+  "version": "0.6.1-beta",
+  "title": "Global Level Rank Groups",
+  "added": [],
+  "menus": [],
   "changed": [
-    "Administração passa a ter uma central visual própria sem substituir o menuadm completo"
+    "/ranknivelg agora mostra nível e quantidade de grupos atuais com Level ativo",
+    "A contagem ignora grupos em que a pessoa não está mais e grupos com Level desligado",
+    "Formato simplificado: @membro — Nv.X • Grupos: Y"
   ],
-  "fixed": [],
+  "fixed": [
+    "Contagem global de grupos não depende mais apenas do histórico de XP salvo"
+  ],
   "notes": [
-    "Status do grupo consulta as configurações reais no momento do comando",
-    "Mostra AntiLink, AntiLink GP, Light, AntiTelegram, AntiTrava, AntiFarm, Level, Fun, AutoSticker, AntiDelete, AntiEdit, Sentinel, Anti-PV e Whitelist",
-    "Painel e status são restritos a administradores do grupo",
+    "A Kobayashi consulta os grupos dos quais participa no momento do comando",
+    "Usuários sem nenhum grupo atual com Level ativo não aparecem no resultado",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.6.0 inaugura a fase Admin Center da Kobayashi com uma central limpa de administração e um painel de status em tempo real das proteções do grupo."
+  "summary": "A v0.6.1 torna a contagem de grupos do rank global compatível com a presença atual do membro e com o status real do sistema Level."
 }

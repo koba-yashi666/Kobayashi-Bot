@@ -3150,19 +3150,61 @@ case "rankxpg": {
     );
   }
 
+  // Conta somente grupos em que:
+  // 1) o Level está ativo;
+  // 2) a Kobayashi ainda participa;
+  // 3) o usuário realmente é membro atualmente.
+  let participatingGroups = {};
+  try {
+    participatingGroups = await conn.groupFetchAllParticipating();
+  } catch (e) {
+    console.error("Erro ao consultar grupos para o rank global:", e?.message || e);
+  }
+
+  const enabledGroups = Object.entries(participatingGroups || {})
+    .filter(([groupJid]) => isLevelEnabled(groupJid));
+
+  const countCurrentLevelGroups = (userJid) => {
+    const userPN = normalizeJid(userJid);
+    let count = 0;
+
+    for (const [, metadata] of enabledGroups) {
+      const members = Array.isArray(metadata?.participants) ? metadata.participants : [];
+      const found = members.some((p) => {
+        const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid]
+          .filter(Boolean);
+        return ids.some((id) =>
+          id === userJid ||
+          normalizeJid(id) === userPN ||
+          String(id).split("@")[0] === String(userJid).split("@")[0]
+        );
+      });
+      if (found) count++;
+    }
+    return count;
+  };
+
+  const ranked = top
+    .map((x) => ({ ...x, currentGroups: countCurrentLevelGroups(x.jid) }))
+    .filter((x) => x.currentGroups > 0);
+
+  if (!ranked.length) {
+    return reply("🐉 Nenhum jogador do rank está atualmente em grupos com o sistema de níveis ativado.");
+  }
+
   const medals = ["🥇", "🥈", "🥉"];
-  const mentions = top.map((x) => x.jid);
-  const rows = top.map((x, i) =>
-    `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *Nv.${x.level}* • ${x.xp} XP • ${x.groups} grupo${x.groups === 1 ? "" : "s"}`
+  const mentions = ranked.map((x) => x.jid);
+  const rows = ranked.map((x, i) =>
+    `${medals[i] || `#${i + 1}`} @${String(x.jid).split("@")[0]} — *Nv.${x.level}* • *Grupos: ${x.currentGroups}*`
   ).join("\n");
 
   return conn.sendMessage(from, {
     text:
       `╭━━〔 🌍 RANK GLOBAL DE NÍVEL 〕━━╮\n` +
-      `┃ Top 10 de todos os grupos com Level ativo\n` +
+      `┃ Apenas grupos atuais com Level ativo\n` +
       `╰━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
       `${rows}\n\n` +
-      `🐉 O XP é somado entre todos os grupos onde o sistema de níveis está ativado.`,
+      `🐉 A quantidade considera somente grupos em que a pessoa ainda está e o sistema de nível está ativado.`,
     mentions
   }, { quoted: info });
 }
