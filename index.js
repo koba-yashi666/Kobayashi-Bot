@@ -418,45 +418,55 @@ return onlyNumber ? `${onlyNumber}@lid` : null;
 }
 
 function auditMessagePreview(info, body = "", type = "") {
-  const LIMIT = 120;
+  const clean = String(body || "")
+    .replace(/\u0000/g, "")
+    .trim();
 
-  const compact = (value = "") => {
-    const clean = String(value || "")
-      .replace(/\u0000/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    if (!clean) return "";
-    return clean.length > LIMIT
-      ? `${clean.slice(0, LIMIT).trimEnd()}...`
-      : clean;
-  };
-
-  const cleanBody = compact(body);
-  if (cleanBody) return cleanBody;
+  if (clean) return clean;
 
   const message = info?.message || {};
   if (message?.stickerMessage) return "[Figurinha]";
-
   if (message?.imageMessage) {
-    const caption = compact(message.imageMessage.caption || "");
-    return caption ? `[Foto: ${caption}]` : "[Foto]";
+    const caption = String(message.imageMessage.caption || "").trim();
+    return caption ? `[Foto]\n${caption}` : "[Foto]";
   }
-
   if (message?.videoMessage) {
-    const caption = compact(message.videoMessage.caption || "");
-    return caption ? `[Vídeo: ${caption}]` : "[Vídeo]";
+    const caption = String(message.videoMessage.caption || "").trim();
+    return caption ? `[Vídeo]\n${caption}` : "[Vídeo]";
   }
-
   if (message?.audioMessage) return "[Áudio]";
-  if (message?.documentMessage) {
-    return compact(`[Documento: ${message.documentMessage.fileName || "sem nome"}]`);
-  }
+  if (message?.documentMessage) return `[Documento: ${message.documentMessage.fileName || "sem nome"}]`;
   if (message?.contactMessage || message?.contactsArrayMessage) return "[Contato]";
   if (message?.locationMessage || message?.liveLocationMessage) return "[Localização]";
   if (message?.pollCreationMessage || message?.pollCreationMessageV3) return "[Enquete]";
 
   return `[${type || "Mensagem sem texto"}]`;
+}
+
+function formatAuditPhone(sender = "") {
+  const raw = String(sender || "").split("@")[0].replace(/\D/g, "");
+  if (!raw) return "não disponível";
+
+  if (raw.startsWith("55") && raw.length >= 12) {
+    const ddd = raw.slice(2, 4);
+    const local = raw.slice(4);
+    if (local.length === 9) {
+      return `+55 ${ddd} ${local.slice(0, 5)}-${local.slice(5)}`;
+    }
+    if (local.length === 8) {
+      return `+55 ${ddd} ${local.slice(0, 4)}-${local.slice(4)}`;
+    }
+  }
+
+  return `+${raw}`;
+}
+
+function buildWhatsAppReadMoreBreak() {
+  // O WhatsApp cria "Ler mais" automaticamente em mensagens longas.
+  // Este bloco mantém o cabeçalho visível e empurra o conteúdo completo
+  // para a área recolhida sem alterar o texto original da mensagem.
+  const invisible = "\u200E";
+  return Array.from({ length: 45 }, () => invisible).join("\n");
 }
 
 function formatAntiLinkAudit({
@@ -468,18 +478,22 @@ function formatAntiLinkAudit({
   actionResult = "",
   action = "AntiLink"
 }) {
-  const preview = String(messageText || "[sem conteúdo legível]")
-    .replace(/\s+/g, " ")
-    .trim();
+  const targetNumber = String(sender || "").split("@")[0] || "desconhecido";
+  const phone = formatAuditPhone(sender);
+  const fullMessage = String(messageText || "[sem conteúdo legível]").trim();
+  const readMoreBreak = buildWhatsAppReadMoreBreak();
 
   return (
     `🚨 *Registro de Auditoria*\n\n` +
-    `• Ação: *${action}*\n` +
-    `• Alvo: @${String(sender || "").split("@")[0] || "desconhecido"}\n` +
-    `• Grupo: ${groupName || "Grupo"}\n` +
-    `• Id: ${groupJid || messageId || "não disponível"}\n` +
-    `• Mensagem:\n${preview}` +
-    (actionResult ? `\n• Resultado: ${actionResult}` : "")
+    `- Ação: ${action}\n` +
+    `- Alvo: @${targetNumber}\n` +
+    `- Grupo: ${groupName || "Grupo"}\n` +
+    `- Id: ${messageId || "não disponível"}\n` +
+    `- Número: ${phone}\n` +
+    `- Mensagem:\n` +
+    `${readMoreBreak}\n` +
+    `${fullMessage}` +
+    (actionResult ? `\n\n- Resultado: ${actionResult}` : "")
   );
 }
 

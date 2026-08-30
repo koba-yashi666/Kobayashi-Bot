@@ -1,21 +1,23 @@
 {
-  "version": "0.5.1-beta",
-  "title": "Compact Audit",
-  "added": [],
-  "menus": [],
+  "version": "0.5.2-beta",
+  "title": "Expandable AntiLink Audit",
+  "added": [
+    "Auditoria passa a mostrar o número formatado do usuário",
+    "Bloco de expansão para o WhatsApp recolher a mensagem completa em Ler mais",
+    "Conteúdo integral da mensagem fica disponível após expandir"
+  ],
   "changed": [
-    "Registro de Auditoria do AntiLink agora usa formato compacto",
-    "Mensagem detectada mostra no máximo 120 caracteres",
-    "Mensagens maiores terminam em ... em vez de exibir o conteúdo completo",
-    "Campo Id do relatório prioriza o JID do grupo"
+    "Campo Id volta a usar o ID real da mensagem detectada",
+    "Grupo usa o nome real do grupo",
+    "Alvo usa menção do participante detectado"
   ],
   "fixed": [
-    "Relatórios enormes do AntiLink não ocupam mais toda a conversa do dono"
+    "Auditoria não exibe mais toda a mensagem imediatamente no cabeçalho"
   ],
   "notes": [
-    "Fotos e vídeos mostram somente uma prévia curta da legenda",
-    "Áudio, figurinha, documento e outros tipos usam descrição compacta",
+    "O texto Ler mais é criado pelo próprio WhatsApp quando ele recolhe a mensagem",
+    "Não existe API do Baileys para criar manualmente o botão Ler mais",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.5.1 deixa a auditoria do AntiLink curta e legível, sem mostrar a mensagem completa."
+  "summary": "A v0.5.2 deixa os dados da auditoria visíveis e move a mensagem completa para a área recolhida pelo Ler mais do WhatsApp."
 }
