@@ -1217,6 +1217,19 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
     const auditPreview = auditMessagePreview(info, body, type);
     const messageId = info?.key?.id || "não disponível";
 
+    // Responde diretamente à mensagem proibida ANTES de apagar/banir.
+    // Assim o aviso fica visualmente ligado ao link que acionou o AntiLink.
+    await conn.sendMessage(from, {
+      text:
+        action === "light"
+          ? `⚠️🌸 *Link proibido detectado.*\n@${sender.split("@")[0]}, esse tipo de link não é permitido aqui.`
+          : `🚫🐉 *PROIBIDO LINKS AQUI!*\n@${sender.split("@")[0]} será removido por enviar link proibido.`,
+      mentions: [sender]
+    }, { quoted: info }).catch((e) => {
+      console.error("Erro ao responder mensagem do AntiLink:", e?.message || e);
+    });
+
+    await delay(700);
     await deleteDetectedMessage(conn, from, info);
 
     let actionResult = "Mensagem removida";
@@ -1272,15 +1285,6 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
             ? "Mensagem removida • membro removido"
             : "Mensagem removida • falha ao remover membro")
         : "Mensagem removida • bot sem ADM para remover membro";
-
-      if (removed) {
-        await conn.sendMessage(from, {
-          text:
-            `🚫🐉 *AntiLink acionado*\n\n` +
-            `@${sender.split("@")[0]} foi removido por enviar link proibido.`,
-          mentions: [sender]
-        }).catch(() => {});
-      }
 
       await notifyOwnerAntiLink(conn, dono, {
         sender,
@@ -2501,43 +2505,62 @@ case "togif": {
     return reply(`🎞️ Responda a uma figurinha animada com *${prefix}togif*.`);
   }
 
+  const stickerInfo = target.message?.stickerMessage || {};
+  if (stickerInfo.isAnimated === false) {
+    return reply(`🌸 Essa figurinha é estática. O *${prefix}togif* funciona com figurinhas animadas.`);
+  }
+
+  let inputPath = null;
+  let outputPath = null;
+
   try {
     const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
+    if (!stickerBuffer?.length) throw new Error("buffer da figurinha vazio");
+
     const tmpId = randomBytes(6).toString("hex");
-    const inputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.webp`);
-    const outputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.mp4`);
+    inputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.webp`);
+    outputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.gif`);
 
     fsx.writeFileSync(inputPath, stickerBuffer);
 
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
+        .inputOptions(["-ignore_loop 0"])
         .outputOptions([
-          "-movflags faststart",
-          "-pix_fmt yuv420p",
-          "-vf scale=trunc(iw/2)*2:trunc(ih/2)*2"
+          "-vf",
+          "fps=15,scale='min(512,iw)':-2:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle",
+          "-loop 0"
         ])
-        .toFormat("mp4")
+        .toFormat("gif")
         .on("end", resolve)
         .on("error", reject)
         .save(outputPath);
     });
 
-    const videoBuffer = fsx.readFileSync(outputPath);
-    try { fsx.unlinkSync(inputPath); } catch {}
-    try { fsx.unlinkSync(outputPath); } catch {}
+    const gifBuffer = fsx.readFileSync(outputPath);
+    if (!gifBuffer?.length) throw new Error("GIF gerado vazio");
 
+    // WhatsApp não possui envio nativo de arquivo GIF animado no balão como mídia.
+    // Enviamos o GIF real como documento para preservar o formato .gif.
     return conn.sendMessage(
       from,
       {
-        video: videoBuffer,
-        gifPlayback: true,
-        caption: "🐉🌸 Figurinha convertida para GIF."
+        document: gifBuffer,
+        mimetype: "image/gif",
+        fileName: `Kobayashi-${tmpId}.gif`,
+        caption: "🐉🌸 Figurinha animada convertida para GIF."
       },
       { quoted: info }
     );
   } catch (e) {
-    console.error("Erro /togif:", e);
-    return reply("❌ Não consegui converter essa figurinha. Tente com uma figurinha animada.");
+    console.error("Erro /togif:", e?.message || e);
+    return reply(
+      "❌ Não consegui converter essa figurinha para GIF.\n" +
+      "Verifique se ela é realmente animada e se o FFmpeg está disponível na hospedagem."
+    );
+  } finally {
+    if (inputPath) try { fsx.unlinkSync(inputPath); } catch {}
+    if (outputPath) try { fsx.unlinkSync(outputPath); } catch {}
   }
 }
 break;

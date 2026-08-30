@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.6.1-beta",
-  "description": "Kobayashi Bot Beta v0.6.1 - Global Level Rank Groups",
+  "version": "0.6.2-beta",
+  "description": "Kobayashi Bot Beta v0.6.2 - ToGIF & AntiLink Reply",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

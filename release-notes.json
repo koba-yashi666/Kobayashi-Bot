@@ -1,20 +1,21 @@
 {
-  "version": "0.6.1-beta",
-  "title": "Global Level Rank Groups",
+  "version": "0.6.2-beta",
+  "title": "ToGIF & AntiLink Reply",
   "added": [],
   "menus": [],
   "changed": [
-    "/ranknivelg agora mostra nível e quantidade de grupos atuais com Level ativo",
-    "A contagem ignora grupos em que a pessoa não está mais e grupos com Level desligado",
-    "Formato simplificado: @membro — Nv.X • Grupos: Y"
+    "/togif agora gera um arquivo GIF real a partir da figurinha animada",
+    "AntiLink responde citando a mensagem proibida antes de apagar a mensagem e remover o membro",
+    "AntiLink estrito não envia mais um segundo aviso redundante depois do ban"
   ],
   "fixed": [
-    "Contagem global de grupos não depende mais apenas do histórico de XP salvo"
+    "Corrigida conversão de figurinha animada no /togif",
+    "Arquivos temporários do /togif agora são removidos também quando ocorre erro"
   ],
   "notes": [
-    "A Kobayashi consulta os grupos dos quais participa no momento do comando",
-    "Usuários sem nenhum grupo atual com Level ativo não aparecem no resultado",
-    "Não é necessário npm install"
+    "O GIF é enviado como arquivo .gif para preservar o formato animado",
+    "A hospedagem precisa ter FFmpeg disponível, como já era exigido pelo conversor anterior",
+    "Nenhuma dependência npm nova foi adicionada"
   ],
-  "summary": "A v0.6.1 torna a contagem de grupos do rank global compatível com a presença atual do membro e com o status real do sistema Level."
+  "summary": "A v0.6.2 corrige o /togif e faz o AntiLink responder diretamente ao link antes da punição."
 }
