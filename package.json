@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.5.3-beta",
-  "description": "Kobayashi Bot Beta v0.5.3 - Read More Audit Fix",
+  "version": "0.5.5-beta",
+  "description": "Kobayashi Bot Beta v0.5.5 - LID Audit",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

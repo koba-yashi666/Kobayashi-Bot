@@ -1,19 +1,19 @@
 {
-  "version": "0.5.3-beta",
-  "title": "Read More Audit Fix",
-  "added": [],
+  "version": "0.5.5-beta",
+  "title": "Kobayashi LID Audit",
+  "added": [
+    "Auditoria AntiLink agora captura e exibe o LID real do participante quando o WhatsApp o fornece"
+  ],
   "menus": [],
   "changed": [
-    "O espaçador invisível da auditoria agora fica na mesma linha",
-    "Mantida a mensagem completa após o Ler mais"
+    "Campo Id foi substituído por Lid no Kobayashi Audit"
   ],
-  "fixed": [
-    "Corrigido o enorme espaço vazio criado no relatório da v0.5.2",
-    "Auditoria volta a ficar compacta antes de expandir"
-  ],
+  "fixed": [],
   "notes": [
-    "O Ler mais continua sendo gerado automaticamente pelo WhatsApp",
+    "O bot tenta obter o LID por participant, participantAlt e metadados do grupo",
+    "Se a sessão do WhatsApp não fornecer um LID correspondente, o relatório mostra não disponível em vez de inventar um identificador",
+    "O ID da mensagem continua disponível internamente nos logs administrativos",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.5.3 corrige o paredão de espaço vazio da auditoria expansível mantendo o conteúdo completo oculto atrás do Ler mais."
+  "summary": "A v0.5.5 troca o campo Id visual da auditoria pelo LID real do usuário, preservando o número formatado e o Ler mais."
 }

@@ -470,6 +470,7 @@ function buildWhatsAppReadMoreBreak() {
 
 function formatAntiLinkAudit({
   sender,
+  senderLid,
   groupName,
   groupJid,
   messageId,
@@ -483,15 +484,24 @@ function formatAntiLinkAudit({
   const readMoreBreak = buildWhatsAppReadMoreBreak();
 
   return (
-    `🚨 *Registro de Auditoria*\n\n` +
-    `- Ação: ${action}\n` +
-    `- Alvo: @${targetNumber}\n` +
-    `- Grupo: ${groupName || "Grupo"}\n` +
-    `- Id: ${messageId || "não disponível"}\n` +
-    `- Número: ${phone}\n` +
-    `- Mensagem:\n` +
-    `${readMoreBreak}${fullMessage}` +
-    (actionResult ? `\n\n- Resultado: ${actionResult}` : "")
+    `╭═══════ ❀ 🐉 ❀ ═══════╮\n` +
+    `   🚨 *KOBAYASHI AUDIT* 🚨\n` +
+    `╰═══════ ❀ 🌸 ❀ ═══════╯\n\n` +
+
+    `╭─〔 🛡️ *REGISTRO DE AUDITORIA* 〕\n` +
+    `│ ⚙️ Ação › *${action}*\n` +
+    `│ 🎯 Alvo › @${targetNumber}\n` +
+    `│ 👥 Grupo › ${groupName || "Grupo"}\n` +
+    `│ 🆔 Lid › ${senderLid || "não disponível"}\n` +
+    `│ 📱 Número › ${phone}\n` +
+    `╰────────────────\n\n` +
+
+    `╭─〔 💬 *MENSAGEM DETECTADA* 〕\n` +
+    `│ ${readMoreBreak}${fullMessage}\n` +
+    `╰────────────────` +
+    (actionResult
+      ? `\n\n╭─〔 ✅ *RESULTADO* 〕\n│ ${actionResult}\n╰────────────────`
+      : "")
   );
 }
 
@@ -626,6 +636,22 @@ const rawSender = info.key.fromMe
 const sender =
 (await getPNForJid(conn, rawSender, info?.key?.participantAlt)) ||
 normalizeJid(rawSender);
+
+// Mantém o identificador LID original para auditoria.
+// participantAlt costuma carregar o LID quando participant já foi entregue como PN.
+const senderLidCandidates = [
+  info?.key?.participant,
+  info?.key?.participantAlt,
+  rawSender,
+  groupMetadata?.participants?.find?.((p) => {
+    const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
+    return ids.includes(rawSender) || ids.includes(sender);
+  })?.lid
+].filter(Boolean);
+
+const senderLid = senderLidCandidates.find((jid) =>
+  String(jid).includes("@lid")
+) || null;
 
 const botNumber = await getPNForJid(conn, conn.user.id, conn.user.lid || conn.user.phoneNumber) ||
 (conn.user.id.split(":")[0] + "@s.whatsapp.net");
@@ -1220,6 +1246,7 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
 
       await notifyOwnerAntiLink(conn, dono, {
         sender,
+        senderLid,
         groupName,
         groupJid: from,
         messageId,
@@ -1255,6 +1282,7 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
 
       await notifyOwnerAntiLink(conn, dono, {
         sender,
+        senderLid,
         groupName,
         groupJid: from,
         messageId,
