@@ -462,11 +462,10 @@ function formatAuditPhone(sender = "") {
 }
 
 function buildWhatsAppReadMoreBreak() {
-  // O WhatsApp cria "Ler mais" automaticamente em mensagens longas.
-  // Este bloco mantém o cabeçalho visível e empurra o conteúdo completo
-  // para a área recolhida sem alterar o texto original da mensagem.
-  const invisible = "\u200E";
-  return Array.from({ length: 45 }, () => invisible).join("\n");
+  // O WhatsApp cria "Ler mais" automaticamente quando a mensagem ultrapassa
+  // o limite visual. Usamos caracteres invisíveis NA MESMA LINHA para não
+  // criar um bloco gigante de espaço vazio no chat.
+  return "\u200B".repeat(1400);
 }
 
 function formatAntiLinkAudit({
@@ -491,8 +490,7 @@ function formatAntiLinkAudit({
     `- Id: ${messageId || "não disponível"}\n` +
     `- Número: ${phone}\n` +
     `- Mensagem:\n` +
-    `${readMoreBreak}\n` +
-    `${fullMessage}` +
+    `${readMoreBreak}${fullMessage}` +
     (actionResult ? `\n\n- Resultado: ${actionResult}` : "")
   );
 }

@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.5.2-beta",
-  "description": "Kobayashi Bot Beta v0.5.2 - Expandable Audit",
+  "version": "0.5.3-beta",
+  "description": "Kobayashi Bot Beta v0.5.3 - Read More Audit Fix",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

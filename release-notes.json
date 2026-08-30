@@ -1,23 +1,19 @@
 {
-  "version": "0.5.2-beta",
-  "title": "Expandable AntiLink Audit",
-  "added": [
-    "Auditoria passa a mostrar o número formatado do usuário",
-    "Bloco de expansão para o WhatsApp recolher a mensagem completa em Ler mais",
-    "Conteúdo integral da mensagem fica disponível após expandir"
-  ],
+  "version": "0.5.3-beta",
+  "title": "Read More Audit Fix",
+  "added": [],
+  "menus": [],
   "changed": [
-    "Campo Id volta a usar o ID real da mensagem detectada",
-    "Grupo usa o nome real do grupo",
-    "Alvo usa menção do participante detectado"
+    "O espaçador invisível da auditoria agora fica na mesma linha",
+    "Mantida a mensagem completa após o Ler mais"
   ],
   "fixed": [
-    "Auditoria não exibe mais toda a mensagem imediatamente no cabeçalho"
+    "Corrigido o enorme espaço vazio criado no relatório da v0.5.2",
+    "Auditoria volta a ficar compacta antes de expandir"
   ],
   "notes": [
-    "O texto Ler mais é criado pelo próprio WhatsApp quando ele recolhe a mensagem",
-    "Não existe API do Baileys para criar manualmente o botão Ler mais",
+    "O Ler mais continua sendo gerado automaticamente pelo WhatsApp",
     "Não é necessário npm install"
   ],
-  "summary": "A v0.5.2 deixa os dados da auditoria visíveis e move a mensagem completa para a área recolhida pelo Ler mais do WhatsApp."
+  "summary": "A v0.5.3 corrige o paredão de espaço vazio da auditoria expansível mantendo o conteúdo completo oculto atrás do Ler mais."
 }
