@@ -5587,6 +5587,60 @@ case "rankgostoso": {
 break;
 //
 // menu
+// ==========================================
+// 🌸 KOBAYASHI COMMUNITY • v0.7.1
+// ==========================================
+case "dragon_stickers":
+case "dragonstickers": {
+  return reply(
+    `🐉🎴 *DRAGON STICKERS*\n\n` +
+    `Grupo da comunidade dedicado a figurinhas:\n` +
+    `https://chat.whatsapp.com/D4DglH53CywAafglpeU4ie`
+  );
+}
+break;
+
+case "maid_femboy":
+case "maidfemboy": {
+  return reply(
+    `🌸🧹 *MAID FEMBOY*\n\n` +
+    `Grupo da comunidade:\n` +
+    `https://chat.whatsapp.com/E7tLoS1klOy28da87u7zzv`
+  );
+}
+break;
+
+case "dragon_divulgacoes":
+case "dragon_divulgações":
+case "dragondivulgacoes": {
+  return reply(
+    `🐉📢 *DRAGON DIVULGAÇÕES*\n\n` +
+    `Grupo da comunidade dedicado a divulgações:\n` +
+    `https://chat.whatsapp.com/GrWV8BngltU8puCXuQCOEK`
+  );
+}
+break;
+
+case "maid_porn":
+case "maidporn": {
+  return reply(
+    `🔞🌸 *MAID PORN*\n\n` +
+    `Grupo +18 da comunidade:\n` +
+    `https://chat.whatsapp.com/ICSUFyPMG9VGauB9h6RAo1`
+  );
+}
+break;
+
+case "maid_dragon":
+case "maiddragon": {
+  return reply(
+    `🐉🌸 *MAID DRAGON*\n\n` +
+    `Grupo principal da nossa comunidade:\n` +
+    `https://chat.whatsapp.com/H1oVU0BhQMZAdcI1KiFULO`
+  );
+}
+break;
+
 case "menu": {
   await conn.sendMessage(from, {
     react: { text: "🐉", key: info.key }

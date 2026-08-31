@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.7.0-beta",
-  "description": "Kobayashi Bot Beta v0.7.0 - Sentinel Bridge",
+  "version": "0.7.1-beta",
+  "description": "Kobayashi Bot Beta v0.7.1 - Community Commands",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

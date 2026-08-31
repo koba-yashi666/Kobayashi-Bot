@@ -1,25 +1,20 @@
 {
-  "version": "0.7.0-beta",
-  "title": "Sentinel Bridge",
+  "version": "0.7.1-beta",
+  "title": "Kobayashi Community Commands",
   "added": [
-    "Receptor HTTP privado assinado por HMAC para o Kobayashi Sentinel Core",
-    "/sentinelbridge status/token/renovar/logs/on/off",
-    "Deduplicação de eventos por grupo+messageId",
-    "Validação de timestamp, grupo, assinatura e suspeita antes de agir",
-    "Proteção automática de dono, administradores e whitelist"
+    "/Dragon_Stickers — grupo de figurinhas",
+    "/Maid_Femboy — grupo da comunidade",
+    "/Dragon_divulgacoes — grupo de divulgação",
+    "/Maid_porn — grupo +18",
+    "/Maid_dragon — grupo principal Maid Dragon"
   ],
-  "menus": [
-    "/menudono agora mostra /sentinelbridge status"
-  ],
-  "changed": [
-    "Kobayashi principal pode receber detecções de um bot separado sem ADM e executar a remoção como ADM"
-  ],
+  "menus": [],
+  "changed": [],
   "fixed": [],
   "notes": [
-    "Bridge padrão escuta em 127.0.0.1:3333; ideal quando os dois processos estão na mesma hospedagem",
-    "A exclusão da mensagem original entre duas sessões não é prometida; a ação confiável é a remoção do participante",
-    "Token é gerado automaticamente e pode ser consultado no PV do dono",
-    "Sem dependências npm novas"
+    "Comandos públicos e exclusivos para atalhos da comunidade",
+    "Aliases sem underline também foram adicionados",
+    "Não é necessário npm install"
   ],
-  "summary": "A v0.7.0 conecta oficialmente o Sentinel Core separado à Kobayashi principal por um bridge privado e autenticado."
+  "summary": "A v0.7.1 adiciona atalhos oficiais para os grupos da comunidade."
 }
