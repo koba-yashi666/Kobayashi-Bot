@@ -41,6 +41,7 @@ import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, g
 import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
 
 import { buildAdminCenter, buildGroupStatus } from "./lib/ui/adminCenter.js";
+import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs } from "./lib/features/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
@@ -788,6 +789,13 @@ configureSentinelRuntime(conn, {
     (await getPNForJid(conn, raw, alt)) || normalizeJid(alt || raw),
   isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
 });
+
+// 🛰️ SENTINEL BRIDGE EXTERNO • v0.7.0
+configureSentinelBridgeRuntime(conn, {
+  ownerJids: [dono],
+  isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
+});
+ensureSentinelBridgeServer();
 
 
 // ==========================================
@@ -5655,6 +5663,65 @@ reply(
 );
 break;
 
+
+case "sentinelbridge":
+case "bridge": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode configurar o Sentinel Bridge.");
+
+  const action = String(args?.[0] || "status").toLowerCase();
+  const s = getSentinelBridgeStatus();
+
+  if (action === "status") {
+    return reply(
+      `╭━━〔 🛰️ SENTINEL BRIDGE 〕━━╮\n` +
+      `┃ 🌐 Servidor: *${s.listening ? "ONLINE ✅" : "OFFLINE ⚠️"}*\n` +
+      `┃ 🛡️ Sistema: *${s.enabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
+      `┃ 📍 Host: *${s.host}:${s.port}*\n` +
+      `┃ 📨 Recebidos: *${s.received}*\n` +
+      `┃ ✅ Aceitos: *${s.accepted}*\n` +
+      `┃ ⛔ Rejeitados: *${s.rejected}*\n` +
+      `┃ 🔨 Remoções: *${s.removals}*\n` +
+      `┃\n` +
+      `┃ ${prefix}sentinelbridge token\n` +
+      `┃ ${prefix}sentinelbridge renovar\n` +
+      `┃ ${prefix}sentinelbridge logs\n` +
+      `┃ ${prefix}sentinelbridge on/off\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (action === "token") {
+    const tokenText = `🛰️ *TOKEN DO SENTINEL BRIDGE*\n\n${s.secret}\n\n⚠️ Não compartilhe este token. Use-o como bridgeSecret no config.json do Sentinel Core.`;
+    if (from === dono) return reply(tokenText);
+    await conn.sendMessage(dono, { text: tokenText }).catch(() => {});
+    return reply("🔐 Enviei o token do Sentinel Bridge no PV do dono.");
+  }
+
+  if (["renovar","rotate","rotacionar"].includes(action)) {
+    const secret = rotateSentinelBridgeSecret();
+    await conn.sendMessage(dono, { text: `🔐 *NOVO TOKEN SENTINEL BRIDGE*\n\n${secret}\n\nAtualize o bridgeSecret do Sentinel Core.` }).catch(() => {});
+    return reply("✅ Token do Bridge renovado. O novo token foi enviado ao PV do dono.");
+  }
+
+  if (action === "on" || action === "off") {
+    const cfg = setSentinelBridgeEnabled(action === "on");
+    if (cfg.enabled) ensureSentinelBridgeServer();
+    return reply(`🛰️ Sentinel Bridge *${cfg.enabled ? "ativado ✅" : "desativado ❌"}*.`);
+  }
+
+  if (action === "logs" || action === "log") {
+    const logs = getSentinelBridgeLogs(10);
+    if (!logs.length) return reply("🛰️ Ainda não há eventos no Sentinel Bridge.");
+    return reply(
+      `╭━━〔 🛰️ BRIDGE LOG 〕━━╮\n` +
+      logs.map((x,i)=>`┃ ${i+1}. ${x.action || "evento"} • ${x.reason || (x.reasons||[]).join(", ") || "ok"}\n┃ ${new Date(x.timestamp||Date.now()).toLocaleString("pt-BR")}`).join("\n┃\n") +
+      `\n╰━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  return reply(`🛰️ Use *${prefix}sentinelbridge status*.`);
+}
+break;
 
 case "sentinel": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode configurar o Kobayashi Sentinel.");

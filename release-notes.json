@@ -1,17 +1,25 @@
 {
-  "version": "0.6.3-beta",
-  "title": "Nazuna ToGIF",
-  "added": [],
-  "menus": [],
+  "version": "0.7.0-beta",
+  "title": "Sentinel Bridge",
+  "added": [
+    "Receptor HTTP privado assinado por HMAC para o Kobayashi Sentinel Core",
+    "/sentinelbridge status/token/renovar/logs/on/off",
+    "Deduplicação de eventos por grupo+messageId",
+    "Validação de timestamp, grupo, assinatura e suspeita antes de agir",
+    "Proteção automática de dono, administradores e whitelist"
+  ],
+  "menus": [
+    "/menudono agora mostra /sentinelbridge status"
+  ],
   "changed": [
-    "/togif foi refeito usando o mesmo fluxo de conversão encontrado no Nazuna: WebP animado → GIF com Sharp → MP4 com gifPlayback via FFmpeg"
+    "Kobayashi principal pode receber detecções de um bot separado sem ADM e executar a remoção como ADM"
   ],
-  "fixed": [
-    "Conversão de figurinhas animadas do /togif"
-  ],
+  "fixed": [],
   "notes": [
-    "Mantida a melhoria do AntiLink da v0.6.2",
-    "Não há nova dependência npm; Sharp, fluent-ffmpeg e FFmpeg já eram usados pela base"
+    "Bridge padrão escuta em 127.0.0.1:3333; ideal quando os dois processos estão na mesma hospedagem",
+    "A exclusão da mensagem original entre duas sessões não é prometida; a ação confiável é a remoção do participante",
+    "Token é gerado automaticamente e pode ser consultado no PV do dono",
+    "Sem dependências npm novas"
   ],
-  "summary": "A v0.6.3 adapta para a Kobayashi a implementação de ToGIF usada pelo Nazuna."
+  "summary": "A v0.7.0 conecta oficialmente o Sentinel Core separado à Kobayashi principal por um bridge privado e autenticado."
 }
