@@ -1,21 +1,17 @@
 {
-  "version": "0.6.2-beta",
-  "title": "ToGIF & AntiLink Reply",
+  "version": "0.6.3-beta",
+  "title": "Nazuna ToGIF",
   "added": [],
   "menus": [],
   "changed": [
-    "/togif agora gera um arquivo GIF real a partir da figurinha animada",
-    "AntiLink responde citando a mensagem proibida antes de apagar a mensagem e remover o membro",
-    "AntiLink estrito não envia mais um segundo aviso redundante depois do ban"
+    "/togif foi refeito usando o mesmo fluxo de conversão encontrado no Nazuna: WebP animado → GIF com Sharp → MP4 com gifPlayback via FFmpeg"
   ],
   "fixed": [
-    "Corrigida conversão de figurinha animada no /togif",
-    "Arquivos temporários do /togif agora são removidos também quando ocorre erro"
+    "Conversão de figurinhas animadas do /togif"
   ],
   "notes": [
-    "O GIF é enviado como arquivo .gif para preservar o formato animado",
-    "A hospedagem precisa ter FFmpeg disponível, como já era exigido pelo conversor anterior",
-    "Nenhuma dependência npm nova foi adicionada"
+    "Mantida a melhoria do AntiLink da v0.6.2",
+    "Não há nova dependência npm; Sharp, fluent-ffmpeg e FFmpeg já eram usados pela base"
   ],
-  "summary": "A v0.6.2 corrige o /togif e faz o AntiLink responder diretamente ao link antes da punição."
+  "summary": "A v0.6.3 adapta para a Kobayashi a implementação de ToGIF usada pelo Nazuna."
 }

@@ -2502,65 +2502,76 @@ case "togif": {
   const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
 
   if (!target?.message || getContentType(target.message) !== "stickerMessage") {
-    return reply(`🎞️ Responda a uma figurinha animada com *${prefix}togif*.`);
+    return reply(
+      `╭━━━⊱ 🎞️ *CONVERTER* 🎞️ ⊱━━━╮\n` +
+      `│\n` +
+      `│ ❌ Marque uma figurinha animada\n` +
+      `│    para converter em GIF!\n` +
+      `│\n` +
+      `│ 💡 Responda uma figurinha com:\n` +
+      `│ ${prefix}togif\n` +
+      `│\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+    );
   }
 
-  const stickerInfo = target.message?.stickerMessage || {};
-  if (stickerInfo.isAnimated === false) {
-    return reply(`🌸 Essa figurinha é estática. O *${prefix}togif* funciona com figurinhas animadas.`);
-  }
-
-  let inputPath = null;
-  let outputPath = null;
+  const tmpId = randomBytes(6).toString("hex");
+  const togifTempDir = path.join(os.tmpdir(), `koba-temp_togif_${tmpId}`);
+  const inputWebp = path.join(togifTempDir, "input.webp");
+  const outputGif = path.join(togifTempDir, "output.gif");
+  const outputMp4 = path.join(togifTempDir, "output.mp4");
 
   try {
+    fsx.mkdirSync(togifTempDir, { recursive: true });
+
     const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
     if (!stickerBuffer?.length) throw new Error("buffer da figurinha vazio");
 
-    const tmpId = randomBytes(6).toString("hex");
-    inputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.webp`);
-    outputPath = path.join(os.tmpdir(), `koba-togif-${tmpId}.gif`);
+    fsx.writeFileSync(inputWebp, stickerBuffer);
 
-    fsx.writeFileSync(inputPath, stickerBuffer);
+    // Mesmo fluxo usado pelo Nazuna:
+    // WebP animado -> GIF via Sharp -> MP4 com gifPlayback via FFmpeg.
+    const sharpModule = await import("sharp");
+    const sharp = sharpModule.default || sharpModule;
+
+    await sharp(stickerBuffer, { animated: true })
+      .gif({
+        loop: 0,
+        effort: 3
+      })
+      .toFile(outputGif);
 
     await new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
-        .inputOptions(["-ignore_loop 0"])
+      ffmpeg(outputGif)
         .outputOptions([
-          "-vf",
-          "fps=15,scale='min(512,iw)':-2:flags=lanczos,split[s0][s1];[s0]palettegen=stats_mode=diff[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle",
-          "-loop 0"
+          "-movflags faststart",
+          "-pix_fmt yuv420p",
+          "-vf scale=trunc(iw/2)*2:trunc(ih/2)*2"
         ])
-        .toFormat("gif")
+        .toFormat("mp4")
         .on("end", resolve)
         .on("error", reject)
-        .save(outputPath);
+        .save(outputMp4);
     });
 
-    const gifBuffer = fsx.readFileSync(outputPath);
-    if (!gifBuffer?.length) throw new Error("GIF gerado vazio");
-
-    // WhatsApp não possui envio nativo de arquivo GIF animado no balão como mídia.
-    // Enviamos o GIF real como documento para preservar o formato .gif.
-    return conn.sendMessage(
-      from,
-      {
-        document: gifBuffer,
-        mimetype: "image/gif",
-        fileName: `Kobayashi-${tmpId}.gif`,
-        caption: "🐉🌸 Figurinha animada convertida para GIF."
-      },
-      { quoted: info }
-    );
-  } catch (e) {
-    console.error("Erro /togif:", e?.message || e);
-    return reply(
-      "❌ Não consegui converter essa figurinha para GIF.\n" +
-      "Verifique se ela é realmente animada e se o FFmpeg está disponível na hospedagem."
-    );
+    return conn.sendMessage(from, {
+      video: fsx.readFileSync(outputMp4),
+      gifPlayback: true,
+      mimetype: "video/mp4",
+      fileName: "sticker.gif"
+    }, {
+      quoted: info
+    });
+  } catch (error) {
+    console.error("Erro /togif:", error?.message || error);
+    return reply("❌ Erro ao converter a figurinha animada.");
   } finally {
-    if (inputPath) try { fsx.unlinkSync(inputPath); } catch {}
-    if (outputPath) try { fsx.unlinkSync(outputPath); } catch {}
+    try {
+      fsx.rmSync(togifTempDir, {
+        recursive: true,
+        force: true
+      });
+    } catch {}
   }
 }
 break;
