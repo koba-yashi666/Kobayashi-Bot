@@ -34,6 +34,7 @@ import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand
 import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePendingUpdateNews } from "./lib/features/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
+import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/antiSpam.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
@@ -855,6 +856,62 @@ if (isCmd && command) {
 
   trackCommandUsage(command, sender);
 }
+
+// ==========================================
+// 🐉 KOBAYASHI ANTISPAM PRO • v0.7.2
+// ==========================================
+if (isGroup && sender && !info.key.fromMe && sender !== botNumber && !isGroupAdmins && !isWhitelisted(from, sender)) {
+  const antiSpamCfg = getAntiSpamConfig(from);
+  const antiSpamHit = inspectAntiSpam({
+    groupJid: from,
+    userJid: sender,
+    message: info.message,
+    text: body,
+    isCommand: isCmd,
+    config: antiSpamCfg
+  });
+
+  if (antiSpamHit.triggered) {
+    let deleted = false;
+    if (isBotGroupAdmins) {
+      deleted = await deleteDetectedMessage(conn, from, info);
+    }
+
+    let punishmentText = "Somente alerta";
+    if (antiSpamHit.punishment === "ban" && isBotGroupAdmins) {
+      try {
+        await conn.groupParticipantsUpdate(from, [sender], "remove");
+        punishmentText = "Membro removido";
+      } catch (e) {
+        const result = await addAutomaticWarning(conn, from, sender, "AntiSpam: " + antiSpamHit.reasons.join(", "), isBotGroupAdmins, info);
+        punishmentText = result.removed ? "3/3 ADVs • removido" : `Ban falhou • ADV ${result.count}/3`;
+      }
+    } else if (antiSpamHit.punishment === "adv") {
+      const result = await addAutomaticWarning(conn, from, sender, "AntiSpam: " + antiSpamHit.reasons.join(", "), isBotGroupAdmins, info);
+      punishmentText = result.removed ? "3/3 ADVs • removido" : `ADV ${result.count}/3`;
+    }
+
+    await conn.sendMessage(from, {
+      text:
+        `🚨🐉 *KOBAYASHI ANTISPAM*\n\n` +
+        `👤 @${sender.split("@")[0]}\n` +
+        `⚠️ Detectado: *${antiSpamHit.reasons.join(" • ")}*\n` +
+        `🗑️ Mensagem: *${deleted ? "apagada ✅" : isBotGroupAdmins ? "não consegui apagar ⚠️" : "bot sem ADM ⚠️"}*\n` +
+        `⚖️ Ação: *${punishmentText}*`,
+      mentions: [sender]
+    }).catch(() => {});
+
+    addAdminLog(from, {
+      type: "antispam",
+      actor: botNumber,
+      target: sender,
+      detail: `${antiSpamHit.reasons.join(", ")} • ${punishmentText}`
+    });
+
+    continue;
+  }
+}
+
 
 // ==========================================
 // 🛡️ KOBAYASHI ANTI-TRAVA • v0.1.58
@@ -5587,6 +5644,27 @@ case "rankgostoso": {
 break;
 //
 // menu
+// ==========================================
+// 🐉 ANTISPAM PRO • CONFIGURAÇÃO
+// ==========================================
+case "antispam": {
+  if (!isGroup) return reply("❌ Este comando só funciona em grupos.");
+  if (!isGroupAdmins && !SoDono) return reply("❌ Apenas administradores podem configurar o AntiSpam.");
+
+  const option = String(args?.[0] || "").toLowerCase();
+  if (["on", "1", "ativar"].includes(option)) {
+    setAntiSpamEnabled(from, true);
+    return reply("🐉🛡️ *AntiSpam Pro ativado neste grupo.*");
+  }
+  if (["off", "0", "desativar"].includes(option)) {
+    setAntiSpamEnabled(from, false);
+    return reply("🌸 *AntiSpam Pro desativado neste grupo.*");
+  }
+
+  return reply(formatAntiSpamStatus(from, prefix));
+}
+break;
+
 // ==========================================
 // 🌸 KOBAYASHI COMMUNITY • v0.7.1
 // ==========================================

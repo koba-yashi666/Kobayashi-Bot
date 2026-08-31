@@ -1,20 +1,19 @@
 {
-  "version": "0.7.1-beta",
-  "title": "Kobayashi Community Commands",
+  "version": "0.7.2-beta",
+  "title": "AntiSpam Pro",
   "added": [
-    "/Dragon_Stickers — grupo de figurinhas",
-    "/Maid_Femboy — grupo da comunidade",
-    "/Dragon_divulgacoes — grupo de divulgação",
-    "/Maid_porn — grupo +18",
-    "/Maid_dragon — grupo principal Maid Dragon"
+    "/antispam on/off/status",
+    "Detecção de flood geral, comandos, figurinhas, imagens, menções em massa e mensagens repetidas",
+    "Proteção automática de ADM e whitelist",
+    "Integração com ADV/ban e logs administrativos"
   ],
   "menus": [],
   "changed": [],
   "fixed": [],
   "notes": [
-    "Comandos públicos e exclusivos para atalhos da comunidade",
-    "Aliases sem underline também foram adicionados",
-    "Não é necessário npm install"
+    "AntiSpam inicia desligado por grupo",
+    "Punição padrão: ADV",
+    "Sem novas dependências npm"
   ],
-  "summary": "A v0.7.1 adiciona atalhos oficiais para os grupos da comunidade."
+  "summary": "A v0.7.2 adiciona uma camada dedicada de proteção contra spam e flood."
 }
