@@ -35,6 +35,7 @@ import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePend
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate } from "./lib/features/rentalSystem.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/antiTrava.js";
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/antiSpam.js";
+import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/adminPro.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/sentinelSystem.js";
@@ -132,11 +133,26 @@ async function addAutomaticWarning(conn, groupJid, target, reason, botIsAdmin, q
   const count = db[groupJid][target].count;
   writeAdvDb(db);
 
+  addPunishmentHistory(groupJid, target, {
+    type: "adv_auto",
+    reason,
+    by: "Kobayashi AutoMod",
+    source: "automod",
+    meta: { count }
+  });
+
   if (count >= 3 && botIsAdmin) {
     try {
       await conn.groupParticipantsUpdate(groupJid, [target], "remove");
       db[groupJid][target] = { count: 0, history: [] };
       writeAdvDb(db);
+
+      addPunishmentHistory(groupJid, target, {
+        type: "ban_auto",
+        reason: "Limite de 3 advertências automáticas atingido",
+        by: "Kobayashi AutoMod",
+        source: "automod"
+      });
 
       await conn.sendMessage(groupJid, {
         text:
@@ -4344,19 +4360,29 @@ case "banc": {
   if (target === botNumber) return reply(`🌸 Eu não posso me banir do próprio grupo.`);
   if (target === dono) return reply(`👑 Não posso banir o dono do Kobayashi Bot.`);
 
+  const reason = args.filter((arg) => !arg.startsWith("@")).join(" ").trim();
+  if (!reason) return reply(`⚠️ Informe o motivo da remoção.\nExemplo: *${prefix}banc @membro spam*`);
+
   try {
     const targetNumber = target.split('@')[0];
     await conn.groupParticipantsUpdate(from, [target], 'remove');
+
+    addPunishmentHistory(from, target, {
+      type: "ban",
+      reason,
+      by: sender,
+      source: "manual"
+    });
 
     addAdminLog(from, {
       type: "ban",
       actor: sender,
       target,
-      detail: "Membro removido do grupo",
+      detail: `Membro removido do grupo • ${reason}`,
     });
 
     return conn.sendMessage(from, {
-      text: `🐉🌸 *Membro removido!*\n\n👤 @${targetNumber}\n🛡️ Ação realizada por: @${sender.split('@')[0]}`,
+      text: `🐉🌸 *Membro removido!*\n\n👤 @${targetNumber}\n📋 Motivo: ${reason}\n🛡️ Ação realizada por: @${sender.split('@')[0]}`,
       mentions: [target, sender],
     }, { quoted: info });
   } catch (e) {
@@ -4376,7 +4402,8 @@ Exemplo: ${prefix}adv @membro motivo`);
   if (target === botNumber) return reply(`🐉🌸 Eu não posso receber advertência.`);
   if (target === dono) return reply(`👑 O dono do Kobayashi Bot não pode receber advertência.`);
 
-  const reason = args.filter((arg) => !arg.startsWith('@')).join(' ').trim() || 'Motivo não informado';
+  const reason = args.filter((arg) => !arg.startsWith('@')).join(' ').trim();
+  if (!reason) return reply(`⚠️ Informe o motivo da advertência.\nExemplo: *${prefix}adv @membro spam*`);
   const db = readAdvDb();
   if (!db[from]) db[from] = {};
   if (!db[from][target]) db[from][target] = { count: 0, history: [] };
@@ -4391,6 +4418,14 @@ Exemplo: ${prefix}adv @membro motivo`);
 
   const count = db[from][target].count;
   writeAdvDb(db);
+
+  addPunishmentHistory(from, target, {
+    type: "adv",
+    reason,
+    by: sender,
+    source: "manual",
+    meta: { count }
+  });
 
   addAdminLog(from, {
     type: "adv",
@@ -4551,6 +4586,14 @@ Exemplo: ${prefix}rmadv @membro`);
   }
 
   writeAdvDb(db);
+
+  addPunishmentHistory(from, target, {
+    type: "rmadv",
+    reason: removed?.reason ? `ADV removida: ${removed.reason}` : "Uma advertência foi removida",
+    by: sender,
+    source: "manual",
+    meta: { before: current, after: newCount }
+  });
 
   addAdminLog(from, {
     type: "rmadv",
@@ -5645,6 +5688,50 @@ break;
 //
 // menu
 // ==========================================
+// 🛡️ MODERAÇÃO PRO • v0.7.3
+// ==========================================
+case "historico":
+case "historicomod":
+case "punicoes": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins && !SoDono) return reply(mess.onlyAdmins());
+
+  const target = getTargetFromMessage(info, sender) || sender;
+  const rows = getPunishmentHistory(from, target, 20);
+  const recid = getRecidivismSummary(from, target, 30);
+
+  return conn.sendMessage(from, {
+    text: formatPunishmentHistory(target, rows, recid),
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "limparhistorico":
+case "limparpunicoes": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins && !SoDono) return reply(mess.onlyAdmins());
+
+  const target = getTargetFromMessage(info, null);
+  if (!target) return reply(`⚠️ Marque ou responda ao membro.\nExemplo: *${prefix}limparhistorico @membro*`);
+
+  const count = clearPunishmentHistory(from, target);
+  addAdminLog(from, {
+    type: "history_clear",
+    actor: sender,
+    target,
+    detail: `${count} registro(s) removido(s)`
+  });
+
+  return conn.sendMessage(from, {
+    text: `🧹🌸 Histórico de @${target.split("@")[0]} limpo.\n📚 Registros removidos: *${count}*`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+
+// ==========================================
 // 🐉 ANTISPAM PRO • CONFIGURAÇÃO
 // ==========================================
 case "antispam": {
@@ -6577,13 +6664,28 @@ case "blacklist": {
   if (!target) return reply("👤 Marque ou responda a mensagem do usuário.");
   if (target === dono || isMainOwnerJid(target)) return reply("👑 O dono principal não pode entrar na lista negra.");
   if (["add","adicionar","+"].includes(action)) {
-    const reason = args.slice(2).join(" ") || "Sem motivo informado";
+    const reason = args.slice(2).join(" ").trim();
+    if (!reason) return reply(`⚠️ Informe o motivo.\nExemplo: *${prefix}listanegra add @membro golpes*`);
     addBlacklist(from,target,sender,reason);
     if (isBotGroupAdmins) await conn.groupParticipantsUpdate(from,[target],"remove").catch(()=>{});
+    addPunishmentHistory(from, target, {
+      type: "blacklist_add",
+      reason,
+      by: sender,
+      source: "manual"
+    });
     addAdminLog(from,{type:"blacklist_add",actor:sender,target,detail:reason});
     return conn.sendMessage(from,{text:`⛔ @${target.split('@')[0]} adicionado à lista negra.\n📝 Motivo: *${reason}*${isBotGroupAdmins?'\n🔨 Removido do grupo.':''}`,mentions:[target]},{quoted:info});
   }
   const ok=removeBlacklist(from,target);
+  if (ok) {
+    addPunishmentHistory(from, target, {
+      type: "blacklist_remove",
+      reason: "Removido da lista negra",
+      by: sender,
+      source: "manual"
+    });
+  }
   return conn.sendMessage(from,{text:ok?`✅ @${target.split('@')[0]} removido da lista negra.`:`⚠️ @${target.split('@')[0]} não estava na lista negra.`,mentions:[target]},{quoted:info});
 }
 break;

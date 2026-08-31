@@ -1,19 +1,24 @@
 {
-  "version": "0.7.2-beta",
-  "title": "AntiSpam Pro",
+  "version": "0.7.3-beta",
+  "title": "Moderation Pro",
   "added": [
-    "/antispam on/off/status",
-    "Detecção de flood geral, comandos, figurinhas, imagens, menções em massa e mensagens repetidas",
-    "Proteção automática de ADM e whitelist",
-    "Integração com ADV/ban e logs administrativos"
+    "/historico, /historicomod e /punicoes — histórico por membro",
+    "/limparhistorico e /limparpunicoes — limpeza do histórico",
+    "Banco moderation-history.json separado do contador atual de ADVs",
+    "Indicador de reincidência baseado nas ocorrências dos últimos 30 dias",
+    "Registro de ADV manual/automática, ban, ban automático e lista negra"
   ],
-  "menus": [],
-  "changed": [],
+  "changed": [
+    "/adv agora exige motivo",
+    "/banc agora exige motivo e mostra o motivo na confirmação",
+    "/listanegra add agora exige motivo"
+  ],
   "fixed": [],
+  "menus": [],
   "notes": [
-    "AntiSpam inicia desligado por grupo",
-    "Punição padrão: ADV",
+    "Reincidência é informativa; não aumenta punições automaticamente",
+    "Histórico limitado a 200 registros por usuário/grupo",
     "Sem novas dependências npm"
   ],
-  "summary": "A v0.7.2 adiciona uma camada dedicada de proteção contra spam e flood."
+  "summary": "A v0.7.3 fecha a fase 0.7.x com histórico persistente e moderação rastreável."
 }
