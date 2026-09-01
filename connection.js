@@ -14,6 +14,7 @@ import NodeCache from "node-cache";
 import start from "./index.js";
 import { bindGroupCache, groupCache } from "./lib/groupCache.js";
 import { ensureDragonCoreRuntime } from "./lib/features/dragonCore.js";
+import { ensureRentalRuntime } from "./lib/features/rentalSystem.js";
 import {
   readline,
   P,
@@ -652,6 +653,7 @@ async function startConnect() {
             console.log(colors.cyan(mess.open()));
             console.log(colors.magenta("🐉🌸 Kobayashi Bot conectado com sucesso!"));
             ensureDragonCoreRuntime(conn);
+            ensureRentalRuntime(conn);
             await conn.sendPresenceUpdate("available");
             break;
         }

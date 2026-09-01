@@ -1,21 +1,22 @@
 {
-  "version": "0.8.3-beta",
-  "title": "Dragon Core Update",
+  "version": "0.8.4-beta",
+  "title": "Aluguel 2.0",
   "added": [
-    "Agendamento 2.0 com abrir/fechar grupo, mensagens e regras programadas",
-    "Central /dragoncore e /seguranca",
-    "Fuso horário configurável por grupo",
-    "Backup administrativo automático diário e manual",
-    "Migração do banco Dragon Core e escrita atômica",
-    "Proteção de runtime contra promises e exceções não tratadas",
-    "Diagnóstico rápido do estado de segurança"
+    "Planos oficiais: 30d/R$30, 45d/R$45, 60d/R$55 e 90d/R$75",
+    "/plano 1 a /plano 4 com detalhes individuais",
+    "/planos envia a arte oficial dos planos",
+    "/aluguel_parceria ID PLANO aplica automaticamente +5/+7/+10/+15 dias",
+    "Registro e renovação por ID do grupo e número do plano",
+    "Período grátis com /aluguel_teste",
+    "Avisos automáticos de vencimento em 7d, 3d, 1d, 12h e 1h",
+    "Aviso automático de expiração e bloqueio via restrição de aluguel",
+    "Lista de aluguéis com status, plano e parceria",
+    "Migração automática preservando registros antigos"
   ],
   "improved": [
-    "Integração com AntiSpam, AntiTrava, AntiFake e auditoria existentes",
-    "Agendamentos persistem após reinicialização",
-    "Mantidos apenas os 7 backups administrativos mais recentes"
+    "Banco de aluguel atualizado para schema 2 com escrita atômica",
+    "Runtime de aluguel independente e persistente",
+    "Compatibilidade com aluguéis antigos do Kobayashi"
   ],
-  "excluded": [
-    "Aluguel 2.0 ficou reservado para a v0.8.4"
-  ]
+  "reference": "Fluxo central de aluguel/ativação inspirado no HutaoBot V10 e refeito para o Kobayashi."
 }
