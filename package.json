@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.9.0-beta",
-  "description": "Kobayashi Bot Beta v0.9.0 - Dragon Fun 2.0",
+  "version": "0.9.1-beta",
+  "description": "Kobayashi Bot Beta v0.9.1 - MenuBN Unificado",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

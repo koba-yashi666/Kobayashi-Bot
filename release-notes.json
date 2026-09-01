@@ -1,20 +1,12 @@
 {
-  "version": "0.9.0-beta",
-  "title": "Dragon Fun 2.0 — Hutao + Nazuna",
+  "version": "0.9.1-beta",
+  "title": "MenuBN Unificado",
   "added": [
-    "Hub completo /menujogos e /menurpg",
-    "Jogos: Forca, Anagrama, Quiz, Enigma, Wordle, PPT, Dados, Coinflip, Cassino/Slots e Roleta",
-    "Verdade, Desafio, Eu Nunca e Vord com base do Hutao",
-    "Dezenas de medidores de personalidade e rankings da base Hutao/Nazuna",
-    "Interacoes com imagens/GIFs do Hutao e fallback de assets do Nazuna",
-    "Casamento, dupla, divorcio, familia e adocao",
-    "Dragon RPG: carteira, daily, trabalho, mineracao, pesca, exploracao, crime, loja, inventario, Pix e rankings",
-    "RPG expandido: plantacao, culinaria, forja, dungeons, bosses, arena, torneios, pets, classes, casa, mercado, missoes e conquistas",
-    "Banco persistente dragon-fun-v09.json"
+    "/menubn como menu principal de jogos e diversão"
   ],
-  "sources": [
-    "HutaoBot-mainV10: menus, perguntas Vord, forca, imagens/GIFs e audio",
-    "Nazuna: bases de Quiz, Anagrama, Forca, Wordle, Stop, Caca-palavras, Batalha Naval, textos e imagens de jogos"
-  ],
-  "compatibility": "Mantem v0.8.5 Planos & Contato e sistemas administrativos anteriores."
+  "improved": [
+    "/menujogos, /menudiversao e /menubrincadeiras agora apontam para o /menubn",
+    "Jogos separados por categorias dentro de um único menu",
+    "Dragon RPG permanece no /menurpg"
+  ]
 }

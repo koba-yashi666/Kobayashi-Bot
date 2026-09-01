@@ -12,7 +12,7 @@ const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
 ];
 const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","comer","louca","louça","lamber","morder","socar","soco","chorao","chorona"];
-const GAME_ALIASES = ["menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
+const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
 const ECON = ["menurpg","rpg","perfilrpg","carteira","gold","vergold","daily","diario","work","trabalhar","mine","minerar","fish","pescar","hunt","cacar","caçar","explore","explorar","crime","roubar","assaltar","doargold","pix","rankgold","toprpg","topriqueza","loja","comprar","inv","inventario"];
 const RPG = ["emprego","vagas","demitir","habilidades","desafiosemanal","desafiomensal","investir","sell","plantar","cultivar","farm","colher","coletar","harvest","plantacao","horta","cozinhar","cook","receitas","ingredientes","sementes","comer","eat","vendercomida","masmorra","dungeon","bossrpg","arena","torneio","guerra","desafio","forge","forjar","encantar","enchant","dismantle","desmontar","reparar","materiais","precos","equipamentos","pets","adotar","feed","train","evolve","renamepet","petbattle","petbet","equippet","unequippet","classe","class","casa","house","auction","mercado","missoes","quests","conquistas","achievements","prestige","evoluir","streak","reivindicar","claim","speedup","boost","tributos","meustats","criarcla","cla","convidar","convite","rmconvite","aceitarconvite","recusarconvite","expulsar","sair","lojapremium","comprarpremium","propriedades","cprop","cprops","doar","presente","reputacao","rep","vote","eventos","loteria","corrida","leilao","investir","evoluir","reivindicar","speedup"];
@@ -24,14 +24,100 @@ function targetOf(ctx){const c=ctxInfo(ctx.info);return c?.mentionedJid?.[0]||c?
 function tag(jid){return jid?`@${String(jid).split("@")[0]}`:"alguém";}
 function ms(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return `${h}h ${m}m`;}
 async function sendMedia(ctx,url,caption,mentions=[]){ if(!url)return ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info}); try{const isVideo=/\.(mp4|gif)(?:$|\?)/i.test(url); await ctx.conn.sendMessage(ctx.from,isVideo?{video:{url},gifPlayback:true,caption,mentions}:{image:{url},caption,mentions},{quoted:ctx.info});}catch{await ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info});}}
-function menu(p){return `╭══════ ❀ 🐉 ❀ ══════╮\n  *DRAGON FUN • v0.9.0*\n╰══════ ❀ 🎮 ❀ ══════╯\n\n🎮 *JOGOS*\n${p}forca • ${p}anagrama • ${p}quiz\n${p}enigma • ${p}wordle • ${p}ppt\n${p}dados • ${p}coinflip • ${p}cassino • ${p}roleta\n${p}verdade • ${p}desafio • ${p}eununca\n\n💞 *INTERAÇÕES*\n${p}beijo @ • ${p}abraco @ • ${p}tapa @ • ${p}carinho @\n${p}casar @ • ${p}minhadupla • ${p}familia\n\n🎲 *MEDIDORES & RANKS*\n${p}chance • ${p}lindo @ • ${p}gado @ • ${p}rankgado\n... dezenas de medidores do Hutao + Nazuna\n\n💰 *DRAGON RPG*\n${p}perfilrpg • ${p}daily • ${p}work • ${p}mine • ${p}fish\n${p}loja • ${p}comprar picareta • ${p}inv • ${p}pix @ 100\n${p}menurpg para o menu completo.`;}
+function menu(p){return `╭══════ ❀ 🐉 ❀ ══════╮
+      *MENUBN • v0.9.1*
+   🎮 Jogos & Diversão 🎲
+╰══════ ❀ 🌸 ❀ ══════╯
+
+🧠 *PALAVRAS & PERGUNTAS*
+${p}forca [letra/palavra]
+${p}anagrama [resposta]
+${p}quiz [resposta]
+${p}enigma [resposta]
+${p}wordle [palavra]
+${p}cacapalavras
+${p}quiz_animais
+${p}gartic
+
+🎮 *JOGOS CLÁSSICOS*
+${p}ppt pedra/papel/tesoura
+${p}jogodavelha
+${p}connect4
+${p}uno
+${p}stop
+${p}batalhanaval
+${p}duelo
+${p}dueloquiz
+${p}jogov
+${p}vord
+${p}amongus
+
+🎰 *SORTE & CASSINO*
+${p}dados [aposta]
+${p}coinflip cara/coroa [aposta]
+${p}cassino [aposta]
+${p}slots [aposta]
+${p}roleta preto/vermelho [aposta]
+${p}roletaban
+${p}chance
+${p}sn
+
+🔥 *BRINCADEIRAS DE GRUPO*
+${p}verdade
+${p}desafio
+${p}eununca
+${p}cantada
+${p}piada
+${p}fato
+${p}conselho
+${p}elogio
+${p}reflexao
+${p}motivacional
+${p}quando
+
+💞 *INTERAÇÕES*
+${p}beijo @
+${p}abraco @
+${p}carinho @
+${p}cafune @
+${p}tapa @
+${p}chute @
+${p}morder @
+${p}socar @
+${p}lamber @
+${p}shipo @
+${p}casal @
+
+💍 *RELACIONAMENTO & FAMÍLIA*
+${p}casar @
+${p}aceitarcasamento
+${p}divorciar
+${p}minhadupla
+${p}familia
+${p}adotaruser @
+${p}deserdar @
+
+📊 *MEDIDORES*
+${p}lindo @ • ${p}linda @ • ${p}gado @
+${p}rico @ • ${p}pobre @ • ${p}nerd @
+${p}gamer @ • ${p}sortudo @ • ${p}azarado @
+${p}romantico @ • ${p}ciumento @ • ${p}inteligente @
+
+🏆 *RANKINGS DOS MEDIDORES*
+Use *${p}rank + medidor*
+Ex.: ${p}rankgado • ${p}ranklindo • ${p}rankrico
+
+🐉 *DRAGON RPG*
+O RPG continua organizado em *${p}menurpg*.
+
+💡 ${p}menujogos, ${p}menudiversao e ${p}menubrincadeiras agora abrem este mesmo menu.`;}
 function rpgMenu(p){return `╭━━〔 🐉⚔️ *DRAGON RPG 0.9* 〕━━╮\n👤 ${p}perfilrpg | ${p}carteira | ${p}toprpg\n💰 ${p}daily | ${p}work | ${p}mine | ${p}fish | ${p}explore\n🎰 ${p}dados 20 | ${p}coinflip cara 50 | ${p}slots 30 | ${p}roleta preto 50\n🛒 ${p}loja | ${p}comprar picareta | ${p}inv\n🌱 ${p}plantar trigo | ${p}colher | ${p}cook sopa\n⚔️ ${p}dungeon | ${p}bossrpg | ${p}arena | ${p}torneio\n🔨 ${p}forge espada | ${p}encantar espada | ${p}reparar espada\n🐾 ${p}pets | ${p}adotar dragao | ${p}feed 1 | ${p}train 1\n🏰 ${p}classe | ${p}casa | ${p}auction | ${p}mercado\n📜 ${p}missoes | ${p}conquistas | ${p}prestige\n╰━━━━━━━━━━━━━━━━━━━━━━╯`;}
 
 export default {
  name:"dragonfun", aliases:dragonFunAliases, category:"diversao", description:"Sistema completo de diversão e RPG da v0.9.0.", usage:"menujogos", permission:"Membro",
  async execute(ctx){
   const c=String(ctx.command||"").toLowerCase(); const n=c.normalize("NFD").replace(/[\u0300-\u036f]/g,""); const target=targetOf(ctx)||ctx.sender; const mentions=target?[target]:[];
-  if(["dragonfun","menujogos","menudiversao","menubrincadeiras","brincadeira","games"].includes(n)) return ctx.reply(menu(ctx.prefix));
+  if(["dragonfun","menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games"].includes(n)) return ctx.reply(menu(ctx.prefix));
   if(["menurpg","rpg"].includes(n)) return ctx.reply(rpgMenu(ctx.prefix));
   if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
   if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
@@ -48,7 +134,7 @@ export default {
   if(["ppt","pedrapapeltesoura"].includes(n)){const choices=["pedra","papel","tesoura"],me=String(ctx.args?.[0]||"").toLowerCase(),bot=choices[Math.floor(Math.random()*3)];if(!choices.includes(me))return ctx.reply(`Use: *${ctx.prefix}ppt pedra/papel/tesoura*`);const win=(me==="pedra"&&bot==="tesoura")||(me==="papel"&&bot==="pedra")||(me==="tesoura"&&bot==="papel");return ctx.reply(`✊✋✌️ Você: *${me}*\n🐉 Kobayashi: *${bot}*\n\n${me===bot?"🤝 Empate!":win?"🏆 Você venceu!":"🐉 Kobayashi venceu!"}`);}
   if(["dados","dice","coinflip","moeda","cassino","slots","slotmachine","roleta","roulette"].includes(n)){let game="slots",choice="",bet=10;if(["dados","dice"].includes(n)){game="dice";bet=ctx.args?.[0];}else if(["coinflip","moeda"].includes(n)){game="coinflip";choice=ctx.args?.[0];bet=ctx.args?.[1];}else if(["roleta","roulette"].includes(n)){game="roulette";choice=ctx.args?.[0];bet=ctx.args?.[1];}else bet=ctx.args?.[0];const r=gamble(ctx.sender,game,bet,choice);if(!r.ok)return ctx.reply("💸 Saldo insuficiente ou aposta inválida.");return ctx.reply(`🎰 *${game.toUpperCase()}*\n${r.result}\n\n${r.win?`🏆 Ganhou *${r.prize}* coins!`:`💥 Perdeu *${r.bet}* coins.`}\n💰 Saldo: ${r.u.coins}`);}
   if(["jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","gartic","quiz_animais","amongus","roletaban"].includes(n)){const r=simpleRpgAction(ctx.sender,n,ctx.args?.join(" "));return ctx.reply(`🎮 *${n.toUpperCase()}*\n${r.text}\n⭐ Lv.${r.u.level} • 💰 ${r.u.coins}`);}
-  if(["revelar_gartic","revelar_animal","revelar_enigma","revelar_anagrama","resetv","pular","responder","confirmar","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","reset_vord","pontos","checkpts","rankpts"].includes(n)){return ctx.reply(`🎲 *${n.toUpperCase()}* integrado ao Dragon Fun 2.0.\nUse *${ctx.prefix}menujogos* para iniciar uma rodada ou consultar os jogos disponíveis.`);}
+  if(["revelar_gartic","revelar_animal","revelar_enigma","revelar_anagrama","resetv","pular","responder","confirmar","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","reset_vord","pontos","checkpts","rankpts"].includes(n)){return ctx.reply(`🎲 *${n.toUpperCase()}* integrado ao Dragon Fun 2.0.\nUse *${ctx.prefix}menubn* para iniciar uma rodada ou consultar os jogos disponíveis.`);}
   if(n==="daily"||n==="diario"){const r=daily(ctx.sender);return r.ok?ctx.reply(`🎁 Daily recebido: *${r.amount} coins*\n🔥 Streak: ${r.u.streak}\n💰 Saldo: ${r.u.coins}`):ctx.reply(`⏳ Daily já coletado. Volte em ${ms(r.wait)}.`);}
   if(["work","trabalhar","mine","minerar","fish","pescar","hunt","cacar","explore","explorar","crime"].includes(n)){const map={trabalhar:"work",minerar:"mine",pescar:"fish",cacar:"hunt",explorar:"explore"};const r=work(ctx.sender,map[n]||n);return r.ok?sendMedia(ctx,mediaFor(n),`${r.amount>=0?"✅":"💥"} *${n.toUpperCase()}*\nResultado: ${r.amount>=0?"+":""}${r.amount} coins\n💰 Saldo: ${r.u.coins}`):ctx.reply(`⏳ Aguarde ${ms(r.wait)} para tentar novamente.`);}
   if(["perfilrpg","carteira","gold","vergold"].includes(n)){const u=getUser(target);return ctx.conn.sendMessage(ctx.from,{text:`🐉 *DRAGON CARD*\n👤 ${tag(target)}\n⭐ Nível: ${u.level}\n✨ XP: ${u.xp}\n💰 Coins: ${u.coins}\n🏦 Banco: ${u.bank}\n🏆 Vitórias: ${u.wins}\n💥 Derrotas: ${u.losses}`,mentions:[target]},{quoted:ctx.info});}
