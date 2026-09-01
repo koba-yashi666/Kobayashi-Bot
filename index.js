@@ -24,7 +24,7 @@ import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJ
 import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
 import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js";
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
-import { addAdminLog } from "./lib/features/adminLogs.js";
+import { addAdminLog, getAdminLogs, clearAdminLogs, getAdminLogStats, cleanupAdminLogs } from "./lib/features/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/afkSystem.js";
 import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel, resetGroupLevelRank, resetGlobalLevelRank
 } from "./lib/features/activityTracker.js";
@@ -5829,6 +5829,129 @@ reagir("🐉");
 reply(buildLevelMenu(prefix));
 break;
 
+case "logs":
+case "adminlogs": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const rawArgs = Array.isArray(args) ? args : [];
+  const tokens = rawArgs.map((x) => String(x || "").trim()).filter(Boolean);
+  const lower = tokens.map((x) => x.toLowerCase());
+  const mentioned = info.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0]
+    || info.message?.imageMessage?.contextInfo?.mentionedJid?.[0]
+    || info.message?.videoMessage?.contextInfo?.mentionedJid?.[0]
+    || null;
+
+  if (["ajuda", "help", "?"].includes(lower[0])) {
+    return reply(
+      `╭━━〔 📋 LOGS 2.0 〕━━╮\n` +
+      `┃ ${prefix}logs\n` +
+      `┃ ${prefix}logs @membro\n` +
+      `┃ ${prefix}logs antilink\n` +
+      `┃ ${prefix}logs adv\n` +
+      `┃ ${prefix}logs hoje\n` +
+      `┃ ${prefix}logs ontem\n` +
+      `┃ ${prefix}logs 7d\n` +
+      `┃ ${prefix}logs 30d\n` +
+      `┃ ${prefix}logs data 01/09/2026\n` +
+      `┃ ${prefix}logs adv hoje\n` +
+      `┃ ${prefix}logs status\n` +
+      `┃ ${prefix}logs limpar 30d\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `🧹 Logs com mais de 90 dias são removidos automaticamente.`
+    );
+  }
+
+  if (["status", "stats", "estatisticas", "estatísticas"].includes(lower[0])) {
+    const stats = getAdminLogStats(from);
+    const top = Object.entries(stats.byType)
+      .sort((a,b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([type, count]) => `┃ • ${type}: *${count}*`)
+      .join("\n") || "┃ Nenhum registro ainda.";
+    return reply(
+      `╭━━〔 📊 LOGS • STATUS 〕━━╮\n` +
+      `┃ Total armazenado: *${stats.total}*\n` +
+      `${top}\n` +
+      `┃ Retenção automática: *90 dias*\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (["limpar", "clear", "clean"].includes(lower[0])) {
+    const spec = lower[1] || "";
+    if (["tudo", "all"].includes(spec)) {
+      const removed = clearAdminLogs(from);
+      addAdminLog(from, { type: "logs_clear", actor: sender, detail: `${removed} logs removidos; histórico reiniciado` });
+      return reply(`🧹 *Logs 2.0*\n\n✅ ${removed} registro(s) removido(s).`);
+    }
+
+    const matchDays = spec.match(/^(\d{1,3})d$/i);
+    if (!matchDays) {
+      return reply(`🧹 Use *${prefix}logs limpar 30d* para apagar logs mais antigos que 30 dias, ou *${prefix}logs limpar tudo*.`);
+    }
+    const days = Math.max(1, Number(matchDays[1]));
+    const before = Date.now() - days * 86400000;
+    const removed = clearAdminLogs(from, { before });
+    addAdminLog(from, { type: "logs_clear", actor: sender, detail: `${removed} logs anteriores a ${days} dias removidos` });
+    return reply(`🧹 *Logs 2.0*\n\n✅ ${removed} registro(s) com mais de *${days} dias* removido(s).`);
+  }
+
+  let type = "";
+  let member = mentioned;
+  let since = 0;
+  let until = 0;
+  let dateLabel = "recentes";
+
+  for (let i = 0; i < lower.length; i++) {
+    const token = lower[i];
+    if (["antilink", "link", "links"].includes(token)) type = "antilink";
+    else if (["adv", "advertencia", "advertência", "advs"].includes(token)) type = "adv";
+    else if (token === "hoje") {
+      const d = new Date(); d.setHours(0,0,0,0); since = d.getTime(); dateLabel = "hoje";
+    } else if (token === "ontem") {
+      const d = new Date(); d.setHours(0,0,0,0); until = d.getTime() - 1; since = until - 86400000 + 1; dateLabel = "ontem";
+    } else if (/^\d{1,3}d$/.test(token)) {
+      const days = Number(token.slice(0,-1)); since = Date.now() - days * 86400000; dateLabel = `últimos ${days} dias`;
+    } else if (token === "data" && tokens[i+1]) {
+      const m = tokens[i+1].match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (m) {
+        const start = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), 0,0,0,0);
+        const end = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), 23,59,59,999);
+        since = start.getTime(); until = end.getTime(); dateLabel = tokens[i+1]; i++;
+      }
+    }
+  }
+
+  // Se não houve menção, aceita número/JID digitado como filtro de membro.
+  if (!member) {
+    const possibleMember = tokens.find((x) => /^@?\d{8,20}$/.test(x));
+    if (possibleMember) member = possibleMember.replace(/^@/, "");
+  }
+
+  const logs = getAdminLogs(from, { type, member, since, until, limit: 20 });
+  if (!logs.length) {
+    return reply(`📋 *Logs 2.0*\n\nNenhum registro encontrado com esses filtros.\n💡 Use *${prefix}logs ajuda* para ver os filtros disponíveis.`);
+  }
+
+  const jidName = (jid) => jid ? `@${String(jid).split("@")[0]}` : "—";
+  const lines = logs.map((log, i) => {
+    const when = new Date(log.at || log.timestamp || Date.now()).toLocaleString("pt-BR");
+    return `${i+1}. *${String(log.type || "admin").toUpperCase()}*\n   👤 Ação: ${jidName(log.actor)}${log.target ? ` → ${jidName(log.target)}` : ""}\n   📝 ${log.detail || log.message || "Sem detalhes"}\n   🕒 ${when}`;
+  }).join("\n\n");
+
+  const activeFilters = [type ? `tipo: ${type}` : "", member ? `membro: ${jidName(member)}` : "", `data: ${dateLabel}`].filter(Boolean).join(" • ");
+  return conn.sendMessage(from, {
+    text:
+      `╭━━〔 📋 LOGS 2.0 〕━━╮\n` +
+      `┃ ${activeFilters}\n` +
+      `┃ Exibindo: *${logs.length}* registro(s)\n` +
+      `╰━━━━━━━━━━━━━━━━━━╯\n\n` + lines,
+    mentions: [...new Set(logs.flatMap((x) => [x.actor, x.target]).filter((x) => typeof x === "string" && x.includes("@")))]
+  }, { quoted: info });
+}
+break;
+
 case "paineladm":
 case "admincenter":
 case "centraladm": {
@@ -5843,7 +5966,8 @@ case "centraladm": {
         { header: "📊 Visão geral", title: "Status do grupo", description: "Veja os sistemas e proteções ativas", id: `${prefix}statusgrupo` },
         { header: "🛡️ Segurança", title: "Proteções", description: "Confira o estado das proteções", id: `${prefix}painelprotecao` },
         { header: "⚙️ Recursos", title: "Sistemas", description: "Level, diversão, stickers e outros", id: `${prefix}painelsistemas` },
-        { header: "🩺 Diagnóstico", title: "Permissões do bot", description: "Descubra rapidamente o que pode falhar", id: `${prefix}diagpermissoes` }
+        { header: "🩺 Diagnóstico", title: "Permissões do bot", description: "Descubra rapidamente o que pode falhar", id: `${prefix}diagpermissoes` },
+        { header: "📋 Auditoria", title: "Logs 2.0", description: "Ações, filtros e histórico administrativo", id: `${prefix}logs` }
       ]}]
     })
   }];
@@ -5946,6 +6070,7 @@ reply(
   `\n\n╭─〔 🛡️ *ADMIN CENTER* 〕\n` +
   `│ ${prefix}paineladm\n` +
   `│ ${prefix}statusgrupo\n` +
+  `│ ${prefix}logs\n` +
   `╰────────────────`
 );
 break;
