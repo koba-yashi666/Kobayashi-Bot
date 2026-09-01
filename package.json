@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.8.4-beta",
-  "description": "Kobayashi Bot Beta v0.8.4 - Aluguel 2.0",
+  "version": "0.8.5-beta",
+  "description": "Kobayashi Bot Beta v0.8.5 - Planos & Contato",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

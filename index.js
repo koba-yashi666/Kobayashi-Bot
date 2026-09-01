@@ -1491,7 +1491,7 @@ if (isCmd) {
 switch (command) {
 
 // ==========================================
-// 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.4
+// 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.5
 // Inspirado no fluxo de aluguel/ativação do Hutao,
 // refeito para a arquitetura e banco do Kobayashi.
 // ==========================================
@@ -1503,7 +1503,8 @@ case "plans": {
     plans.map((p) => `┃ *${p.id}.* ${p.name}\n┃ 📅 ${p.days} dias • 💰 R$ ${p.price.toFixed(2).replace(".", ",")}\n┃ 🤝 Parceria: +${p.partnerBonusDays} dias`).join("\n┃\n") +
     `\n╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
     `🔎 Veja um plano: *${prefix}plano 1* até *${prefix}plano 4*\n` +
-    `📩 Fale com o proprietário para ativar.`;
+    `📩 *Contato do dono:* https://wa.me/5515997075304\n` +
+    `💬 Escolha um plano para receber o link já com o plano selecionado.`;
   try {
     const planImage = fs.readFileSync(new URL("./assets/kobayashi-planos.png", import.meta.url));
     await conn.sendMessage(from, { image: planImage, caption }, { quoted: info });
@@ -1524,7 +1525,10 @@ case "plano": {
     `┃ 🤝 Com parceria: *+${plan.partnerBonusDays} dias grátis*\n` +
     `┃ 🎁 Total com parceria: *${plan.days + plan.partnerBonusDays} dias*\n` +
     `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-    `📩 Chame o proprietário no privado para ativar.`
+    `📩 *CONTRATAR ESTE PLANO*\n` +
+    `🔗 https://wa.me/5515997075304?text=${encodeURIComponent(`Olá! Quero contratar o Plano ${plan.id} - ${plan.name} do Kobayashi Bot (${plan.days} dias por R$ ${plan.price.toFixed(2).replace(".", ",")}).`)}\n\n` +
+    `👑 Dono: https://wa.me/5515997075304\n` +
+    `📦 Plano selecionado: *Plano ${plan.id} - ${plan.name}*`
   );
 }
 break;

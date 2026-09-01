@@ -1,22 +1,15 @@
 {
-  "version": "0.8.4-beta",
-  "title": "Aluguel 2.0",
+  "version": "0.8.5-beta",
+  "title": "Planos & Contato",
   "added": [
-    "Planos oficiais: 30d/R$30, 45d/R$45, 60d/R$55 e 90d/R$75",
-    "/plano 1 a /plano 4 com detalhes individuais",
-    "/planos envia a arte oficial dos planos",
-    "/aluguel_parceria ID PLANO aplica automaticamente +5/+7/+10/+15 dias",
-    "Registro e renovação por ID do grupo e número do plano",
-    "Período grátis com /aluguel_teste",
-    "Avisos automáticos de vencimento em 7d, 3d, 1d, 12h e 1h",
-    "Aviso automático de expiração e bloqueio via restrição de aluguel",
-    "Lista de aluguéis com status, plano e parceria",
-    "Migração automática preservando registros antigos"
+    "Contato oficial do dono nos menus de planos",
+    "Link wa.me específico para cada plano selecionado",
+    "Mensagem de contratação preenchida automaticamente no WhatsApp",
+    "Identificação do número e nome do plano no /plano"
   ],
   "improved": [
-    "Banco de aluguel atualizado para schema 2 com escrita atômica",
-    "Runtime de aluguel independente e persistente",
-    "Compatibilidade com aluguéis antigos do Kobayashi"
+    "/planos agora mostra o contato oficial https://wa.me/5515997075304",
+    "/plano 1 a /plano 4 direcionam diretamente para o dono com o plano escolhido"
   ],
-  "reference": "Fluxo central de aluguel/ativação inspirado no HutaoBot V10 e refeito para o Kobayashi."
+  "base": "Mantém integralmente o sistema Aluguel 2.0 da v0.8.4"
 }
