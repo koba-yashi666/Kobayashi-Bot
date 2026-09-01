@@ -42,7 +42,7 @@ import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSent
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/dragonSocial.js";
 import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
 
-import { buildAdminCenter, buildGroupStatus } from "./lib/ui/adminCenter.js";
+import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsPanel, buildPermissionDiagnostic } from "./lib/ui/adminCenter.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs } from "./lib/features/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
@@ -5835,7 +5835,73 @@ case "centraladm": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   reagir("🛡️");
-  return reply(buildAdminCenter(prefix));
+  const interactiveButtons = [{
+    name: "single_select",
+    buttonParamsJson: JSON.stringify({
+      title: "🛡️ Abrir Admin Center",
+      sections: [{ title: "Admin Center 2.0", rows: [
+        { header: "📊 Visão geral", title: "Status do grupo", description: "Veja os sistemas e proteções ativas", id: `${prefix}statusgrupo` },
+        { header: "🛡️ Segurança", title: "Proteções", description: "Confira o estado das proteções", id: `${prefix}painelprotecao` },
+        { header: "⚙️ Recursos", title: "Sistemas", description: "Level, diversão, stickers e outros", id: `${prefix}painelsistemas` },
+        { header: "🩺 Diagnóstico", title: "Permissões do bot", description: "Descubra rapidamente o que pode falhar", id: `${prefix}diagpermissoes` }
+      ]}]
+    })
+  }];
+  return conn.sendMessage(from, {
+    text: buildAdminCenter(prefix),
+    footer: `Kobayashi Bot • ${getLocalVersion()}`,
+    interactiveButtons
+  }, { quoted: info });
+}
+break;
+
+case "painelprotecao":
+case "protecao": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const yuriProtection = getYuriProtection(from);
+  return reply(buildProtectionPanel({
+    prefix,
+    protections: getGroupProtection(from),
+    antiTrava: getAntiTravaConfig(from),
+    antiSpam: getAntiSpamConfig(from),
+    antiDelete: Boolean(yuriProtection?.antidel),
+    antiEdit: Boolean(yuriProtection?.antiedit),
+    sentinel: getSentinelStatus(from)
+  }));
+}
+break;
+
+case "painelsistemas":
+case "sistemasgp": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const settingsNow = readSettingsFile();
+  const whitelistNow = getWhitelist(from);
+  return reply(buildSystemsPanel({
+    levelEnabled: isLevelEnabled(from),
+    funEnabled: isFunModeEnabled(from),
+    autoStickerEnabled: isAutoStickerEnabled(from),
+    antiFarm: getAntiFarmConfig(from),
+    antiPv: Boolean(settingsNow?.antiPv),
+    whitelistCount: Array.isArray(whitelistNow) ? whitelistNow.length : 0
+  }));
+}
+break;
+
+case "diagpermissoes":
+case "permissoesbot": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  // No WhatsApp, tornar o bot ADM normalmente concede as capacidades administrativas
+  // usadas pela Kobayashi (remover membros, editar grupo e gerar/consultar convites).
+  return reply(buildPermissionDiagnostic({
+    botIsAdmin: isBotGroupAdmins,
+    userIsAdmin: isGroupAdmins,
+    canRemove: isBotGroupAdmins,
+    canEditGroup: isBotGroupAdmins,
+    canInvite: isBotGroupAdmins
+  }));
 }
 break;
 
@@ -5846,6 +5912,7 @@ case "statusgp": {
 
   const protections = getGroupProtection(from);
   const antiTrava = getAntiTravaConfig(from);
+  const antiSpam = getAntiSpamConfig(from);
   const antiFarm = getAntiFarmConfig(from);
   const yuriProtection = getYuriProtection(from);
   const sentinel = getSentinelStatus(from);
@@ -5857,6 +5924,7 @@ case "statusgp": {
     botIsAdmin: isBotGroupAdmins,
     protections,
     antiTrava,
+    antiSpam,
     antiFarm,
     levelEnabled: isLevelEnabled(from),
     funEnabled: isFunModeEnabled(from),

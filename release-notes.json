@@ -1,24 +1,25 @@
 {
-  "version": "0.7.3-beta",
-  "title": "Moderation Pro",
+  "version": "0.8.0-beta",
+  "title": "Admin Center 2.0",
   "added": [
-    "/historico, /historicomod e /punicoes — histórico por membro",
-    "/limparhistorico e /limparpunicoes — limpeza do histórico",
-    "Banco moderation-history.json separado do contador atual de ADVs",
-    "Indicador de reincidência baseado nas ocorrências dos últimos 30 dias",
-    "Registro de ADV manual/automática, ban, ban automático e lista negra"
+    "/paineladm interativo com lista de navegação administrativa",
+    "/statusgrupo com visão geral das proteções e sistemas do grupo",
+    "/painelprotecao para consultar rapidamente todas as proteções",
+    "/painelsistemas para consultar Level, diversão, AutoSticker, AntiFarm, AntiPV e whitelist",
+    "/diagpermissoes para diagnóstico rápido das permissões necessárias do bot"
   ],
   "changed": [
-    "/adv agora exige motivo",
-    "/banc agora exige motivo e mostra o motivo na confirmação",
-    "/listanegra add agora exige motivo"
+    "Admin Center reorganizado em páginas para evitar um painel gigante",
+    "/menuadm agora funciona como entrada para a central administrativa"
   ],
   "fixed": [],
-  "menus": [],
+  "menus": [
+    "Admin Center 2.0"
+  ],
   "notes": [
-    "Reincidência é informativa; não aumenta punições automaticamente",
-    "Histórico limitado a 200 registros por usuário/grupo",
+    "Os comandos do Admin Center exigem grupo e permissão de administrador",
+    "O diagnóstico sinaliza limitações quando a Kobayashi não é administradora",
     "Sem novas dependências npm"
   ],
-  "summary": "A v0.7.3 fecha a fase 0.7.x com histórico persistente e moderação rastreável."
+  "summary": "A v0.8.0 inaugura a fase 0.8.x com uma central administrativa interativa e diagnóstico rápido do grupo."
 }
