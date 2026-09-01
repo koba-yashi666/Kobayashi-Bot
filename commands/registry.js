@@ -3,6 +3,7 @@ import configBot from "./owner/configBot.js";
 import helpCommand from "./general/help.js";
 import backupCommand from "./owner/backup.js";
 import adminLogsCommand from "./admin/adminLogs.js";
+import dragonCoreCommand from "./admin/dragonCore.js";
 
 export const modularCommands = [
   configGp,
@@ -10,6 +11,7 @@ export const modularCommands = [
   helpCommand,
   backupCommand,
   adminLogsCommand,
+  dragonCoreCommand,
 ];
 
 export function findModularCommand(name) {

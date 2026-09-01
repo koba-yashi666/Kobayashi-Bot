@@ -1,30 +1,21 @@
 {
-  "version": "0.8.1-beta",
-  "title": "Logs 2.0",
+  "version": "0.8.3-beta",
+  "title": "Dragon Core Update",
   "added": [
-    "/logs com os 20 registros administrativos mais recentes do grupo",
-    "/logs @membro para filtrar ações envolvendo um usuário",
-    "/logs antilink e /logs adv para filtros rápidos por sistema",
-    "Filtros por hoje, ontem, 7d, 30d e data DD/MM/AAAA",
-    "/logs status com total e categorias armazenadas",
-    "/logs limpar 30d e /logs limpar tudo para manutenção manual",
-    "Limpeza automática de registros com mais de 90 dias"
+    "Agendamento 2.0 com abrir/fechar grupo, mensagens e regras programadas",
+    "Central /dragoncore e /seguranca",
+    "Fuso horário configurável por grupo",
+    "Backup administrativo automático diário e manual",
+    "Migração do banco Dragon Core e escrita atômica",
+    "Proteção de runtime contra promises e exceções não tratadas",
+    "Diagnóstico rápido do estado de segurança"
   ],
-  "changed": [
-    "Admin Center 2.0 agora possui acesso direto aos Logs 2.0",
-    "Persistência de admin logs usa escrita temporária e rename para reduzir risco de JSON corrompido",
-    "Banco de logs mantém compatibilidade com formato antigo por grupo"
+  "improved": [
+    "Integração com AntiSpam, AntiTrava, AntiFake e auditoria existentes",
+    "Agendamentos persistem após reinicialização",
+    "Mantidos apenas os 7 backups administrativos mais recentes"
   ],
-  "fixed": [],
-  "menus": [
-    "Admin Center 2.0",
-    "Menu ADM"
-  ],
-  "notes": [
-    "Os comandos de logs exigem grupo e permissão de administrador",
-    "O banco files/database/admin-logs.json não é incluído no ZIP e portanto não sobrescreve os dados do usuário",
-    "A retenção automática padrão é de 90 dias",
-    "Sem novas dependências npm"
-  ],
-  "summary": "A v0.8.1 adiciona Logs 2.0 com auditoria administrativa, filtros por membro/tipo/data e manutenção automática do histórico."
+  "excluded": [
+    "Aluguel 2.0 ficou reservado para a v0.8.4"
+  ]
 }

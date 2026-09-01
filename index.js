@@ -43,6 +43,7 @@ import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, g
 import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
 
 import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsPanel, buildPermissionDiagnostic } from "./lib/ui/adminCenter.js";
+import { ensureDragonCoreRuntime } from "./lib/features/dragonCore.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs } from "./lib/features/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
@@ -566,6 +567,7 @@ async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageTex
 
 export default async function start(upsert, conn) {
 try {
+ensureDragonCoreRuntime(conn);
 for (const info of upsert?.messages || []) {
 // 🛰️ Kobayashi Sentinel: registra até eventos sem conteúdo.
 // Isso permite comparar o que a conta ADM recebeu com o que a conta membro recebeu.

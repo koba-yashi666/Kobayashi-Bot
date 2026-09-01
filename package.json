@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.8.1-beta",
-  "description": "Kobayashi Bot Beta v0.8.1 - Logs 2.0",
+  "version": "0.8.3-beta",
+  "description": "Kobayashi Bot Beta v0.8.3 - Dragon Core Update",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
