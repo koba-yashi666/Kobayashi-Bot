@@ -1,15 +1,15 @@
 {
-  "version": "1.0.2",
-  "title": "Lista Negra Global",
-  "added": [
-    "/listanegrag para gerenciar usuários bloqueados globalmente",
-    "Adicionar, remover, listar e consultar registros",
-    "Bloqueio válido em todos os grupos e no privado",
-    "Persistência em files/database/lista-negra-global.json",
-    "Aliases /blacklistg e /listanegraglobal"
+  "version": "1.0.4",
+  "title": "Lista Negra Global Simplificada",
+  "changed": [
+    "/listanegrag agora recebe apenas o número",
+    "/rmlistanegrag remove um número da lista negra global",
+    "Aceita número formatado com +, espaços e hífen",
+    "Sem argumentos, /listanegrag continua exibindo a lista"
   ],
-  "security": [
-    "Somente o dono principal pode alterar a lista",
-    "Dono principal possui bypass e não pode ser bloqueado"
-  ]
+  "examples": [
+    "/listanegrag +55 21 98093-7319",
+    "/rmlistanegrag +55 21 98093-7319"
+  ],
+  "database": "Nenhum arquivo de files/database é incluído ou apagado."
 }

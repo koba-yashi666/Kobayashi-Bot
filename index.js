@@ -1737,42 +1737,24 @@ case "listanegraglobal": {
     return reply("👑 Apenas o dono principal pode gerenciar a lista negra global.");
   }
 
-  const action = String(args[0] || "").toLowerCase().trim();
-  const context =
-    info.message?.extendedTextMessage?.contextInfo ||
-    info.message?.imageMessage?.contextInfo ||
-    info.message?.videoMessage?.contextInfo ||
-    {};
-
-  const mentioned = context.mentionedJid?.[0] || null;
-  const quoted = context.participant || context.participantAlt || null;
-
-  const rawTarget =
-    mentioned ||
-    quoted ||
-    (action && !["add", "adicionar", "del", "remover", "rm", "info", "ver", "list", "lista"].includes(action)
-      ? args[0]
-      : args[1]);
-
-  const target = normalizeBlacklistJid(rawTarget);
-
-  if (!action || action === "list" || action === "lista") {
+  // Sem número: lista os usuários atualmente bloqueados.
+  if (!args.length) {
     const entries = listGlobalBlacklist();
+
     if (!entries.length) {
       return reply(
         `╭━━〔 🖤 *LISTA NEGRA GLOBAL* 〕━━╮\n` +
         `┃ 📦 Total: *0*\n` +
         `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
         `Nenhum usuário está bloqueado globalmente.\n\n` +
-        `➕ *${prefix}listanegrag add @membro motivo*\n` +
-        `➖ *${prefix}listanegrag del @membro*\n` +
-        `🔎 *${prefix}listanegrag info @membro*`
+        `➕ *${prefix}listanegrag +55 21 98093-7319*\n` +
+        `➖ *${prefix}rmlistanegrag +55 21 98093-7319*`
       );
     }
 
     const lines = entries.slice(0, 100).map((entry, i) =>
-      `${i + 1}. @${entry.jid.split("@")[0]}\n   📝 ${entry.reason || "Sem motivo"}`
-    ).join("\n\n");
+      `${i + 1}. @${entry.jid.split("@")[0]}`
+    ).join("\n");
 
     return conn.sendMessage(from, {
       text:
@@ -1783,68 +1765,76 @@ case "listanegraglobal": {
     }, { quoted: info });
   }
 
-  if (["add", "adicionar"].includes(action)) {
-    if (!target) return reply(`Use: *${prefix}listanegrag add @membro motivo*`);
-    if (target === dono || isMainOwnerJid(target)) {
-      return reply("🛡️ O dono principal não pode ser colocado na lista negra global.");
-    }
+  // Junta todos os argumentos para aceitar:
+  // /listanegrag +55 21 98093-7319
+  const rawNumber = args.join(" ");
+  const target = normalizeBlacklistJid(rawNumber);
 
-    const reasonStart = mentioned || quoted ? 1 : 2;
-    const reason = args.slice(reasonStart).join(" ").trim() || "Sem motivo informado";
-    const entry = addGlobalBlacklist(target, { reason, by: sender });
+  if (!target) {
+    return reply(
+      `❌ Número inválido.\n\n` +
+      `Use: *${prefix}listanegrag +55 21 98093-7319*`
+    );
+  }
 
+  if (target === dono || isMainOwnerJid(target)) {
+    return reply("🛡️ O dono principal não pode ser colocado na lista negra global.");
+  }
+
+  const existing = getGlobalBlacklistEntry(target);
+  if (existing) {
     return conn.sendMessage(from, {
-      text:
-        `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
-        `👤 @${target.split("@")[0]} foi adicionado.\n` +
-        `📝 Motivo: *${entry.reason}*\n\n` +
-        `🚫 A Kobayashi passará a ignorar esse usuário em todos os grupos e no PV.`,
+      text: `ℹ️ @${target.split("@")[0]} já está na lista negra global.`,
       mentions: [target]
     }, { quoted: info });
   }
 
-  if (["del", "remover", "rm"].includes(action)) {
-    if (!target) return reply(`Use: *${prefix}listanegrag del @membro*`);
-    const removed = removeGlobalBlacklist(target);
-    return conn.sendMessage(from, {
-      text: removed
-        ? `✅ @${target.split("@")[0]} foi removido da lista negra global.`
-        : `ℹ️ @${target.split("@")[0]} não estava na lista negra global.`,
-      mentions: [target]
-    }, { quoted: info });
+  addGlobalBlacklist(target, {
+    reason: "Adicionado manualmente pelo dono",
+    by: sender
+  });
+
+  return conn.sendMessage(from, {
+    text:
+      `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
+      `👤 @${target.split("@")[0]} foi adicionado.\n` +
+      `🚫 A Kobayashi passará a ignorar esse número em todos os grupos e no PV.`,
+    mentions: [target]
+  }, { quoted: info });
+}
+break;
+
+case "rmlistanegrag":
+case "rmblacklistg":
+case "removerlistanegrag": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o dono principal pode gerenciar a lista negra global.");
   }
 
-  if (["info", "ver"].includes(action)) {
-    if (!target) return reply(`Use: *${prefix}listanegrag info @membro*`);
-    const entry = getGlobalBlacklistEntry(target);
-    if (!entry) {
-      return conn.sendMessage(from, {
-        text: `✅ @${target.split("@")[0]} não está na lista negra global.`,
-        mentions: [target]
-      }, { quoted: info });
-    }
-
-    const addedAt = entry.addedAt
-      ? new Date(entry.addedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
-      : "Não informado";
-
-    return conn.sendMessage(from, {
-      text:
-        `🖤🌐 *REGISTRO GLOBAL*\n\n` +
-        `👤 Usuário: @${target.split("@")[0]}\n` +
-        `📝 Motivo: *${entry.reason || "Sem motivo"}*\n` +
-        `📅 Adicionado: *${addedAt}*`,
-      mentions: [target]
-    }, { quoted: info });
+  if (!args.length) {
+    return reply(
+      `Use: *${prefix}rmlistanegrag +55 21 98093-7319*`
+    );
   }
 
-  return reply(
-    `🖤 *LISTA NEGRA GLOBAL*\n\n` +
-    `➕ ${prefix}listanegrag add @membro motivo\n` +
-    `➖ ${prefix}listanegrag del @membro\n` +
-    `🔎 ${prefix}listanegrag info @membro\n` +
-    `📋 ${prefix}listanegrag`
-  );
+  const rawNumber = args.join(" ");
+  const target = normalizeBlacklistJid(rawNumber);
+
+  if (!target) {
+    return reply(
+      `❌ Número inválido.\n\n` +
+      `Use: *${prefix}rmlistanegrag +55 21 98093-7319*`
+    );
+  }
+
+  const removed = removeGlobalBlacklist(target);
+
+  return conn.sendMessage(from, {
+    text: removed
+      ? `✅ @${target.split("@")[0]} foi removido da lista negra global.`
+      : `ℹ️ @${target.split("@")[0]} não estava na lista negra global.`,
+    mentions: [target]
+  }, { quoted: info });
 }
 break;
 
@@ -6414,7 +6404,8 @@ reagir("👑");
 reply(
   linguagem.menuOwner(prefix) +
   `\n\n╭─〔 🖤 *SEGURANÇA GLOBAL* 〕\n` +
-  `│ ${prefix}listanegrag\n` +
+  `│ ${prefix}listanegrag +55...\n` +
+  `│ ${prefix}rmlistanegrag +55...\n` +
   `│ └ Lista negra global do bot\n` +
   `╰────────────────\n` +
   `\n╭─〔 🛰️ *KOBAYASHI SENTINEL* 〕\n` +
