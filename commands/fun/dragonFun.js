@@ -7,6 +7,7 @@ import {
   proposeMarriage, acceptMarriage, marriageOf, divorce, familyAction, getFamily,
   getUser, shop, buy, inventory, simpleRpgAction
 } from "../../lib/features/social/dragonFunV09.js";
+import { isRpgEnabled, setRpgEnabled } from "../../lib/features/social/rpgSettings.js";
 
 const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
@@ -118,7 +119,27 @@ export default {
  async execute(ctx){
   const c=String(ctx.command||"").toLowerCase(); const n=c.normalize("NFD").replace(/[\u0300-\u036f]/g,""); const target=targetOf(ctx)||ctx.sender; const mentions=target?[target]:[];
   if(["dragonfun","menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games"].includes(n)) return ctx.reply(menu(ctx.prefix));
-  if(["menurpg","rpg"].includes(n)) return ctx.reply(rpgMenu(ctx.prefix));
+
+  const rpgEnabled = !ctx.isGroup || isRpgEnabled(ctx.from);
+
+  if(n === "rpg" && ["on","off"].includes(String(ctx.args?.[0] || "").toLowerCase())){
+    if(!ctx.isGroup) return ctx.reply("🐉 O controle do RPG é configurado por grupo.");
+    if(!ctx.permissions?.isAdmin) return ctx.reply("🛡️ Apenas administradores podem ativar ou desativar o modo RPG.");
+    const enabled = String(ctx.args[0]).toLowerCase() === "on";
+    setRpgEnabled(ctx.from, enabled, ctx.sender);
+    return ctx.reply(enabled
+      ? "🐉⚔️ *Modo RPG ativado neste grupo!*\nOs comandos do Dragon RPG voltaram a funcionar."
+      : `🐉💤 *Modo RPG desativado neste grupo!*\nOs comandos do Dragon RPG ficarão bloqueados até um ADM usar *${ctx.prefix}rpg on*.`);
+  }
+
+  if(["menurpg","rpg"].includes(n)){
+    if(!rpgEnabled) return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n\n🛡️ ADM: use *${ctx.prefix}rpg on* para ativar.`);
+    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}rpg off* para desativar neste grupo.`);
+  }
+
+  if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled){
+    return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n🛡️ Um ADM pode ativar com *${ctx.prefix}rpg on*.`);
+  }
   if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
   if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
   if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`Marque alguém ou responda a mensagem da pessoa. Ex.: *${ctx.prefix}${c} @alguém*`);const phrases={beijo:"deu um beijo em",beijar:"deu um beijo em",abraco:"deu um abraço em",abracar:"deu um abraço em",tapa:"deu um tapa em",tapar:"deu um tapa em",chute:"deu um chute em",chutar:"deu um chute em",carinho:"fez carinho em",cafune:"fez cafuné em",matar:"eliminou dramaticamente",comer:"foi comer com",louca:"mandou lavar a louça com",lamber:"deu uma lambida em",morder:"mordeu",socar:"deu um soco de brincadeira em",soco:"deu um soco de brincadeira em"}; const cap=`💞 ${tag(ctx.sender)} ${phrases[n]||"interagiu com"} ${tag(target)}!`;return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}

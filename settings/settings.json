@@ -6,7 +6,7 @@
   "channeldl": "",
   "channel": "",
   "newsletterName": "🐉🌸 Kobayashi Bot • Canal Oficial",
-  "version": "0.1.52-beta",
+  "version": "0.1.4-beta",
   "theme": "🐉🌸 Kobayashi Bot",
   "creatorName": "✧༒☬ƙσႦαყαʂԋι☬༒✧",
   "leaders": [
@@ -16,5 +16,6 @@
     "",
     ""
   ],
-  "yutaToken": "yuta_7dae08e64e1f24c09c6c11f0e1d8de8e22a3331c2d96d592"
+  "yutaToken": "yuta_7dae08e64e1f24c09c6c11f0e1d8de8e22a3331c2d96d592",
+  "antiPv": true
 }

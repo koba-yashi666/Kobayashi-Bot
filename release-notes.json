@@ -1,10 +1,10 @@
 {
-  "version": "1.0.6",
-  "title": "Credits Cleanup",
-  "changed": [
-    "Removidas referências textuais incorretas solicitadas pelo criador do projeto",
-    "Mantidas todas as funções e correções cumulativas até a v1.0.5",
-    "Mantida a Lista Negra Global simplificada"
+  "version": "1.0.8",
+  "title": "RPG On/Off por Grupo",
+  "added": [
+    "/rpg off (ADM)",
+    "/rpg on (ADM)",
+    "Estado independente por grupo"
   ],
-  "database": "Nenhum arquivo de files/database é incluído ou alterado."
+  "database": "files/database não é incluído no ZIP."
 }

@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.6",
-  "description": "Kobayashi Bot v1.0.6 Stable - Credits Cleanup",
+  "version": "1.0.8",
+  "description": "Kobayashi Bot v1.0.7 Stable - Import Guard + Full Architecture Fix",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
@@ -10,7 +10,9 @@
   "scripts": {
     "start": "bash start.sh",
     "dev": "node --watch connection.js",
-    "direct": "node bootstrap.js"
+    "direct": "node bootstrap.js",
+    "check:imports": "node tools/check-local-imports.mjs",
+    "prestart": "npm run check:imports"
   },
   "keywords": [
     "whatsapp",
