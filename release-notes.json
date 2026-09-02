@@ -1,10 +1,9 @@
 {
-  "version": "1.0.8",
-  "title": "RPG On/Off por Grupo",
-  "added": [
-    "/rpg off (ADM)",
-    "/rpg on (ADM)",
-    "Estado independente por grupo"
+  "version": "1.0.9",
+  "title": "Modo RPG",
+  "changed": [
+    "Controle do RPG agora usa /modorpg on e /modorpg off",
+    "/rpg continua reservado para abrir o menu RPG"
   ],
-  "database": "files/database não é incluído no ZIP."
+  "database": "Nenhum banco de dados é incluído no ZIP."
 }

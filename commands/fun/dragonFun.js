@@ -122,7 +122,7 @@ export default {
 
   const rpgEnabled = !ctx.isGroup || isRpgEnabled(ctx.from);
 
-  if(n === "rpg" && ["on","off"].includes(String(ctx.args?.[0] || "").toLowerCase())){
+  if(n === "modorpg" && ["on","off"].includes(String(ctx.args?.[0] || "").toLowerCase())){
     if(!ctx.isGroup) return ctx.reply("🐉 O controle do RPG é configurado por grupo.");
     if(!ctx.permissions?.isAdmin) return ctx.reply("🛡️ Apenas administradores podem ativar ou desativar o modo RPG.");
     const enabled = String(ctx.args[0]).toLowerCase() === "on";
@@ -130,6 +130,10 @@ export default {
     return ctx.reply(enabled
       ? "🐉⚔️ *Modo RPG ativado neste grupo!*\nOs comandos do Dragon RPG voltaram a funcionar."
       : `🐉💤 *Modo RPG desativado neste grupo!*\nOs comandos do Dragon RPG ficarão bloqueados até um ADM usar *${ctx.prefix}rpg on*.`);
+  }
+
+  if(n === "modorpg"){
+    return ctx.reply(`🐉 *Modo RPG*\n\nUse *${ctx.prefix}modorpg on* para ativar.\nUse *${ctx.prefix}modorpg off* para desativar.\n\n🛡️ Apenas administradores podem alterar.`);
   }
 
   if(["menurpg","rpg"].includes(n)){

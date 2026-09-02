@@ -1,6 +1,6 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Kobayashi Bot v1.0.7 Stable - Import Guard + Full Architecture Fix",
   "main": "bootstrap.js",
   "type": "module",
