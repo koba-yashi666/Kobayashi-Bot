@@ -38,6 +38,7 @@ import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamS
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickers/stickerSources.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
+import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/social/dragonSocial.js";
 import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
@@ -685,6 +686,13 @@ const SoDonoPrincipal = sender === dono || isMainOwnerJid(sender);
 const SoLider = isLeaderJid(sender);
 const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
+
+// 🖤 LISTA NEGRA GLOBAL v1.0.2
+// Usuários cadastrados aqui são ignorados pelo bot em qualquer grupo/PV.
+// O dono principal sempre possui bypass para evitar lockout administrativo.
+if (!SoDonoPrincipal && sender && isGloballyBlacklisted(sender)) {
+  continue;
+}
 
 // 🐉 UPDATE NEWS v0.3.6
 // Após um /update, a notícia fica pendente em disco. Na primeira atividade
@@ -1721,6 +1729,124 @@ case "alugel_permanente": {
 }
 break;
 
+
+case "listanegrag":
+case "blacklistg":
+case "listanegraglobal": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o dono principal pode gerenciar a lista negra global.");
+  }
+
+  const action = String(args[0] || "").toLowerCase().trim();
+  const context =
+    info.message?.extendedTextMessage?.contextInfo ||
+    info.message?.imageMessage?.contextInfo ||
+    info.message?.videoMessage?.contextInfo ||
+    {};
+
+  const mentioned = context.mentionedJid?.[0] || null;
+  const quoted = context.participant || context.participantAlt || null;
+
+  const rawTarget =
+    mentioned ||
+    quoted ||
+    (action && !["add", "adicionar", "del", "remover", "rm", "info", "ver", "list", "lista"].includes(action)
+      ? args[0]
+      : args[1]);
+
+  const target = normalizeBlacklistJid(rawTarget);
+
+  if (!action || action === "list" || action === "lista") {
+    const entries = listGlobalBlacklist();
+    if (!entries.length) {
+      return reply(
+        `╭━━〔 🖤 *LISTA NEGRA GLOBAL* 〕━━╮\n` +
+        `┃ 📦 Total: *0*\n` +
+        `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+        `Nenhum usuário está bloqueado globalmente.\n\n` +
+        `➕ *${prefix}listanegrag add @membro motivo*\n` +
+        `➖ *${prefix}listanegrag del @membro*\n` +
+        `🔎 *${prefix}listanegrag info @membro*`
+      );
+    }
+
+    const lines = entries.slice(0, 100).map((entry, i) =>
+      `${i + 1}. @${entry.jid.split("@")[0]}\n   📝 ${entry.reason || "Sem motivo"}`
+    ).join("\n\n");
+
+    return conn.sendMessage(from, {
+      text:
+        `╭━━〔 🖤 *LISTA NEGRA GLOBAL* 〕━━╮\n` +
+        `┃ 📦 Total: *${entries.length}*\n` +
+        `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n${lines}`,
+      mentions: entries.slice(0, 100).map((entry) => entry.jid)
+    }, { quoted: info });
+  }
+
+  if (["add", "adicionar"].includes(action)) {
+    if (!target) return reply(`Use: *${prefix}listanegrag add @membro motivo*`);
+    if (target === dono || isMainOwnerJid(target)) {
+      return reply("🛡️ O dono principal não pode ser colocado na lista negra global.");
+    }
+
+    const reasonStart = mentioned || quoted ? 1 : 2;
+    const reason = args.slice(reasonStart).join(" ").trim() || "Sem motivo informado";
+    const entry = addGlobalBlacklist(target, { reason, by: sender });
+
+    return conn.sendMessage(from, {
+      text:
+        `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
+        `👤 @${target.split("@")[0]} foi adicionado.\n` +
+        `📝 Motivo: *${entry.reason}*\n\n` +
+        `🚫 A Kobayashi passará a ignorar esse usuário em todos os grupos e no PV.`,
+      mentions: [target]
+    }, { quoted: info });
+  }
+
+  if (["del", "remover", "rm"].includes(action)) {
+    if (!target) return reply(`Use: *${prefix}listanegrag del @membro*`);
+    const removed = removeGlobalBlacklist(target);
+    return conn.sendMessage(from, {
+      text: removed
+        ? `✅ @${target.split("@")[0]} foi removido da lista negra global.`
+        : `ℹ️ @${target.split("@")[0]} não estava na lista negra global.`,
+      mentions: [target]
+    }, { quoted: info });
+  }
+
+  if (["info", "ver"].includes(action)) {
+    if (!target) return reply(`Use: *${prefix}listanegrag info @membro*`);
+    const entry = getGlobalBlacklistEntry(target);
+    if (!entry) {
+      return conn.sendMessage(from, {
+        text: `✅ @${target.split("@")[0]} não está na lista negra global.`,
+        mentions: [target]
+      }, { quoted: info });
+    }
+
+    const addedAt = entry.addedAt
+      ? new Date(entry.addedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+      : "Não informado";
+
+    return conn.sendMessage(from, {
+      text:
+        `🖤🌐 *REGISTRO GLOBAL*\n\n` +
+        `👤 Usuário: @${target.split("@")[0]}\n` +
+        `📝 Motivo: *${entry.reason || "Sem motivo"}*\n` +
+        `📅 Adicionado: *${addedAt}*`,
+      mentions: [target]
+    }, { quoted: info });
+  }
+
+  return reply(
+    `🖤 *LISTA NEGRA GLOBAL*\n\n` +
+    `➕ ${prefix}listanegrag add @membro motivo\n` +
+    `➖ ${prefix}listanegrag del @membro\n` +
+    `🔎 ${prefix}listanegrag info @membro\n` +
+    `📋 ${prefix}listanegrag`
+  );
+}
+break;
 
 case "listabranca":
 case "whitelist": {
@@ -6287,7 +6413,11 @@ if (!SoDono) return reply(mess.onlyOwner());
 reagir("👑");
 reply(
   linguagem.menuOwner(prefix) +
-  `\n\n╭─〔 🛰️ *KOBAYASHI SENTINEL* 〕\n` +
+  `\n\n╭─〔 🖤 *SEGURANÇA GLOBAL* 〕\n` +
+  `│ ${prefix}listanegrag\n` +
+  `│ └ Lista negra global do bot\n` +
+  `╰────────────────\n` +
+  `\n╭─〔 🛰️ *KOBAYASHI SENTINEL* 〕\n` +
   `│ ${prefix}sentinel status\n` +
   `│ └ Proteção por segunda conta membro\n` +
   `╰────────────────`

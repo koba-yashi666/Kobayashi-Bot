@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.0",
-  "description": "Kobayashi Bot v1.0 Stable - Organized Architecture",
+  "version": "1.0.2",
+  "description": "Kobayashi Bot v1.0.2 Stable - Lista Negra Global",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
