@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.4",
-  "description": "Kobayashi Bot v1.0.4 Stable - Lista Negra Global Simplificada",
+  "version": "1.0.6",
+  "description": "Kobayashi Bot v1.0.6 Stable - Credits Cleanup",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

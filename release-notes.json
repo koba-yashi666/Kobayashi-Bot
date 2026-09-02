@@ -1,15 +1,10 @@
 {
-  "version": "1.0.4",
-  "title": "Lista Negra Global Simplificada",
+  "version": "1.0.6",
+  "title": "Credits Cleanup",
   "changed": [
-    "/listanegrag agora recebe apenas o número",
-    "/rmlistanegrag remove um número da lista negra global",
-    "Aceita número formatado com +, espaços e hífen",
-    "Sem argumentos, /listanegrag continua exibindo a lista"
+    "Removidas referências textuais incorretas solicitadas pelo criador do projeto",
+    "Mantidas todas as funções e correções cumulativas até a v1.0.5",
+    "Mantida a Lista Negra Global simplificada"
   ],
-  "examples": [
-    "/listanegrag +55 21 98093-7319",
-    "/rmlistanegrag +55 21 98093-7319"
-  ],
-  "database": "Nenhum arquivo de files/database é incluído ou apagado."
+  "database": "Nenhum arquivo de files/database é incluído ou alterado."
 }
