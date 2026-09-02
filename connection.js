@@ -13,8 +13,8 @@ import makeWASocket, {
 import NodeCache from "node-cache";
 import start from "./index.js";
 import { bindGroupCache, groupCache } from "./lib/groupCache.js";
-import { ensureDragonCoreRuntime } from "./lib/features/dragonCore.js";
-import { ensureRentalRuntime } from "./lib/features/rentalSystem.js";
+import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
+import { ensureRentalRuntime } from "./lib/features/rental/rentalSystem.js";
 import {
   readline,
   P,
@@ -26,7 +26,7 @@ import {
   banner2,
   banner3,
 } from "./settings/imports/consts.js";
-import { getAntiFakeConfig, checkAntiFakeParticipant } from "./lib/features/antiFake.js";
+import { getAntiFakeConfig, checkAntiFakeParticipant } from "./lib/features/moderation/antiFake.js";
 
 const AUTH_DIR = "./files/database/qr-code";
 const msgStore = new NodeCache({ stdTTL: 10 * 60, useClones: false });

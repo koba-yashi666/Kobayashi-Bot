@@ -1,12 +1,12 @@
-import { getAdminLogConfig } from "../../lib/features/adminLogs.js";
-import { getWelcomeConfig } from "../../lib/features/welcomeConfig.js";
-import { readGroupScheduleDb } from "../../lib/features/groupSchedule.js";
-import { isAutoStickerEnabled } from "../../lib/features/autoSticker.js";
-import { getWhitelist } from "../../lib/features/whitelist.js";
+import { getAdminLogConfig } from "../../lib/features/moderation/adminLogs.js";
+import { getWelcomeConfig } from "../../lib/features/group/welcomeConfig.js";
+import { readGroupScheduleDb } from "../../lib/features/group/groupSchedule.js";
+import { isAutoStickerEnabled } from "../../lib/features/group/autoSticker.js";
+import { getWhitelist } from "../../lib/features/moderation/whitelist.js";
 import {
   exportGroupConfig,
   restoreGroupConfig,
-} from "../../lib/features/groupConfigTransfer.js";
+} from "../../lib/features/group/groupConfigTransfer.js";
 
 function normalizeAction(value = "") {
   return String(value).trim().toLowerCase();

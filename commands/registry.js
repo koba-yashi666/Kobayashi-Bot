@@ -4,7 +4,7 @@ import helpCommand from "./general/help.js";
 import backupCommand from "./owner/backup.js";
 import adminLogsCommand from "./admin/adminLogs.js";
 import dragonCoreCommand from "./admin/dragonCore.js";
-import dragonFunCommand from "./general/dragonFun.js";
+import dragonFunCommand from "./fun/dragonFun.js";
 
 export const modularCommands = [
   configGp,

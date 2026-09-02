@@ -7,10 +7,10 @@ import {
   updateGroupCoreConfig,
   createCoreBackup,
   getDragonCoreStatus,
-} from "../../lib/features/dragonCore.js";
-import { getAntiSpamConfig } from "../../lib/features/antiSpam.js";
-import { getAntiTravaConfig } from "../../lib/features/antiTrava.js";
-import { getAntiFakeConfig } from "../../lib/features/antiFake.js";
+} from "../../lib/features/core/dragonCore.js";
+import { getAntiSpamConfig } from "../../lib/features/moderation/antiSpam.js";
+import { getAntiTravaConfig } from "../../lib/features/moderation/antiTrava.js";
+import { getAntiFakeConfig } from "../../lib/features/moderation/antiFake.js";
 
 function taskLabel(type) {
   return ({ open: "🟢 Abrir grupo", close: "🔒 Fechar grupo", message: "💬 Mensagem", rules: "📖 Regras" })[type] || type;

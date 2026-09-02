@@ -1,12 +1,18 @@
 {
-  "version": "0.9.1-beta",
-  "title": "MenuBN Unificado",
-  "added": [
-    "/menubn como menu principal de jogos e diversão"
+  "version": "1.0.0",
+  "title": "Kobayashi Bot v1.0 Stable — Organized Architecture",
+  "changes": [
+    "Features reorganizadas por domínio: core, moderation, group, social, stickers, rental e system",
+    "Comandos de diversão movidos para commands/fun",
+    "Assets do Dragon Fun organizados em assets/dragon_fun",
+    "Bridges de compatibilidade mantêm imports antigos funcionando",
+    "Registry atualizado para a nova estrutura",
+    "Base consolidada com atualizações até v0.9.1"
   ],
-  "improved": [
-    "/menujogos, /menudiversao e /menubrincadeiras agora apontam para o /menubn",
-    "Jogos separados por categorias dentro de um único menu",
-    "Dragon RPG permanece no /menurpg"
+  "compatibility": [
+    "Banco files/database preservado",
+    "Aliases de comandos mantidos",
+    "/menubn segue como menu unificado de jogos e diversão",
+    "/menurpg continua separado"
   ]
 }

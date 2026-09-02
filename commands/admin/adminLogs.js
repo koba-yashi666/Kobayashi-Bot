@@ -2,7 +2,7 @@ import {
   getAdminLogConfig,
   setAdminLogEnabled,
   getAdminLogs,
-} from "../../lib/features/adminLogs.js";
+} from "../../lib/features/moderation/adminLogs.js";
 
 function shortJid(jid) {
   if (!jid) return "—";

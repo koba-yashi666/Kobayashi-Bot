@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "0.9.1-beta",
-  "description": "Kobayashi Bot Beta v0.9.1 - MenuBN Unificado",
+  "version": "1.0.0",
+  "description": "Kobayashi Bot v1.0 Stable - Organized Architecture",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
