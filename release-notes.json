@@ -46,5 +46,14 @@
       "Mensagem personalizada com alvo, administrador e motivo.",
       "KobaBan registrado no histórico de punições e logs administrativos."
     ]
+  },
+  "v1.0.17": {
+    "version": "1.0.17",
+    "title": "KobaBan GIF",
+    "changes": [
+      "Adicionada animação personalizada enviada pelo criador ao /KobaBan.",
+      "Sequência do KobaBan: animação, mensagem personalizada e remoção.",
+      "A mídia fica embutida no pacote para funcionar também na hospedagem."
+    ]
   }
 }
