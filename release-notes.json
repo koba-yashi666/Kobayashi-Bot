@@ -1,22 +1,23 @@
 {
   "version": "1.0.12",
-  "title": "Menu Sakura Refresh + HelpCMD",
+  "title": "Kobayashi Sakura Dragon Menu + HelpCMD",
   "date": "2026-09-03",
   "added": [
     "/helpcmd comando",
-    "Novo tema visual leve para menus",
-    "Central Essencial",
-    "Central de Administração",
-    "Atelier de Figurinhas",
-    "Trilha de Níveis",
+    "Tema visual Sakura Dragon exclusivo da Kobayashi",
+    "Jardim Essencial",
+    "Santuário ADM",
+    "Ateliê de Escamas",
+    "Ascensão Dragon",
     "Reino Dragon Social",
-    "Empório Dragon",
-    "Salão de Brincadeiras",
-    "Câmara do Dono"
+    "Mercado das Escamas",
+    "Salão da Kanna",
+    "Câmara da Kobayashi"
   ],
   "changed": [
-    "Menu principal ficou mais simples",
-    "Submenus exibem somente comandos",
-    "Nomes dos menus foram modernizados"
+    "Menu principal redesenhado com molduras florais e identidade Kobayashi",
+    "Submenus mostram somente os comandos, sem descrições ao lado",
+    "HelpCMD recebeu o mesmo tema visual dos menus",
+    "Categorias ganharam nomes próprios mantendo os comandos originais"
   ]
 }

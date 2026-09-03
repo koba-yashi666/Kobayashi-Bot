@@ -1,21 +1,27 @@
-KOBAYASHI BOT v1.0.12 — MENU SAKURA REFRESH + HELPCMD
+KOBAYASHI BOT v1.0.12 — SAKURA DRAGON MENUS + HELPCMD
+========================================================
 
-NOVIDADES
-- Menu principal simplificado com acesso direto às centrais principais.
-- Novos nomes visuais para cada menu, mantendo leitura simples no WhatsApp.
-- Submenus agora mostram apenas comandos, sem explicações linha por linha.
-- /helpcmd comando: a Kobayashi explica a função do comando selecionado.
-  Exemplo: /helpcmd play
-- Atualizados: Menu Geral, ADM, Figurinhas, Level, Dragon Social, Loja, Brincadeiras e Dono.
-- Decoração baseada em linhas/caixas Unicode leves para boa compatibilidade em Android/WhatsApp.
+Atualização visual dos menus da Kobayashi Bot.
 
-REFERÊNCIAS DE DESIGN
-- Pack de decoração enviado pelo usuário (créditos originais preservados no pacote-fonte: @Wszin7x e Pedrozz_Mods).
-- Referências públicas de menus Baileys pesquisadas em 03/09/2026: organização por seções, títulos curtos e ícones por categoria.
+PRINCIPAIS ALTERAÇÕES
+- Menu principal redesenhado com identidade Sakura Dragon.
+- Molduras florais inspiradas no estilo decorativo enviado, sem copiar o layout original.
+- Menu principal continua simples, exibindo apenas os portais principais.
+- Submenus exibem somente os comandos, sem explicações ao lado.
+- Novos nomes visuais das categorias:
+  • Jardim Essencial
+  • Santuário ADM
+  • Ateliê de Escamas
+  • Ascensão Dragon
+  • Reino Dragon Social
+  • Mercado das Escamas
+  • Salão da Kanna
+  • Câmara da Kobayashi
+- /helpcmd comando mantém as explicações fora dos menus.
+- /helpcmd também recebeu o novo tema visual.
+- Saudação e horário usam o fuso America/Sao_Paulo.
 
-INSTALAÇÃO SOBRE A v1.0.11
-cd ~/Kobayashi-Bot
-unzip -o /sdcard/Download/Kobayashi-Bot-v1.0.12-Menu-Sakura-HelpCMD.zip -d ~/Kobayashi-Bot
-npm install
+EXEMPLO
+/helpcmd play
 
-Observação: este ZIP continua a partir exatamente do pacote v1.0.11 fornecido, preservando a estrutura enxuta dele.
+O comando /play serve para buscar e baixar músicas usando o nome ou um link do YouTube.

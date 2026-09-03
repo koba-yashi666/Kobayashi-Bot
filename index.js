@@ -3009,26 +3009,29 @@ case "ajudacmd": {
   const selected = String(args?.[0] || q || "").trim();
   if (!selected) {
     return reply(
-      `╭━━〔 🔎 *HELP CMD* 〕━━╮\n` +
-      `┃ Use: *${prefix}helpcmd comando*\n` +
-      `┃ Ex.: *${prefix}helpcmd play*\n` +
-      `╰━━━━━━━━━━━━━━━━━━━━╯`
+      `┏╾❀╼━━〔 🔎 *𝑯𝑬𝑳𝑷 𝑪𝑴𝑫* 🔎 〕━━╾❀╼┓\n` +
+      `┃╎ ୨୧ *${prefix}helpcmd comando*\n` +
+      `┃╎ ୨୧ Ex.: *${prefix}helpcmd play*\n` +
+      `┗╾🌸╼━━━━━━━━━━━━━━━━╾🌸╼┛`
     );
   }
 
   const help = getCommandHelp(selected, prefix);
   if (!help?.found) {
     return reply(
-      `🌸 Não encontrei uma ajuda detalhada para *${selected.replace(/^[/!+.#-]+/, "")}*.\n\n` +
-      `Tente o nome principal do comando, por exemplo: *${prefix}helpcmd play*.`
+      `╭╾ׁ═╼･ﾟ♡ﾟ･｡🔎｡･ﾟ♡ﾟ･╾ׁ═╼╮\n` +
+      `┃ ୨୧ Não encontrei ajuda para *${selected.replace(/^[/!+.#-]+/, "")}*\n` +
+      `┃ ୨୧ Tente: *${prefix}helpcmd play*\n` +
+      `╰╾ׁ═╼･ﾟ♡ﾟ･｡🌸｡･ﾟ♡ﾟ･╾ׁ═╼╯`
     );
   }
 
   return reply(
-    `╭━━〔 🔎 *AJUDA DE COMANDO* 〕━━╮\n` +
-    `┃ 🐉 *${prefix}${help.command}*\n` +
-    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-    `🌸 O comando *${prefix}${help.command}* ${help.description}`
+    `┏╾❀╼━━〔 🔎 *𝑨𝑱𝑼𝑫𝑨 𝑫𝑨 𝑲𝑶𝑩𝑨𝒀𝑨𝑺𝑯𝑰* 〕━━╾❀╼┓\n` +
+    `┃╎ ୨୧ 🐉 *${prefix}${help.command}*\n` +
+    `┃╎\n` +
+    `┃╎ 🌸 O comando *${prefix}${help.command}* ${help.description}\n` +
+    `┗╾🌸╼━━━━━━━━━━━━━━━━━━━━╾🌸╼┛`
   );
 }
 break;
