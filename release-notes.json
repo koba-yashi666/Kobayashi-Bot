@@ -37,5 +37,14 @@
       "Fallback de version.json via jsDelivr.",
       "Suporte opcional a GITHUB_TOKEN/KOBAYASHI_GITHUB_TOKEN."
     ]
+  },
+  "v1.0.16": {
+    "version": "1.0.16",
+    "title": "KobaBan Personalizado",
+    "changes": [
+      "Novo /KobaBan exclusivo da Kobayashi.",
+      "Mensagem personalizada com alvo, administrador e motivo.",
+      "KobaBan registrado no histórico de punições e logs administrativos."
+    ]
   }
 }

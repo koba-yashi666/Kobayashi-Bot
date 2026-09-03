@@ -4549,6 +4549,66 @@ case "s": {
 }
 break;
 
+case "koban":
+case "kobaban": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
+
+  const target = getTargetFromMessage(info, menc_os2);
+  if (!target || target === from) return reply(`🐉 Marque o membro ou responda à mensagem dele.\nExemplo: *${prefix}KobaBan @membro spam*`);
+  if (target === botNumber) return reply("🌸 A Kobayashi não pode expulsar a si mesma.");
+  if (target === dono) return reply("👑 O criador da Kobayashi está protegido.");
+
+  const reason = args.filter((arg) => !arg.startsWith("@")).join(" ").trim() || "Não informado";
+  const targetNumber = target.split("@")[0];
+  const adminNumber = sender.split("@")[0];
+
+  const kobaBanText =
+`┏╾ׁ═╼°❀•°: | ⊱🐉⊰ | :°•❀°╾ׁ═╼┓
+┃       *KOBAYASHI BAN* 🌸
+┗╾ׁ═╼°❀•°: | ⊱🔥⊰ | :°•❀°╾ׁ═╼┛
+╎
+┃ 🐉 *A Kobayashi tomou uma decisão.*
+┃
+┃ 👤 Alvo: @${targetNumber}
+┃ 🛡️ ADM: @${adminNumber}
+┃ 📜 Motivo: *${reason}*
+┃
+┃ 🌸 _As portas do Reino Dragon se fecharam para você._
+┃ 🔥 *Que as chamas da Kobayashi marquem sua saída.*
+╎
+┗━━━〔 🐲 KOBAYASHI BOT 🐲 〕━━━┛`;
+
+  try {
+    // Envia a despedida antes da remoção para manter a menção visível no grupo.
+    await conn.sendMessage(from, {
+      text: kobaBanText,
+      mentions: [target, sender]
+    }, { quoted: info });
+
+    await conn.groupParticipantsUpdate(from, [target], "remove");
+
+    addPunishmentHistory(from, target, {
+      type: "kobaban",
+      reason,
+      by: sender,
+      source: "manual"
+    });
+
+    addAdminLog(from, {
+      type: "kobaban",
+      actor: sender,
+      target,
+      detail: `KobaBan executado • ${reason}`,
+    });
+  } catch (e) {
+    console.error("Erro no KobaBan:", e);
+    return reply("❌🐉 A Kobayashi tentou executar o ban, mas o WhatsApp recusou a remoção.");
+  }
+}
+break;
+
 case "ban":
 case "b":
 case "banc": {
