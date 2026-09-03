@@ -19,5 +19,13 @@
     "Submenus mostram somente os comandos, sem descrições ao lado",
     "HelpCMD recebeu o mesmo tema visual dos menus",
     "Categorias ganharam nomes próprios mantendo os comandos originais"
-  ]
+  ],
+  "v1.0.14": {
+    "version": "1.0.14",
+    "title": "Dragon Game Menu",
+    "changes": [
+      "Novo visual do menu de jogos inspirado no modelo enviado, com identidade Kobayashi.",
+      "/menubn e aliases de jogos unificados no novo menu."
+    ]
+  }
 }

@@ -8,6 +8,7 @@ import {
   getUser, shop, buy, inventory, simpleRpgAction
 } from "../../lib/features/social/dragonFunV09.js";
 import { isRpgEnabled, setRpgEnabled } from "../../lib/features/social/rpgSettings.js";
+import { buildFunMenu } from "../../lib/ui/menuTheme.js";
 
 const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
@@ -25,93 +26,7 @@ function targetOf(ctx){const c=ctxInfo(ctx.info);return c?.mentionedJid?.[0]||c?
 function tag(jid){return jid?`@${String(jid).split("@")[0]}`:"alguém";}
 function ms(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return `${h}h ${m}m`;}
 async function sendMedia(ctx,url,caption,mentions=[]){ if(!url)return ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info}); try{const isVideo=/\.(mp4|gif)(?:$|\?)/i.test(url); await ctx.conn.sendMessage(ctx.from,isVideo?{video:{url},gifPlayback:true,caption,mentions}:{image:{url},caption,mentions},{quoted:ctx.info});}catch{await ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info});}}
-function menu(p){return `╭══════ ❀ 🐉 ❀ ══════╮
-      *MENUBN • v0.9.1*
-   🎮 Jogos & Diversão 🎲
-╰══════ ❀ 🌸 ❀ ══════╯
-
-🧠 *PALAVRAS & PERGUNTAS*
-${p}forca [letra/palavra]
-${p}anagrama [resposta]
-${p}quiz [resposta]
-${p}enigma [resposta]
-${p}wordle [palavra]
-${p}cacapalavras
-${p}quiz_animais
-${p}gartic
-
-🎮 *JOGOS CLÁSSICOS*
-${p}ppt pedra/papel/tesoura
-${p}jogodavelha
-${p}connect4
-${p}uno
-${p}stop
-${p}batalhanaval
-${p}duelo
-${p}dueloquiz
-${p}jogov
-${p}vord
-${p}amongus
-
-🎰 *SORTE & CASSINO*
-${p}dados [aposta]
-${p}coinflip cara/coroa [aposta]
-${p}cassino [aposta]
-${p}slots [aposta]
-${p}roleta preto/vermelho [aposta]
-${p}roletaban
-${p}chance
-${p}sn
-
-🔥 *BRINCADEIRAS DE GRUPO*
-${p}verdade
-${p}desafio
-${p}eununca
-${p}cantada
-${p}piada
-${p}fato
-${p}conselho
-${p}elogio
-${p}reflexao
-${p}motivacional
-${p}quando
-
-💞 *INTERAÇÕES*
-${p}beijo @
-${p}abraco @
-${p}carinho @
-${p}cafune @
-${p}tapa @
-${p}chute @
-${p}morder @
-${p}socar @
-${p}lamber @
-${p}shipo @
-${p}casal @
-
-💍 *RELACIONAMENTO & FAMÍLIA*
-${p}casar @
-${p}aceitarcasamento
-${p}divorciar
-${p}minhadupla
-${p}familia
-${p}adotaruser @
-${p}deserdar @
-
-📊 *MEDIDORES*
-${p}lindo @ • ${p}linda @ • ${p}gado @
-${p}rico @ • ${p}pobre @ • ${p}nerd @
-${p}gamer @ • ${p}sortudo @ • ${p}azarado @
-${p}romantico @ • ${p}ciumento @ • ${p}inteligente @
-
-🏆 *RANKINGS DOS MEDIDORES*
-Use *${p}rank + medidor*
-Ex.: ${p}rankgado • ${p}ranklindo • ${p}rankrico
-
-🐉 *DRAGON RPG*
-O RPG continua organizado em *${p}menurpg*.
-
-💡 ${p}menujogos, ${p}menudiversao e ${p}menubrincadeiras agora abrem este mesmo menu.`;}
+function menu(p){return buildFunMenu(p);}
 function rpgMenu(p){return `╭━━〔 🐉⚔️ *DRAGON RPG 0.9* 〕━━╮\n👤 ${p}perfilrpg | ${p}carteira | ${p}toprpg\n💰 ${p}daily | ${p}work | ${p}mine | ${p}fish | ${p}explore\n🎰 ${p}dados 20 | ${p}coinflip cara 50 | ${p}slots 30 | ${p}roleta preto 50\n🛒 ${p}loja | ${p}comprar picareta | ${p}inv\n🌱 ${p}plantar trigo | ${p}colher | ${p}cook sopa\n⚔️ ${p}dungeon | ${p}bossrpg | ${p}arena | ${p}torneio\n🔨 ${p}forge espada | ${p}encantar espada | ${p}reparar espada\n🐾 ${p}pets | ${p}adotar dragao | ${p}feed 1 | ${p}train 1\n🏰 ${p}classe | ${p}casa | ${p}auction | ${p}mercado\n📜 ${p}missoes | ${p}conquistas | ${p}prestige\n╰━━━━━━━━━━━━━━━━━━━━━━╯`;}
 
 export default {
