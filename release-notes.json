@@ -1,9 +1,13 @@
 {
-  "version": "1.0.9",
-  "title": "Modo RPG",
+  "version": "1.0.11",
+  "title": "Alternância rápida do Modo RPG",
   "changed": [
-    "Controle do RPG agora usa /modorpg on e /modorpg off",
-    "/rpg continua reservado para abrir o menu RPG"
+    "/modorpg agora ativa ou desativa o RPG automaticamente, sem on/off",
+    "Apenas administradores podem usar /modorpg",
+    "Sentinela no Termux agora envia alertas assinados para a Kobayashi na hospedagem pelo próprio WhatsApp",
+    "Novo modo de teste registra eventos sem remover membros",
+    "Detecção de marcações em massa a partir de 10 usuários",
+    "Novos controles /sentinelbridge numero, teste e proteger"
   ],
   "database": "Nenhum banco de dados é incluído no ZIP."
 }

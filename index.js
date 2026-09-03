@@ -45,7 +45,7 @@ import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from ".
 
 import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsPanel, buildPermissionDiagnostic } from "./lib/ui/adminCenter.js";
 import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
-import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs } from "./lib/features/moderation/sentinelBridge.js";
+import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
@@ -686,6 +686,18 @@ const SoDonoPrincipal = sender === dono || isMainOwnerJid(sender);
 const SoLider = isLeaderJid(sender);
 const SoDono = SoDonoPrincipal || SoLider;
 const runtimeSettings = readSettingsFile();
+
+// 🛰️ SENTINEL WA • recebe alertas assinados enviados pelo número observador.
+// É processado antes do Anti-PV para a própria proteção do PV não bloquear a ponte.
+configureSentinelBridgeRuntime(conn, {
+  ownerJids: [dono],
+  isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
+});
+const sentinelWaResult = await processSentinelWhatsAppMessage({
+  text: body,
+  senderJid: sender
+});
+if (sentinelWaResult.handled) continue;
 
 // 🖤 LISTA NEGRA GLOBAL v1.0.2
 // Usuários cadastrados aqui são ignorados pelo bot em qualquer grupo/PV.
@@ -6240,9 +6252,10 @@ case "bridge": {
   if (action === "status") {
     return reply(
       `╭━━〔 🛰️ SENTINEL BRIDGE 〕━━╮\n` +
-      `┃ 🌐 Servidor: *${s.listening ? "ONLINE ✅" : "OFFLINE ⚠️"}*\n` +
+      `┃ 📡 Transporte: *WhatsApp*\n` +
       `┃ 🛡️ Sistema: *${s.enabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
-      `┃ 📍 Host: *${s.host}:${s.port}*\n` +
+      `┃ 🧪 Modo: *${s.testMode ? "TESTE (sem remoção)" : "PROTEÇÃO (remove)"}*\n` +
+      `┃ 📱 Sentinela: *${s.sentinelNumber || "não configurada"}*\n` +
       `┃ 📨 Recebidos: *${s.received}*\n` +
       `┃ ✅ Aceitos: *${s.accepted}*\n` +
       `┃ ⛔ Rejeitados: *${s.rejected}*\n` +
@@ -6251,6 +6264,8 @@ case "bridge": {
       `┃ ${prefix}sentinelbridge token\n` +
       `┃ ${prefix}sentinelbridge renovar\n` +
       `┃ ${prefix}sentinelbridge logs\n` +
+      `┃ ${prefix}sentinelbridge numero 55DDDNUMERO\n` +
+      `┃ ${prefix}sentinelbridge teste/proteger\n` +
       `┃ ${prefix}sentinelbridge on/off\n` +
       `╰━━━━━━━━━━━━━━━━━━━━━━╯`
     );
@@ -6267,6 +6282,25 @@ case "bridge": {
     const secret = rotateSentinelBridgeSecret();
     await conn.sendMessage(dono, { text: `🔐 *NOVO TOKEN SENTINEL BRIDGE*\n\n${secret}\n\nAtualize o bridgeSecret do Sentinel Core.` }).catch(() => {});
     return reply("✅ Token do Bridge renovado. O novo token foi enviado ao PV do dono.");
+  }
+
+  if (["numero","número","number"].includes(action)) {
+    const number = String(args?.[1] || "").replace(/\D/g, "");
+    if (number.length < 10 || number.length > 15) {
+      return reply(`📱 Use: *${prefix}sentinelbridge numero 55DDDNUMERO*`);
+    }
+    const cfg = setSentinelWhatsAppNumber(number);
+    return reply(`✅ Número autorizado da Sentinela: *${cfg.sentinelNumber}*\n\nEssa conta deve permanecer como membro comum.`);
+  }
+
+  if (["teste","test"].includes(action)) {
+    setSentinelBridgeTestMode(true);
+    return reply("🧪 Sentinel Bridge em *modo de teste*. Os eventos serão validados e registrados, sem remover membros.");
+  }
+
+  if (["proteger","protecao","proteção","ativo"].includes(action)) {
+    setSentinelBridgeTestMode(false);
+    return reply("🛡️ Sentinel Bridge em *modo de proteção*. Eventos válidos poderão remover invasores.");
   }
 
   if (action === "on" || action === "off") {

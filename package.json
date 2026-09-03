@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.9",
-  "description": "Kobayashi Bot v1.0.7 Stable - Import Guard + Full Architecture Fix",
+  "version": "1.0.11",
+  "description": "Kobayashi Bot v1.0.11 Stable - RPG Toggle + Sentinel WhatsApp Bridge",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

@@ -13,7 +13,7 @@ const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
 ];
 const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","comer","louca","louça","lamber","morder","socar","soco","chorao","chorona"];
-const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
+const GAME_ALIASES = ["modorpg","menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
 const ECON = ["menurpg","rpg","perfilrpg","carteira","gold","vergold","daily","diario","work","trabalhar","mine","minerar","fish","pescar","hunt","cacar","caçar","explore","explorar","crime","roubar","assaltar","doargold","pix","rankgold","toprpg","topriqueza","loja","comprar","inv","inventario"];
 const RPG = ["emprego","vagas","demitir","habilidades","desafiosemanal","desafiomensal","investir","sell","plantar","cultivar","farm","colher","coletar","harvest","plantacao","horta","cozinhar","cook","receitas","ingredientes","sementes","comer","eat","vendercomida","masmorra","dungeon","bossrpg","arena","torneio","guerra","desafio","forge","forjar","encantar","enchant","dismantle","desmontar","reparar","materiais","precos","equipamentos","pets","adotar","feed","train","evolve","renamepet","petbattle","petbet","equippet","unequippet","classe","class","casa","house","auction","mercado","missoes","quests","conquistas","achievements","prestige","evoluir","streak","reivindicar","claim","speedup","boost","tributos","meustats","criarcla","cla","convidar","convite","rmconvite","aceitarconvite","recusarconvite","expulsar","sair","lojapremium","comprarpremium","propriedades","cprop","cprops","doar","presente","reputacao","rep","vote","eventos","loteria","corrida","leilao","investir","evoluir","reivindicar","speedup"];
@@ -122,27 +122,23 @@ export default {
 
   const rpgEnabled = !ctx.isGroup || isRpgEnabled(ctx.from);
 
-  if(n === "modorpg" && ["on","off"].includes(String(ctx.args?.[0] || "").toLowerCase())){
+  if(n === "modorpg"){
     if(!ctx.isGroup) return ctx.reply("🐉 O controle do RPG é configurado por grupo.");
     if(!ctx.permissions?.isAdmin) return ctx.reply("🛡️ Apenas administradores podem ativar ou desativar o modo RPG.");
-    const enabled = String(ctx.args[0]).toLowerCase() === "on";
+    const enabled = !rpgEnabled;
     setRpgEnabled(ctx.from, enabled, ctx.sender);
     return ctx.reply(enabled
       ? "🐉⚔️ *Modo RPG ativado neste grupo!*\nOs comandos do Dragon RPG voltaram a funcionar."
-      : `🐉💤 *Modo RPG desativado neste grupo!*\nOs comandos do Dragon RPG ficarão bloqueados até um ADM usar *${ctx.prefix}rpg on*.`);
-  }
-
-  if(n === "modorpg"){
-    return ctx.reply(`🐉 *Modo RPG*\n\nUse *${ctx.prefix}modorpg on* para ativar.\nUse *${ctx.prefix}modorpg off* para desativar.\n\n🛡️ Apenas administradores podem alterar.`);
+      : `🐉💤 *Modo RPG desativado neste grupo!*\nUse *${ctx.prefix}modorpg* novamente para reativar.`);
   }
 
   if(["menurpg","rpg"].includes(n)){
-    if(!rpgEnabled) return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n\n🛡️ ADM: use *${ctx.prefix}rpg on* para ativar.`);
-    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}rpg off* para desativar neste grupo.`);
+    if(!rpgEnabled) return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n\n🛡️ ADM: use *${ctx.prefix}modorpg* para ativar.`);
+    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}modorpg* para desativar neste grupo.`);
   }
 
   if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled){
-    return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n🛡️ Um ADM pode ativar com *${ctx.prefix}rpg on*.`);
+    return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n🛡️ Um ADM pode ativar com *${ctx.prefix}modorpg*.`);
   }
   if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
   if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
