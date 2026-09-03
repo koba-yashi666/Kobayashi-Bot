@@ -27,5 +27,15 @@
       "Novo visual do menu de jogos inspirado no modelo enviado, com identidade Kobayashi.",
       "/menubn e aliases de jogos unificados no novo menu."
     ]
+  },
+  "v1.0.15": {
+    "version": "1.0.15",
+    "title": "Updater HTTP 403 Fix",
+    "changes": [
+      "Updater deixa de depender da API Git Trees do GitHub, que retornava HTTP 403 em algumas hospedagens.",
+      "Atualizações passam a baixar o branch completo via codeload em tar.gz.",
+      "Fallback de version.json via jsDelivr.",
+      "Suporte opcional a GITHUB_TOKEN/KOBAYASHI_GITHUB_TOKEN."
+    ]
   }
 }

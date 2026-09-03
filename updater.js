@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { spawnSync } from "node:child_process";
 
 const REPO = "koba-yashi666/Kobayashi-Bot";
@@ -9,6 +10,7 @@ const ROOT = process.cwd();
 const LOCAL_VERSION_FILE = path.join(ROOT, "version.json");
 const STAGING_DIR = path.join(ROOT, ".koba-update-tmp");
 const BACKUP_DIR = path.join(ROOT, ".koba-update-backup");
+const ARCHIVE_FILE = path.join(os.tmpdir(), "kobayashi-update-main.tar.gz");
 
 const PROTECTED_PATHS = [
   "settings/settings.json",
@@ -58,35 +60,42 @@ export function getLocalVersion() {
   }
 }
 
-async function fetchJson(url) {
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "Kobayashi-Bot-Updater",
-      Accept: "application/vnd.github+json"
-    },
-    cache: "no-store"
-  });
-
-  if (!res.ok) throw new Error(`GitHub respondeu HTTP ${res.status}`);
-  return res.json();
+function githubHeaders(extra = {}) {
+  const token = process.env.KOBAYASHI_GITHUB_TOKEN || process.env.GITHUB_TOKEN || "";
+  return {
+    "User-Agent": "Kobayashi-Bot-Updater/1.0.15",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra
+  };
 }
 
 export async function getRemoteVersion() {
-  const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/version.json?t=${Date.now()}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Kobayashi-Bot-Updater" },
-    cache: "no-store"
-  });
+  const urls = [
+    `https://raw.githubusercontent.com/${REPO}/${BRANCH}/version.json?t=${Date.now()}`,
+    `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/version.json?t=${Date.now()}`
+  ];
 
-  if (!res.ok) throw new Error(`Não consegui ler version.json (HTTP ${res.status})`);
-  const data = await res.json();
-  return data?.version || "0.0.0";
+  let lastError;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: githubHeaders({ Accept: "application/json" }),
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data?.version || "0.0.0";
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new Error(`Não consegui ler version.json remoto: ${lastError?.message || "erro desconhecido"}`);
 }
 
 export async function checkUpdate() {
   const local = getLocalVersion();
   const remote = await getRemoteVersion();
-
   return {
     local,
     remote,
@@ -94,34 +103,62 @@ export async function checkUpdate() {
   };
 }
 
-async function getRepositoryTree() {
-  const url = `https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`;
-  const data = await fetchJson(url);
+async function downloadArchive() {
+  const urls = [
+    `https://codeload.github.com/${REPO}/tar.gz/refs/heads/${BRANCH}`,
+    `https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz`
+  ];
 
-  if (data?.truncated) {
-    throw new Error("A lista de arquivos do GitHub veio incompleta.");
+  let lastError;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: githubHeaders({ Accept: "application/octet-stream" }),
+        redirect: "follow",
+        cache: "no-store"
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buffer = Buffer.from(await res.arrayBuffer());
+
+      if (buffer.length < 1024) {
+        throw new Error("arquivo de atualização muito pequeno");
+      }
+
+      fs.writeFileSync(ARCHIVE_FILE, buffer);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return (data?.tree || []).filter((item) => item.type === "blob");
+  throw new Error(`Falha ao baixar atualização do GitHub: ${lastError?.message || "erro desconhecido"}`);
 }
 
-async function downloadFile(rel, destination) {
-  const encoded = rel.split("/").map(encodeURIComponent).join("/");
-  const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${encoded}?t=${Date.now()}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Kobayashi-Bot-Updater" },
-    cache: "no-store"
+function extractArchive() {
+  fs.rmSync(STAGING_DIR, { recursive: true, force: true });
+  fs.mkdirSync(STAGING_DIR, { recursive: true });
+
+  const result = spawnSync("tar", ["-xzf", ARCHIVE_FILE, "-C", STAGING_DIR, "--strip-components=1"], {
+    stdio: "pipe",
+    encoding: "utf8"
   });
 
-  if (!res.ok) throw new Error(`Falha ao baixar ${rel} (HTTP ${res.status})`);
+  if (result.status !== 0) {
+    throw new Error(`Não consegui extrair atualização: ${result.stderr || result.stdout || "tar falhou"}`);
+  }
+}
 
-  const buffer = Buffer.from(await res.arrayBuffer());
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
-  fs.writeFileSync(destination, buffer);
+function walkFiles(dir, base = dir, output = []) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkFiles(full, base, output);
+    else if (entry.isFile()) output.push(cleanPath(path.relative(base, full)));
+  }
+  return output;
 }
 
 function ensureSafeRepoStructure(treePaths) {
-  // Evita atualizar a partir de um repositório que perdeu as pastas no upload.
   const required = [
     "index.js",
     "connection.js",
@@ -129,15 +166,13 @@ function ensureSafeRepoStructure(treePaths) {
     "settings/imports/consts.js",
     "settings/imports/menus.js",
     "settings/settings.json",
-  "settings/LOGOS/menu.png",
+    "settings/LOGOS/menu.png",
     "lib/groupCache.js"
   ];
 
   const missing = required.filter((file) => !treePaths.has(file));
   if (missing.length) {
-    throw new Error(
-      "A estrutura do GitHub ainda está incompleta. Faltam: " + missing.join(", ")
-    );
+    throw new Error("A estrutura baixada está incompleta. Faltam: " + missing.join(", "));
   }
 }
 
@@ -186,22 +221,12 @@ function installDependencies() {
   }
 }
 
-
 function readInstalledReleaseNotes() {
   try {
     const file = path.join(ROOT, "release-notes.json");
-
-    if (!fs.existsSync(file)) {
-      return null;
-    }
-
-    const data = JSON.parse(
-      fs.readFileSync(file, "utf8")
-    );
-
-    return data && typeof data === "object"
-      ? data
-      : null;
+    if (!fs.existsSync(file)) return null;
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    return data && typeof data === "object" ? data : null;
   } catch {
     return null;
   }
@@ -214,26 +239,18 @@ export async function applyUpdate({ force = false } = {}) {
     return { ...status, updated: false, files: 0 };
   }
 
-  const tree = await getRepositoryTree();
-  const treePaths = new Set(tree.map((item) => cleanPath(item.path)));
-  ensureSafeRepoStructure(treePaths);
-
-  const files = tree
-    .map((item) => cleanPath(item.path))
-    .filter((rel) => rel && !isProtected(rel));
-
-  fs.rmSync(STAGING_DIR, { recursive: true, force: true });
-  fs.mkdirSync(STAGING_DIR, { recursive: true });
-
   try {
-    // Primeiro baixa tudo. Nada do bot é alterado enquanto o download não terminar.
-    for (const rel of files) {
-      await downloadFile(rel, path.join(STAGING_DIR, rel));
-    }
+    await downloadArchive();
+    extractArchive();
+
+    const tree = walkFiles(STAGING_DIR);
+    const treePaths = new Set(tree);
+    ensureSafeRepoStructure(treePaths);
+
+    const files = tree.filter((rel) => rel && !isProtected(rel));
 
     backupCurrent(files);
 
-    // Só depois substitui os arquivos.
     for (const rel of files) {
       const staged = path.join(STAGING_DIR, rel);
       const target = path.join(ROOT, rel);
@@ -241,10 +258,10 @@ export async function applyUpdate({ force = false } = {}) {
       fs.copyFileSync(staged, target);
     }
 
-    // Atualiza dependências caso package.json/package-lock tenham mudado.
     installDependencies();
 
     fs.rmSync(STAGING_DIR, { recursive: true, force: true });
+    try { fs.rmSync(ARCHIVE_FILE, { force: true }); } catch {}
 
     return {
       ...status,
@@ -256,6 +273,7 @@ export async function applyUpdate({ force = false } = {}) {
   } catch (error) {
     try { restoreBackup(); } catch {}
     fs.rmSync(STAGING_DIR, { recursive: true, force: true });
+    try { fs.rmSync(ARCHIVE_FILE, { force: true }); } catch {}
     throw error;
   }
 }
