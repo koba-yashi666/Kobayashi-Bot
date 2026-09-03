@@ -1,13 +1,22 @@
 {
-  "version": "1.0.11",
-  "title": "Alternância rápida do Modo RPG",
-  "changed": [
-    "/modorpg agora ativa ou desativa o RPG automaticamente, sem on/off",
-    "Apenas administradores podem usar /modorpg",
-    "Sentinela no Termux agora envia alertas assinados para a Kobayashi na hospedagem pelo próprio WhatsApp",
-    "Novo modo de teste registra eventos sem remover membros",
-    "Detecção de marcações em massa a partir de 10 usuários",
-    "Novos controles /sentinelbridge numero, teste e proteger"
+  "version": "1.0.12",
+  "title": "Menu Sakura Refresh + HelpCMD",
+  "date": "2026-09-03",
+  "added": [
+    "/helpcmd comando",
+    "Novo tema visual leve para menus",
+    "Central Essencial",
+    "Central de Administração",
+    "Atelier de Figurinhas",
+    "Trilha de Níveis",
+    "Reino Dragon Social",
+    "Empório Dragon",
+    "Salão de Brincadeiras",
+    "Câmara do Dono"
   ],
-  "database": "Nenhum banco de dados é incluído no ZIP."
+  "changed": [
+    "Menu principal ficou mais simples",
+    "Submenus exibem somente comandos",
+    "Nomes dos menus foram modernizados"
+  ]
 }

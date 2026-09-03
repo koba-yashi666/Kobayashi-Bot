@@ -41,7 +41,10 @@ import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNo
 import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/social/dragonSocial.js";
-import { buildMainMenu, buildSocialMenu, buildShopMenu, buildLevelMenu } from "./lib/ui/menuTheme.js";
+import {
+  buildMainMenu, buildGeneralMenu, buildAdminMenu, buildStickerMenu, buildOwnerMenu,
+  buildSocialMenu, buildShopMenu, buildLevelMenu, buildFunMenu, getCommandHelp
+} from "./lib/ui/menuTheme.js";
 
 import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsPanel, buildPermissionDiagnostic } from "./lib/ui/adminCenter.js";
 import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
@@ -3001,6 +3004,35 @@ break;
 //
 
 
+case "helpcmd":
+case "ajudacmd": {
+  const selected = String(args?.[0] || q || "").trim();
+  if (!selected) {
+    return reply(
+      `╭━━〔 🔎 *HELP CMD* 〕━━╮\n` +
+      `┃ Use: *${prefix}helpcmd comando*\n` +
+      `┃ Ex.: *${prefix}helpcmd play*\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  const help = getCommandHelp(selected, prefix);
+  if (!help?.found) {
+    return reply(
+      `🌸 Não encontrei uma ajuda detalhada para *${selected.replace(/^[/!+.#-]+/, "")}*.\n\n` +
+      `Tente o nome principal do comando, por exemplo: *${prefix}helpcmd play*.`
+    );
+  }
+
+  return reply(
+    `╭━━〔 🔎 *AJUDA DE COMANDO* 〕━━╮\n` +
+    `┃ 🐉 *${prefix}${help.command}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `🌸 O comando *${prefix}${help.command}* ${help.description}`
+  );
+}
+break;
+
 case "play": {
   const query = String(q || "").trim();
 
@@ -5523,54 +5555,8 @@ break;
 
 case "menubn": {
   if (!isGroup) return reply(mess.onlyGroup());
-
-  const enabled = isFunModeEnabled(from);
-  const status = enabled ? "🟢 ATIVADO" : "🔒 DESATIVADO";
-
-  return reply(
-    `╭────────「 🎭 」────────╮\n` +
-    `      *KOBAYASHI FUN*\n` +
-    `╰─────────────────────╯\n\n` +
-    `Status › *${status}*\n` +
-    `🐉 Dragon Social › *${prefix}menusocial*\n\n` +
-    `┌─ 🌸 *BRINCADEIRAS*\n` +
-    `│ 🌷 ${prefix}linda @membro\n` +
-    `│ 🌺 ${prefix}lindo @membro\n` +
-    `│ 🏳️‍🌈 ${prefix}gay @membro\n` +
-    `│ 💙 ${prefix}hetero @membro\n` +
-    `│ 🫂 ${prefix}abraco @membro\n` +
-    `│ 🐂 ${prefix}gado @membro\n` +
-    `│ 💞 ${prefix}shipo @membro\n` +
-    `│ 🔥 ${prefix}gostosa @membro\n` +
-    `│ 😏 ${prefix}gostoso @membro\n` +
-    `│\n` +
-    `├─ 🏆 *RANKINGS*\n` +
-    `│ 👑 ${prefix}ranklinda\n` +
-    `│ 👑 ${prefix}ranklindo\n` +
-    `│ 🌈 ${prefix}rankgay\n` +
-    `│ 💙 ${prefix}rankhetero\n` +
-    `│ 🔥 ${prefix}rankgostosa\n` +
-    `│ 😏 ${prefix}rankgostoso\n` +
-    `│\n` +
-    `├─ 💬 *FRASES & TEXTOS*\n` +
-    `│ 😂 ${prefix}piada\n` +
-    `│ 💡 ${prefix}conselho\n` +
-    `│ 🌟 ${prefix}motivacional\n` +
-    `│ 💖 ${prefix}elogio @membro\n` +
-    `│ 🧩 ${prefix}charada\n` +
-    `│\n` +
-    `├─ 🎲 *JOGOS RÁPIDOS*\n` +
-    `│ 🎯 ${prefix}chance pergunta\n` +
-    `│ ⏳ ${prefix}quando pergunta\n` +
-    `│ 🍀 ${prefix}sorte\n` +
-    `│ 🙈 ${prefix}eununca\n` +
-    `│ ⚔️ ${prefix}vab\n` +
-    `│ ✊ ${prefix}ppt pedra|papel|tesoura\n` +
-    `│\n` +
-    `└ 🎭 ${prefix}modobrincadeira\n` +
-    `   ↳ Somente ADM liga/desliga\n\n` +
-    `🌸 Quando ativado, todos os membros podem brincar.`
-  );
+  reagir("🎮");
+  return reply(buildFunMenu(prefix));
 }
 break;
 
@@ -6231,14 +6217,7 @@ break;
 case "menuadm":
 if (!isGroup) return reply(mess.onlyGroup());
 reagir("🛡️");
-reply(
-  linguagem.menuAdm(prefix) +
-  `\n\n╭─〔 🛡️ *ADMIN CENTER* 〕\n` +
-  `│ ${prefix}paineladm\n` +
-  `│ ${prefix}statusgrupo\n` +
-  `│ ${prefix}logs\n` +
-  `╰────────────────`
-);
+reply(buildAdminMenu(prefix));
 break;
 
 
@@ -6435,30 +6414,19 @@ case "menuowner":
 case "menudono":
 if (!SoDono) return reply(mess.onlyOwner());
 reagir("👑");
-reply(
-  linguagem.menuOwner(prefix) +
-  `\n\n╭─〔 🖤 *SEGURANÇA GLOBAL* 〕\n` +
-  `│ ${prefix}listanegrag +55...\n` +
-  `│ ${prefix}rmlistanegrag +55...\n` +
-  `│ └ Lista negra global do bot\n` +
-  `╰────────────────\n` +
-  `\n╭─〔 🛰️ *KOBAYASHI SENTINEL* 〕\n` +
-  `│ ${prefix}sentinel status\n` +
-  `│ └ Proteção por segunda conta membro\n` +
-  `╰────────────────`
-);
+reply(buildOwnerMenu(prefix));
 break;
 
 case "menusticker":
 case "menustk":
 reagir("🎴");
-reply(linguagem.menuSticker(prefix));
+reply(buildStickerMenu(prefix));
 break;
 
 case "menugeral":
 case "geral":
 reagir("🪷");
-reply(linguagem.menuGeral(prefix));
+reply(buildGeneralMenu(prefix));
 break;
 //
 
