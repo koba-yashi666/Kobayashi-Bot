@@ -4581,20 +4581,16 @@ case "kobaban": {
 ┗━━━〔 🐲 KOBAYASHI BOT 🐲 〕━━━┛`;
 
   try {
-    // Animação personalizada do KobaBan enviada antes da mensagem e da remoção.
+    // KobaBan em uma única mensagem: GIF + texto no caption.
     const kobaBanMedia = path.join(process.cwd(), "media", "kobaban", "kobaban.mp4");
-    if (fs.existsSync(kobaBanMedia)) {
-      await conn.sendMessage(from, {
-        video: fs.readFileSync(kobaBanMedia),
-        gifPlayback: true,
-        caption: `🐉🔥 *KOBAYASHI BAN* 🔥🐉\n@${targetNumber}, seu julgamento chegou.`,
-        mentions: [target]
-      }, { quoted: info });
+    if (!fs.existsSync(kobaBanMedia)) {
+      return reply("❌🐉 A mídia do KobaBan não foi encontrada.");
     }
 
-    // Envia a despedida antes da remoção para manter a menção visível no grupo.
     await conn.sendMessage(from, {
-      text: kobaBanText,
+      video: fs.readFileSync(kobaBanMedia),
+      gifPlayback: true,
+      caption: kobaBanText,
       mentions: [target, sender]
     }, { quoted: info });
 
