@@ -1,6 +1,6 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Kobayashi Bot v1.0.13 Stable - Menu Sakura Refresh + HelpCMD",
   "main": "bootstrap.js",
   "type": "module",

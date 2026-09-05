@@ -55,5 +55,18 @@
       "Sequência do KobaBan: animação, mensagem personalizada e remoção.",
       "A mídia fica embutida no pacote para funcionar também na hospedagem."
     ]
+  },
+  "v1.0.19": {
+    "version": "1.0.19",
+    "title": "Perfil + Dragon Fun Upgrade",
+    "changes": [
+      "/perfil remodelado usando referências do Hutao Bot, Nazuna Bot e do pack de decoração.",
+      "Perfil agora destaca identidade, humor diário, bio, cargo, Level, atividade, Dragon Social, aura e advertências.",
+      "Comandos do /menubn receberam textos próprios em vez de respostas genéricas.",
+      "Beijo, abraço, carinho/cafuné, tapa, chute, mordida, soco e outras interações ganharam frases mais próximas das referências originais.",
+      "Medidores como lindo/linda, gado, feio, corno, otaku, rico/pobre, gostoso/gostosa e outros foram aprimorados.",
+      "/ppt ganhou instruções e resultado visual melhores.",
+      "/helpcmd recebeu explicações para mais comandos do Salão de Brincadeiras."
+    ]
   }
 }

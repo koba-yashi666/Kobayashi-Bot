@@ -24,6 +24,55 @@ export const dragonFunAliases=[...new Set([...TRAITS,...ACTIONS,...GAME_ALIASES,
 function ctxInfo(info){return info?.message?.extendedTextMessage?.contextInfo||info?.message?.imageMessage?.contextInfo||info?.message?.videoMessage?.contextInfo||{};}
 function targetOf(ctx){const c=ctxInfo(ctx.info);return c?.mentionedJid?.[0]||c?.participant||null;}
 function tag(jid){return jid?`@${String(jid).split("@")[0]}`:"alguém";}
+
+function traitCaption(command, targetTag, value){
+  const t = String(targetTag || "alguém");
+  const bank = {
+    personalidade: `🧠✨ *PERSONALIDADE DRAGON*\n\n➬ 「 ${t} 」\n\nA Kobayashi analisou sua aura e detectou *${value}%* de personalidade marcante. 🐉🌸`,
+    linda: `💎🌟 *O quanto você é linda?*\n\n➬ 「 ${t} 」\n\nVOCÊ É: ✰ *${value}%* ✰ LINDA 😻✨`,
+    lindo: `💎🌟 *O quanto você é lindo?*\n\n➬ 「 ${t} 」\n\nVOCÊ É: ✰ *${value}%* ✰ LINDO 😻✨`,
+    gay: `🌈✨ ${t} está irradiando *${value}%* de orgulho e alegria! O arco-íris ficou até mais forte hoje. 🏳️‍🌈💖`,
+    hetero: `✨📊 ${t} marcou *${value}%* no medidor hétero da Kobayashi. Resultado totalmente científico, confia. 🐉`,
+    lesbica: `🌈🌸 ${t} está com *${value}%* de energia sáfica detectada pelo radar Dragon. 💖✨`,
+    gado: `🐄💨 *O quanto você é gado?*\n\n「 ${t} 」\n\nVocê é: ❰ *${value}%* ❱ GADO 🐂\n\n${value >= 90 ? "👑 Gado-Rei detectado!" : value >= 60 ? "🐂 Gado avançado!" : value >= 30 ? "🐮 Gadinho em treinamento." : "🌱 Ainda há esperança."}`,
+    feio: `👻😅 *O quanto você é feio?*\n\n➬ 「 ${t} 」\n\nVOCÊ É ✰ *${value}%* ✰ FEIO\n\n📐 Charme é questão de ângulo, né?`,
+    corno: `🐂👑 *MEDIDOR DE CHIFRES*\n\n➬ 「 ${t} 」\n\nResultado: ✰ *${value}%* ✰\n\nSerá que tem fundamento ou é só folclore? 🤭📊`,
+    bebado: `🍻🎤 ${t} está com *${value}%* de alegria de boteco! 💧 A Kobayashi recomenda água antes do próximo rolê. 🥴`,
+    gostoso: `🔥🌟 *Se liga o quanto você é gostoso*\n\n➬ 「 ${t} 」\n\nVOCÊ É › *${value}%* ‹ GOSTOSO 🤤✨`,
+    gostosa: `🔥🌸 *O quanto você é gostosa?*\n\n➬ 「 ${t} 」\n\nVOCÊ É › *${value}%* ‹ GOSTOSA 🙀✨`,
+    golpista: `🕵️‍♂️💸 ${t} está com *${value}%* de energia suspeita. A Kobayashi já escondeu a carteira. 👀`,
+    otaku: `🎌🍜 ${t} atingiu *${value}%* de poder otaku! Já dá pra ouvir uma opening tocando ao fundo. ⚔️✨`,
+    pobre: `💸🥺 ${t} está com *${value}%* de crise financeira! Alguém inicia a vaquinha Dragon? 🐉💔`,
+    rico: `💰🏦 ${t} ostenta *${value}%* de fortuna! Tá quase nadando em Dragon Coins. 🤑💎`,
+    chance: `🔮🐉 *ORÁCULO DRAGON*\n\n${t}, a chance indicada pela Kobayashi é de *${value}%*.`
+  };
+  return bank[command] || null;
+}
+
+function actionCaption(command, actor, target){
+  const bank = {
+    beijo: `Awwww 😍 ${actor} deu um beijo carinhoso em ${target}! 💋💖`,
+    beijar: `Awwww 😍 ${actor} deu um beijo carinhoso em ${target}! 💋💖`,
+    abraco: `Abraço caloroso! 🤗 ${actor} envolveu ${target} em um abraço super apertado e aconchegante! 💕`,
+    abracar: `Abraço caloroso! 🤗 ${actor} envolveu ${target} em um abraço super apertado e aconchegante! 💕`,
+    carinho: `🥰 ${actor} fez um carinho fofinho em ${target}... energia de conforto +100! 💞`,
+    cafune: `Que delícia de cafuné! 🥰 ${actor} fez ${target} relaxar com seus dedos mágicos! 💆✨`,
+    tapa: `PÁH! 👋 ${actor} deu um tapa sonoro em ${target}! Não deu nem tempo de reagir. 😳`,
+    tapar: `PÁH! 👋 ${actor} deu um tapa sonoro em ${target}! Não deu nem tempo de reagir. 😳`,
+    chute: `PUFF! 💥 ${actor} acabou de dar uma bicuda poderosa em ${target}! 😱`,
+    chutar: `PUFF! 💥 ${actor} acabou de dar uma bicuda poderosa em ${target}! 😱`,
+    morder: `😋 ${actor} deu uma mordida em ${target}! A Kobayashi vai fingir que não viu. 🐉`,
+    socar: `🥊 ${actor} acertou um soco de brincadeira em ${target}!`,
+    soco: `🥊 ${actor} acertou um soco de brincadeira em ${target}!`,
+    lamber: `👅💖 ${actor} deu uma lambida em ${target}. Isso ficou estranho bem rápido.`,
+    matar: `💀🎭 ${actor} eliminou ${target} dramaticamente... no faz de conta, obviamente.`,
+    comer: `🍜 ${actor} chamou ${target} pra comer alguma coisa. Finalmente uma interação pacífica.`,
+    louca: `🍽️😤 ${actor} mandou ${target} lavar a louça. A guerra começou.`,
+    chorao: `😭 ${actor} declarou que ${target} está no modo chorão hoje.`,
+    chorona: `😭 ${actor} declarou que ${target} está no modo chorona hoje.`
+  };
+  return bank[command] || `💞 ${actor} interagiu com ${target}!`;
+}
 function ms(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return `${h}h ${m}m`;}
 async function sendMedia(ctx,url,caption,mentions=[]){ if(!url)return ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info}); try{const isVideo=/\.(mp4|gif)(?:$|\?)/i.test(url); await ctx.conn.sendMessage(ctx.from,isVideo?{video:{url},gifPlayback:true,caption,mentions}:{image:{url},caption,mentions},{quoted:ctx.info});}catch{await ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info});}}
 function menu(p){return buildFunMenu(p);}
@@ -56,8 +105,8 @@ export default {
     return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n🛡️ Um ADM pode ativar com *${ctx.prefix}modorpg*.`);
   }
   if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
-  if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
-  if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`Marque alguém ou responda a mensagem da pessoa. Ex.: *${ctx.prefix}${c} @alguém*`);const phrases={beijo:"deu um beijo em",beijar:"deu um beijo em",abraco:"deu um abraço em",abracar:"deu um abraço em",tapa:"deu um tapa em",tapar:"deu um tapa em",chute:"deu um chute em",chutar:"deu um chute em",carinho:"fez carinho em",cafune:"fez cafuné em",matar:"eliminou dramaticamente",comer:"foi comer com",louca:"mandou lavar a louça com",lamber:"deu uma lambida em",morder:"mordeu",socar:"deu um soco de brincadeira em",soco:"deu um soco de brincadeira em"}; const cap=`💞 ${tag(ctx.sender)} ${phrases[n]||"interagiu com"} ${tag(target)}!`;return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}
+  if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
+  if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);const cap=actionCaption(n,tag(ctx.sender),tag(target));return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}
   if(n==="forca"||n==="fc"){if(ctx.args?.length){const r=guessForca(ctx.from,ctx.sender,ctx.args.join(" "));if(r.win)return ctx.reply(`🎉 Acertou! A palavra era *${r.word}*. +60 coins.`);if(r.lose)return ctx.reply(`💀 Fim de jogo! A palavra era *${r.word}*.`);if(r.ok)return ctx.reply(`🪢 ${r.masked}\n❤️ Tentativas: ${r.tries}\n💡 ${r.hint}`);}const s=startForca(ctx.from,ctx.sender);const mask=[...s.word].map(x=>x===" "?" ":"_ ").join("");return ctx.reply(`🪢 *FORCA*\n\n${mask}\n💡 Dica: ${s.hint}\n📚 Tema: ${s.theme}\n\nResponda com *${ctx.prefix}forca letra/palavra*`);}
   if(n==="anagrama"){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Acertou! *${r.answer}* +50 coins.`):ctx.reply("❌ Ainda não. Tente novamente!");}const s=startAnagram(ctx.from,ctx.sender);return ctx.reply(`🔀 *ANAGRAMA*\n\n🔤 *${s.scrambled.toUpperCase()}*\n💡 ${s.hint}\n\nResponda: *${ctx.prefix}anagrama resposta*`);}
   if(["quiz","trivia"].includes(n)){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Resposta certa: *${r.answer}*. +50 coins.`):ctx.reply("❌ Resposta incorreta. Tente de novo!");}const s=startQuiz(ctx.from,ctx.sender);return ctx.reply(`🧠 *QUIZ • ${s.category.toUpperCase()}*\n\n${s.question}\n\nResponda: *${ctx.prefix}quiz resposta*`);}
@@ -67,7 +116,7 @@ export default {
   if(n==="desafio")return ctx.reply(`🔥 *DESAFIO*\n${randomDare()}`);
   if(n==="eununca")return ctx.reply(`🙈 *EU NUNCA*\n${randomNever()}`);
   if(["cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando"].includes(n)){const bank={cantada:["Você não é Wi-Fi, mas senti uma conexão aqui 😏","Você é estrela? Porque iluminou o grupo inteiro ✨"],piada:["Por que o computador foi ao médico? Porque pegou um vírus. 💻😂","O zero disse pro oito: belo cinto! 😭"],fato:["🐙 Polvos têm três corações.","🌌 A luz do Sol leva cerca de 8 minutos para chegar à Terra."],conselho:["🌱 Faça primeiro o que depende de você; o resto fica mais fácil de organizar.","🧭 Nem toda pressa é progresso. Escolha uma direção antes de acelerar."],elogio:["✨ Você parece ser o tipo de pessoa que melhora o clima do grupo.","🌸 Seu bom humor merece XP extra hoje."],reflexao:["🌙 Às vezes mudar de rota é parte do caminho, não um fracasso.","🐉 Consistência pequena costuma vencer motivação gigante e rara."],motivacional:["🔥 Um passo hoje ainda é um passo.","🐉 Continue acumulando XP; chefão nenhum cai no primeiro hit."],quando:["🔮 Meu palpite totalmente científico: em breve.","⏳ Os dragões disseram: ainda não, mas tá chegando."]};return ctx.reply(bank[n][Math.floor(Math.random()*bank[n].length)]);}
-  if(["ppt","pedrapapeltesoura"].includes(n)){const choices=["pedra","papel","tesoura"],me=String(ctx.args?.[0]||"").toLowerCase(),bot=choices[Math.floor(Math.random()*3)];if(!choices.includes(me))return ctx.reply(`Use: *${ctx.prefix}ppt pedra/papel/tesoura*`);const win=(me==="pedra"&&bot==="tesoura")||(me==="papel"&&bot==="pedra")||(me==="tesoura"&&bot==="papel");return ctx.reply(`✊✋✌️ Você: *${me}*\n🐉 Kobayashi: *${bot}*\n\n${me===bot?"🤝 Empate!":win?"🏆 Você venceu!":"🐉 Kobayashi venceu!"}`);}
+  if(["ppt","pedrapapeltesoura"].includes(n)){const choices=["pedra","papel","tesoura"],me=String(ctx.args?.[0]||"").toLowerCase(),bot=choices[Math.floor(Math.random()*3)];if(!choices.includes(me))return ctx.reply(`🎮 *PEDRA, PAPEL OU TESOURA*\n\n💡 *Como jogar:*\n• Escolha sua jogada após o comando\n• ${ctx.prefix}ppt pedra\n• ${ctx.prefix}ppt papel\n• ${ctx.prefix}ppt tesoura\n\n🐉 Vamos ver quem ganha!`);const win=(me==="pedra"&&bot==="tesoura")||(me==="papel"&&bot==="pedra")||(me==="tesoura"&&bot==="papel");return ctx.reply(`╭━━〔 ✊✋✌️ *PPT DRAGON* 〕━━╮\n┃ 👤 Você: *${me}*\n┃ 🐉 Kobayashi: *${bot}*\n╰━━━━━━━━━━━━━━━━━━━━╯\n\n${me===bot?"🤝 *Empate!*":win?"🏆 *Você venceu!*":"🐉 *Kobayashi venceu!*"}`);}
   if(["dados","dice","coinflip","moeda","cassino","slots","slotmachine","roleta","roulette"].includes(n)){let game="slots",choice="",bet=10;if(["dados","dice"].includes(n)){game="dice";bet=ctx.args?.[0];}else if(["coinflip","moeda"].includes(n)){game="coinflip";choice=ctx.args?.[0];bet=ctx.args?.[1];}else if(["roleta","roulette"].includes(n)){game="roulette";choice=ctx.args?.[0];bet=ctx.args?.[1];}else bet=ctx.args?.[0];const r=gamble(ctx.sender,game,bet,choice);if(!r.ok)return ctx.reply("💸 Saldo insuficiente ou aposta inválida.");return ctx.reply(`🎰 *${game.toUpperCase()}*\n${r.result}\n\n${r.win?`🏆 Ganhou *${r.prize}* coins!`:`💥 Perdeu *${r.bet}* coins.`}\n💰 Saldo: ${r.u.coins}`);}
   if(["jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","gartic","quiz_animais","amongus","roletaban"].includes(n)){const r=simpleRpgAction(ctx.sender,n,ctx.args?.join(" "));return ctx.reply(`🎮 *${n.toUpperCase()}*\n${r.text}\n⭐ Lv.${r.u.level} • 💰 ${r.u.coins}`);}
   if(["revelar_gartic","revelar_animal","revelar_enigma","revelar_anagrama","resetv","pular","responder","confirmar","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","reset_vord","pontos","checkpts","rankpts"].includes(n)){return ctx.reply(`🎲 *${n.toUpperCase()}* integrado ao Dragon Fun 2.0.\nUse *${ctx.prefix}menubn* para iniciar uma rodada ou consultar os jogos disponíveis.`);}
