@@ -54,7 +54,7 @@ import {
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
-  resetDragonRpgUsers, resetAllDragonRpg
+  resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
 } from "./lib/features/rpg/dragonRpg.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
@@ -6435,10 +6435,12 @@ break;
 
 case "habilidade":
 case "rpghabilidade": {
-  const r = rpgSkill(sender);
+  const r = rpgSkill(sender, args?.[0] || "");
   if (!r.ok) {
     if (r.reason === "no_battle") return reply(`🗺️ Você não está em batalha.`);
     if (r.reason === "mana") return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*, você tem *${r.current}*.`);
+    if (r.reason === "skill_level") return reply(`🔒 *${r.skill.name}* exige Nível RPG *${r.required}*.`);
+    if (r.reason === "skill") return reply(`✨ Habilidade inválida. Veja *${prefix}habilidades*.`);
     return reply(`❌ Não foi possível usar a habilidade.`);
   }
   return reply(formatBattleAction(r, prefix));
@@ -6531,6 +6533,13 @@ case "rpgmissao": {
   return reply(`📜 Ação inválida. Use *aceitar* ou *resgatar*.`);
 }
 break;
+
+case "lojarpg": case "rpgloja": { return reply(formatRpgShop(prefix)); } break;
+case "comprarrpg": case "rpgcomprar": { const id=String(args?.[0]||"").toLowerCase(),qty=Number(args?.[1]||1);if(!id)return reply(`🏪 Use: *${prefix}comprarrpg espada_ferro*`);const r=buyRpgItem(sender,id,qty);if(!r.ok){if(r.reason==="gold")return reply(`🪙 Ouro insuficiente. Custa *${r.required}*, você tem *${r.current}*.`);if(r.reason==="level")return reply(`🔒 Exige Nível RPG *${r.required}+*.`);if(r.reason==="class")return reply(`⚔️ Item incompatível com sua classe.`);if(r.reason==="dragon")return reply(`🐉 Item exclusivo para dragões despertos.`);return reply(`❌ Não foi possível comprar. Veja *${prefix}lojarpg*.`);}return reply(`${r.item.icon} *${r.qty}x ${r.item.name}* comprado!\n🪙 -${r.total} • Saldo: *${r.player.gold}*`);} break;
+case "equipamentos": case "rpgequipamentos": {const p=getDragonRpgPlayer(sender);if(!p)return reply(`🌱 Crie seu personagem primeiro.`);return reply(formatRpgEquipment(p,prefix));} break;
+case "equipar": case "rpgequipar": {const r=equipRpgItem(sender,String(args?.[0]||"").toLowerCase());if(!r.ok){if(r.reason==="combat")return reply(`⚔️ Não troque equipamento durante a batalha.`);if(r.reason==="inventory")return reply(`🎒 Você não possui esse equipamento.`);if(r.reason==="level")return reply(`🔒 Exige Nível RPG *${r.required}+*.`);if(r.reason==="class")return reply(`⚔️ Equipamento incompatível com sua classe.`);if(r.reason==="dragon")return reply(`🐉 Exige Despertar Dracônico.`);return reply(`❌ Não foi possível equipar.`);}return reply(`${r.item.icon} *${r.item.name} equipado!*${r.old?`\n↩️ ${r.old.name} foi substituído.`:""}`);} break;
+case "desequipar": case "rpgdesequipar": {const r=unequipRpgItem(sender,String(args?.[0]||"").toLowerCase());if(!r.ok)return reply(r.reason==="combat"?`⚔️ Não troque equipamento durante a batalha.`:`📦 Não há equipamento nesse espaço.`);return reply(`↩️ ${r.item?.icon||"📦"} *${r.item?.name||"Equipamento"}* desequipado.`);} break;
+case "habilidades": case "skillsrpg": case "rpghabilidades": {const text=formatRpgSkills(sender,prefix);if(!text)return reply(`🌱 Crie seu personagem primeiro.`);return reply(text);} break;
 
 case "rankrpg":
 case "rpgrank": {
