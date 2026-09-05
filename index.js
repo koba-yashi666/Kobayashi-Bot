@@ -56,6 +56,7 @@ import {
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
   resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
 } from "./lib/features/rpg/dragonRpg.js";
+import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
@@ -1490,7 +1491,27 @@ if (isCmd) {
     modularCatalog.flatMap((item) => [item.name, ...(item.aliases || [])])
   );
 
-  const modularHandled = await runModularCommand(command, {
+  const DRAGON_RPG_COMMANDS = new Set([
+    "dragonrpg","rpg","menurpg","rpgcriar","criarpersonagem","rpgperfil","perfilrpg",
+    "rpginventario","inventariorpg","rpgclasses","classesrpg","classeinfo","rpgclasseinfo",
+    "rpgclasse","escolherclasse","despertardragao","despertar","rpgfaccao","escolherfaccao",
+    "rpgdragao","escolherdragao","regioes","rpgregioes","explorar","batalhar","atacar",
+    "rpgatacar","defender","rpgdefender","habilidade","rpghabilidade","item","rpgitem",
+    "fugir","rpgfugir","descansar","rpgdescansar","rpgatributo","atributorpg","missoes",
+    "rpgmissoes","missao","rpgmissao","lojarpg","rpgloja","comprarrpg","rpgcomprar",
+    "equipamentos","rpgequipamentos","equipar","rpgequipar","desequipar","rpgdesequipar",
+    "habilidades","skillsrpg","rpghabilidades","rankrpg","rpgrank","rpgajuda","dragonhelp",
+    "rpgcomandos","comandosrpg","zerarrpg","zerarrpgg"
+  ]);
+
+  const dragonRpgModeEnabled = !isGroup || isDragonRpgEnabled(from);
+  const dragonRpgOwnsCommand = DRAGON_RPG_COMMANDS.has(command);
+
+  // Se o Dragon RPG estiver ligado, ele recebe primeiro os aliases compartilhados.
+  // Assim o RPG clássico não consegue responder ao mesmo comando.
+  const skipModularForDragonRpg = dragonRpgModeEnabled && dragonRpgOwnsCommand;
+
+  const modularHandled = skipModularForDragonRpg ? false : await runModularCommand(command, {
     conn,
     info,
     from,
@@ -1516,6 +1537,12 @@ if (isCmd) {
   });
 
   if (modularHandled) {
+    continue;
+  }
+
+  // Dragon RPG desligado = não responde aos comandos dele.
+  // /mododragonrpg fica liberado para que um ADM possa reativá-lo.
+  if (dragonRpgOwnsCommand && !dragonRpgModeEnabled) {
     continue;
   }
 
@@ -6239,6 +6266,29 @@ O primeiro passo para todos agora é:
     console.error("Erro no /zerarrpgg:", error);
     return reply("❌🐉 Não consegui executar o reset global. O banco original foi preservado.");
   }
+}
+break;
+
+case "mododragonrpg":
+case "dragonrpgmode": {
+  if (!isGroup) return reply("🐉 O controle do Dragon RPG é configurado por grupo.");
+  if (!groupAdmins.includes(sender) && !SoDonoPrincipal) {
+    return reply("🛡️ Apenas administradores ou o dono principal podem alterar o Dragon RPG.");
+  }
+
+  const atual = isDragonRpgEnabled(from);
+  const arg = String(args?.[0] || "").trim().toLowerCase();
+  let enabled;
+
+  if (["on","ativar","ligar","1"].includes(arg)) enabled = true;
+  else if (["off","desativar","desligar","0"].includes(arg)) enabled = false;
+  else enabled = !atual;
+
+  setDragonRpgEnabled(from, enabled, sender);
+
+  return reply(enabled
+    ? `🐉🔥 *Dragon RPG ativado neste grupo!*\n\nOs comandos da versão 2.x voltaram a responder.\n🎮 O RPG clássico continua sendo controlado separadamente por *${prefix}modorpg*.`
+    : `🐉💤 *Dragon RPG desativado neste grupo!*\n\nEnquanto estiver desligado, nenhum comando do Dragon RPG responderá.\n🎮 O RPG clássico continua independente em *${prefix}modorpg*.`);
 }
 break;
 

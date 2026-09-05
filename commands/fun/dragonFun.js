@@ -92,18 +92,17 @@ export default {
     const enabled = !rpgEnabled;
     setRpgEnabled(ctx.from, enabled, ctx.sender);
     return ctx.reply(enabled
-      ? "🐉⚔️ *Modo RPG ativado neste grupo!*\nOs comandos do Dragon RPG voltaram a funcionar."
-      : `🐉💤 *Modo RPG desativado neste grupo!*\nUse *${ctx.prefix}modorpg* novamente para reativar.`);
+      ? "🎮⚔️ *RPG clássico ativado neste grupo!*\nOs comandos do RPG clássico voltaram a funcionar."
+      : `🎮💤 *RPG clássico desativado neste grupo!*\nEnquanto estiver desligado, ele não responderá aos comandos.\nUse *${ctx.prefix}modorpg* para reativar.`);
   }
 
   if(["menurpg","rpg"].includes(n)){
-    if(!rpgEnabled) return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n\n🛡️ ADM: use *${ctx.prefix}modorpg* para ativar.`);
-    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}modorpg* para desativar neste grupo.`);
+    if(!rpgEnabled) return;
+    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}modorpg* controla somente o RPG clássico.`);
   }
 
-  if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled){
-    return ctx.reply(`🐉💤 O *Modo RPG está desativado* neste grupo.\n🛡️ Um ADM pode ativar com *${ctx.prefix}modorpg*.`);
-  }
+  // RPG clássico desligado = nenhuma resposta aos comandos desse sistema.
+  if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled) return;
   if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
   if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
   if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);const cap=actionCaption(n,tag(ctx.sender),tag(target));return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}

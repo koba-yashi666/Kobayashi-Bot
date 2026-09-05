@@ -117,5 +117,17 @@
       "A confirmação agora lê o texto completo dos argumentos e normaliza espaços/acentos.",
       "Também aceita confirmar, confirmo, confirmado e sim."
     ]
+  },
+  "v2.0.6": {
+    "version": "2.0.6",
+    "title": "Isolamento Dragon RPG / RPG Clássico",
+    "changes": [
+      "Dragon RPG v2 e RPG clássico agora possuem estados de ativação independentes por grupo.",
+      "Novo /mododragonrpg on/off para controlar somente o Dragon RPG.",
+      "/modorpg continua controlando somente o RPG clássico.",
+      "Sistema desativado fica silencioso e não responde a seus comandos.",
+      "Aliases iguais deixam de gerar resposta cruzada; Dragon RPG tem prioridade quando estiver ativado.",
+      "Configuração do Dragon RPG salva em files/database/dragon-rpg-mode.json."
+    ]
   }
 }
