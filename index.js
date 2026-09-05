@@ -48,6 +48,11 @@ import {
 
 import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsPanel, buildPermissionDiagnostic } from "./lib/ui/adminCenter.js";
 import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
+import {
+  getDragonRpgPlayer, createDragonRpgPlayer, chooseHumanClass, startDragonAwakening,
+  chooseDragonFaction, chooseDragonClass, formatDragonRpgProfile, formatDragonRpgInventory,
+  formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName
+} from "./lib/features/rpg/dragonRpg.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
@@ -6084,6 +6089,170 @@ case "maiddragon": {
     `Grupo principal da nossa comunidade:\n` +
     `https://chat.whatsapp.com/H1oVU0BhQMZAdcI1KiFULO`
   );
+}
+break;
+
+case "dragonrpg":
+case "rpg":
+case "menurpg": {
+  const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
+  const player = getDragonRpgPlayer(sender);
+  return reply(formatRpgMenu(prefix, socialInfo.level, Boolean(player)));
+}
+break;
+
+case "rpgcriar":
+case "criarpersonagem": {
+  const result = createDragonRpgPlayer(sender, pushname || sender.split("@")[0]);
+  if (!result.created) {
+    return reply(`🐉 Você já possui um personagem no Dragon RPG.\n\nUse *${prefix}rpgperfil* para consultar sua ficha.`);
+  }
+  return reply(
+`╭═══❀══〔 🐉 *NOVO AVENTUREIRO* 〕══❀═══╮
+┃ 🌸 Bem-vindo ao *Dragon RPG*!
+┃ 👤 Personagem: *${result.player.name}*
+┃ ⭐ Nível RPG: *1*
+┃ 🪙 Ouro inicial: *100*
+┃ 🎒 Itens iniciais: *2 Poções + 1 Pão*
+╰══════════════════════════════════╯
+
+🧭 Agora escolha seu primeiro caminho:
+*${prefix}rpgclasses*
+
+Depois use:
+*${prefix}rpgclasse escudeiro*
+
+📖 Ficou perdido? *${prefix}rpgajuda 1*`);
+}
+break;
+
+case "rpgperfil":
+case "perfilrpg": {
+  const player = getDragonRpgPlayer(sender);
+  if (!player) return reply(`🌱 Você ainda não entrou no Dragon RPG. Use *${prefix}rpgcriar*.`);
+  const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
+  return reply(formatDragonRpgProfile(player, { socialLevel: socialInfo.level, prefix }));
+}
+break;
+
+case "rpginventario":
+case "inventariorpg": {
+  const player = getDragonRpgPlayer(sender);
+  if (!player) return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+  return reply(formatDragonRpgInventory(player));
+}
+break;
+
+case "rpgclasses":
+case "classesrpg": {
+  return reply(formatRpgClasses(prefix));
+}
+break;
+
+case "classeinfo":
+case "rpgclasseinfo": {
+  const key = String(args?.[0] || "").toLowerCase();
+  if (!key) return reply(`🌸 Informe uma classe. Ex.: *${prefix}classeinfo escudeiro*\n\nVeja todas em *${prefix}rpgclasses*.`);
+  return reply(formatClassInfo(key, prefix));
+}
+break;
+
+case "rpgclasse":
+case "escolherclasse": {
+  const key = String(args?.[0] || "").toLowerCase();
+  if (!key) return reply(`⚔️ Escolha uma classe. Ex.: *${prefix}rpgclasse escudeiro*\n\nVeja: *${prefix}rpgclasses*`);
+  const result = chooseHumanClass(sender, key);
+  if (!result.ok) {
+    if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (result.reason === "already") return reply(`🔒 Sua classe humana já foi escolhida e não pode ser trocada nesta versão.\n\nUse *${prefix}rpgperfil* para ver sua ficha.`);
+    return reply(`❌ Classe inválida. Use *${prefix}rpgclasses* para ver as opções.`);
+  }
+  return reply(`╭━━〔 ${result.klass.icon} *CLASSE DESPERTADA* 〕━━╮\n┃ Você agora é *${result.klass.name}*!\n┃ 🎯 Função: *${result.klass.role}*\n╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n${result.klass.desc}\n\n🐉 Veja seus novos atributos em *${prefix}rpgperfil*.`);
+}
+break;
+
+case "despertardragao":
+case "despertar": {
+  const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
+  const result = startDragonAwakening(sender, socialInfo.level);
+  if (!result.ok) {
+    if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (result.reason === "class") return reply(`⚔️ Você precisa escolher uma classe humana antes. Use *${prefix}rpgclasses*.`);
+    if (result.reason === "social_level") return reply(`🔒 *DESPERTAR BLOQUEADO*\n\n🌟 Seu Level social: *${result.current}*\n🐉 Requisito: *Level 20*\n\nContinue participando do grupo e evoluindo no sistema de níveis da Kobayashi.`);
+    if (result.reason === "completed") return reply(`🐲 Seu Despertar Dracônico já foi concluído. Veja *${prefix}rpgperfil*.`);
+  }
+  return reply(
+`╭═══🔥══〔 🐉 *DESPERTAR DRACÔNICO* 〕══🔥═══╮
+┃ O poder adormecido dentro de você respondeu.
+┃ As escamas ainda não surgiram... mas o caminho abriu.
+╰════════════════════════════════════╯
+
+🏰 Escolha sua facção:
+🔥 *caos*
+⚖️ *harmonia*
+👁️ *espectador*
+⚡ *independente*
+
+Use: *${prefix}rpgfaccao caos*
+
+⚠️ A escolha da facção é permanente nesta versão.`);
+}
+break;
+
+case "rpgfaccao":
+case "escolherfaccao": {
+  const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
+  const key = String(args?.[0] || "").toLowerCase();
+  if (!key) return reply(`🏰 Escolha: *caos*, *harmonia*, *espectador* ou *independente*.\nEx.: *${prefix}rpgfaccao caos*`);
+  const result = chooseDragonFaction(sender, key, socialInfo.level);
+  if (!result.ok) {
+    if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (result.reason === "locked") return reply(`🔒 Primeiro alcance Level social 20 e use *${prefix}despertardragao*.`);
+    if (result.reason === "already") return reply(`🔒 Você já pertence à facção *${factionName(result.player.faction)}*.`);
+    return reply(`❌ Facção inválida. Escolha: *caos*, *harmonia*, *espectador* ou *independente*.`);
+  }
+  return reply(`${result.faction.icon} Você jurou seu caminho à facção *${result.faction.name}*.\n\n${result.faction.desc}\n\n🐉 Agora veja as linhagens em *${prefix}rpgclasses* e escolha com *${prefix}rpgdragao <classe>*.`);
+}
+break;
+
+case "rpgdragao":
+case "escolherdragao": {
+  const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
+  const key = String(args?.[0] || "").toLowerCase();
+  if (!key) return reply(`🐉 Informe a linhagem dracônica. Ex.: *${prefix}rpgdragao chamas*\n\nVeja *${prefix}rpgclasses*.`);
+  const result = chooseDragonClass(sender, key, socialInfo.level);
+  if (!result.ok) {
+    if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (result.reason === "locked") return reply(`🔒 O Despertar ainda está bloqueado. Use *${prefix}despertardragao* quando atingir Level social 20.`);
+    if (result.reason === "faction") return reply(`🏰 Escolha sua facção primeiro com *${prefix}rpgfaccao <facção>*.`);
+    if (result.reason === "already") return reply(`🐲 Você já possui uma forma dracônica e não pode trocá-la nesta versão.`);
+    if (result.reason === "faction_mismatch") return reply(`⚠️ Essa linhagem pertence à facção *${factionName(result.required)}*.\n\nUse *${prefix}rpgclasses* para encontrar uma linhagem compatível com sua facção.`);
+    return reply(`❌ Linhagem inválida. Use *${prefix}rpgclasses*.`);
+  }
+  return reply(
+`╭═══🔥══〔 ${result.klass.icon} *DRAGÃO DESPERTO* 〕══🔥═══╮
+┃ Sua transformação foi concluída!
+┃ 🐲 Classe: *${result.klass.name}*
+┃ 🎯 Função: *${result.klass.role}*
+┃ ✨ Inspiração: *${result.klass.inspiration}*
+╰════════════════════════════════════╯
+
+${result.klass.desc}
+
+🌸 Sua ficha recebeu os bônus dracônicos.
+Veja: *${prefix}rpgperfil*`);
+}
+break;
+
+case "rpgajuda":
+case "dragonhelp": {
+  return reply(formatRpgHelp(args?.[0] || "", prefix));
+}
+break;
+
+case "rpgcomandos":
+case "comandosrpg": {
+  return reply(formatRpgCommands(prefix));
 }
 break;
 

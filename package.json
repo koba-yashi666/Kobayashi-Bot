@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "1.0.19",
-  "description": "Kobayashi Bot v1.0.13 Stable - Menu Sakura Refresh + HelpCMD",
+  "version": "2.0.0",
+  "description": "Kobayashi Bot v2.0.0 - Dragon RPG Foundation",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

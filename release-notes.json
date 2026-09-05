@@ -68,5 +68,20 @@
       "/ppt ganhou instruções e resultado visual melhores.",
       "/helpcmd recebeu explicações para mais comandos do Salão de Brincadeiras."
     ]
+  },
+  "v2.0.0": {
+    "version": "2.0.0",
+    "title": "Dragon RPG - Fundação",
+    "changes": [
+      "Início oficial do Dragon RPG da Kobayashi.",
+      "Novo menu /dragonrpg com tutorial e manual para iniciantes.",
+      "Criação de personagem persistente com nível RPG, XP, ouro, atributos, inventário e equipamentos.",
+      "Classes humanas iniciais: Escudeiro, Guerreiro, Mago, Arqueiro e Curandeiro.",
+      "Despertar Dracônico integrado ao Level social existente, desbloqueado no nível 20.",
+      "Facções dracônicas: Caos, Harmonia, Espectadores e Independente.",
+      "Linhagens dracônicas inspiradas em Maid Dragon: Chamas/Tohru, Abissal/Fafnir, Carmesim/Ilulu, Aquático/Elma, Arcano/Lucoa e Elétrico/Kanna.",
+      "Comandos /rpgajuda, /classeinfo e /rpgcomandos para explicar o sistema sem confundir novos jogadores.",
+      "Sistema isolado em lib/features/rpg/dragonRpg.js com banco próprio files/database/dragon-rpg.json criado automaticamente."
+    ]
   }
 }
