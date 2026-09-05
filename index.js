@@ -54,7 +54,7 @@ import {
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
-  resetDragonRpgPlayers, resetAllDragonRpg
+  formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills, resetRpgUsers, resetRpgGlobal
 } from "./lib/features/rpg/dragonRpg.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
@@ -6095,44 +6095,6 @@ case "maiddragon": {
 }
 break;
 
-case "rezarrpg": {
-  if (!SoDono) return reply(mess.onlyOwner());
-  if (!isGroup) return reply("🐉 Este comando só pode ser usado dentro de um grupo.");
-
-  const memberJids = (Array.isArray(groupMembers) ? groupMembers : [])
-    .map((p) => p?.id || p?.jid || p?.participant)
-    .filter(Boolean);
-
-  const result = resetDragonRpgPlayers(memberJids, `grupo-${from}`);
-  return reply(
-`╭━━〔 🧹 *RESET DRAGON RPG* 〕━━╮
-┃ 👑 Executado pelo dono do bot
-┃ 👥 Grupo atual resetado
-┃ 🐉 Personagens removidos: *${result.removed}*
-┃ 💾 Backup automático: *${result.backup ? "criado" : "não necessário"}*
-╰━━━━━━━━━━━━━━━━━━━━━━╯
-
-🌸 O Dragon RPG dos membros deste grupo voltou ao zero.`
-  );
-}
-break;
-
-case "regrarrpgg": {
-  if (!SoDono) return reply(mess.onlyOwner());
-  const result = resetAllDragonRpg("global");
-  return reply(
-`╭━━〔 ☄️ *RESET GLOBAL DRAGON RPG* 〕━━╮
-┃ 👑 Executado pelo dono do bot
-┃ 🌐 Todos os grupos foram resetados
-┃ 🐉 Personagens removidos: *${result.removed}*
-┃ 💾 Backup automático: *${result.backup ? "criado" : "não necessário"}*
-╰━━━━━━━━━━━━━━━━━━━━━━━━╯
-
-🔥 Todo o banco do Dragon RPG foi zerado.`
-  );
-}
-break;
-
 case "dragonrpg":
 case "rpg":
 case "menurpg": {
@@ -6326,10 +6288,11 @@ break;
 
 case "habilidade":
 case "rpghabilidade": {
-  const r = rpgSkill(sender);
+  const r = rpgSkill(sender, args?.[0] || 1);
   if (!r.ok) {
     if (r.reason === "no_battle") return reply(`🗺️ Você não está em batalha.`);
     if (r.reason === "mana") return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*, você tem *${r.current}*.`);
+    if (r.reason === "level") return reply(`🔒 Essa habilidade exige Nível RPG *${r.required}+*. Seu nível: *${r.current}*.`);
     return reply(`❌ Não foi possível usar a habilidade.`);
   }
   return reply(formatBattleAction(r, prefix));
@@ -6420,6 +6383,89 @@ case "rpgmissao": {
     return reply(`🎁 *MISSÃO CONCLUÍDA!*\n${r.quest.title}\n✨ +${r.quest.xp} XP RPG\n🪙 +${r.quest.gold} ouro${r.quest.item ? `\n📦 +${r.quest.item.qty || 1} ${r.quest.item.name}` : ""}${r.levels.length ? `\n🌟 Você subiu para o Nível RPG *${r.player.level}*!` : ""}`);
   }
   return reply(`📜 Ação inválida. Use *aceitar* ou *resgatar*.`);
+}
+break;
+
+case "lojarpg":
+case "rpgloja": {
+  return reply(formatRpgShop(prefix));
+}
+break;
+
+case "comprarrpg":
+case "rpgcomprar": {
+  const itemId = String(args?.[0] || "").toLowerCase();
+  const qty = Number(args?.[1] || 1);
+  if (!itemId) return reply(`🏪 Veja os itens em *${prefix}lojarpg*.\nComprar: *${prefix}comprarrpg espada_ferro*`);
+  const r = buyRpgItem(sender, itemId, qty);
+  if (!r.ok) {
+    if (r.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (r.reason === "item") return reply(`❌ Item não encontrado. Veja *${prefix}lojarpg*.`);
+    if (r.reason === "level") return reply(`🔒 Requer Nível RPG *${r.required}+*.`);
+    if (r.reason === "gold") return reply(`🪙 Ouro insuficiente. Precisa de *${r.required}*, você tem *${r.current}*.`);
+  }
+  return reply(`🛒 Compra concluída!\n${r.item.icon} *${r.item.name}* ×${r.qty}\n🪙 -${r.total} ouro\n💰 Saldo: *${r.player.gold}*`);
+}
+break;
+
+case "equipar":
+case "rpgequipar": {
+  const itemId=String(args?.[0]||"").toLowerCase();
+  if(!itemId) return reply(`⚙️ Use: *${prefix}equipar espada_ferro*\nVeja: *${prefix}rpginventario*`);
+  const r=equipRpgItem(sender,itemId);
+  if(!r.ok){
+    if(r.reason==="combat") return reply(`⚔️ Termine a batalha antes de trocar equipamentos.`);
+    if(r.reason==="level") return reply(`🔒 Esse equipamento exige Nível RPG *${r.required}+*.`);
+    if(r.reason==="already") return reply(`✅ Esse item já está equipado.`);
+    return reply(`❌ Você não possui esse equipamento no inventário.`);
+  }
+  return reply(`⚙️ ${r.item.icon} *${r.item.name}* equipado com sucesso!\n📊 Seus atributos foram atualizados.`);
+}
+break;
+
+case "desequipar":
+case "rpgdesequipar": {
+  const slot=String(args?.[0]||"").toLowerCase();
+  if(!slot) return reply(`📤 Use: *${prefix}desequipar arma*, *armadura* ou *acessorio*.`);
+  const r=unequipRpgItem(sender,slot);
+  if(!r.ok){
+    if(r.reason==="combat") return reply(`⚔️ Termine a batalha antes de trocar equipamentos.`);
+    if(r.reason==="empty") return reply(`📭 Esse espaço já está vazio.`);
+    return reply(`❌ Slot inválido. Use arma, armadura ou acessorio.`);
+  }
+  return reply(`📤 ${r.item.icon} *${r.item.name}* foi removido e voltou ao inventário.`);
+}
+break;
+
+case "equipamentos":
+case "rpgequipamentos": {
+  const text=formatRpgEquipment(sender,prefix);
+  if(!text) return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+  return reply(text);
+}
+break;
+
+case "habilidades":
+case "rpghabilidades": {
+  const text=formatRpgSkills(sender,prefix);
+  if(!text) return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+  return reply(text);
+}
+break;
+
+case "zerarrpg": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode zerar o Dragon RPG.");
+  if (!isGroup) return reply("🐉 Use este comando dentro do grupo que deseja zerar.");
+  const memberJids = (groupMembers || []).map((p) => normalizeJid(p?.id || p?.jid || p?.participant)).filter(Boolean);
+  const r = resetRpgUsers(memberJids);
+  return reply(`🧹🐉 *DRAGON RPG ZERADO NESTE GRUPO*\n\n👥 Personagens apagados: *${r.count}*\n🌱 Todos os membros afetados voltaram ao zero e precisarão usar *${prefix}rpgcriar* novamente.`);
+}
+break;
+
+case "zerarrpgg": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode zerar globalmente o Dragon RPG.");
+  const r = resetRpgGlobal();
+  return reply(`☢️🐉 *RESET GLOBAL DO DRAGON RPG*\n\n🌎 Personagens apagados: *${r.count}*\n👑 O RPG do dono também foi zerado.\n🌱 Todos os jogadores de todos os grupos voltaram ao zero.`);
 }
 break;
 

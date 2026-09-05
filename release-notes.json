@@ -98,11 +98,13 @@
   },
   "v2.0.2": {
     "version": "2.0.2",
-    "title": "Dragon RPG Reset Tools",
+    "title": "Dragon RPG Equipamentos & Reset",
     "changes": [
-      "Adicionado /rezarrpg exclusivo do dono para zerar o RPG dos membros do grupo atual.",
-      "Adicionado /regrarrpgg exclusivo do dono para zerar todo o Dragon RPG global.",
-      "Backups automáticos são criados antes de qualquer reset destrutivo."
+      "Loja RPG, armas, armaduras e acessórios com raridades.",
+      "Equipar e desequipar altera atributos.",
+      "Segunda habilidade por classe com requisito de nível.",
+      "/zerarrpg exclusivo do dono principal para zerar os membros do grupo atual.",
+      "/zerarrpgg exclusivo do dono principal para zerar todo o Dragon RPG global, incluindo o próprio dono."
     ]
   }
 }
