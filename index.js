@@ -53,7 +53,8 @@ import {
   chooseDragonFaction, chooseDragonClass, formatDragonRpgProfile, formatDragonRpgInventory,
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
-  rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank
+  rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
+  resetDragonRpgPlayers, resetAllDragonRpg
 } from "./lib/features/rpg/dragonRpg.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
@@ -6090,6 +6091,44 @@ case "maiddragon": {
     `🐉🌸 *MAID DRAGON*\n\n` +
     `Grupo principal da nossa comunidade:\n` +
     `https://chat.whatsapp.com/H1oVU0BhQMZAdcI1KiFULO`
+  );
+}
+break;
+
+case "rezarrpg": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  if (!isGroup) return reply("🐉 Este comando só pode ser usado dentro de um grupo.");
+
+  const memberJids = (Array.isArray(groupMembers) ? groupMembers : [])
+    .map((p) => p?.id || p?.jid || p?.participant)
+    .filter(Boolean);
+
+  const result = resetDragonRpgPlayers(memberJids, `grupo-${from}`);
+  return reply(
+`╭━━〔 🧹 *RESET DRAGON RPG* 〕━━╮
+┃ 👑 Executado pelo dono do bot
+┃ 👥 Grupo atual resetado
+┃ 🐉 Personagens removidos: *${result.removed}*
+┃ 💾 Backup automático: *${result.backup ? "criado" : "não necessário"}*
+╰━━━━━━━━━━━━━━━━━━━━━━╯
+
+🌸 O Dragon RPG dos membros deste grupo voltou ao zero.`
+  );
+}
+break;
+
+case "regrarrpgg": {
+  if (!SoDono) return reply(mess.onlyOwner());
+  const result = resetAllDragonRpg("global");
+  return reply(
+`╭━━〔 ☄️ *RESET GLOBAL DRAGON RPG* 〕━━╮
+┃ 👑 Executado pelo dono do bot
+┃ 🌐 Todos os grupos foram resetados
+┃ 🐉 Personagens removidos: *${result.removed}*
+┃ 💾 Backup automático: *${result.backup ? "criado" : "não necessário"}*
+╰━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+🔥 Todo o banco do Dragon RPG foi zerado.`
   );
 }
 break;

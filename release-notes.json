@@ -95,5 +95,14 @@
       "Missões com progresso automático, recompensas e até três missões ativas.",
       "Descanso com cooldown, derrota sem perda de personagem e rank RPG global."
     ]
+  },
+  "v2.0.2": {
+    "version": "2.0.2",
+    "title": "Dragon RPG Reset Tools",
+    "changes": [
+      "Adicionado /rezarrpg exclusivo do dono para zerar o RPG dos membros do grupo atual.",
+      "Adicionado /regrarrpgg exclusivo do dono para zerar todo o Dragon RPG global.",
+      "Backups automáticos são criados antes de qualquer reset destrutivo."
+    ]
   }
 }
