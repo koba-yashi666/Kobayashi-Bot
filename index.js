@@ -644,16 +644,26 @@ if (!body && type === "stickerMessage") {
 }
 
 const isCmd = body.startsWith(prefix);
+
+// Parser universal de comandos:
+// lê a mensagem inteira depois do prefixo e separa comando + complementos.
+// Ex.: /dragonrpg off -> rawCommand="dragonrpg", args=["off"], q="off".
+const fullCommandText = isCmd ? body.slice(prefix.length).trim() : "";
+const commandParts = fullCommandText ? fullCommandText.split(/\s+/) : [];
 const rawCommand = isCmd
-  ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase()
+  ? String(commandParts.shift() || "").toLowerCase()
   : null;
 
 const command = isCmd
   ? resolveCommandAlias(rawCommand)
   : null;
 
-const args = body.trim().split(/ +/).slice(1);
-const q = args.join(" ");
+// Complementos preservados para TODOS os comandos.
+const args = commandParts;
+const q = args.join(" ").trim();
+const commandWithArgs = isCmd
+  ? `${command || rawCommand}${q ? ` ${q}` : ""}`
+  : "";
 
 let groupMetadata = "";
 try {
@@ -1519,6 +1529,8 @@ if (isCmd) {
     command,
     args,
     q,
+    fullCommandText,
+    commandWithArgs,
     prefix,
     reply,
     reagir,
@@ -1542,7 +1554,11 @@ if (isCmd) {
 
   // Dragon RPG desligado = não responde aos comandos dele.
   // /mododragonrpg fica liberado para que um ADM possa reativá-lo.
-  if (dragonRpgOwnsCommand && !dragonRpgModeEnabled) {
+  const dragonRpgInlineModeArg =
+    command === "dragonrpg" &&
+    ["on","off","ativar","desativar","ligar","desligar","1","0"].includes(String(args?.[0] || "").toLowerCase());
+
+  if (dragonRpgOwnsCommand && !dragonRpgModeEnabled && !dragonRpgInlineModeArg) {
     continue;
   }
 
@@ -6295,6 +6311,28 @@ break;
 case "dragonrpg":
 case "rpg":
 case "menurpg": {
+  // /dragonrpg on|off controla o modo usando a mensagem completa.
+  // /dragonrpg sem complemento continua abrindo o menu.
+  if (command === "dragonrpg" && args?.length) {
+    const arg = String(q || args[0] || "").trim().toLowerCase();
+    const onArgs = ["on","ativar","ligar","1"];
+    const offArgs = ["off","desativar","desligar","0"];
+
+    if (onArgs.includes(arg) || offArgs.includes(arg)) {
+      if (!isGroup) return reply("🐉 O Dragon RPG é configurado por grupo.");
+      if (!groupAdmins.includes(sender) && !SoDonoPrincipal) {
+        return reply("🛡️ Apenas administradores ou o dono principal podem alterar o Dragon RPG.");
+      }
+
+      const enabled = onArgs.includes(arg);
+      setDragonRpgEnabled(from, enabled, sender);
+
+      return reply(enabled
+        ? `🐉🔥 *Dragon RPG ativado neste grupo!*\n\n✅ Comando reconhecido: *${prefix}${commandWithArgs}*`
+        : `🐉💤 *Dragon RPG desativado neste grupo!*\n\n✅ Comando reconhecido: *${prefix}${commandWithArgs}*`);
+    }
+  }
+
   const socialInfo = getLevelInfoFromXp(getUserActivity(from, sender)?.xp || 0);
   const player = getDragonRpgPlayer(sender);
   return reply(formatRpgMenu(prefix, socialInfo.level, Boolean(player)));

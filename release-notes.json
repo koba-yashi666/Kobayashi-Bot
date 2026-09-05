@@ -129,5 +129,17 @@
       "Aliases iguais deixam de gerar resposta cruzada; Dragon RPG tem prioridade quando estiver ativado.",
       "Configuração do Dragon RPG salva em files/database/dragon-rpg-mode.json."
     ]
+  },
+  "v2.0.7": {
+    "version": "2.0.7",
+    "title": "Emergency Full Command Arguments Fix",
+    "changes": [
+      "Parser global agora reconhece a mensagem completa após o prefixo.",
+      "Argumentos são preservados para comandos switch e modulares.",
+      "Espaços múltiplos, tabs e quebras de linha são aceitos entre comando e complemento.",
+      "/dragonrpg on e /dragonrpg off agora funcionam diretamente.",
+      "/dragonrpg sem complemento continua abrindo o menu.",
+      "Dragon RPG pode ser reativado com /dragonrpg on mesmo quando estiver desligado."
+    ]
   }
 }
