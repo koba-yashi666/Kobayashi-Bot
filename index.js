@@ -6103,8 +6103,17 @@ case "zerarrpg": {
     return reply(`🐉 Esse comando funciona dentro de um grupo.\n\nUse *${prefix}zerarrpgg* para zerar o Dragon RPG global.`);
   }
 
-  const confirmation = String(args?.[0] || "").toLowerCase();
-  if (!["confirmar", "confirmo", "sim"].includes(confirmation)) {
+  const confirmation = String(
+    q ||
+    (Array.isArray(args) ? args.join(" ") : "") ||
+    ""
+  )
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/g, "");
+  if (!["confirmar", "confirmo", "sim", "confirmado"].includes(confirmation)) {
     return reply(
 `⚠️🐉 *RESET DO DRAGON RPG — GRUPO*
 
@@ -6178,8 +6187,17 @@ case "zerarrpgg": {
     return reply("👑 Apenas o dono principal da Kobayashi pode zerar o Dragon RPG global.");
   }
 
-  const confirmation = String(args?.[0] || "").toLowerCase();
-  if (!["confirmar", "confirmo", "sim"].includes(confirmation)) {
+  const confirmation = String(
+    q ||
+    (Array.isArray(args) ? args.join(" ") : "") ||
+    ""
+  )
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/g, "");
+  if (!["confirmar", "confirmo", "sim", "confirmado"].includes(confirmation)) {
     return reply(
 `🚨🐉 *RESET GLOBAL DO DRAGON RPG*
 

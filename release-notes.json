@@ -107,5 +107,15 @@
       "O Level social normal da Kobayashi não é apagado pelos resets RPG.",
       "Menu do dono e /helpcmd atualizados com os novos comandos."
     ]
+  },
+  "v2.0.4": {
+    "version": "2.0.4",
+    "title": "Dragon RPG Reset Confirmation Fix",
+    "changes": [
+      "Corrigido /zerarrpg confirmar que podia repetir a tela de confirmação.",
+      "Corrigido /zerarrpgg confirmar pelo mesmo mecanismo.",
+      "A confirmação agora lê o texto completo dos argumentos e normaliza espaços/acentos.",
+      "Também aceita confirmar, confirmo, confirmado e sim."
+    ]
   }
 }
