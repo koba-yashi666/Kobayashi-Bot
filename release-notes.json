@@ -96,15 +96,16 @@
       "Descanso com cooldown, derrota sem perda de personagem e rank RPG global."
     ]
   },
-  "v2.0.2": {
-    "version": "2.0.2",
-    "title": "Dragon RPG Equipamentos & Reset",
+  "v2.0.3": {
+    "version": "2.0.3",
+    "title": "Dragon RPG Reset System",
     "changes": [
-      "Loja RPG, armas, armaduras e acessórios com raridades.",
-      "Equipar e desequipar altera atributos.",
-      "Segunda habilidade por classe com requisito de nível.",
-      "/zerarrpg exclusivo do dono principal para zerar os membros do grupo atual.",
-      "/zerarrpgg exclusivo do dono principal para zerar todo o Dragon RPG global, incluindo o próprio dono."
+      "Novo /zerarrpg: exclusivo do dono principal, zera o progresso RPG dos membros do grupo atual.",
+      "Novo /zerarrpgg: exclusivo do dono principal, apaga globalmente todos os personagens Dragon RPG, incluindo o dono do bot.",
+      "Os dois resets exigem confirmação explícita para evitar exclusões acidentais.",
+      "Backup automático do banco Dragon RPG é criado antes de qualquer reset que apague personagens.",
+      "O Level social normal da Kobayashi não é apagado pelos resets RPG.",
+      "Menu do dono e /helpcmd atualizados com os novos comandos."
     ]
   }
 }
