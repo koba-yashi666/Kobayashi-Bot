@@ -1,6 +1,6 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Kobayashi Bot v2.0.0 - Dragon RPG Foundation",
   "main": "bootstrap.js",
   "type": "module",

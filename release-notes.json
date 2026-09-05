@@ -83,5 +83,17 @@
       "Comandos /rpgajuda, /classeinfo e /rpgcomandos para explicar o sistema sem confundir novos jogadores.",
       "Sistema isolado em lib/features/rpg/dragonRpg.js com banco próprio files/database/dragon-rpg.json criado automaticamente."
     ]
+  },
+  "v2.0.1": {
+    "version": "2.0.1",
+    "title": "Dragon RPG - Batalhas e Missões",
+    "changes": [
+      "Combate PvE por turnos com atacar, defender, habilidade, itens e fuga.",
+      "Cinco regiões de exploração e oito tipos de monstros escaláveis.",
+      "XP RPG, level up, pontos distribuíveis e recuperação de HP/Mana.",
+      "Drops de materiais e consumíveis integrados ao inventário.",
+      "Missões com progresso automático, recompensas e até três missões ativas.",
+      "Descanso com cooldown, derrota sem perda de personagem e rank RPG global."
+    ]
   }
 }

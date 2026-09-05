@@ -51,7 +51,9 @@ import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
 import {
   getDragonRpgPlayer, createDragonRpgPlayer, chooseHumanClass, startDragonAwakening,
   chooseDragonFaction, chooseDragonClass, formatDragonRpgProfile, formatDragonRpgInventory,
-  formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName
+  formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
+  formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
+  rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank
 } from "./lib/features/rpg/dragonRpg.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
@@ -6241,6 +6243,150 @@ ${result.klass.desc}
 
 🌸 Sua ficha recebeu os bônus dracônicos.
 Veja: *${prefix}rpgperfil*`);
+}
+break;
+
+case "regioes":
+case "rpgregioes": {
+  return reply(formatRpgRegions(prefix));
+}
+break;
+
+case "explorar":
+case "batalhar": {
+  const region = String(args?.[0] || "floresta").toLowerCase();
+  const result = startRpgBattle(sender, region);
+  if (!result.ok) {
+    if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+    if (result.reason === "class") return reply(`⚔️ Escolha uma classe primeiro com *${prefix}rpgclasse <classe>*.`);
+    if (result.reason === "active") return reply(`⚠️ Você já está em batalha. Use *${prefix}atacar*, *${prefix}habilidade*, *${prefix}defender* ou *${prefix}fugir*.`);
+    if (result.reason === "defeated") return reply(`☠️ Você está sem HP. Use *${prefix}descansar* antes de explorar novamente.`);
+    if (result.reason === "level") return reply(`🔒 Essa região exige Nível RPG *${result.required}+*. Seu nível: *${result.current}*.`);
+    if (result.reason === "dragon_required") return reply(`🐉 O Reino dos Dragões exige que seu Despertar Dracônico esteja completo.`);
+    return reply(`❌ Região inválida. Veja *${prefix}regioes*.`);
+  }
+  return reply(formatBattleStart(result, prefix));
+}
+break;
+
+case "atacar":
+case "rpgatacar": {
+  const r = rpgAttack(sender);
+  if (!r.ok) return reply(r.reason === "no_battle" ? `🗺️ Você não está em batalha. Use *${prefix}explorar floresta*.` : `🌱 Crie seu personagem primeiro.`);
+  return reply(formatBattleAction(r, prefix));
+}
+break;
+
+case "defender":
+case "rpgdefender": {
+  const r = rpgDefend(sender);
+  if (!r.ok) return reply(`🗺️ Você não está em batalha. Use *${prefix}explorar floresta*.`);
+  return reply(formatBattleAction(r, prefix));
+}
+break;
+
+case "habilidade":
+case "rpghabilidade": {
+  const r = rpgSkill(sender);
+  if (!r.ok) {
+    if (r.reason === "no_battle") return reply(`🗺️ Você não está em batalha.`);
+    if (r.reason === "mana") return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*, você tem *${r.current}*.`);
+    return reply(`❌ Não foi possível usar a habilidade.`);
+  }
+  return reply(formatBattleAction(r, prefix));
+}
+break;
+
+case "item":
+case "rpgitem": {
+  const key = String(args?.[0] || "pocao").toLowerCase();
+  const r = rpgUseItem(sender, key);
+  if (!r.ok) {
+    if (r.reason === "no_battle") return reply(`🗺️ Itens de batalha são usados durante um combate.`);
+    if (r.reason === "item") return reply(`🎒 Você não possui esse item. Veja *${prefix}rpginventario*.`);
+    return reply(`❌ Esse item não pode ser usado agora.`);
+  }
+  if (r.counter?.defeated) return reply(`🧪 Você usou *${r.item.name}*, mas o inimigo contra-atacou e você foi derrotado.\n🏕️ Use *${prefix}descansar*.`);
+  return reply(`🧪 Você usou *${r.item.name}*.${r.heal ? ` ❤️ +${r.heal} HP.` : ""}${r.mana ? ` 🔷 +${r.mana} Mana.` : ""}\n💥 O inimigo contra-atacou: *${r.counter.damage}* de dano.\n❤️ HP: *${r.player.resources.hp}/${r.player.stats.hp}*`);
+}
+break;
+
+case "fugir":
+case "rpgfugir": {
+  const r = rpgFlee(sender);
+  if (!r.ok) return reply(`🗺️ Você não está em batalha.`);
+  if (r.escaped) return reply(`🏃💨 Você conseguiu escapar da batalha!`);
+  if (r.counter?.defeated) return reply(`❌ A fuga falhou e o inimigo te derrotou.\n🏕️ Use *${prefix}descansar*.`);
+  return reply(`❌ A fuga falhou! O inimigo causou *${r.counter.damage}* de dano.\n❤️ HP: *${r.player.resources.hp}/${r.player.stats.hp}*`);
+}
+break;
+
+case "descansar":
+case "rpgdescansar": {
+  const r = rpgRest(sender);
+  if (!r.ok) {
+    if (r.reason === "combat") return reply(`⚔️ Você não pode descansar no meio de uma batalha.`);
+    if (r.reason === "cooldown") { const min = Math.ceil(r.remaining / 60000); return reply(`🏕️ Você já descansou recentemente. Tente novamente em cerca de *${min} min*.`); }
+    return reply(`🌱 Crie seu personagem primeiro.`);
+  }
+  return reply(`🏕️✨ Você descansou e recuperou completamente suas forças.\n❤️ HP: *${r.player.resources.hp}/${r.player.stats.hp}*\n🔷 Mana: *${r.player.resources.mana}/${r.player.stats.mana}*`);
+}
+break;
+
+case "rpgatributo":
+case "atributorpg": {
+  const stat = String(args?.[0] || "").toLowerCase();
+  const pts = Number(args?.[1] || 1);
+  if (!stat) return reply(`📊 Use: *${prefix}rpgatributo atk 1*\nOpções: hp, mana, atk, def, mag, agi`);
+  const r = rpgSpendStat(sender, stat, pts);
+  if (!r.ok) {
+    if (r.reason === "points") return reply(`🎯 Pontos insuficientes. Você possui *${r.current}*.`);
+    if (r.reason === "stat") return reply(`❌ Atributo inválido. Use: hp, mana, atk, def, mag ou agi.`);
+    return reply(`🌱 Crie seu personagem primeiro.`);
+  }
+  return reply(`📈 Atributo melhorado! *${r.stat.toUpperCase()} +${r.gain}*\n🎯 Pontos restantes: *${r.player.statPoints}*`);
+}
+break;
+
+case "missoes":
+case "rpgmissoes": {
+  const text = formatRpgQuests(sender, prefix);
+  if (!text) return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+  return reply(text);
+}
+break;
+
+case "missao":
+case "rpgmissao": {
+  const action = String(args?.[0] || "").toLowerCase();
+  const id = String(args?.[1] || "");
+  if (!action || !id) return reply(`📜 Use:\n*${prefix}missao aceitar q_slimes*\n*${prefix}missao resgatar q_slimes*\n\nVeja *${prefix}missoes*.`);
+  if (["aceitar", "accept"].includes(action)) {
+    const r = acceptRpgQuest(sender, id);
+    if (!r.ok) {
+      if (r.reason === "level") return reply(`🔒 Essa missão exige Nível RPG *${r.required}+*.`);
+      if (r.reason === "completed") return reply(`✅ Você já concluiu essa missão.`);
+      if (r.reason === "active") return reply(`🟡 Essa missão já está ativa.`);
+      if (r.reason === "limit") return reply(`📜 Você já possui 3 missões ativas. Conclua alguma primeiro.`);
+      return reply(`❌ Missão inválida. Veja *${prefix}missoes*.`);
+    }
+    return reply(`📜 Missão aceita: *${r.quest.title}*\n${r.quest.desc}\n\nO progresso será contado automaticamente.`);
+  }
+  if (["resgatar", "claim", "receber"].includes(action)) {
+    const r = claimRpgQuest(sender, id);
+    if (!r.ok) {
+      if (r.reason === "progress") return reply(`⏳ Missão ainda incompleta: *${r.progress}/${r.target}*.`);
+      return reply(`❌ Essa missão não está pronta para resgate.`);
+    }
+    return reply(`🎁 *MISSÃO CONCLUÍDA!*\n${r.quest.title}\n✨ +${r.quest.xp} XP RPG\n🪙 +${r.quest.gold} ouro${r.quest.item ? `\n📦 +${r.quest.item.qty || 1} ${r.quest.item.name}` : ""}${r.levels.length ? `\n🌟 Você subiu para o Nível RPG *${r.player.level}*!` : ""}`);
+  }
+  return reply(`📜 Ação inválida. Use *aceitar* ou *resgatar*.`);
+}
+break;
+
+case "rankrpg":
+case "rpgrank": {
+  return reply(formatRpgRank(10));
 }
 break;
 
