@@ -177,5 +177,16 @@
       "Remoção automática da lista negra local não expulsa whitelist.",
       "Comandos manuais de ADM continuam disponíveis."
     ]
+  },
+  "v2.0.12": {
+    "version": "2.0.12",
+    "title": "Lista Branca Hard Guard",
+    "changes": [
+      "Proteção de whitelist movida para o nível do socket groupParticipantsUpdate.",
+      "Qualquer tentativa de remoção pelo bot é filtrada antes de chegar ao WhatsApp.",
+      "Aliases LID/PN/phoneNumber/JID são salvos ao adicionar à Lista Branca.",
+      "Membro protegido não pode ser removido nem por /ban enquanto estiver na Lista Branca.",
+      "Para banir, primeiro remova da Lista Branca."
+    ]
   }
 }

@@ -1476,6 +1476,99 @@ const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
 
+// 🤍 WHITELIST HARD GUARD • v2.0.12
+// Proteção no nível do socket: qualquer remoção feita pelo bot passa por esta barreira.
+// Isso cobre AntiLink, AntiSpam, AntiTrava, BanFake, Banghost, Sentinel e handlers externos
+// que usem o mesmo conn.groupParticipantsUpdate().
+if (!conn.__kobayashiWhitelistHardGuard) {
+  const originalGroupParticipantsUpdate = conn.groupParticipantsUpdate.bind(conn);
+
+  conn.groupParticipantsUpdate = async (groupJid, participants, action, ...rest) => {
+    if (String(action || "").toLowerCase() !== "remove") {
+      return originalGroupParticipantsUpdate(groupJid, participants, action, ...rest);
+    }
+
+    const list = Array.isArray(participants) ? participants : [participants];
+    let metadata = null;
+
+    try {
+      metadata = await conn.groupMetadata(groupJid);
+    } catch {}
+
+    const groupParts = Array.isArray(metadata?.participants) ? metadata.participants : [];
+    const protectedJids = [];
+    const allowedJids = [];
+
+    for (const rawTarget of list.filter(Boolean)) {
+      const aliases = new Set([rawTarget]);
+
+      try {
+        const pn = await getPNForJid(conn, rawTarget, rawTarget);
+        if (pn) aliases.add(pn);
+      } catch {}
+
+      // Procura o mesmo participante em todos os identificadores que o WhatsApp/Baileys fornece.
+      for (const p of groupParts) {
+        const ids = [
+          p?.id,
+          p?.jid,
+          p?.participant,
+          p?.phoneNumber,
+          p?.lid
+        ].filter(Boolean);
+
+        const normalizedTarget = normalizeJid(rawTarget);
+        const matches = ids.some((id) => {
+          if (id === rawTarget) return true;
+          try {
+            if (normalizeJid(id) === normalizedTarget) return true;
+          } catch {}
+          return false;
+        });
+
+        if (matches) {
+          for (const id of ids) aliases.add(id);
+
+          for (const id of ids) {
+            try {
+              const pn = await getPNForJid(conn, id, id);
+              if (pn) aliases.add(pn);
+            } catch {}
+          }
+        }
+      }
+
+      const protectedMember = [...aliases].some((jid) => {
+        try {
+          return isWhitelisted(groupJid, jid);
+        } catch {
+          return false;
+        }
+      });
+
+      if (protectedMember) {
+        protectedJids.push(rawTarget);
+        console.log(
+          `[WHITELIST HARD GUARD] Remoção BLOQUEADA: ${rawTarget} em ${groupJid}`
+        );
+      } else {
+        allowedJids.push(rawTarget);
+      }
+    }
+
+    if (!allowedJids.length) {
+      return {
+        status: "whitelist-blocked",
+        protected: protectedJids
+      };
+    }
+
+    return originalGroupParticipantsUpdate(groupJid, allowedJids, action, ...rest);
+  };
+
+  conn.__kobayashiWhitelistHardGuard = true;
+}
+
 // 🛰️ KOBAYASHI SENTINEL • v0.3.9
 // Atualiza a conexão principal usada pelo executor. A conta sentinela nunca recebe poder de ADM.
 configureSentinelRuntime(conn, {
@@ -2568,7 +2661,7 @@ case "whitelist": {
         `      *LISTA BRANCA*\n` +
         `╰──────────────────╯\n\n` +
         `${lines}\n\n` +
-        `🛡️ Esses membros ficam protegidos das remoções automáticas do bot e podem enviar links mesmo sem serem ADM.`,
+        `🛡️ Esses membros ficam protegidos de QUALQUER remoção feita pela Kobayashi e podem enviar links mesmo sem serem ADM.`,
       mentions: list,
     }, { quoted: info });
   }
@@ -2587,26 +2680,88 @@ case "whitelist": {
   }
 
   if (["add","adicionar","+"].includes(rawAction)) {
-    if (isWhitelisted(from, target)) {
+    const aliases = new Set([target]);
+
+    try {
+      const targetPN = await getPNForJid(conn, target, target);
+      if (targetPN) aliases.add(targetPN);
+    } catch {}
+
+    const targetParticipant = (groupMembers || []).find((p) => {
+      const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
+      return ids.includes(target) || ids.some((id) => {
+        try { return normalizeJid(id) === normalizeJid(target); } catch { return false; }
+      });
+    });
+
+    if (targetParticipant) {
+      for (const id of [
+        targetParticipant?.id,
+        targetParticipant?.jid,
+        targetParticipant?.participant,
+        targetParticipant?.phoneNumber,
+        targetParticipant?.lid
+      ].filter(Boolean)) {
+        aliases.add(id);
+        try {
+          const pn = await getPNForJid(conn, id, id);
+          if (pn) aliases.add(pn);
+        } catch {}
+      }
+    }
+
+    if ([...aliases].some((jid) => isWhitelisted(from, jid))) {
       return reply(`🤍 @${target.split("@")[0]} já está na Lista Branca.`);
     }
-    addWhitelist(from, target);
+
+    for (const jid of aliases) addWhitelist(from, jid);
+
     return conn.sendMessage(from, {
       text:
         `🤍🌸 *LISTA BRANCA*\n\n` +
         `✅ @${target.split("@")[0]} foi autorizado.\n\n` +
-        `🛡️ Agora está protegido das remoções automáticas do bot.\n` +
+        `🛡️ Agora está protegido de QUALQUER remoção feita pela Kobayashi enquanto permanecer na Lista Branca.\n` +
         `🔗 Também pode enviar links mesmo sem ser ADM.\n` +
         `🐉 A permissão vale somente neste grupo.`,
       mentions: [target],
     }, { quoted: info });
   }
 
-  if (!isWhitelisted(from, target)) {
+  const removeAliases = new Set([target]);
+
+  try {
+    const targetPN = await getPNForJid(conn, target, target);
+    if (targetPN) removeAliases.add(targetPN);
+  } catch {}
+
+  const removeParticipant = (groupMembers || []).find((p) => {
+    const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
+    return ids.includes(target) || ids.some((id) => {
+      try { return normalizeJid(id) === normalizeJid(target); } catch { return false; }
+    });
+  });
+
+  if (removeParticipant) {
+    for (const id of [
+      removeParticipant?.id,
+      removeParticipant?.jid,
+      removeParticipant?.participant,
+      removeParticipant?.phoneNumber,
+      removeParticipant?.lid
+    ].filter(Boolean)) {
+      removeAliases.add(id);
+      try {
+        const pn = await getPNForJid(conn, id, id);
+        if (pn) removeAliases.add(pn);
+      } catch {}
+    }
+  }
+
+  if (![...removeAliases].some((jid) => isWhitelisted(from, jid))) {
     return reply(`🤍 @${target.split("@")[0]} não está na Lista Branca.`);
   }
 
-  removeWhitelist(from, target);
+  for (const jid of removeAliases) removeWhitelist(from, jid);
   return conn.sendMessage(from, {
     text:
       `🤍🌸 *LISTA BRANCA*\n\n` +
