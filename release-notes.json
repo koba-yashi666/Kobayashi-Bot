@@ -165,5 +165,17 @@
       "Frases sem comando real continuam silenciosas.",
       "Permissões e bloqueios originais continuam sendo verificados."
     ]
+  },
+  "v2.0.11": {
+    "version": "2.0.11",
+    "title": "Lista Branca Protection Fix",
+    "changes": [
+      "Corrigido módulo da Lista Branca e normalização de JIDs/números.",
+      "Anti-Trava agora ignora membros protegidos.",
+      "ADVs automáticas não punem whitelist.",
+      "BanFake e Banghost ignoram whitelist.",
+      "Remoção automática da lista negra local não expulsa whitelist.",
+      "Comandos manuais de ADM continuam disponíveis."
+    ]
   }
 }

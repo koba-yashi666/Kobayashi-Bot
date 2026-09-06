@@ -134,6 +134,11 @@ async function deleteDetectedMessage(conn, jid, info) {
 }
 
 async function addAutomaticWarning(conn, groupJid, target, reason, botIsAdmin, quotedInfo) {
+  if (isWhitelisted(groupJid, target)) {
+    console.log(`[WHITELIST] AutoMod ignorado para ${target} em ${groupJid}`);
+    return { count: 0, removed: false, whitelisted: true };
+  }
+
   const db = readAdvDb();
   if (!db[groupJid]) db[groupJid] = {};
   if (!db[groupJid][target]) db[groupJid][target] = { count: 0, history: [] };
@@ -1491,7 +1496,7 @@ ensureSentinelBridgeServer();
 // ==========================================
 // 🛡️ ADMIN PRO • LISTA NEGRA v0.2.0
 // ==========================================
-if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoDono) {
+if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoDono && !isWhitelisted(from, sender)) {
   if (isBotGroupAdmins) {
     await conn.groupParticipantsUpdate(from, [sender], "remove").catch(() => {});
   }
@@ -1605,7 +1610,7 @@ if (isGroup && sender && !info.key.fromMe && sender !== botNumber && !isGroupAdm
 // ==========================================
 // 🛡️ KOBAYASHI ANTI-TRAVA • v0.1.58
 // ==========================================
-if (isGroup && sender && !info.key.fromMe && sender !== botNumber) {
+if (isGroup && sender && !info.key.fromMe && sender !== botNumber && !isWhitelisted(from, sender)) {
   const antiTravaCfg = getAntiTravaConfig(from);
   const inspection = inspectPotentialTrava({
     groupJid: from,
@@ -2563,7 +2568,7 @@ case "whitelist": {
         `      *LISTA BRANCA*\n` +
         `╰──────────────────╯\n\n` +
         `${lines}\n\n` +
-        `🔗 Esses membros podem enviar links mesmo sem serem ADM.`,
+        `🛡️ Esses membros ficam protegidos das remoções automáticas do bot e podem enviar links mesmo sem serem ADM.`,
       mentions: list,
     }, { quoted: info });
   }
@@ -2590,7 +2595,8 @@ case "whitelist": {
       text:
         `🤍🌸 *LISTA BRANCA*\n\n` +
         `✅ @${target.split("@")[0]} foi autorizado.\n\n` +
-        `🔗 Agora pode enviar links mesmo sem ser ADM.\n` +
+        `🛡️ Agora está protegido das remoções automáticas do bot.\n` +
+        `🔗 Também pode enviar links mesmo sem ser ADM.\n` +
         `🐉 A permissão vale somente neste grupo.`,
       mentions: [target],
     }, { quoted: info });
@@ -2605,7 +2611,7 @@ case "whitelist": {
     text:
       `🤍🌸 *LISTA BRANCA*\n\n` +
       `❌ @${target.split("@")[0]} foi removido da lista.\n\n` +
-      `🔐 Os filtros de links voltarão a valer normalmente para esse membro.`,
+      `🔐 As proteções automáticas e os filtros de links voltarão a valer normalmente para esse membro.`,
     mentions: [target],
   }, { quoted: info });
 }
@@ -4794,11 +4800,12 @@ case "banfake": {
 
   const targets = foreign
     .map((item) => item.jid)
-    .filter((jid) => !adminSet.has(jid));
+    .filter((jid) => !adminSet.has(jid))
+    .filter((jid) => !isWhitelisted(from, jid));
 
   if (!targets.length) {
     return reply(
-      "🌸 Os números estrangeiros encontrados são administradores. Não removi ninguém automaticamente."
+      "🌸 Os números estrangeiros encontrados são administradores ou estão na Lista Branca. Não removi ninguém automaticamente."
     );
   }
 
@@ -8467,7 +8474,7 @@ case "banghost": {
   const candidates = [];
   for (const p of groupMembers) {
     const jid = p.id || p.jid;
-    if (!jid || groupAdmins.includes(jid) || jid===botNumber || jid===dono) continue;
+    if (!jid || groupAdmins.includes(jid) || jid===botNumber || jid===dono || isWhitelisted(from, jid)) continue;
     const a = getUserActivity(from,jid);
     const last = Number(a?.lastActivity || a?.lastMessageAt || 0);
     const msgs = Number(a?.messages || a?.count || 0);
