@@ -50,7 +50,7 @@ import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsP
 import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
 import {
   getDragonRpgPlayer, createDragonRpgPlayer, chooseHumanClass, startDragonAwakening,
-  chooseDragonFaction, chooseDragonClass, formatDragonRpgProfile, formatDragonRpgInventory,
+  chooseDragonFaction, chooseDragonClass, startAwakeningBoss, transformDragon, returnHumanForm, useDragonSkill, restoreDragonEnergy, getAwakeningStatus, formatDragonRpgProfile, formatDragonRpgInventory,
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
@@ -1511,7 +1511,7 @@ if (isCmd) {
     "rpgmissoes","missao","rpgmissao","lojarpg","rpgloja","comprarrpg","rpgcomprar",
     "equipamentos","rpgequipamentos","equipar","rpgequipar","desequipar","rpgdesequipar",
     "habilidades","skillsrpg","rpghabilidades","rankrpg","rpgrank","rpgajuda","dragonhelp",
-    "rpgcomandos","comandosrpg","zerarrpg","zerarrpgg"
+    "rpgcomandos","comandosrpg","zerarrpg","zerarrpgg","bossdespertar","despertarboss","transformar","formadragao","formahumana","humano","habilidadedragao","skilldragao","energiadragao","descansodragao","statusdespertar"
   ]);
 
   const dragonRpgModeEnabled = !isGroup || isDragonRpgEnabled(from);
@@ -6425,7 +6425,7 @@ case "despertar": {
 ┃ As escamas ainda não surgiram... mas o caminho abriu.
 ╰════════════════════════════════════╯
 
-🏰 Escolha sua facção:
+🐲 Antes da escolha final, prove seu poder.\n\n⚔️ Enfrente: *${prefix}bossdespertar*\n\nDepois escolha sua facção:
 🔥 *caos*
 ⚖️ *harmonia*
 👁️ *espectador*
@@ -6434,6 +6434,20 @@ case "despertar": {
 Use: *${prefix}rpgfaccao caos*
 
 ⚠️ A escolha da facção é permanente nesta versão.`);
+}
+break;
+
+case "bossdespertar":
+case "despertarboss": {
+  const socialInfo=getLevelInfoFromXp(getUserActivity(from,sender)?.xp||0);
+  const r=startAwakeningBoss(sender,socialInfo.level);
+  if(!r.ok){
+    if(r.reason==="not_started")return reply(`🐉 Primeiro use *${prefix}despertardragao*.`);
+    if(r.reason==="defeated")return reply(`✅ O Guardião já foi derrotado.`);
+    if(r.reason==="combat")return reply(`⚔️ Você já está em batalha.`);
+    return reply(`❌ Não foi possível iniciar o Boss do Despertar.`);
+  }
+  return reply(`🐲 *GUARDIÃO DO DESPERTAR*\n❤️ ${r.enemy.hp}/${r.enemy.maxHp}\n⚔️ ATK ${r.enemy.atk} • 🛡️ DEF ${r.enemy.def}\n\nUse *${prefix}atacar*, *${prefix}habilidade* ou *${prefix}defender*.`);
 }
 break;
 
@@ -6462,6 +6476,7 @@ case "escolherdragao": {
   if (!result.ok) {
     if (result.reason === "missing") return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
     if (result.reason === "locked") return reply(`🔒 O Despertar ainda está bloqueado. Use *${prefix}despertardragao* quando atingir Level social 20.`);
+    if (result.reason === "boss") return reply(`🐲 Derrote primeiro o Guardião com *${prefix}bossdespertar*.`);
     if (result.reason === "faction") return reply(`🏰 Escolha sua facção primeiro com *${prefix}rpgfaccao <facção>*.`);
     if (result.reason === "already") return reply(`🐲 Você já possui uma forma dracônica e não pode trocá-la nesta versão.`);
     if (result.reason === "faction_mismatch") return reply(`⚠️ Essa linhagem pertence à facção *${factionName(result.required)}*.\n\nUse *${prefix}rpgclasses* para encontrar uma linhagem compatível com sua facção.`);
@@ -6479,6 +6494,51 @@ ${result.klass.desc}
 
 🌸 Sua ficha recebeu os bônus dracônicos.
 Veja: *${prefix}rpgperfil*`);
+}
+break;
+
+case "transformar":
+case "formadragao": {
+  const r=transformDragon(sender);
+  if(!r.ok){
+    if(r.reason==="locked")return reply(`🔒 Conclua o Despertar Dracônico primeiro.`);
+    if(r.reason==="already")return reply(`🐉 Você já está na forma dracônica.`);
+    if(r.reason==="energy")return reply(`🔥 Energia insuficiente: *${r.current}/${r.required}*.`);
+    return reply(`❌ Não foi possível transformar.`);
+  }
+  return reply(`${r.klass.icon} *FORMA DRACÔNICA ATIVADA!*\n🔥 Energia: *${r.player.dragonEnergy}/${r.player.maxDragonEnergy}*\nUse *${prefix}habilidadedragao* em batalha.`);
+}
+break;
+case "formahumana":
+case "humano": {
+  const r=returnHumanForm(sender);
+  if(!r.ok)return reply(`👤 Você já está na forma humana.`);
+  return reply(`👤 *Forma humana restaurada.*`);
+}
+break;
+case "habilidadedragao":
+case "skilldragao": {
+  const r=useDragonSkill(sender);
+  if(!r.ok){
+    if(r.reason==="form")return reply(`🐉 Use *${prefix}transformar* primeiro.`);
+    if(r.reason==="no_battle")return reply(`⚔️ Use essa habilidade durante uma batalha.`);
+    if(r.reason==="mana")return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*.`);
+    return reply(`❌ Habilidade dracônica indisponível.`);
+  }
+  return reply(`${r.skill.icon} *${r.skill.name}*\n💥 Dano: *${r.damage}*${r.victory?`\n🏆 Inimigo derrotado!`:""}`);
+}
+break;
+case "energiadragao":
+case "descansodragao": {
+  const r=restoreDragonEnergy(sender);
+  if(!r.ok)return reply(`🌱 Crie seu personagem primeiro.`);
+  return reply(`🔥 Energia Dracônica: *+${r.recovered}*\n🐉 Atual: *${r.player.dragonEnergy}/${r.player.maxDragonEnergy}*`);
+}
+break;
+case "statusdespertar": {
+  const r=getAwakeningStatus(sender);
+  if(!r)return reply(`🌱 Crie seu personagem primeiro.`);
+  return reply(`🐉 *STATUS DO DESPERTAR*\nIniciado: *${r.awakening.started?"Sim":"Não"}*\nBoss derrotado: *${r.awakening.bossDefeated?"Sim":"Não"}*\nConcluído: *${r.awakening.completed?"Sim":"Não"}*\nForma: *${r.klass?.name||"Nenhuma"}*\nEnergia: *${r.player.dragonEnergy}/${r.player.maxDragonEnergy}*`);
 }
 break;
 
