@@ -57,6 +57,7 @@ import {
   resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
 } from "./lib/features/rpg/dragonRpg.js";
 import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
+import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/kobaTrigger.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
@@ -631,7 +632,69 @@ function extractCommandText(message = {}) {
   }
 }
 
+
+function normalizeKobaIntentText(value=""){
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+
+function resolveKobaTrigger(messageText, prefix="/"){
+  const raw = String(messageText || "").trim();
+  if(!raw) return null;
+
+  const match = raw.match(/^koba(?:yashi)?\s+(.+)$/i);
+  if(!match) return null;
+
+  const intentRaw = match[1].trim();
+  const intent = normalizeKobaIntentText(intentRaw);
+
+  const exact = new Map([
+    ["menu","menu"],["ajuda","menu"],["comandos","menu"],
+    ["perfil","perfil"],
+    ["fig","s"],["figurinha","s"],["sticker","s"],["stickers","s"],
+    ["dragon rpg","dragonrpg"],["dragonrpg","dragonrpg"],["rpg dragao","dragonrpg"],
+    ["loja rpg","lojarpg"],["lojarpg","lojarpg"],
+    ["habilidades","habilidades"],["habilidades rpg","habilidades"],
+    ["equipamentos","equipamentos"],["equipamentos rpg","equipamentos"]
+  ]);
+  if(exact.has(intent)) return `${prefix}${exact.get(intent)}`;
+
+  const rules = [
+    {re:/^(?:tocar|toca|play|musica|música)\s+(.+)$/i, cmd:"play"},
+    {re:/^(?:banir|ban)\s+(.+)$/i, cmd:"ban"},
+    {re:/^(?:advertir|advertencia|advertência|adv)\s+(.+)$/i, cmd:"adv"},
+    {re:/^(?:tirar advertencia|tirar advertência|rmadv)\s+(.+)$/i, cmd:"rmadv"},
+    {re:/^(?:classe rpg|rpg classe|classe)\s+(.+)$/i, cmd:"rpgclasse"},
+    {re:/^explorar\s+(.+)$/i, cmd:"explorar"},
+    {re:/^(?:missao|missão)\s+(.+)$/i, cmd:"missao"},
+    {re:/^(?:comprar rpg|comprarrpg)\s+(.+)$/i, cmd:"comprarrpg"},
+    {re:/^equipar\s+(.+)$/i, cmd:"equipar"},
+    {re:/^habilidade\s+(.+)$/i, cmd:"habilidade"}
+  ];
+
+  for(const rule of rules){
+    const m = intentRaw.match(rule.re);
+    if(m && m[1]?.trim()) return `${prefix}${rule.cmd} ${m[1].trim()}`;
+  }
+
+  return null;
+}
+
 let body = extractCommandText(info.message) || info?.text || "";
+
+// Koba Trigger: só converte intenções conhecidas em comandos reais.
+// Frases como "Koba tudo bem?" continuam sem resposta.
+if (body && !body.startsWith(prefix)) {
+  const triggerEnabled = !isGroup || isKobaTriggerEnabled(from);
+  if (triggerEnabled) {
+    const mapped = resolveKobaTrigger(body, prefix);
+    if (mapped) body = mapped;
+  }
+}
 
 // Figurinha pode disparar um comando previamente associado.
 if (!body && type === "stickerMessage") {
@@ -6282,6 +6345,29 @@ O primeiro passo para todos agora é:
     console.error("Erro no /zerarrpgg:", error);
     return reply("❌🐉 Não consegui executar o reset global. O banco original foi preservado.");
   }
+}
+break;
+
+case "kobatrigger":
+case "kobamode": {
+  if (!isGroup) return reply("🐉 O Koba Trigger é configurado por grupo.");
+  if (!groupAdmins.includes(sender) && !SoDonoPrincipal) {
+    return reply("🛡️ Apenas administradores ou o dono principal podem alterar o Koba Trigger.");
+  }
+
+  const atual = isKobaTriggerEnabled(from);
+  const arg = String(args?.[0] || "").trim().toLowerCase();
+  let enabled;
+
+  if (["on","ativar","ligar","1"].includes(arg)) enabled = true;
+  else if (["off","desativar","desligar","0"].includes(arg)) enabled = false;
+  else enabled = !atual;
+
+  setKobaTriggerEnabled(from, enabled, sender);
+
+  return reply(enabled
+    ? `🐉✨ *Koba Trigger ativado!*\n\nExemplos:\n*Koba menu*\n*Koba tocar <música>*\n*Koba perfil*`
+    : `🐉💤 *Koba Trigger desativado!*\n\nAs chamadas naturais começando com *Koba* serão ignoradas neste grupo.`);
 }
 break;
 

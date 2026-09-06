@@ -141,5 +141,17 @@
       "/dragonrpg sem complemento continua abrindo o menu.",
       "Dragon RPG pode ser reativado com /dragonrpg on mesmo quando estiver desligado."
     ]
+  },
+  "v2.0.9": {
+    "version": "2.0.9",
+    "title": "Koba Trigger",
+    "changes": [
+      "Chamadas naturais iniciadas por Koba/Kobayashi.",
+      "Koba menu, Koba perfil, Koba figurinha e Koba Dragon RPG.",
+      "Koba tocar <música> executa /play <música>.",
+      "Ações administrativas reconhecidas continuam respeitando permissões.",
+      "Frases sem intenção cadastrada são ignoradas silenciosamente.",
+      "Novo /kobatrigger on/off por grupo."
+    ]
   }
 }
