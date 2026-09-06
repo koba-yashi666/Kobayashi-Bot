@@ -153,5 +153,17 @@
       "Frases sem intenção cadastrada são ignoradas silenciosamente.",
       "Novo /kobatrigger on/off por grupo."
     ]
+  },
+  "v2.0.10": {
+    "version": "2.0.10",
+    "title": "Koba Trigger Universal",
+    "changes": [
+      "Koba Trigger ampliado para 564 comandos/aliases detectados no bot.",
+      "Formato universal Koba <comando> [argumentos].",
+      "Mantidos atalhos naturais como Koba tocar <música>.",
+      "Argumentos completos são preservados.",
+      "Frases sem comando real continuam silenciosas.",
+      "Permissões e bloqueios originais continuam sendo verificados."
+    ]
   }
 }
