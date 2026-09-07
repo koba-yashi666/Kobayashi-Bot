@@ -18,7 +18,6 @@ import { getGroupMetadata } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/group/groupSchedule.js";
 import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
-import { hasRegisteredFigu, getRegisteredFigu, registerFigu, removeRegisteredFigu, listRegisteredFigus, normalizeRgfCommand } from "./lib/features/stickers/registeredFigus.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/moderation/whitelist.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/group/autoSticker.js";
 import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
@@ -639,6 +638,37 @@ function extractCommandText(message = {}) {
 }
 
 
+
+function resolveBanTarget(info, args=[]){
+  const msg = info?.message || {};
+  const contexts = [
+    msg?.extendedTextMessage?.contextInfo,
+    msg?.imageMessage?.contextInfo,
+    msg?.videoMessage?.contextInfo,
+    msg?.documentMessage?.contextInfo,
+    msg?.stickerMessage?.contextInfo
+  ].filter(Boolean);
+
+  // Resposta a uma mensagem tem prioridade.
+  for (const ctx of contexts) {
+    const replied = ctx?.participant;
+    if (replied) return String(replied);
+  }
+
+  // Depois, menção.
+  for (const ctx of contexts) {
+    const mentioned = Array.isArray(ctx?.mentionedJid) ? ctx.mentionedJid : [];
+    if (mentioned.length) return String(mentioned[0]);
+  }
+
+  // Compatibilidade com número digitado.
+  const raw = String(args?.[0] || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length >= 8) return `${digits}@s.whatsapp.net`;
+
+  return null;
+}
+
 function normalizeKobaIntentText(value=""){
   return String(value)
     .trim()
@@ -1250,7 +1280,7 @@ function resolveKobaTrigger(messageText, prefix="/"){
   const candidateRaw = String(parts.shift() || "");
   const candidate = normalizeKobaIntentText(candidateRaw);
 
-  if(!KOBA_TRIGGER_COMMANDS.has(candidate) && !hasRegisteredFigu(candidate)) return null;
+  if(!KOBA_TRIGGER_COMMANDS.has(candidate)) return null;
 
   const rest = parts.join(" ").trim();
   return `${prefix}${candidateRaw}${rest ? ` ${rest}` : ""}`;
@@ -2278,16 +2308,6 @@ if (isCmd) {
 
   if (modularHandled) {
     continue;
-  }
-
-  // 🎴 RgFigu: comandos personalizados que respondem com a figurinha registrada.
-  // Ex.: responder uma figurinha com /rgfigu oi -> depois /oi envia aquela figurinha.
-  if (isCmd && rawCommand && !["rgfigu","rmfigu","listafigu"].includes(rawCommand)) {
-    const registeredFigu = getRegisteredFigu(rawCommand);
-    if (registeredFigu?.buffer) {
-      await conn.sendMessage(from, { sticker: registeredFigu.buffer }, { quoted: info });
-      continue;
-    }
   }
 
   // Dragon RPG desligado = não responde aos comandos dele.
@@ -3773,77 +3793,6 @@ case "take": {
     console.error("Erro /take:", e);
     return reply("❌ Não consegui alterar os dados dessa figurinha.");
   }
-}
-break;
-
-case "rgfigu": {
-  if (!SoDonoPrincipal) {
-    return reply("🐉 Apenas o dono principal pode registrar comandos de figurinha.");
-  }
-
-  const quoted = getQuotedMessage(info);
-  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
-
-  if (!target?.message || getContentType(target.message) !== "stickerMessage") {
-    return reply(
-      `🎴 *RGFIGU*\n\n` +
-      `Responda à figurinha que deseja registrar com:\n` +
-      `*${prefix}rgfigu nome_do_comando*\n\n` +
-      `Ex.: responda uma figurinha com *${prefix}rgfigu oi*\n` +
-      `Depois, ao usar *${prefix}oi*, a Kobayashi enviará essa figurinha.`
-    );
-  }
-
-  const customCommand = normalizeRgfCommand(q);
-  if (!customCommand) {
-    return reply(`🎴 Informe o nome do comando.\nEx.: *${prefix}rgfigu oi*`);
-  }
-
-  if (["rgfigu","rmfigu","listafigu"].includes(customCommand)) {
-    return reply("❌ Esse nome é reservado pelo sistema de figurinhas.");
-  }
-
-  // Não deixa uma figurinha sobrescrever um comando real do bot.
-  if (switchCommandNames.has(customCommand) || modularCommandNames.has(customCommand)) {
-    return reply(`⚠️ *${prefix}${customCommand}* já é um comando real da Kobayashi. Escolha outro nome.`);
-  }
-
-  try {
-    const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
-    if (!stickerBuffer?.length) throw new Error("buffer vazio");
-
-    const result = registerFigu(customCommand, stickerBuffer, sender);
-    if (!result?.ok) return reply("❌ Não consegui registrar essa figurinha.");
-
-    return reply(
-      `✅🎴 *FIGURINHA REGISTRADA*\n\n` +
-      `Comando: *${prefix}${customCommand}*\n\n` +
-      `Agora é só usar *${prefix}${customCommand}* para a Kobayashi responder com a figurinha.\n` +
-      `✨ Também funciona como *Koba ${customCommand}* quando o Koba Trigger estiver ativo.`
-    );
-  } catch (e) {
-    console.error("Erro /rgfigu:", e?.message || e);
-    return reply("❌ Não consegui baixar ou registrar a figurinha respondida.");
-  }
-}
-break;
-
-case "rmfigu": {
-  if (!SoDonoPrincipal) return reply("🐉 Apenas o dono principal pode remover figurinhas registradas.");
-  const customCommand = normalizeRgfCommand(q);
-  if (!customCommand) return reply(`🎴 Use: *${prefix}rmfigu nome_do_comando*`);
-  if (!removeRegisteredFigu(customCommand)) return reply(`🌸 Não existe figurinha registrada em *${prefix}${customCommand}*.`);
-  return reply(`✅ Figurinha do comando *${prefix}${customCommand}* removida.`);
-}
-break;
-
-case "listafigu": {
-  const rows = listRegisteredFigus();
-  if (!rows.length) return reply("🎴 Nenhuma figurinha personalizada foi registrada ainda.");
-  return reply(
-    `🎴 *FIGURINHAS REGISTRADAS*\n\n` +
-    rows.map((x,i)=>`${i+1}. *${prefix}${x.command}*`).join("\n")
-  );
 }
 break;
 
@@ -5479,7 +5428,7 @@ case "kobaban": {
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
 
-  const target = getTargetFromMessage(info, menc_os2);
+  const target = resolveBanTarget(info, args);
   if (!target || target === from) return reply(`🐉 Marque o membro ou responda à mensagem dele.\nExemplo: *${prefix}KobaBan @membro spam*`);
   if (target === botNumber) return reply("🌸 A Kobayashi não pode expulsar a si mesma.");
   if (target === dono) return reply("👑 O criador da Kobayashi está protegido.");
@@ -5547,7 +5496,7 @@ case "banc": {
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
 
-  const target = getTargetFromMessage(info, menc_os2);
+  const target = resolveBanTarget(info, args);
   if (!target || target === from) return reply(`🐉🌸 Marque o membro ou responda à mensagem dele para usar ${prefix}ban.`);
   if (target === botNumber) return reply(`🌸 Eu não posso me banir do próprio grupo.`);
   if (target === dono) return reply(`👑 Não posso banir o dono do Kobayashi Bot.`);

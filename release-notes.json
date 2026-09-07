@@ -188,16 +188,5 @@
       "Membro protegido não pode ser removido nem por /ban enquanto estiver na Lista Branca.",
       "Para banir, primeiro remova da Lista Branca."
     ]
-  },
-  "v2.0.13": {
-    "version": "2.0.13",
-    "title": "RgFigu Reply Fix",
-    "changes": [
-      "/rgfigu agora funciona respondendo diretamente a uma figurinha.",
-      "Comandos personalizados enviam a figurinha registrada.",
-      "Adicionados /rmfigu e /listafigu.",
-      "Comandos reais do bot não podem ser sobrescritos.",
-      "Koba Trigger reconhece comandos personalizados do /rgfigu."
-    ]
   }
 }
