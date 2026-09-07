@@ -681,6 +681,7 @@ function normalizeKobaIntentText(value=""){
 // Registro completo dos comandos reconhecidos pelo bot.
 // O Koba Trigger só dispara se a primeira ação corresponder a um comando real.
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "rgfigu",
   "0",
   "1",
   "12345",
@@ -3847,6 +3848,65 @@ case "delcmd": {
 }
 break;
 
+case "rgfigu": {
+  if (!SoDonoPrincipal) {
+    return reply("🐉 Apenas o dono principal pode configurar o /rgfigu.");
+  }
+
+  const selectedCommand = String(args?.[0] || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\//, "");
+
+  if (!selectedCommand) {
+    return reply(
+      "🎴 *RGFIGU — COMANDO POR FIGURINHA*\n\n" +
+      "Responda uma figurinha com o comando que ela deve executar:\n\n" +
+      "*/rgfigu ban*\n" +
+      "*/rgfigu adv*\n" +
+      "*/rgfigu menu*"
+    );
+  }
+
+  // Aqui o comportamento é o inverso do antigo:
+  // o nome PRECISA ser um comando real da Kobayashi.
+  if (!KOBA_TRIGGER_COMMANDS.has(selectedCommand)) {
+    return reply(`⚠️ */${selectedCommand}* não é um comando real da Kobayashi.`);
+  }
+
+  const msg = info?.message || {};
+  const contexts = [
+    msg?.extendedTextMessage?.contextInfo,
+    msg?.imageMessage?.contextInfo,
+    msg?.videoMessage?.contextInfo,
+    msg?.documentMessage?.contextInfo
+  ].filter(Boolean);
+
+  const quotedMessage = contexts.find((ctx) => ctx?.quotedMessage)?.quotedMessage;
+
+  if (!quotedMessage?.stickerMessage) {
+    return reply(
+      "⚠️ Responda a figurinha que deseja configurar.\n\n" +
+      "Exemplo: */rgfigu ban*"
+    );
+  }
+
+  const result = setStickerMappedCommand(quotedMessage, selectedCommand);
+
+  if (result === false) {
+    return reply("⚠️ Não consegui vincular essa figurinha. Tente novamente.");
+  }
+
+  return reply(
+    `🎴🐉 *Figurinha configurada!*\n\n` +
+    `Ela agora executa: */${selectedCommand}*` +
+    (["ban","banc","kobaban","koban","adv","rmadv"].includes(selectedCommand)
+      ? `\n\n↩️ Para usar em alguém, envie essa figurinha *respondendo a mensagem do membro*.`
+      : "")
+  );
+}
+break;
+
 case "listcmdsticker":
 case "stickercmds": {
   if (!isGroup || !groupAdmins.includes(sender)) {
@@ -5537,7 +5597,7 @@ case "adv": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
-  const target = getTargetFromMessage(info, menc_os2);
+  const target = resolveBanTarget(info, args);
   if (!target) return reply(`⚠️🌸 Marque um membro ou responda à mensagem dele.
 Exemplo: ${prefix}adv @membro motivo`);
   if (target === botNumber) return reply(`🐉🌸 Eu não posso receber advertência.`);
