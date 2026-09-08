@@ -188,5 +188,17 @@
       "Membro protegido não pode ser removido nem por /ban enquanto estiver na Lista Branca.",
       "Para banir, primeiro remova da Lista Branca."
     ]
+  },
+  "2.0.16": {
+    "version": "2.0.16",
+    "title": "RankADM 2.0",
+    "changes": [
+      "Novo visual decorado para o ranking.",
+      "Filtros por texto, fotos, vídeos, figurinhas e comandos.",
+      "Líderes individuais por categoria.",
+      "Perfil detalhado de ADM por menção ou resposta.",
+      "Percentual de participação no grupo.",
+      "Reset do ranking agora exige confirmação."
+    ]
   }
 }

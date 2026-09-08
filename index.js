@@ -19,7 +19,7 @@ import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./
 import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/moderation/whitelist.js";
-import { trackAdminActivity, getAdminActivityRank, resetAdminActivityRank } from "./lib/features/moderation/adminActivityRank.js";
+import { trackAdminActivity, getAdminActivityRank, getAdminActivityStats, getAdminActivityUser, resetAdminActivityRank } from "./lib/features/moderation/adminActivityRank.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/group/autoSticker.js";
 import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
 import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
@@ -7851,17 +7851,181 @@ break;
 
 case "rankadm": {
   if (!isGroup) return reply("👑 O /rankadm só funciona em grupos.");
-  const ranking = getAdminActivityRank(from, groupAdmins || [], 10);
-  if (!ranking.length) return reply("👑 *RANK ADM*\\n\\nAinda não há interações de ADMs registradas. O ranking começa a contar a partir desta atualização.");
-  const medals=["🥇","🥈","🥉"], mentions=[];
-  const lines=ranking.map((a,i)=>{ mentions.push(a.jid); return `${medals[i] || `🏅 ${i+1}º`} *@${a.jid.split("@")[0]}* — *${a.total}* interações\\n   💬 ${a.text}  📷 ${a.photos}  🎥 ${a.videos}  🎴 ${a.stickers}  ⌨️ ${a.commands}`; });
-  return conn.sendMessage(from,{text:`👑🐉 *RANK ADM — MAIS ATIVOS*\\n\\n${lines.join("\\n\\n")}\\n\\n💬 Texto • 📷 Fotos • 🎥 Vídeos\\n🎴 Figurinhas • ⌨️ Comandos`,mentions:[...new Set(mentions)]},{quoted:info});
+
+  const normalizeRankCategory = (value="") => {
+    const v = String(value || "").trim().toLowerCase();
+    const map = {
+      texto:"text", text:"text", mensagens:"text",
+      foto:"photos", fotos:"photos", photo:"photos",
+      video:"videos", videos:"videos", vídeo:"videos", vídeos:"videos",
+      figu:"stickers", figurinha:"stickers", figurinhas:"stickers", sticker:"stickers", stickers:"stickers",
+      cmd:"commands", comando:"commands", comandos:"commands",
+      total:"total", geral:"total"
+    };
+    return map[v] || null;
+  };
+
+  const rankLabel = {
+    total:"GERAL",
+    text:"TEXTOS",
+    photos:"FOTOS",
+    videos:"VÍDEOS",
+    stickers:"FIGURINHAS",
+    commands:"COMANDOS"
+  };
+
+  const rankIcon = {
+    total:"🐉",
+    text:"💬",
+    photos:"📷",
+    videos:"🎥",
+    stickers:"🎴",
+    commands:"⌨️"
+  };
+
+  const dominantCategory = (adm) => {
+    const cats = [
+      ["💬 Texto", adm.text],
+      ["📷 Fotos", adm.photos],
+      ["🎥 Vídeos", adm.videos],
+      ["🎴 Figurinhas", adm.stickers],
+      ["⌨️ Comandos", adm.commands]
+    ].sort((a,b)=>b[1]-a[1]);
+    return cats[0][1] > 0 ? cats[0][0] : "🌙 Sem atividade";
+  };
+
+  const target = resolveBanTarget(info, args);
+  const firstArg = String(args?.[0] || "").trim().toLowerCase();
+  const requestedCategory =
+    firstArg === "top"
+      ? normalizeRankCategory(args?.[1])
+      : normalizeRankCategory(firstArg);
+
+  // Perfil individual: respondendo/marcando alguém com /rankadm.
+  if (target) {
+    const isCurrentAdmin = (groupAdmins || []).includes(target);
+    if (!isCurrentAdmin) {
+      return reply("👑 Esse membro não é administrador atual do grupo.");
+    }
+
+    const adm = getAdminActivityUser(from, target);
+    if (!adm || !adm.total) {
+      return reply(`👑 @${target.split("@")[0]} ainda não possui atividade registrada no Rank ADM.`);
+    }
+
+    const groupStats = getAdminActivityStats(from, groupAdmins || []);
+    const share = groupStats.totals.total > 0
+      ? ((adm.total / groupStats.totals.total) * 100).toFixed(1)
+      : "0.0";
+
+    return conn.sendMessage(from, {
+      text:
+        `╭━━━〔 👑 *PERFIL ADM* 〕━━━╮\n` +
+        `┃ 🐉 @${target.split("@")[0]}\n` +
+        `┃ ✨ ${adm.total} interações • ${share}% do total\n` +
+        `┃ 🌟 Destaque: ${dominantCategory(adm)}\n` +
+        `┣━━━━━━━━━━━━━━━━━━\n` +
+        `┃ 💬 Textos: *${adm.text}*\n` +
+        `┃ 📷 Fotos: *${adm.photos}*\n` +
+        `┃ 🎥 Vídeos: *${adm.videos}*\n` +
+        `┃ 🎴 Figurinhas: *${adm.stickers}*\n` +
+        `┃ ⌨️ Comandos: *${adm.commands}*\n` +
+        `╰━━━━━━━━━━━━━━━━━━╯`,
+      mentions:[target]
+    }, {quoted:info});
+  }
+
+  const sortBy = requestedCategory || "total";
+  const ranking = getAdminActivityRank(from, groupAdmins || [], 10, sortBy);
+  const stats = getAdminActivityStats(from, groupAdmins || []);
+
+  if (!ranking.length) {
+    return reply(
+      "╭━━━〔 👑 *RANK ADM* 〕━━━╮\n" +
+      "┃ Ainda não há atividade registrada.\n" +
+      "┃ O ranking começa a contar a partir\n" +
+      "┃ da atualização v2.0.15.\n" +
+      "╰━━━━━━━━━━━━━━━━━━╯"
+    );
+  }
+
+  const medals = ["🥇","🥈","🥉"];
+  const mentions = [];
+  const valueFor = (adm) => Number(adm[sortBy] || 0);
+
+  const cards = ranking.map((adm,index)=>{
+    mentions.push(adm.jid);
+    const medal = medals[index] || `🏅 ${index+1}º`;
+    const share = stats.totals.total > 0
+      ? ((adm.total / stats.totals.total) * 100).toFixed(1)
+      : "0.0";
+
+    return (
+      `${medal} *@${adm.jid.split("@")[0]}*\n` +
+      `╰➤ ${rankIcon[sortBy]} *${valueFor(adm)}* em ${rankLabel[sortBy].toLowerCase()}` +
+      (sortBy !== "total" ? ` • 🐉 ${adm.total} total` : "") + `\n` +
+      `   💬 ${adm.text}  📷 ${adm.photos}  🎥 ${adm.videos}\n` +
+      `   🎴 ${adm.stickers}  ⌨️ ${adm.commands}  📊 ${share}%\n` +
+      `   🌟 ${dominantCategory(adm)}`
+    );
+  });
+
+  const leaderLine = (key,emoji,label) => {
+    const l = stats.leaders[key];
+    if (!l || !Number(l[key]||0)) return `${emoji} ${label}: —`;
+    mentions.push(l.jid);
+    return `${emoji} ${label}: @${l.jid.split("@")[0]} (${l[key]})`;
+  };
+
+  const textOut =
+    `╭━━━〔 👑🐉 *RANK ADM 2.0* 〕━━━╮\n` +
+    `┃ ${rankIcon[sortBy]} Ranking: *${rankLabel[sortBy]}*\n` +
+    `┃ 👑 ADMs ativos: *${stats.activeAdmins}*\n` +
+    `┃ ✨ Interações: *${stats.totals.total}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    cards.join("\n\n") +
+    `\n\n╭━━〔 🌸 *LÍDERES POR CATEGORIA* 〕━━╮\n` +
+    `${leaderLine("text","💬","Texto")}\n` +
+    `${leaderLine("photos","📷","Fotos")}\n` +
+    `${leaderLine("videos","🎥","Vídeos")}\n` +
+    `${leaderLine("stickers","🎴","Figurinhas")}\n` +
+    `${leaderLine("commands","⌨️","Comandos")}\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `╭━━〔 🎯 *FILTROS* 〕━━╮\n` +
+    `┃ /rankadm texto\n` +
+    `┃ /rankadm fotos\n` +
+    `┃ /rankadm videos\n` +
+    `┃ /rankadm figurinhas\n` +
+    `┃ /rankadm comandos\n` +
+    `┃ /rankadm @adm  • ou responda\n` +
+    `╰━━━━━━━━━━━━━━━━╯`;
+
+  return conn.sendMessage(from, {
+    text:textOut,
+    mentions:[...new Set(mentions)]
+  }, {quoted:info});
 }
 break;
+
 case "resetrankadm": {
   if (!isGroup) return reply("👑 Esse comando só funciona em grupos.");
-  if (!isGroupAdmins && !SoDonoPrincipal) return reply("⚠️ Apenas administradores podem zerar o Rank ADM.");
-  return reply(resetAdminActivityRank(from) ? "👑✨ Rank ADM zerado." : "👑 O Rank ADM ainda não possui dados.");
+  if (!isGroupAdmins && !SoDonoPrincipal) {
+    return reply("⚠️ Apenas administradores podem zerar o Rank ADM.");
+  }
+
+  const confirm = String(args?.[0] || "").trim().toLowerCase();
+  if (!["confirmar","confirmo","sim"].includes(confirm)) {
+    return reply(
+      "⚠️ *Zerar todo o Rank ADM deste grupo?*\n\n" +
+      "Use: */resetrankadm confirmar*"
+    );
+  }
+
+  return reply(
+    resetAdminActivityRank(from)
+      ? "👑✨ *Rank ADM zerado com sucesso!*"
+      : "👑 O Rank ADM ainda não possui dados."
+  );
 }
 break;
 
