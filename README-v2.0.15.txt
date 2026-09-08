@@ -1,0 +1,1 @@
+Kobayashi Bot v2.0.15 — RankADM\n/rankadm: Top 10 ADMs por texto, fotos, vídeos, figurinhas e comandos.\nSó conta atividade enquanto a pessoa é ADM. Comandos não contam como texto.\n/resetrankadm: zera o ranking do grupo (ADM/dono).\nTambém: Koba rankadm\n

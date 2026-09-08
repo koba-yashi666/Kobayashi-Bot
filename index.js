@@ -19,6 +19,7 @@ import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./
 import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/moderation/whitelist.js";
+import { trackAdminActivity, getAdminActivityRank, resetAdminActivityRank } from "./lib/features/moderation/adminActivityRank.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/group/autoSticker.js";
 import { readSettingsFile, writeSettingsFile, getConfiguredLeaders, isMainOwnerJid, isLeaderJid, onlyDigits } from "./lib/config/settingsStore.js";
 import { readAdvDb, writeAdvDb } from "./lib/moderation/advStore.js";
@@ -681,6 +682,8 @@ function normalizeKobaIntentText(value=""){
 // Registro completo dos comandos reconhecidos pelo bot.
 // O Koba Trigger só dispara se a primeira ação corresponder a um comando real.
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "rankadm",
+  "resetrankadm",
   "rgfigu",
   "0",
   "1",
@@ -1507,6 +1510,17 @@ if (isGroup && sender && !info.key.fromMe) {
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
+// 👑 RankADM — registra apenas atividade feita enquanto o membro é ADM.
+if (isGroup && isGroupAdmins && !info.key.fromMe) {
+  let rankAdmKind = null;
+  if (isCmd) rankAdmKind = "command";
+  else if (info?.message?.stickerMessage) rankAdmKind = "sticker";
+  else if (info?.message?.imageMessage) rankAdmKind = "photo";
+  else if (info?.message?.videoMessage) rankAdmKind = "video";
+  else if (info?.message?.conversation || info?.message?.extendedTextMessage?.text) rankAdmKind = "text";
+  if (rankAdmKind) try { trackAdminActivity(from, sender, rankAdmKind); } catch (e) { console.log("[RANKADM]",e?.message||e); }
+}
+
 
 // 🤍 WHITELIST HARD GUARD • v2.0.12
 // Proteção no nível do socket: qualquer remoção feita pelo bot passa por esta barreira.
@@ -7832,6 +7846,22 @@ case "permissoesbot": {
     canEditGroup: isBotGroupAdmins,
     canInvite: isBotGroupAdmins
   }));
+}
+break;
+
+case "rankadm": {
+  if (!isGroup) return reply("👑 O /rankadm só funciona em grupos.");
+  const ranking = getAdminActivityRank(from, groupAdmins || [], 10);
+  if (!ranking.length) return reply("👑 *RANK ADM*\\n\\nAinda não há interações de ADMs registradas. O ranking começa a contar a partir desta atualização.");
+  const medals=["🥇","🥈","🥉"], mentions=[];
+  const lines=ranking.map((a,i)=>{ mentions.push(a.jid); return `${medals[i] || `🏅 ${i+1}º`} *@${a.jid.split("@")[0]}* — *${a.total}* interações\\n   💬 ${a.text}  📷 ${a.photos}  🎥 ${a.videos}  🎴 ${a.stickers}  ⌨️ ${a.commands}`; });
+  return conn.sendMessage(from,{text:`👑🐉 *RANK ADM — MAIS ATIVOS*\\n\\n${lines.join("\\n\\n")}\\n\\n💬 Texto • 📷 Fotos • 🎥 Vídeos\\n🎴 Figurinhas • ⌨️ Comandos`,mentions:[...new Set(mentions)]},{quoted:info});
+}
+break;
+case "resetrankadm": {
+  if (!isGroup) return reply("👑 Esse comando só funciona em grupos.");
+  if (!isGroupAdmins && !SoDonoPrincipal) return reply("⚠️ Apenas administradores podem zerar o Rank ADM.");
+  return reply(resetAdminActivityRank(from) ? "👑✨ Rank ADM zerado." : "👑 O Rank ADM ainda não possui dados.");
 }
 break;
 
