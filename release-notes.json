@@ -200,5 +200,15 @@
       "Percentual de participação no grupo.",
       "Reset do ranking agora exige confirmação."
     ]
+  },
+  "2.0.19": {
+    "version": "2.0.19",
+    "title": "Créditos Luiz G. / Kobayashi",
+    "changes": [
+      "Banner antigo da base substituído.",
+      "Novo crédito: Luiz G. / Kobayashi.",
+      "Aviso contra venda sem autorização.",
+      "Contato de aluguel: 5515997075304."
+    ]
   }
 }

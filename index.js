@@ -1,10 +1,12 @@
-/*ESSA BASE FOI DESENVOLVIDA PELO  COM FOCO EM PERFORMANCE E OTIMIZAÇÃO.
-© COPYRIGHT BY 
-BASE PÚBLICA - O USO E A MODIFICAÇÃO SÃO PERMITIDOS,
-PORÉM É EXPRESSAMENTE PROIBIDA A VENDA OU COMERCIALIZAÇÃO
-DESTA BASE, NO TODO OU EM PARTE.
-NÃO VENDA, REVENDA OU COMERCIALIZE ESTA BASE
-SEM A AUTORIZAÇÃO DO AUTOR.*/
+/* 🐉 KOBAYASHI BOT
+Bot criado por Luiz G. / Kobayashi.
+
+A venda deste bot sem autorização do criador é proibida.
+Você pode alugar o bot diretamente com o criador.
+
+Contato para aluguel:
+WhatsApp: 5515997075304
+*/
 
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
