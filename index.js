@@ -40,6 +40,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/moderation/antiSpam.js";
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickers/stickerSources.js";
+import { cleanPackName, createStickerPack, startPackCapture, stopPackCapture, getPackCapture, addStickerToActivePack, getStickerPackBuffers, listStickerPacks } from "./lib/features/stickers/stickerPacks.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
 import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
@@ -1400,6 +1401,19 @@ if (!SoDonoPrincipal && sender && isGloballyBlacklisted(sender)) {
   continue;
 }
 
+// 🎴 PACOTES DE FIGURINHAS • v2.0.21
+// Enquanto /pacote fig on estiver ativo, toda figurinha recebida neste chat
+// é armazenada no pacote selecionado. Mensagens enviadas pelo próprio bot
+// não são recapturadas, evitando loop ao reenviar coleções.
+if (type === "stickerMessage" && !info.key.fromMe && getPackCapture(from)) {
+  try {
+    const capturedSticker = await downloadMediaMessage(info, "buffer", {});
+    addStickerToActivePack(from, capturedSticker, { senderJid: sender });
+  } catch (e) {
+    console.error("Erro ao capturar figurinha do pacote:", e?.message || e);
+  }
+}
+
 // 🐉 UPDATE NEWS v0.3.6
 // Após um /update, a notícia fica pendente em disco. Na primeira atividade
 // recebida depois do reinício, a Kobayashi publica o resumo no chat que iniciou a atualização.
@@ -2339,6 +2353,133 @@ if (isCmd) {
   }
 
 switch (command) {
+
+// ==========================================
+// 🎴 KOBAYASHI STICKER PACKS • v2.0.21
+// /pacote add "nome"  -> cria/seleciona e inicia captura
+// /pacote fig on      -> retoma a captura do último pacote deste chat
+// /pacote fig off     -> encerra a captura
+// /pacote "nome"      -> envia a coleção com metadados do mesmo pacote
+// /figurinha "nome"   -> envia os arquivos salvos um por um
+// ==========================================
+case "pacote":
+case "pack": {
+  const first = String(args[0] || "").toLowerCase();
+  const second = String(args[1] || "").toLowerCase();
+
+  if (first === "add") {
+    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem registrar pacotes de figurinhas.");
+    const packName = cleanPackName(args.slice(1).join(" "));
+    if (!packName) {
+      return reply(`🎴 Use: *${prefix}pacote add "nome do pacote"*`);
+    }
+
+    try {
+      const pack = createStickerPack(packName, { chatJid: from, creatorJid: sender });
+      startPackCapture(from, pack.id, sender);
+      return reply(
+        `╭━━〔 🎴 *PACOTE REGISTRADO* 〕━━╮\n` +
+        `┃ 📦 *${pack.name}*\n` +
+        `┃ 🖼️ Figurinhas: *${pack.stickers?.length || 0}*\n` +
+        `┃ 🟢 Captura: *ATIVA*\n` +
+        `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+        `Agora envie ou encaminhe as figurinhas que devem entrar no pacote.\n` +
+        `Quando terminar, use *${prefix}pacote fig off*.`
+      );
+    } catch (e) {
+      console.error("Erro /pacote add:", e?.message || e);
+      return reply("❌ Não consegui criar esse pacote.");
+    }
+  }
+
+  if (first === "fig" && second === "on") {
+    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem controlar a captura de pacotes.");
+    const optionalName = cleanPackName(args.slice(2).join(" "));
+    const pack = startPackCapture(from, optionalName, sender);
+    if (!pack) {
+      return reply(
+        `❌ Não encontrei um pacote para capturar.\n\n` +
+        `Crie primeiro com *${prefix}pacote add "nome do pacote"*.`
+      );
+    }
+    return reply(`🟢🎴 Captura ativada para *${pack.name}*.\nEnvie as figurinhas e depois use *${prefix}pacote fig off*.`);
+  }
+
+  if (first === "fig" && second === "off") {
+    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem controlar a captura de pacotes.");
+    const pack = stopPackCapture(from);
+    if (!pack) return reply("🌸 A captura de figurinhas já está desativada neste chat.");
+    return reply(
+      `🔒🎴 Captura encerrada!\n\n` +
+      `📦 *${pack.name}*\n` +
+      `🖼️ *${pack.stickers?.length || 0}* figurinhas registradas.`
+    );
+  }
+
+  const requestedName = cleanPackName(q);
+  if (!requestedName) {
+    const capture = getPackCapture(from);
+    return reply(
+      `╭━━〔 🎴 *PACOTES KOBAYASHI* 〕━━╮\n` +
+      `┃ ${prefix}pacote add "nome"\n` +
+      `┃ ${prefix}pacote fig on\n` +
+      `┃ ${prefix}pacote fig off\n` +
+      `┃ ${prefix}pacote "nome"\n` +
+      `┃ ${prefix}figurinha "nome"\n` +
+      `┃ ${prefix}pacotes\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯` +
+      (capture ? `\n\n🟢 Capturando agora: *${capture.name}* (${capture.stickers?.length || 0})` : "")
+    );
+  }
+
+  const pack = getStickerPackBuffers(requestedName);
+  if (!pack) return reply(`❌ Não encontrei o pacote *${requestedName}*.`);
+  if (!pack.stickers.length) return reply(`📭 O pacote *${pack.name}* ainda está vazio.`);
+
+  await reply(`📦🎴 Enviando *${pack.name}* com *${pack.stickers.length}* figurinhas...`);
+  for (const item of pack.stickers) {
+    try {
+      const packedSticker = await applyStickerMetadata(item.buffer, {
+        userNick: "Kobayashi",
+        packName: pack.name,
+        publisher: "Kobayashi Bot",
+        packId: pack.id,
+        emojis: ["🐉", "🌸", "🎴"]
+      });
+      await conn.sendMessage(from, { sticker: packedSticker });
+      await delay(120);
+    } catch (e) {
+      console.error(`Erro ao enviar sticker ${item.index} do pacote ${pack.name}:`, e?.message || e);
+    }
+  }
+  return;
+}
+break;
+
+case "figurinha": {
+  const requestedName = cleanPackName(q);
+  if (!requestedName) return reply(`🎴 Use: *${prefix}figurinha "nome do pacote"*`);
+  const pack = getStickerPackBuffers(requestedName);
+  if (!pack) return reply(`❌ Não encontrei o pacote *${requestedName}*.`);
+  if (!pack.stickers.length) return reply(`📭 O pacote *${pack.name}* ainda está vazio.`);
+
+  await reply(`🌸 Enviando as *${pack.stickers.length}* figurinhas de *${pack.name}* uma por uma...`);
+  for (const item of pack.stickers) {
+    await conn.sendMessage(from, { sticker: item.buffer });
+    await delay(350);
+  }
+  return;
+}
+break;
+
+case "pacotes":
+case "packs": {
+  const packs = listStickerPacks();
+  if (!packs.length) return reply(`📭 Nenhum pacote registrado ainda.\nUse *${prefix}pacote add "nome"*.`);
+  const lines = packs.map((p, i) => `${i + 1}. 📦 *${p.name}* — ${p.count} figurinhas`);
+  return reply(`╭━━〔 🎴 *PACOTES SALVOS* 〕━━╮\n${lines.join("\n")}\n╰━━━━━━━━━━━━━━━━━━━━━━╯`);
+}
+break;
 
 // ==========================================
 // 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.5
