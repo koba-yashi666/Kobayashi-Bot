@@ -682,6 +682,7 @@ function normalizeKobaIntentText(value=""){
 // Registro completo dos comandos reconhecidos pelo bot.
 // O Koba Trigger só dispara se a primeira ação corresponder a um comando real.
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "carinho",
   "rankadm",
   "resetrankadm",
   "rgfigu",
@@ -7623,6 +7624,31 @@ break;
 case "rpgcomandos":
 case "comandosrpg": {
   return reply(formatRpgCommands(prefix));
+}
+break;
+
+case "carinho": {
+  const target = resolveBanTarget(info, args);
+  const mention = target ? `@${String(target).split("@")[0]}` : null;
+  const captions = target ? [
+    `🌸 ${mention}, toma um carinho pra deixar o dia um pouquinho mais leve. 🫶`,
+    `💗 Um carinho especial chegou pra você, ${mention}. Aceita sem reclamar, hein? ✨`,
+    `🐉💞 Kobayashi entregando uma dose de carinho para ${mention}. E não tem como recusar!`,
+    `🌷 ${mention}, às vezes um pouquinho de carinho já muda tudo. Então toma. 🤍`
+  ] : [
+    `🌸 Passando só pra deixar um pouquinho de carinho por aqui. 🫶`,
+    `💗 Dose gratuita de carinho entregue pela Kobayashi. ✨`,
+    `🐉💞 Nem todo comando precisa causar caos... esse aqui é só carinho.`,
+    `🌷 Um carinho inesperado pra deixar o chat um pouco mais fofinho. 🤍`
+  ];
+  const videoPath = path.join(process.cwd(), "media", "carinho", "carinho.mp4");
+  if (!fs.existsSync(videoPath)) return reply("⚠️ O vídeo do /carinho não foi encontrado.");
+  return conn.sendMessage(from, {
+    video: fs.readFileSync(videoPath),
+    caption: captions[Math.floor(Math.random()*captions.length)],
+    gifPlayback: true,
+    mentions: target ? [target] : []
+  }, {quoted: info});
 }
 break;
 
