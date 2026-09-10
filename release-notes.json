@@ -258,5 +258,31 @@
       "Menu ADM atualizado com /rankadm, /resetrankadm e /listanegra.",
       "Regra de atualização consolidada: comandos novos devem entrar no menu correspondente e nas novidades da versão."
     ]
+  },
+  "2.0.24": {
+    "version": "2.0.24",
+    "title": "Dragon RPG — Progressão, Classes e Atributos",
+    "date": "2026-09-10",
+    "commands": [
+      {
+        "name": "classesavancadas",
+        "category": "Dragon RPG",
+        "note": "mostra requisitos e progresso das especializações"
+      },
+      {
+        "name": "classeavancada",
+        "category": "Dragon RPG",
+        "note": "desbloqueia uma classe avançada ao cumprir todos os requisitos"
+      }
+    ],
+    "changes": [
+      "Tutoriais do Dragon RPG reescritos com explicações detalhadas em 9 tópicos.",
+      "Cada nível RPG agora concede 3 pontos de atributo e 1 ponto de habilidade.",
+      "Adicionadas classes avançadas: Necromante, Assassino, Paladino e Feiticeiro.",
+      "Classes avançadas exigem nível, inimigos derrotados, classe base e, em alguns casos, atributos/especialidades.",
+      "Perfil RPG agora mostra classe avançada, pontos de habilidade, inimigos derrotados, Combate, Furtividade, Sobrevivência e Arcana.",
+      "Especialidades evoluem conforme nível, vitórias e estilo da classe.",
+      "Novos comandos adicionados ao menu Dragon RPG e ao /novidades."
+    ]
   }
 }

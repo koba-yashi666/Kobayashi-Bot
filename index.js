@@ -59,7 +59,7 @@ import {
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
   resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
-} from "./lib/features/rpg/dragonRpg.js";
+, formatAdvancedClasses, chooseAdvancedClass} from "./lib/features/rpg/dragonRpg.js";
 import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
 import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/kobaTrigger.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
@@ -7741,6 +7741,26 @@ case "inventariorpg": {
   const player = getDragonRpgPlayer(sender);
   if (!player) return reply(`🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
   return reply(formatDragonRpgInventory(player));
+}
+break;
+
+case "classesavancadas": {
+  const text = formatAdvancedClasses(sender, prefix);
+  return reply(text || `🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
+}
+break;
+
+case "classeavancada": {
+  const key=String(args[0]||"").toLowerCase();
+  if(!key)return reply(`🌟 Use *${prefix}classeavancada necromante* por exemplo.\nVeja requisitos em *${prefix}classesavancadas*.`);
+  const r=chooseAdvancedClass(sender,key);
+  if(!r.ok){
+    if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);
+    if(r.reason==="already")return reply(`🌟 Você já possui uma classe avançada.`);
+    if(r.reason==="requirements")return reply(`🔒 *REQUISITOS INCOMPLETOS • ${r.klass.name}*\n\n${r.missing.map(x=>`• ${x.name}`).join("\n")}\n\nVeja *${prefix}classesavancadas*.`);
+    return reply(`❌ Classe avançada inválida. Veja *${prefix}classesavancadas*.`);
+  }
+  return reply(`${r.klass.icon}🌟 *CLASSE AVANÇADA DESBLOQUEADA!*\n\nVocê conquistou *${r.klass.name}*!\n🎯 ${r.klass.role}\n\nSeus bônus foram aplicados ao personagem.`);
 }
 break;
 
