@@ -1,27 +1,17 @@
-KOBAYASHI BOT v2.0.21 — PACOTES DE FIGURINHAS
+Kobayashi Bot v2.0.21 — Lista Negra AutoRemove
 
-Novos comandos:
-/pacote add "nome do pacote"
-  Cria/seleciona o pacote e já ativa a captura.
+/listanegra:
+- ao adicionar uma pessoa, tenta remover imediatamente do grupo;
+- se a pessoa entrar novamente, o evento de entrada remove automaticamente;
+- funciona enquanto a Kobayashi for ADM.
 
-/pacote fig on
-  Reativa a captura usando o último pacote selecionado no chat.
-  Também aceita /pacote fig on "nome".
+/listanegrag:
+- ao adicionar um número globalmente, varre todos os grupos participantes;
+- remove a pessoa de cada grupo onde ela estiver e a Kobayashi for ADM;
+- qualquer tentativa futura de entrar em grupo é removida automaticamente;
+- continua bloqueando interação no PV.
 
-/pacote fig off
-  Encerra a captura e informa quantas figurinhas foram registradas.
-
-/pacote "nome do pacote"
-  Reenvia a coleção aplicando o mesmo nome e ID de pacote aos metadados das figurinhas.
-
-/figurinha "nome do pacote"
-  Envia as figurinhas salvas uma por uma, mantendo os arquivos capturados.
-
-/pacotes
-  Lista todos os pacotes registrados.
-
-Observações:
-- Durante a captura, toda figurinha recebida no chat é registrada.
-- Figurinhas duplicadas não são salvas novamente.
-- Os arquivos ficam em files/sticker-packs e o índice em files/database/sticker-packs.json.
-- /pacote add e /pacote fig on/off ficam restritos ao dono/líderes para evitar uso indevido de armazenamento.
+Prioridade:
+- Lista Negra local/global passa a ter prioridade sobre Lista Branca para remoções
+  automáticas da própria Kobayashi.
+- o dono principal continua protegido contra entrada na lista negra.

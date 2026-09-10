@@ -40,7 +40,6 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/moderation/antiSpam.js";
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickers/stickerSources.js";
-import { cleanPackName, createStickerPack, startPackCapture, stopPackCapture, getPackCapture, addStickerToActivePack, getStickerPackBuffers, listStickerPacks } from "./lib/features/stickers/stickerPacks.js";
 import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
 import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
@@ -588,7 +587,170 @@ async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageTex
   }
 }
 
+
+async function getBlacklistAliases(conn, groupJid, rawJid) {
+  const aliases = new Set([rawJid].filter(Boolean));
+
+  try {
+    const pn = await getPNForJid(conn, rawJid, rawJid);
+    if (pn) aliases.add(pn);
+  } catch {}
+
+  try {
+    const metadata = await conn.groupMetadata(groupJid);
+    for (const p of metadata?.participants || []) {
+      const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
+      const rawNorm = (() => { try { return normalizeJid(rawJid); } catch { return rawJid; } })();
+      const match = ids.some((id) => {
+        if (id === rawJid) return true;
+        try { return normalizeJid(id) === rawNorm; } catch { return false; }
+      });
+      if (!match) continue;
+
+      for (const id of ids) aliases.add(id);
+      for (const id of ids) {
+        try {
+          const pn = await getPNForJid(conn, id, id);
+          if (pn) aliases.add(pn);
+        } catch {}
+      }
+    }
+  } catch {}
+
+  return [...aliases].filter(Boolean);
+}
+
+async function getBlacklistState(conn, groupJid, rawJid) {
+  const aliases = await getBlacklistAliases(conn, groupJid, rawJid);
+  const global = aliases.some((jid) => {
+    try { return isGloballyBlacklisted(jid); } catch { return false; }
+  });
+  const local = aliases.some((jid) => {
+    try { return isBlacklisted(groupJid, jid); } catch { return false; }
+  });
+  return { aliases, global, local, blocked: global || local };
+}
+
+async function removeBlacklistedFromGroup(conn, groupJid, rawJid, { announce=false, source="auto" }={}) {
+  const state = await getBlacklistState(conn, groupJid, rawJid);
+  if (!state.blocked) return { removed:false, reason:"not-blacklisted", ...state };
+
+  let metadata;
+  try {
+    metadata = await conn.groupMetadata(groupJid);
+  } catch {
+    return { removed:false, reason:"metadata-error", ...state };
+  }
+
+  const participants = metadata?.participants || [];
+  const botRaw = conn?.user?.id;
+  const botPN = await getPNForJid(conn, botRaw, conn?.user?.lid || conn?.user?.phoneNumber).catch(() => null);
+  const botIds = new Set([botRaw, botPN, conn?.user?.lid, conn?.user?.phoneNumber].filter(Boolean));
+
+  const botParticipant = participants.find((p) =>
+    [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).some((id) => {
+      if (botIds.has(id)) return true;
+      try {
+        return [...botIds].some((b) => normalizeJid(id) === normalizeJid(b));
+      } catch { return false; }
+    })
+  );
+
+  const botIsAdmin = Boolean(botParticipant?.admin);
+  if (!botIsAdmin) return { removed:false, reason:"bot-not-admin", ...state };
+
+  const targetParticipant = participants.find((p) =>
+    [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).some((id) =>
+      state.aliases.some((a) => {
+        if (id === a) return true;
+        try { return normalizeJid(id) === normalizeJid(a); } catch { return false; }
+      })
+    )
+  );
+
+  if (!targetParticipant) return { removed:false, reason:"not-in-group", ...state };
+
+  const target =
+    targetParticipant?.id ||
+    targetParticipant?.jid ||
+    targetParticipant?.participant ||
+    rawJid;
+
+  try {
+    await conn.groupParticipantsUpdate(groupJid, [target], "remove");
+    if (announce) {
+      await conn.sendMessage(groupJid, {
+        text:
+          `🖤🔨 *LISTA NEGRA • REMOÇÃO AUTOMÁTICA*\n\n` +
+          `@${String(target).split("@")[0]} foi removido automaticamente.\n` +
+          `📌 Origem: *${state.global ? "Lista Negra Global" : "Lista Negra do Grupo"}*`,
+        mentions:[target]
+      }).catch(() => {});
+    }
+    console.log(`[LISTA NEGRA ${source}] removido ${target} de ${groupJid}`);
+    return { removed:true, reason:"removed", target, ...state };
+  } catch (e) {
+    console.error(`[LISTA NEGRA ${source}]`, e?.message || e);
+    return { removed:false, reason:"remove-error", error:e?.message || String(e), ...state };
+  }
+}
+
+async function purgeGlobalBlacklistedUser(conn, rawJid) {
+  let groups = {};
+  try {
+    groups = await conn.groupFetchAllParticipating();
+  } catch (e) {
+    console.error("[LISTA NEGRA GLOBAL PURGE] não foi possível listar grupos:", e?.message || e);
+    return { checked:0, removed:0, failures:0 };
+  }
+
+  let checked=0, removed=0, failures=0;
+  for (const groupJid of Object.keys(groups || {})) {
+    checked++;
+    const result = await removeBlacklistedFromGroup(conn, groupJid, rawJid, {
+      announce:true,
+      source:"global-purge"
+    });
+    if (result.removed) removed++;
+    else if (result.reason === "remove-error") failures++;
+  }
+  return { checked, removed, failures };
+}
+
+function ensureBlacklistJoinGuard(conn) {
+  if (conn.__kobayashiBlacklistJoinGuard) return;
+  conn.__kobayashiBlacklistJoinGuard = true;
+
+  conn.ev.on("group-participants.update", async (event) => {
+    try {
+      if (String(event?.action || "").toLowerCase() !== "add") return;
+      const groupJid = event?.id;
+      const participants = Array.isArray(event?.participants) ? event.participants : [];
+      if (!groupJid || !participants.length) return;
+
+      for (const target of participants) {
+        const result = await removeBlacklistedFromGroup(conn, groupJid, target, {
+          announce:true,
+          source:"join-guard"
+        });
+
+        if (result.removed) {
+          addAdminLog(groupJid, {
+            type:"blacklist_auto_remove",
+            actor:"Kobayashi AutoGuard",
+            target:result.target || target,
+            detail:result.global ? "Lista Negra Global • reentrada bloqueada" : "Lista Negra Local • reentrada bloqueada"
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[LISTA NEGRA JOIN GUARD]", e?.stack || e?.message || e);
+    }
+  });
+}
+
 export default async function start(upsert, conn) {
+ensureBlacklistJoinGuard(conn);
 try {
 ensureDragonCoreRuntime(conn);
 for (const info of upsert?.messages || []) {
@@ -1398,20 +1560,13 @@ if (sentinelWaResult.handled) continue;
 // Usuários cadastrados aqui são ignorados pelo bot em qualquer grupo/PV.
 // O dono principal sempre possui bypass para evitar lockout administrativo.
 if (!SoDonoPrincipal && sender && isGloballyBlacklisted(sender)) {
-  continue;
-}
-
-// 🎴 PACOTES DE FIGURINHAS • v2.0.21
-// Enquanto /pacote fig on estiver ativo, toda figurinha recebida neste chat
-// é armazenada no pacote selecionado. Mensagens enviadas pelo próprio bot
-// não são recapturadas, evitando loop ao reenviar coleções.
-if (type === "stickerMessage" && !info.key.fromMe && getPackCapture(from)) {
-  try {
-    const capturedSticker = await downloadMediaMessage(info, "buffer", {});
-    addStickerToActivePack(from, capturedSticker, { senderJid: sender });
-  } catch (e) {
-    console.error("Erro ao capturar figurinha do pacote:", e?.message || e);
+  if (isGroup) {
+    await removeBlacklistedFromGroup(conn, from, sender, {
+      announce:true,
+      source:"message-global"
+    }).catch(() => {});
   }
+  continue;
 }
 
 // 🐉 UPDATE NEWS v0.3.6
@@ -1601,7 +1756,17 @@ if (!conn.__kobayashiWhitelistHardGuard) {
         }
       }
 
-      const protectedMember = [...aliases].some((jid) => {
+      const blacklistedMember = [...aliases].some((jid) => {
+        try {
+          return isGloballyBlacklisted(jid) || isBlacklisted(groupJid, jid);
+        } catch {
+          return false;
+        }
+      });
+
+      // 🖤 Lista Negra tem prioridade sobre Lista Branca.
+      // Assim, quem está bloqueado local/globalmente pode ser removido pelo AutoGuard.
+      const protectedMember = !blacklistedMember && [...aliases].some((jid) => {
         try {
           return isWhitelisted(groupJid, jid);
         } catch {
@@ -2355,133 +2520,6 @@ if (isCmd) {
 switch (command) {
 
 // ==========================================
-// 🎴 KOBAYASHI STICKER PACKS • v2.0.21
-// /pacote add "nome"  -> cria/seleciona e inicia captura
-// /pacote fig on      -> retoma a captura do último pacote deste chat
-// /pacote fig off     -> encerra a captura
-// /pacote "nome"      -> envia a coleção com metadados do mesmo pacote
-// /figurinha "nome"   -> envia os arquivos salvos um por um
-// ==========================================
-case "pacote":
-case "pack": {
-  const first = String(args[0] || "").toLowerCase();
-  const second = String(args[1] || "").toLowerCase();
-
-  if (first === "add") {
-    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem registrar pacotes de figurinhas.");
-    const packName = cleanPackName(args.slice(1).join(" "));
-    if (!packName) {
-      return reply(`🎴 Use: *${prefix}pacote add "nome do pacote"*`);
-    }
-
-    try {
-      const pack = createStickerPack(packName, { chatJid: from, creatorJid: sender });
-      startPackCapture(from, pack.id, sender);
-      return reply(
-        `╭━━〔 🎴 *PACOTE REGISTRADO* 〕━━╮\n` +
-        `┃ 📦 *${pack.name}*\n` +
-        `┃ 🖼️ Figurinhas: *${pack.stickers?.length || 0}*\n` +
-        `┃ 🟢 Captura: *ATIVA*\n` +
-        `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-        `Agora envie ou encaminhe as figurinhas que devem entrar no pacote.\n` +
-        `Quando terminar, use *${prefix}pacote fig off*.`
-      );
-    } catch (e) {
-      console.error("Erro /pacote add:", e?.message || e);
-      return reply("❌ Não consegui criar esse pacote.");
-    }
-  }
-
-  if (first === "fig" && second === "on") {
-    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem controlar a captura de pacotes.");
-    const optionalName = cleanPackName(args.slice(2).join(" "));
-    const pack = startPackCapture(from, optionalName, sender);
-    if (!pack) {
-      return reply(
-        `❌ Não encontrei um pacote para capturar.\n\n` +
-        `Crie primeiro com *${prefix}pacote add "nome do pacote"*.`
-      );
-    }
-    return reply(`🟢🎴 Captura ativada para *${pack.name}*.\nEnvie as figurinhas e depois use *${prefix}pacote fig off*.`);
-  }
-
-  if (first === "fig" && second === "off") {
-    if (!SoDono) return reply("👑 Apenas o dono ou líderes podem controlar a captura de pacotes.");
-    const pack = stopPackCapture(from);
-    if (!pack) return reply("🌸 A captura de figurinhas já está desativada neste chat.");
-    return reply(
-      `🔒🎴 Captura encerrada!\n\n` +
-      `📦 *${pack.name}*\n` +
-      `🖼️ *${pack.stickers?.length || 0}* figurinhas registradas.`
-    );
-  }
-
-  const requestedName = cleanPackName(q);
-  if (!requestedName) {
-    const capture = getPackCapture(from);
-    return reply(
-      `╭━━〔 🎴 *PACOTES KOBAYASHI* 〕━━╮\n` +
-      `┃ ${prefix}pacote add "nome"\n` +
-      `┃ ${prefix}pacote fig on\n` +
-      `┃ ${prefix}pacote fig off\n` +
-      `┃ ${prefix}pacote "nome"\n` +
-      `┃ ${prefix}figurinha "nome"\n` +
-      `┃ ${prefix}pacotes\n` +
-      `╰━━━━━━━━━━━━━━━━━━━━━━╯` +
-      (capture ? `\n\n🟢 Capturando agora: *${capture.name}* (${capture.stickers?.length || 0})` : "")
-    );
-  }
-
-  const pack = getStickerPackBuffers(requestedName);
-  if (!pack) return reply(`❌ Não encontrei o pacote *${requestedName}*.`);
-  if (!pack.stickers.length) return reply(`📭 O pacote *${pack.name}* ainda está vazio.`);
-
-  await reply(`📦🎴 Enviando *${pack.name}* com *${pack.stickers.length}* figurinhas...`);
-  for (const item of pack.stickers) {
-    try {
-      const packedSticker = await applyStickerMetadata(item.buffer, {
-        userNick: "Kobayashi",
-        packName: pack.name,
-        publisher: "Kobayashi Bot",
-        packId: pack.id,
-        emojis: ["🐉", "🌸", "🎴"]
-      });
-      await conn.sendMessage(from, { sticker: packedSticker });
-      await delay(120);
-    } catch (e) {
-      console.error(`Erro ao enviar sticker ${item.index} do pacote ${pack.name}:`, e?.message || e);
-    }
-  }
-  return;
-}
-break;
-
-case "figurinha": {
-  const requestedName = cleanPackName(q);
-  if (!requestedName) return reply(`🎴 Use: *${prefix}figurinha "nome do pacote"*`);
-  const pack = getStickerPackBuffers(requestedName);
-  if (!pack) return reply(`❌ Não encontrei o pacote *${requestedName}*.`);
-  if (!pack.stickers.length) return reply(`📭 O pacote *${pack.name}* ainda está vazio.`);
-
-  await reply(`🌸 Enviando as *${pack.stickers.length}* figurinhas de *${pack.name}* uma por uma...`);
-  for (const item of pack.stickers) {
-    await conn.sendMessage(from, { sticker: item.buffer });
-    await delay(350);
-  }
-  return;
-}
-break;
-
-case "pacotes":
-case "packs": {
-  const packs = listStickerPacks();
-  if (!packs.length) return reply(`📭 Nenhum pacote registrado ainda.\nUse *${prefix}pacote add "nome"*.`);
-  const lines = packs.map((p, i) => `${i + 1}. 📦 *${p.name}* — ${p.count} figurinhas`);
-  return reply(`╭━━〔 🎴 *PACOTES SALVOS* 〕━━╮\n${lines.join("\n")}\n╰━━━━━━━━━━━━━━━━━━━━━━╯`);
-}
-break;
-
-// ==========================================
 // 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.5
 // Inspirado no fluxo de aluguel/ativação do Hutao,
 // refeito para a arquitetura e banco do Kobayashi.
@@ -2777,11 +2815,15 @@ case "listanegraglobal": {
     by: sender
   });
 
+  const purge = await purgeGlobalBlacklistedUser(conn, target);
+
   return conn.sendMessage(from, {
     text:
       `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
       `👤 @${target.split("@")[0]} foi adicionado.\n` +
-      `🚫 A Kobayashi passará a ignorar esse número em todos os grupos e no PV.`,
+      `🔨 Removido agora de *${purge.removed}* grupo(s) onde foi encontrado e a Kobayashi era ADM.\n` +
+      `🚪 Se entrar novamente em qualquer grupo monitorado, será removido automaticamente.\n` +
+      `🚫 A Kobayashi também continuará ignorando esse número no PV.`,
     mentions: [target]
   }, { quoted: info });
 }
@@ -9038,7 +9080,10 @@ case "blacklist": {
     const reason = args.slice(2).join(" ").trim();
     if (!reason) return reply(`⚠️ Informe o motivo.\nExemplo: *${prefix}listanegra add @membro golpes*`);
     addBlacklist(from,target,sender,reason);
-    if (isBotGroupAdmins) await conn.groupParticipantsUpdate(from,[target],"remove").catch(()=>{});
+    const blacklistRemoval = await removeBlacklistedFromGroup(conn, from, target, {
+      announce:false,
+      source:"local-add"
+    });
     addPunishmentHistory(from, target, {
       type: "blacklist_add",
       reason,
@@ -9046,7 +9091,7 @@ case "blacklist": {
       source: "manual"
     });
     addAdminLog(from,{type:"blacklist_add",actor:sender,target,detail:reason});
-    return conn.sendMessage(from,{text:`⛔ @${target.split('@')[0]} adicionado à lista negra.\n📝 Motivo: *${reason}*${isBotGroupAdmins?'\n🔨 Removido do grupo.':''}`,mentions:[target]},{quoted:info});
+    return conn.sendMessage(from,{text:`⛔ @${target.split('@')[0]} adicionado à lista negra.\n📝 Motivo: *${reason}*${blacklistRemoval.removed?'\n🔨 Removido do grupo imediatamente.\n🚪 Se entrar novamente, será removido automaticamente.':(isBotGroupAdmins?'\n⚠️ Não consegui remover agora, mas o bloqueio automático continua ativo.':'\n⚠️ Preciso ser ADM para remover automaticamente.')}`,mentions:[target]},{quoted:info});
   }
   const ok=removeBlacklist(from,target);
   if (ok) {

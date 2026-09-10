@@ -211,16 +211,14 @@
       "Contato de aluguel: 5515997075304."
     ]
   },
-  "v2.0.21": {
+  "2.0.21": {
     "version": "2.0.21",
-    "title": "Pacotes de Figurinhas",
+    "title": "Lista Negra AutoRemove",
     "changes": [
-      "Novo /pacote add \"nome\" cria ou seleciona um pacote e inicia a captura.",
-      "Novo /pacote fig on/off controla a captura de todas as figurinhas recebidas no chat.",
-      "Novo /pacote \"nome\" reenvia a coleção com metadados compartilhados de pacote.",
-      "Novo /figurinha \"nome\" envia as figurinhas salvas uma por uma.",
-      "Novo /pacotes lista as coleções registradas.",
-      "Figurinhas duplicadas são detectadas por SHA-256 e não são salvas novamente."
+      "/listanegra remove imediatamente e bloqueia reentrada.",
+      "/listanegrag expulsa de todos os grupos onde a Kobayashi é ADM.",
+      "Entrada de usuário em lista negra dispara remoção automática.",
+      "Lista Negra passa a ter prioridade sobre whitelist para o AutoGuard."
     ]
   }
 }
