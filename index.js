@@ -20,6 +20,7 @@ import { getGroupMetadata } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/group/groupSchedule.js";
 import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
+import { startPackageCapture, stopPackageCapture, captureStickerIfActive, getPackageCaptureStatus, saveCapturedPackage, getStickerPackage, listStickerPackages, deleteStickerPackage, getNextStickerFromPackage } from "./lib/features/stickers/stickerPackages.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/moderation/whitelist.js";
 import { trackAdminActivity, getAdminActivityRank, getAdminActivityStats, getAdminActivityUser, resetAdminActivityRank } from "./lib/features/moderation/adminActivityRank.js";
 import { setAutoSticker, isAutoStickerEnabled } from "./lib/features/group/autoSticker.js";
@@ -1216,6 +1217,8 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "opengp_off",
   "owner",
   "packfig",
+  "pacote",
+  "figurinha",
   "pagar",
   "paineladm",
   "painelprotecao",
@@ -1669,6 +1672,25 @@ if (!isGroup && !isStatus && !info.key.fromMe && !SoDono) {
       ).catch(() => {});
       continue;
     }
+  }
+}
+
+
+// 🎴 PACOTES • captura as figurinhas recebidas enquanto /pacote fig on estiver ativo.
+if (!info.key.fromMe && type === "stickerMessage") {
+  try {
+    const captureStatus = getPackageCaptureStatus(from);
+    if (captureStatus.active) {
+      const stickerBuffer = await downloadMediaMessage(info, "buffer", {});
+      const captureResult = captureStickerIfActive(from, stickerBuffer);
+      if (captureResult?.reason === "limit") {
+        await conn.sendMessage(from, {
+          text: "🎴⚠️ A captura chegou ao limite de *250 figurinhas* e foi pausada automaticamente."
+        }).catch(() => {});
+      }
+    }
+  } catch (e) {
+    console.error("[PACOTE CAPTURE]", e?.message || e);
   }
 }
 
@@ -6267,6 +6289,182 @@ ${legacyCount > 0 ? `┃ 🗃️ Registros antigos: *${legacyCount}*\n` : ''}┃
   }
 }
 break;
+
+
+// 🎴 PACOTES REGISTRADOS • v2.0.23
+case "pacote": {
+  const sub = String(args?.[0] || "").trim().toLowerCase();
+
+  if (sub === "fig") {
+    if (!SoDonoPrincipal) {
+      return reply("👑 Apenas o dono principal pode iniciar ou encerrar a captura de pacotes.");
+    }
+
+    const op = String(args?.[1] || "").trim().toLowerCase();
+    if (!["on","off"].includes(op)) {
+      const status = getPackageCaptureStatus(from);
+      return reply(
+        `🎴🐉 *CAPTURA DE PACOTE*\n\n` +
+        `Status: *${status.active ? "ATIVA ✅" : "DESATIVADA ❌"}*\n` +
+        `Figurinhas capturadas: *${status.count}*\n\n` +
+        `▶️ *${prefix}pacote fig on*\n` +
+        `⏹️ *${prefix}pacote fig off*`
+      );
+    }
+
+    if (op === "on") {
+      startPackageCapture(from, sender);
+      return reply(
+        `🎴✅ *CAPTURA ATIVADA*\n\n` +
+        `A partir de agora, todas as figurinhas recebidas neste chat serão guardadas temporariamente.\n\n` +
+        `Quando terminar:\n*${prefix}pacote fig off*\n\n` +
+        `Depois registre:\n*${prefix}pacote add Nome do pacote*`
+      );
+    }
+
+    const result = stopPackageCapture(from, sender, SoDonoPrincipal);
+    if (!result.ok && result.reason === "not-started") {
+      return reply(`🎴 Não existe uma captura ativa neste chat.`);
+    }
+
+    return reply(
+      `🎴⏹️ *CAPTURA ENCERRADA*\n\n` +
+      `Figurinhas guardadas: *${result.count}*\n\n` +
+      `Agora use:\n*${prefix}pacote add Nome do pacote*`
+    );
+  }
+
+  if (sub === "add") {
+    if (!SoDonoPrincipal) {
+      return reply("👑 Apenas o dono principal pode registrar pacotes.");
+    }
+
+    const packageName = args.slice(1).join(" ").trim().replace(/^["'“”]+|["'“”]+$/g, "");
+    if (!packageName) {
+      return reply(`🎴 Use: *${prefix}pacote add Nome do pacote*`);
+    }
+
+    const result = saveCapturedPackage(from, sender, packageName);
+
+    if (!result.ok) {
+      const messages = {
+        "no-capture": `🎴 Nenhuma captura foi iniciada.\nUse primeiro *${prefix}pacote fig on*.`,
+        "empty": `🎴 A captura não possui figurinhas.`,
+        "not-owner": `👑 Essa captura foi iniciada por outra pessoa.`,
+        "invalid-name": `⚠️ Escolha um nome válido para o pacote.`
+      };
+      return reply(messages[result.reason] || "❌ Não consegui registrar esse pacote.");
+    }
+
+    return reply(
+      `╭━━〔 🎴 *PACOTE REGISTRADO* 〕━━╮\n` +
+      `┃ 📦 Nome: *${result.name}*\n` +
+      `┃ 🎨 Figurinhas: *${result.count}*\n` +
+      `┃ ♻️ ${result.replaced ? "Pacote anterior substituído" : "Novo pacote criado"}\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `Enviar pacote inteiro:\n*${prefix}pacote ${result.name}*\n\n` +
+      `Enviar uma por vez:\n*${prefix}figurinha ${result.name}*`
+    );
+  }
+
+  if (["lista","list"].includes(sub)) {
+    const packs = listStickerPackages();
+    if (!packs.length) {
+      return reply(
+        `🎴 Nenhum pacote registrado ainda.\n\n` +
+        `Use *${prefix}pacote fig on* para começar uma captura.`
+      );
+    }
+
+    const rows = packs.map((pack, i) =>
+      `${i + 1}. *${pack.name}* — ${pack.count} figurinha${pack.count === 1 ? "" : "s"}`
+    ).join("\n");
+
+    return reply(
+      `╭━━〔 🎴 *PACOTES REGISTRADOS* 〕━━╮\n\n${rows}\n\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (["del","delete","remover","remove"].includes(sub)) {
+    if (!SoDonoPrincipal) {
+      return reply("👑 Apenas o dono principal pode remover pacotes.");
+    }
+    const packageName = args.slice(1).join(" ").trim().replace(/^["'“”]+|["'“”]+$/g, "");
+    if (!packageName) return reply(`🗑️ Use: *${prefix}pacote del Nome do pacote*`);
+    const ok = deleteStickerPackage(packageName);
+    return reply(ok ? `✅ Pacote *${packageName}* removido.` : `⚠️ Não encontrei o pacote *${packageName}*.`);
+  }
+
+  const packageName = q.trim().replace(/^["'“”]+|["'“”]+$/g, "");
+
+  if (!packageName) {
+    const status = getPackageCaptureStatus(from);
+    return reply(
+      `╭━━〔 🎴🐉 *PACOTES KOBAYASHI* 〕━━╮\n\n` +
+      `▶️ *${prefix}pacote fig on*\n` +
+      `⏹️ *${prefix}pacote fig off*\n` +
+      `💾 *${prefix}pacote add Nome*\n` +
+      `📦 *${prefix}pacote Nome*\n` +
+      `🎴 *${prefix}figurinha Nome*\n` +
+      `📚 *${prefix}pacote lista*\n\n` +
+      `Captura atual: *${status.active ? "ATIVA" : "desativada"}* • ${status.count} figurinha(s)\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  const pack = getStickerPackage(packageName);
+  if (!pack) {
+    return reply(
+      `❌ Não encontrei o pacote *${packageName}*.\n` +
+      `Use *${prefix}pacote lista*.`
+    );
+  }
+
+  await reply(
+    `🎴📦 Enviando *${pack.name}* com *${pack.count}* figurinha${pack.count === 1 ? "" : "s"}...`
+  );
+
+  let sent = 0;
+  for (const file of pack.files) {
+    try {
+      await conn.sendMessage(from, { sticker: fs.readFileSync(file) });
+      sent++;
+      await delay(350);
+    } catch (e) {
+      console.error("[PACOTE SEND]", e?.message || e);
+    }
+  }
+
+  return reply(
+    `✅🎴 Pacote *${pack.name}* concluído.\n` +
+    `Enviadas: *${sent}/${pack.count}*.`
+  );
+}
+break;
+
+case "figurinha": {
+  const packageName = q.trim().replace(/^["'“”]+|["'“”]+$/g, "");
+  if (!packageName) {
+    return reply(
+      `🎴 Use: *${prefix}figurinha Nome do pacote*\n\n` +
+      `Cada uso envia a próxima figurinha do pacote e, ao chegar ao final, volta para a primeira.`
+    );
+  }
+
+  const next = getNextStickerFromPackage(packageName, from, sender);
+  if (!next) {
+    return reply(
+      `❌ Não encontrei o pacote *${packageName}*.\n` +
+      `Use *${prefix}pacote lista*.`
+    );
+  }
+
+  await conn.sendMessage(from, { sticker: next.buffer }, { quoted: info });
+  return;
+}
+break;
+
 
 // pacote de figurinhas aleatórias • quantidade obrigatória de 1 a 15
 case "figurinhas":

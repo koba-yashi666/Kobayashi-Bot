@@ -230,5 +230,33 @@
       "Novo modo aluguel com redirecionamento para o criador.",
       "Compatibilidade com a configuração antiPv antiga."
     ]
+  },
+  "2.0.23": {
+    "version": "2.0.23",
+    "title": "Pacotes de Figurinhas + Novidades + Menus",
+    "date": "2026-09-10",
+    "commands": [
+      {
+        "name": "pacote",
+        "category": "Ateliê de Escamas",
+        "note": "captura, registra e envia um pacote salvo"
+      },
+      {
+        "name": "figurinha",
+        "category": "Ateliê de Escamas",
+        "note": "envia as figurinhas de um pacote uma por vez"
+      }
+    ],
+    "changes": [
+      "Corrigido o sistema de pacotes de figurinhas com captura real via /pacote fig on e /pacote fig off.",
+      "/pacote add Nome registra todas as figurinhas capturadas como um pacote persistente.",
+      "/pacote Nome envia o pacote registrado completo.",
+      "/figurinha Nome envia uma figurinha por vez e continua da posição anterior.",
+      "/novidades agora escolhe automaticamente a maior versão do release-notes.json, em vez de poder ficar preso em uma versão antiga.",
+      "/novidades ganhou uma seção própria de NOVOS COMANDOS.",
+      "Menu de figurinhas atualizado com /pacote, /figurinha e /rgfigu.",
+      "Menu ADM atualizado com /rankadm, /resetrankadm e /listanegra.",
+      "Regra de atualização consolidada: comandos novos devem entrar no menu correspondente e nas novidades da versão."
+    ]
   }
 }
