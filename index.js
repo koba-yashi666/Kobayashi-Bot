@@ -563,17 +563,23 @@ async function notifyOwnerAntiLink(conn, ownerJid, data) {
   }
 }
 
-async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageText, type }) {
+async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageText, type, mode="aviso" }) {
   if (!conn || !ownerJid || !sender) return false;
 
   const number = String(sender).split("@")[0] || "desconhecido";
+  const modeLabel = {
+    aviso: "⚠️ Aviso",
+    bloquear: "🚫 Bloqueio",
+    aluguel: "💼 Redirecionamento para aluguel"
+  }[mode] || mode;
+
   const text =
-    `🚨 *ANTI-PV • NOVA INVASÃO*\n\n` +
-    `- Número: @${number}\n` +
-    `- Id: ${messageId || "não disponível"}\n` +
-    `- Tipo: ${type || "mensagem"}\n` +
-    `- Mensagem: ${messageText || "[sem conteúdo legível]"}\n\n` +
-    `🛡️ O Anti-PV bloqueou a interação automaticamente.`;
+    `🚨 *ANTI-PV • CONTATO DETECTADO*\n\n` +
+    `• Número: @${number}\n` +
+    `• ID: ${messageId || "não disponível"}\n` +
+    `• Tipo: ${type || "mensagem"}\n` +
+    `• Modo: ${modeLabel}\n` +
+    `• Mensagem: ${messageText || "[sem conteúdo legível]"}`;
 
   try {
     await conn.sendMessage(ownerJid, {
@@ -1591,25 +1597,79 @@ if (pendingUpdateNews?.targetJid) {
   }
 }
 
-if (!isGroup && !isStatus && !info.key.fromMe && runtimeSettings.antiPv && !SoDono) {
-  const antiPvPreview = auditMessagePreview(info, body, type);
+if (!isGroup && !isStatus && !info.key.fromMe && !SoDono) {
+  // Compatibilidade: instalações antigas com antiPv=true entram em modo aviso.
+  const antiPvMode = String(
+    runtimeSettings?.antiPvMode ||
+    (runtimeSettings?.antiPv ? "aviso" : "off")
+  ).toLowerCase();
 
-  // Avisa o dono em QUALQUER tentativa de contato no PV, não apenas comandos.
-  await notifyOwnerAntiPv(conn, dono, {
-    sender,
-    messageId: info?.key?.id,
-    messageText: antiPvPreview,
-    type
-  });
+  if (["aviso","bloquear","aluguel"].includes(antiPvMode)) {
+    const antiPvPreview = auditMessagePreview(info, body, type);
 
-  // Mantém uma resposta curta ao invasor. Evita múltiplas mensagens do bot.
-  await conn.sendMessage(
-    from,
-    { text: "🛡️🐉 Meu privado está protegido pelo Anti-PV. O proprietário foi notificado." },
-    { quoted: info }
-  ).catch(() => {});
+    await notifyOwnerAntiPv(conn, dono, {
+      sender,
+      messageId: info?.key?.id,
+      messageText: antiPvPreview,
+      type,
+      mode: antiPvMode
+    });
 
-  continue;
+    if (antiPvMode === "aviso") {
+      await conn.sendMessage(
+        from,
+        {
+          text:
+            "⚠️🐉 *ANTI-PV KOBAYASHI*\n\n" +
+            "Meu privado não é destinado ao uso comum do bot.\n" +
+            "Por favor, utilize a Kobayashi nos grupos autorizados.\n\n" +
+            "📨 O criador foi avisado sobre este contato."
+        },
+        { quoted: info }
+      ).catch(() => {});
+      continue;
+    }
+
+    if (antiPvMode === "bloquear") {
+      await conn.sendMessage(
+        from,
+        {
+          text:
+            "🚫🐉 *ANTI-PV KOBAYASHI*\n\n" +
+            "Contatos não autorizados no privado são bloqueados automaticamente."
+        },
+        { quoted: info }
+      ).catch(() => {});
+
+      try {
+        if (typeof conn.updateBlockStatus === "function") {
+          await conn.updateBlockStatus(sender, "block");
+        } else {
+          console.log("[ANTI-PV] updateBlockStatus indisponível nesta versão do Baileys.");
+        }
+      } catch (e) {
+        console.error("[ANTI-PV BLOQUEAR]", e?.message || e);
+      }
+      continue;
+    }
+
+    if (antiPvMode === "aluguel") {
+      const rentUrl = "https://wa.me/5515997075304?text=Quero%20alugar%20o%20bot%2C%20como%20fa%C3%A7o%3F";
+      await conn.sendMessage(
+        from,
+        {
+          text:
+            "💼🐉 *QUER USAR A KOBAYASHI?*\n\n" +
+            "Este privado não é usado para comandos.\n" +
+            "Você pode alugar o bot diretamente com o criador, Luiz G. / Kobayashi.\n\n" +
+            "📲 *Falar com o criador e ver o aluguel:*\n" +
+            `${rentUrl}`
+        },
+        { quoted: info }
+      ).catch(() => {});
+      continue;
+    }
+  }
 }
 
 // KOBAYASHI AFK + ACTIVITY v0.1.55
@@ -8955,26 +9015,68 @@ break;
 
 case "antipv": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
-  const op = String(args[0] || "").toLowerCase();
 
-  if (!["on", "off"].includes(op)) {
+  const aliases = {
+    on:"aviso",
+    aviso:"aviso",
+    avisar:"aviso",
+    warn:"aviso",
+    bloquear:"bloquear",
+    block:"bloquear",
+    aluguel:"aluguel",
+    alugar:"aluguel",
+    redirecionar:"aluguel",
+    redirect:"aluguel",
+    off:"off",
+    desligar:"off"
+  };
+
+  const raw = String(args[0] || "").toLowerCase();
+  const op = aliases[raw] || "";
+
+  if (!op) {
     const cfg = readSettingsFile();
+    const current = String(cfg?.antiPvMode || (cfg?.antiPv ? "aviso" : "off")).toLowerCase();
+    const label = {
+      aviso:"⚠️ AVISO",
+      bloquear:"🚫 BLOQUEAR",
+      aluguel:"💼 ALUGUEL",
+      off:"❌ DESATIVADO"
+    }[current] || current;
+
     return reply(
-      `🛡️ *ANTI-PV*\n\n` +
-      `Status: *${cfg.antiPv ? "ATIVADO ✅" : "DESATIVADO ❌"}*\n` +
-      `Quando ativo, qualquer pessoa que chamar a Kobayashi no privado terá a tentativa bloqueada e o dono receberá:\n` +
-      `• número/JID\n• ID da mensagem\n• tipo\n• conteúdo recebido\n\n` +
-      `Use *${prefix}antipv on* ou *${prefix}antipv off*.`
+      `╭━━━〔 🛡️🐉 *ANTI-PV 3 MODOS* 〕━━━╮\n` +
+      `┃ Status atual: *${label}*\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+      `⚠️ *${prefix}antipv aviso*\n` +
+      `Avisa a pessoa que o PV é protegido e notifica o dono.\n\n` +
+      `🚫 *${prefix}antipv bloquear*\n` +
+      `Avisa e bloqueia o contato no WhatsApp automaticamente.\n\n` +
+      `💼 *${prefix}antipv aluguel*\n` +
+      `Redireciona a pessoa para alugar a Kobayashi diretamente com você.\n\n` +
+      `❌ *${prefix}antipv off*\n` +
+      `Desativa a proteção do privado.`
     );
   }
 
   const cfg = readSettingsFile();
-  cfg.antiPv = op === "on";
+  cfg.antiPvMode = op;
+  // Mantém compatibilidade com trechos antigos que ainda consultem antiPv.
+  cfg.antiPv = op !== "off";
   writeSettingsFile(cfg);
-  return reply(
-    `🛡️🌸 Anti-PV *${cfg.antiPv ? "ativado" : "desativado"}* com sucesso.` +
-    (cfg.antiPv ? `\n📨 Alertas de invasão serão enviados ao PV do dono.` : "")
-  );
+
+  const response = {
+    aviso:
+      "⚠️🐉 *Anti-PV modo AVISO ativado.*\nQuem chamar no PV recebe um aviso e você será notificado.",
+    bloquear:
+      "🚫🐉 *Anti-PV modo BLOQUEAR ativado.*\nQuem chamar no PV será avisado e bloqueado automaticamente.",
+    aluguel:
+      "💼🐉 *Anti-PV modo ALUGUEL ativado.*\nQuem chamar no PV será redirecionado para:\nhttps://wa.me/5515997075304?text=Quero%20alugar%20o%20bot%2C%20como%20fa%C3%A7o%3F",
+    off:
+      "❌🐉 *Anti-PV desativado.*"
+  };
+
+  return reply(response[op]);
 }
 break;
 //

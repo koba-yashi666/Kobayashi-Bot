@@ -220,5 +220,15 @@
       "Entrada de usuário em lista negra dispara remoção automática.",
       "Lista Negra passa a ter prioridade sobre whitelist para o AutoGuard."
     ]
+  },
+  "2.0.22": {
+    "version": "2.0.22",
+    "title": "Anti-PV 3 Modos",
+    "changes": [
+      "Novo modo aviso.",
+      "Novo modo bloquear com bloqueio automático do contato.",
+      "Novo modo aluguel com redirecionamento para o criador.",
+      "Compatibilidade com a configuração antiPv antiga."
+    ]
   }
 }
