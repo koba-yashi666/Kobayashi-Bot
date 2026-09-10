@@ -284,5 +284,19 @@
       "Especialidades evoluem conforme nível, vitórias e estilo da classe.",
       "Novos comandos adicionados ao menu Dragon RPG e ao /novidades."
     ]
+  },
+  "2.0.25": {
+    "version": "2.0.25",
+    "title": "Dragon RPG — Itens Fora de Combate + Comandos Fix",
+    "date": "2026-09-10",
+    "changes": [
+      "Itens consumíveis agora podem ser usados dentro e fora de batalha.",
+      "Poção de HP recupera até 45 HP.",
+      "Poção de Mana recupera até 40 Mana.",
+      "Poção de Força aumenta em 50% o próximo /atacar.",
+      "Poção de Mana e Poção de Força adicionadas à loja RPG.",
+      "Comandos e aliases atuais do Dragon RPG sincronizados com o roteador do modo e com o Koba Trigger.",
+      "Classes avançadas e comandos recentes passam a ser reconhecidos corretamente."
+    ]
   }
 }

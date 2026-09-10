@@ -854,10 +854,6 @@ function normalizeKobaIntentText(value=""){
 // Registro completo dos comandos reconhecidos pelo bot.
 // O Koba Trigger só dispara se a primeira ação corresponder a um comando real.
 const KOBA_TRIGGER_COMMANDS = new Set([
-  "carinho",
-  "rankadm",
-  "resetrankadm",
-  "rgfigu",
   "0",
   "1",
   "12345",
@@ -950,6 +946,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "bridge",
   "buy",
   "cafune",
+  "carinho",
   "carteira",
   "casa",
   "casais",
@@ -966,7 +963,9 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "claim",
   "class",
   "classe",
+  "classeavancada",
   "classeinfo",
+  "classesavancadas",
   "classeslevel",
   "classesrpg",
   "closegp",
@@ -1065,6 +1064,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "farm",
   "feed",
   "fig",
+  "figurinha",
   "figurinhas",
   "fish",
   "fontefig",
@@ -1218,7 +1218,6 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "owner",
   "packfig",
   "pacote",
-  "figurinha",
   "pagar",
   "paineladm",
   "painelprotecao",
@@ -1258,6 +1257,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "quests",
   "quick_reply",
   "rank",
+  "rankadm",
   "rankcoins",
   "rankgay",
   "rankglobal",
@@ -1292,10 +1292,12 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "reparar",
   "reputacao",
   "resetlink",
+  "resetrankadm",
   "responder",
   "revogarlink",
   "rg_aluguel",
   "rgcmd",
+  "rgfigu",
   "rm_adv",
   "rm_aluguel",
   "rm_closegp",
@@ -2539,16 +2541,83 @@ if (isCmd) {
   );
 
   const DRAGON_RPG_COMMANDS = new Set([
-    "dragonrpg","rpg","menurpg","rpgcriar","criarpersonagem","rpgperfil","perfilrpg",
-    "rpginventario","inventariorpg","rpgclasses","classesrpg","classeinfo","rpgclasseinfo",
-    "rpgclasse","escolherclasse","despertardragao","despertar","rpgfaccao","escolherfaccao",
-    "rpgdragao","escolherdragao","regioes","rpgregioes","explorar","batalhar","atacar",
-    "rpgatacar","defender","rpgdefender","habilidade","rpghabilidade","item","rpgitem",
-    "fugir","rpgfugir","descansar","rpgdescansar","rpgatributo","atributorpg","missoes",
-    "rpgmissoes","missao","rpgmissao","lojarpg","rpgloja","comprarrpg","rpgcomprar",
-    "equipamentos","rpgequipamentos","equipar","rpgequipar","desequipar","rpgdesequipar",
-    "habilidades","skillsrpg","rpghabilidades","rankrpg","rpgrank","rpgajuda","dragonhelp",
-    "rpgcomandos","comandosrpg","zerarrpg","zerarrpgg","bossdespertar","despertarboss","transformar","formadragao","formahumana","humano","habilidadedragao","skilldragao","energiadragao","descansodragao","statusdespertar"
+    "atacar",
+    "atributorpg",
+    "batalhar",
+    "bossdespertar",
+    "classeavancada",
+    "classeinfo",
+    "classesavancadas",
+    "classesrpg",
+    "comandosrpg",
+    "comprarrpg",
+    "criarpersonagem",
+    "defender",
+    "descansar",
+    "descansodragao",
+    "desequipar",
+    "despertar",
+    "despertarboss",
+    "despertardragao",
+    "dragonhelp",
+    "dragonrpg",
+    "energiadragao",
+    "equipamentos",
+    "equipar",
+    "escolherclasse",
+    "escolherdragao",
+    "escolherfaccao",
+    "explorar",
+    "formadragao",
+    "formahumana",
+    "fugir",
+    "habilidade",
+    "habilidadedragao",
+    "habilidades",
+    "humano",
+    "inventariorpg",
+    "item",
+    "lojarpg",
+    "menurpg",
+    "missao",
+    "missoes",
+    "perfilrpg",
+    "rankrpg",
+    "regioes",
+    "rpg",
+    "rpgajuda",
+    "rpgatacar",
+    "rpgatributo",
+    "rpgclasse",
+    "rpgclasseinfo",
+    "rpgclasses",
+    "rpgcomandos",
+    "rpgcomprar",
+    "rpgcriar",
+    "rpgdefender",
+    "rpgdescansar",
+    "rpgdesequipar",
+    "rpgdragao",
+    "rpgequipamentos",
+    "rpgequipar",
+    "rpgfaccao",
+    "rpgfugir",
+    "rpghabilidade",
+    "rpghabilidades",
+    "rpginventario",
+    "rpgitem",
+    "rpgloja",
+    "rpgmissao",
+    "rpgmissoes",
+    "rpgperfil",
+    "rpgrank",
+    "rpgregioes",
+    "skilldragao",
+    "skillsrpg",
+    "statusdespertar",
+    "transformar",
+    "zerarrpg",
+    "zerarrpgg"
   ]);
 
   const dragonRpgModeEnabled = !isGroup || isDragonRpgEnabled(from);
@@ -7980,15 +8049,36 @@ break;
 
 case "item":
 case "rpgitem": {
-  const key = String(args?.[0] || "pocao").toLowerCase();
+  const key = String(args?.[0] || "pocao_hp").toLowerCase();
   const r = rpgUseItem(sender, key);
   if (!r.ok) {
-    if (r.reason === "no_battle") return reply(`🗺️ Itens de batalha são usados durante um combate.`);
-    if (r.reason === "item") return reply(`🎒 Você não possui esse item. Veja *${prefix}rpginventario*.`);
+    if (r.reason === "item") return reply(`🎒 Você não possui esse item. Veja *${prefix}rpginventario* ou *${prefix}lojarpg*.`);
+    if (r.reason === "full_hp") return reply(`❤️ Seu HP já está cheio.`);
+    if (r.reason === "full_mana") return reply(`🔷 Sua Mana já está cheia.`);
+    if (r.reason === "full_resources") return reply(`✨ Seu HP e sua Mana já estão cheios.`);
+    if (r.reason === "buff_active") return reply(`💪 Você já tem uma Poção de Força ativa para o próximo ataque.`);
     return reply(`❌ Esse item não pode ser usado agora.`);
   }
-  if (r.counter?.defeated) return reply(`🧪 Você usou *${r.item.name}*, mas o inimigo contra-atacou e você foi derrotado.\n🏕️ Use *${prefix}descansar*.`);
-  return reply(`🧪 Você usou *${r.item.name}*.${r.heal ? ` ❤️ +${r.heal} HP.` : ""}${r.mana ? ` 🔷 +${r.mana} Mana.` : ""}\n💥 O inimigo contra-atacou: *${r.counter.damage}* de dano.\n❤️ HP: *${r.player.resources.hp}/${r.player.stats.hp}*`);
+
+  if (r.counter?.defeated) {
+    return reply(`🧪 Você usou *${r.item.name}*, mas o inimigo contra-atacou e você foi derrotado.\n🏕️ Use *${prefix}descansar*.`);
+  }
+
+  const effects =
+    `${r.heal ? ` ❤️ +${r.heal} HP.` : ""}` +
+    `${r.mana ? ` 🔷 +${r.mana} Mana.` : ""}` +
+    `${r.buff?.type === "forca" ? ` 💪 Próximo ataque: *+50% de força*.` : ""}`;
+
+  const combatText = r.inCombat && r.counter
+    ? `\n💥 O inimigo contra-atacou: *${r.counter.damage}* de dano.`
+    : `\n✅ Item usado fora de combate.`;
+
+  return reply(
+    `${r.item.icon || "🧪"} Você usou *${r.item.name}*.${effects}` +
+    combatText +
+    `\n❤️ HP: *${r.player.resources.hp}/${r.player.stats.hp}*` +
+    `\n🔷 Mana: *${r.player.resources.mana}/${r.player.stats.mana}*`
+  );
 }
 break;
 
