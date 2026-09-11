@@ -298,5 +298,19 @@
       "Comandos e aliases atuais do Dragon RPG sincronizados com o roteador do modo e com o Koba Trigger.",
       "Classes avançadas e comandos recentes passam a ser reconhecidos corretamente."
     ]
+  },
+  "2.0.26": {
+    "version": "2.0.26",
+    "title": "Perfil Kobayashi 2.0",
+    "date": "2026-09-10",
+    "changes": [
+      "/perfil atual substituído pelo Perfil Kobayashi 2.0, sem criar handler concorrente.",
+      "Perfil usa a foto de perfil do WhatsApp quando disponível.",
+      "Nova identidade visual original Kobayashi com Identidade, Hierarquia, Dragon Social, Aura Kobayashi, Atividade e Dragon RPG.",
+      "Personalidade persistente com Caos, Fofura, Aura, Coragem e Mistério.",
+      "Integração com classe, especialização, nível, HP, Mana, Combate e Furtividade do Dragon RPG.",
+      "Mantido suporte a /perfil, /perfil @membro e /perfil respondendo a uma mensagem.",
+      "Conselho da Koba muda diariamente entre frases próprias do bot."
+    ]
   }
 }

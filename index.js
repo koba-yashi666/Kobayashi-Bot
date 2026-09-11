@@ -250,6 +250,23 @@ function getOrCreateFunScore(groupJid, category, jid) {
   return db.scores[groupJid][category][jid];
 }
 
+function getKobayashiPersonality(groupJid, jid) {
+  const scope = groupJid || "global";
+  return {
+    caos: getOrCreateFunScore(scope, "perfil_caos", jid),
+    fofura: getOrCreateFunScore(scope, "perfil_fofura", jid),
+    aura: getOrCreateFunScore(scope, "perfil_aura", jid),
+    coragem: getOrCreateFunScore(scope, "perfil_coragem", jid),
+    misterio: getOrCreateFunScore(scope, "perfil_misterio", jid),
+  };
+}
+
+function kobayashiPercentBar(value) {
+  const n = Math.max(0, Math.min(100, Number(value) || 0));
+  const blocks = Math.round(n / 10);
+  return `${"▰".repeat(blocks)}${"▱".repeat(10 - blocks)} ${n}%`;
+}
+
 function getTwoTargetsFromMessage(info, sender, text) {
   const context =
     info.message?.extendedTextMessage?.contextInfo ||
@@ -6172,7 +6189,7 @@ case "perfil": {
     const target = getTargetFromMessage(info, sender) || sender;
     const targetPN = await getPNForJid(conn, target, target);
     const targetJid = targetPN || normalizeJid(target) || target;
-    const number = targetJid?.split('@')[0] || target?.split('@')[0] || 'desconhecido';
+    const number = targetJid?.split("@")[0] || target?.split("@")[0] || "desconhecido";
 
     const targetParticipant = isGroup ? groupMembers.find((p) => {
       const raw = p?.id || p?.jid || p?.participant;
@@ -6180,177 +6197,173 @@ case "perfil": {
     }) : null;
 
     const cfgPerfil = readSettingsFile();
-    const perfilOwnerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || '').replace(/\D/g, '');
+    const perfilOwnerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || "").replace(/\D/g, "");
     const leaderNumbers = Array.isArray(cfgPerfil?.leaders)
-      ? cfgPerfil.leaders.map((x) => String(x || '').replace(/\D/g, '')).filter(Boolean)
+      ? cfgPerfil.leaders.map((x) => String(x || "").replace(/\D/g, "")).filter(Boolean)
       : [];
 
     const isTargetOwner = number === perfilOwnerNumber || targetJid === dono || target === dono;
     const isTargetLeader = leaderNumbers.includes(number);
     const participantRole = targetParticipant?.admin;
-    const isTargetAdmin = participantRole === 'admin' || participantRole === 'superadmin';
-    const isGroupOwner = participantRole === 'superadmin';
+    const isTargetAdmin = participantRole === "admin" || participantRole === "superadmin";
+    const isGroupOwner = participantRole === "superadmin";
 
     let name = target === sender
-      ? (pushname || 'Usuário')
+      ? (pushname || "Usuário")
       : (targetParticipant?.name || targetParticipant?.notify || `Usuário ${number}`);
-
-    // Nome salvo no WhatsApp quando disponível.
     try {
-      if (typeof conn.getName === 'function') {
+      if (typeof conn.getName === "function") {
         const resolvedName = await conn.getName(targetJid);
         if (resolvedName && !/^\+?\d+$/.test(String(resolvedName).trim())) name = String(resolvedName).trim();
       }
-    } catch (_) {}
+    } catch {}
 
-    let bio = 'Sem recado público';
-    let bioSetAt = '';
+    let bio = "Sem recado público";
     try {
-      if (typeof conn.fetchStatus === 'function') {
+      if (typeof conn.fetchStatus === "function") {
         const statusData = await conn.fetchStatus(targetJid);
         const rawStatus = Array.isArray(statusData) ? statusData[0] : statusData;
         bio = String(rawStatus?.status?.status || rawStatus?.status || bio).trim() || bio;
-        const setAt = rawStatus?.status?.setAt || rawStatus?.setAt;
-        if (setAt) {
-          bioSetAt = new Date(Number(setAt)).toLocaleString('pt-BR', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-            timeZone: 'America/Sao_Paulo'
-          });
-        }
       }
-    } catch (_) {}
-    if (bio.length > 95) bio = `${bio.slice(0, 92)}...`;
-
-    const db = readAdvDb();
-    const advCountRaw = isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0;
-    const advCount = Math.max(0, Math.min(Number(advCountRaw) || 0, 3));
-    const advStatus = advCount === 0
-      ? '✅ Ficha limpa'
-      : advCount === 1
-        ? '🟡 Sob atenção'
-        : advCount === 2
-          ? '🟠 Zona de risco'
-          : '🔴 Limite atingido';
+    } catch {}
+    if (bio.length > 90) bio = `${bio.slice(0, 87)}...`;
 
     const activity = isGroup
       ? getUserActivity(from, targetJid)
-      : { messages: 0, textMessages: 0, images: 0, stickers: 0, legacyMessages: 0, lastSeen: 0 };
+      : { messages:0, textMessages:0, images:0, stickers:0, commands:0, xp:0 };
 
-    const messageCount = Number(activity?.messages || 0);
     const textCount = Number(activity?.textMessages || 0);
     const imageCount = Number(activity?.images || 0);
     const stickerCount = Number(activity?.stickers || 0);
-    const legacyCount = Number(activity?.legacyMessages || 0);
-    const lastSeen = Number(activity?.lastSeen || 0);
-    const lastSeenText = lastSeen
-      ? new Date(lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-      : 'Ainda não registrada';
-
-    // Medidores de brincadeira persistentes.
-    const gado = isGroup ? getOrCreateFunScore(from, 'gado', targetJid) : 0;
-    const beleza = isGroup ? getOrCreateFunScore(from, 'lindo', targetJid) : 0;
-    const presenca = isGroup ? getOrCreateFunScore(from, 'gostoso', targetJid) : 0;
-
-    const cargo = isTargetOwner
-      ? '👑 Dono da Kobayashi'
-      : isGroupOwner
-        ? '👑 Dono do grupo'
-        : isTargetAdmin
-          ? '🛡️ Administrador'
-          : isTargetLeader
-            ? '🐉 Líder da Kobayashi'
-            : '🌸 Membro';
+    const messageCount = Number(activity?.messages || 0);
+    const commandCount = Number(activity?.commands || activity?.commandMessages || 0);
 
     const levelInfo = getLevelInfoFromXp(activity?.xp || 0);
     const socialInfo = getEconomySummary(targetJid);
     const socialAchievements = getAchievements(targetJid, levelInfo.level);
     const activeCosmeticTitle = getActiveTitle(targetJid);
-    const dragonRank = levelInfo.title;
 
-    const levelBlocks = Math.max(0, Math.min(10, Math.round(levelInfo.progress / 10)));
-    const levelBar = "▰".repeat(levelBlocks) + "▱".repeat(10 - levelBlocks);
+    const db = readAdvDb();
+    const advCount = Math.max(0, Math.min(Number(isGroup ? (db[from]?.[targetJid]?.count || db[from]?.[target]?.count || 0) : 0) || 0, 3));
 
-    // "Humor" inspirado no perfil do Nazuna, mas estável para o mesmo membro no dia.
-    const humorOptions = [
-      '😎 Tranquilão',
-      '🔥 Modo Dragon',
-      '😴 Sonolento',
-      '🤓 Nerd mode',
-      '😜 Caos total',
-      '🧘 Zen',
-      '🌸 Energia de maid',
-      '🐉 Pronto pra batalha'
+    const personality = getKobayashiPersonality(isGroup ? from : "private", targetJid);
+
+    const cargo = isTargetOwner
+      ? "👑 Criador da Kobayashi"
+      : isGroupOwner
+        ? "👑 Dono do grupo"
+        : isTargetAdmin
+          ? "🔱 Administrador"
+          : isTargetLeader
+            ? "🐉 Líder"
+            : "🌸 Membro";
+
+    const rpgPlayer = getDragonRpgPlayer(targetJid);
+    const rpgClassNames = {
+      escudeiro:"Escudeiro", guerreiro:"Guerreiro", mago:"Mago",
+      arqueiro:"Arqueiro", curandeiro:"Curandeiro"
+    };
+    const advancedNames = {
+      necromante:"Necromante", assassino:"Assassino",
+      paladino:"Paladino", feiticeiro:"Feiticeiro"
+    };
+    const rpgClass = rpgPlayer?.class ? (rpgClassNames[rpgPlayer.class] || rpgPlayer.class) : "Não iniciado";
+    const rpgAdvanced = rpgPlayer?.advancedClass ? (advancedNames[rpgPlayer.advancedClass] || rpgPlayer.advancedClass) : "Nenhuma";
+
+    const premium = Boolean(
+      targetParticipant?.premium ||
+      cfgPerfil?.premium?.includes?.(number) ||
+      cfgPerfil?.premiums?.includes?.(number)
+    );
+
+    const advice = [
+      "Até uma chama pequena ilumina a noite quando você sabe onde quer chegar.",
+      "Força não é atacar sempre; às vezes é saber quando guardar as garras.",
+      "Quem evolui um pouco todos os dias acaba virando o próprio boss final.",
+      "Nem toda batalha merece sua energia. Escolha bem onde usar seu fogo.",
+      "Um dragão também precisa descansar antes de voltar a voar."
     ];
-    const todayKey = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    const humorSeed = `${number}:${todayKey}`.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const humor = humorOptions[humorSeed % humorOptions.length];
+    const adviceSeed = String(number).split("").reduce((a,c)=>a+Number(c||0),0);
+    const dailyIndex = (adviceSeed + new Date().getDate()) % advice.length;
 
     const caption =
-`╔════════════════════════════╗
-║      🐉 *KOBAYASHI DRAGON CARD* 🐉
-╚════════════════════════════╝
+`╭━━━〔 🐉🌸 *KOBAYASHI* 〕━━━╮
+┃        ✦ *MEU PERFIL* ✦
+╰━━━━━━━━━━━━━━━━━━━━━━╯
 
-╭━━━〔 👤 *IDENTIDADE* 〕━━━╮
+╭─〔 👤 *IDENTIDADE* 〕
 ┃ 🌸 Nome: *${name}*
 ┃ 📱 Número: *+${number}*
+┃ 💌 Bio: _${bio}_
+${activeCosmeticTitle ? `┃ 🎖️ Título: *${activeCosmeticTitle}*\n` : ""}╰────────────────────
+
+╭─〔 🐲 *HIERARQUIA* 〕
+┃ 👑 Dono: 〔 ${isTargetOwner ? "✅" : "❌"} 〕
+┃ 🐉 Líder: 〔 ${isTargetLeader ? "✅" : "❌"} 〕
+┃ 🔱 ADM: 〔 ${isTargetAdmin || isGroupOwner ? "✅" : "❌"} 〕
+┃ 💎 Premium: 〔 ${premium ? "✅" : "❌"} 〕
 ┃ 🎭 Cargo: *${cargo}*
-┃ 😸 Humor: *${humor}*
-┃ 💬 Bio: _${bio}_
-${bioSetAt ? `┃ 🕒 Bio atualizada: *${bioSetAt}*\n` : ''}╰━━━━━━━━━━━━━━━━━━━━━━╯
+╰────────────────────
 
-╭━━━〔 🐲 *REGISTRO DRAGON* 〕━━━╮
-┃ 🏷️ Classe: *${dragonRank}*
-${activeCosmeticTitle ? `┃ 🎖️ Título: *${activeCosmeticTitle}*\n` : ''}┃ ⭐ Nível: *${levelInfo.level}*
-┃ ✨ XP: *${levelInfo.xp}*
-┃ 📈 ${levelBar} *${levelInfo.progress}%*
-╰━━━━━━━━━━━━━━━━━━━━━━╯
-
-╭━━━〔 📊 *ATIVIDADE* 〕━━━╮
-┃ 💬 Mensagens: *${textCount}*
-┃ 🖼️ Fotos: *${imageCount}*
-┃ 🎨 Figurinhas: *${stickerCount}*
-┃ 📦 Total registrado: *${messageCount}*
-${legacyCount > 0 ? `┃ 🗃️ Registros antigos: *${legacyCount}*\n` : ''}┃ 🕒 Última atividade:
-┃ _${lastSeenText}_
-╰━━━━━━━━━━━━━━━━━━━━━━╯
-
-╭━━━〔 💰 *DRAGON SOCIAL* 〕━━━╮
+╭─〔 💰 *DRAGON SOCIAL* 〕
 ┃ 🪙 Coins: *${socialInfo.coins}*
+┃ ⭐ Level: *${levelInfo.level}*
+┃ ✨ XP: *${levelInfo.xp}*
 ┃ 🏆 Conquistas: *${socialAchievements.unlocked.length}/${socialAchievements.total}*
-┃ 🎮 Partidas: *${socialInfo.games.played}*
-┃ 🥇 Vitórias: *${socialInfo.games.wins}*
-┃ 🤝 Interações: *${socialInfo.socialInteractions}*
-╰━━━━━━━━━━━━━━━━━━━━━━╯
+╰────────────────────
 
-╭━━━〔 ✨ *AURA DO MEMBRO* 〕━━━╮
-┃ 🐂 Gadice: *${gado}%*
-┃ 🌸 Charme: *${beleza}%*
-┃ 🔥 Presença: *${presenca}%*
+╭─〔 🌸 *AURA KOBAYASHI* 〕
+┃ 🔥 Caos       ${kobayashiPercentBar(personality.caos)}
+┃ 💖 Fofura     ${kobayashiPercentBar(personality.fofura)}
+┃ 🐉 Aura       ${kobayashiPercentBar(personality.aura)}
+┃ ⚔️ Coragem    ${kobayashiPercentBar(personality.coragem)}
+┃ 🌙 Mistério   ${kobayashiPercentBar(personality.misterio)}
+╰────────────────────
+
+╭─〔 📊 *ATIVIDADE* 〕
+┃ 💬 Mensagens: *${textCount || messageCount}*
+┃ ⚙️ Comandos: *${commandCount}*
+┃ 🎴 Figurinhas: *${stickerCount}*
+┃ 📸 Fotos: *${imageCount}*
 ┃ ⚠️ ADVs: *${advCount}/3*
-┃ ${advStatus}
-╰━━━━━━━━━━━━━━━━━━━━━━╯
+╰────────────────────
 
-☆━━━━━━━━〔 🌸 *KOBAYASHI BOT* 〕━━━━━━━━☆`;
+╭─〔 ⚔️🐉 *DRAGON RPG* 〕
+┃ 🧭 Classe: *${rpgClass}*
+┃ 🌟 Especialização: *${rpgAdvanced}*
+┃ 🎖️ Nível RPG: *${rpgPlayer?.level || 0}*
+┃ ❤️ HP: *${rpgPlayer ? `${rpgPlayer.resources?.hp || 0}/${rpgPlayer.stats?.hp || 0}` : "—"}*
+┃ 🔷 Mana: *${rpgPlayer ? `${rpgPlayer.resources?.mana || 0}/${rpgPlayer.stats?.mana || 0}` : "—"}*
+${rpgPlayer ? `┃ 🎯 Combate: *${rpgPlayer.specialties?.combat || 0}*
+┃ 🥷 Furtividade: *${rpgPlayer.specialties?.stealth || 0}*
+` : ""}╰────────────────────
+
+🌸 ─────「 *CONSELHO DA KOBA* 」───── 🌸
+_${advice[dailyIndex]}_
+
+╭━━━━━━━━━━━━━━━━━━━━╮
+┃ 🐉 *KOBAYASHI BOT*
+┃ 🌸 Sua Dragon Maid no WhatsApp
+╰━━━━━━━━━━━━━━━━━━━━╯`;
 
     let profilePicture = null;
     try {
-      profilePicture = await conn.profilePictureUrl(targetJid || target, 'image');
-    } catch (_) {}
+      profilePicture = await conn.profilePictureUrl(targetJid || target, "image");
+    } catch {}
 
     if (profilePicture) {
       try {
         return await conn.sendMessage(from, {
           image: { url: profilePicture },
           caption,
-          mentions: [targetJid || target],
+          mentions: [targetJid || target]
         }, { quoted: info });
-      } catch (_) {}
+      } catch {}
     }
 
     return conn.sendMessage(from, {
       text: caption,
-      mentions: [targetJid || target],
+      mentions: [targetJid || target]
     }, { quoted: info });
   } catch (error) {
     console.error("Erro no /perfil:", error);
