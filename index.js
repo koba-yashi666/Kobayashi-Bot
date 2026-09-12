@@ -64,6 +64,7 @@ import {
 import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
 import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/kobaTrigger.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
+import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } from "./lib/features/v3/v3Suite.js";
 
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
@@ -1516,7 +1517,7 @@ const rawCommand = isCmd
   : null;
 
 const command = isCmd
-  ? resolveCommandAlias(rawCommand)
+  ? resolveCommandAlias(resolveV3Alias(rawCommand))
   : null;
 
 // Complementos preservados para TODOS os comandos.
@@ -2635,6 +2636,20 @@ if (isCmd) {
     "zerarrpg",
     "zerarrpgg"
   ]);
+
+  // Kobayashi V3.0 • ferramentas locais / compatibilidade Nazuna + Hutao
+  const v3PassiveHandled = await processV3PassiveMessage({
+    conn, info, from, sender, body, isGroup, isCmd, permissions: modularPermissions
+  });
+  if (v3PassiveHandled && !isCmd) continue;
+
+  const v3Handled = await runV3Standalone(command, {
+    conn, info, from, sender, command, args, q, prefix, reply, reagir,
+    isGroup, groupName, groupMembers,
+    groupAdmins: Array.isArray(groupAdmins) ? groupAdmins : [],
+    permissions: modularPermissions
+  });
+  if (v3Handled) continue;
 
   const dragonRpgModeEnabled = !isGroup || isDragonRpgEnabled(from);
   const dragonRpgOwnsCommand = DRAGON_RPG_COMMANDS.has(command);

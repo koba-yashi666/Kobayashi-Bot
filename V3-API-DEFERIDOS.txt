@@ -1,0 +1,36 @@
+Kobayashi V3.0 — comandos externos/API reservados para próxima etapa
+
+- animepic
+- apkmod
+- autotranscrever
+- facebook
+- fb
+- gdrive
+- google
+- image
+- imagem
+- insta
+- instagram
+- kwai
+- letra
+- logo
+- logos
+- lyrics
+- mediafire
+- menulogos
+- pesquisar
+- pinterest
+- pinterestdl
+- play
+- playvid
+- playvideo
+- removebg
+- soundcloud
+- spotify
+- spotifydl
+- tiktok
+- transcrever
+- wallpaper
+- youtube
+- ytmp3
+- ytmp4

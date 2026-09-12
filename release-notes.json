@@ -410,5 +410,52 @@
       "Mostra ao dono quantos grupos receberam e quantos envios falharam.",
       "Incluído pequeno intervalo entre grupos para reduzir disparos simultâneos."
     ]
+  },
+  "3.0.0": {
+    "version": "3.0.0",
+    "title": "Kobayashi V3.0 — Mega Integração",
+    "date": "2026-09-12",
+    "commands": [
+      {
+        "name": "menuv3",
+        "category": "Geral",
+        "note": "central dos sistemas V3"
+      },
+      {
+        "name": "calc",
+        "category": "Ferramentas",
+        "note": "calculadora local"
+      },
+      {
+        "name": "antipalavra",
+        "category": "Admin",
+        "note": "filtro local de palavras"
+      },
+      {
+        "name": "addautoresposta",
+        "category": "Admin",
+        "note": "respostas automáticas locais"
+      },
+      {
+        "name": "listargrupos",
+        "category": "Dono",
+        "note": "lista todos os grupos do bot"
+      },
+      {
+        "name": "v3status",
+        "category": "Geral",
+        "note": "status dos módulos V3"
+      }
+    ],
+    "changes": [
+      "Grande salto para a linha v3.0.",
+      "Compatibilidade de nomes/aliases inspirada nas bases Nazuna e Hutao para os sistemas que a Kobayashi já possui.",
+      "Central V3 adicionada ao menu principal.",
+      "Novo pacote de ferramentas locais sem API: cálculo, texto, sorteios, Base64, UUID e utilidades.",
+      "Novo AntiPalavra local por grupo.",
+      "Novo sistema de respostas automáticas locais por grupo.",
+      "Sistemas já existentes da Kobayashi foram preservados: aluguel, Admin Center, logs, proteção, stickers, Level, Dragon Social, jogos, RPG clássico e Dragon RPG.",
+      "Comandos que dependem de APIs externas foram separados e não fazem parte desta versão."
+    ]
   }
 }

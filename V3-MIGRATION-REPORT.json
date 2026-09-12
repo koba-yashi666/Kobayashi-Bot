@@ -1,0 +1,72 @@
+{
+  "release": "3.0.0",
+  "sources": {
+    "nazuna": {
+      "archive": "nazuna-main.zip",
+      "detected_switch_commands": 1648
+    },
+    "hutao": {
+      "archive": "HutaoBot-mainV10.zip",
+      "notes": "estrutura analisada; núcleo principal está ofuscado, então os sistemas foram reimplementados/compatibilizados no estilo Kobayashi"
+    }
+  },
+  "api_commands_deferred": [
+    "animepic",
+    "apkmod",
+    "autotranscrever",
+    "facebook",
+    "fb",
+    "gdrive",
+    "google",
+    "image",
+    "imagem",
+    "insta",
+    "instagram",
+    "kwai",
+    "letra",
+    "logo",
+    "logos",
+    "lyrics",
+    "mediafire",
+    "menulogos",
+    "pesquisar",
+    "pinterest",
+    "pinterestdl",
+    "play",
+    "playvid",
+    "playvideo",
+    "removebg",
+    "soundcloud",
+    "spotify",
+    "spotifydl",
+    "tiktok",
+    "transcrever",
+    "wallpaper",
+    "youtube",
+    "ytmp3",
+    "ytmp4"
+  ],
+  "integrated_families": [
+    "administração de grupos",
+    "proteções",
+    "anti-flood/anti-spam",
+    "bem-vindo",
+    "abertura/fechamento de grupo",
+    "comandos por figurinha",
+    "aluguel",
+    "logs e rank de ADM",
+    "AFK",
+    "notas e regras",
+    "níveis",
+    "economia/social",
+    "jogos e brincadeiras",
+    "RPG clássico",
+    "Dragon RPG",
+    "broadcast global",
+    "ferramentas locais",
+    "AntiPalavra",
+    "auto respostas",
+    "aliases de compatibilidade"
+  ],
+  "principle": "Funcionalidades externas/API foram deixadas para módulo posterior; nenhuma chave de API foi adicionada."
+}
