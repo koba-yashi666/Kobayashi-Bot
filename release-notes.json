@@ -359,5 +359,24 @@
       "Após o vencimento, todos os comandos ficam bloqueados para não-donos; somente o dono principal continua usando o bot.",
       "/renovar_aluguel limpa o aviso de vencimento e preserva o responsável."
     ]
+  },
+  "2.0.30": {
+    "version": "2.0.30",
+    "title": "Perfil — Porcentagens Corrigidas",
+    "date": "2026-09-12",
+    "changes": [
+      "Corrigida a barra visual das porcentagens da Aura Kobayashi.",
+      "As barras agora usam blocos parciais em vez de arredondar visualmente os valores.",
+      "Os valores persistentes dos usuários foram mantidos."
+    ]
+  },
+  "2.0.31": {
+    "version": "2.0.31",
+    "title": "Perfil — Porcentagens Aleatórias",
+    "date": "2026-09-12",
+    "changes": [
+      "Caos, Fofura, Aura, Coragem e Mistério agora são sorteados de 0% a 100% a cada uso do /perfil.",
+      "A barra proporcional da v2.0.30 foi mantida."
+    ]
   }
 }

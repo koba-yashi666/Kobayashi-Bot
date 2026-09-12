@@ -252,20 +252,24 @@ function getOrCreateFunScore(groupJid, category, jid) {
 }
 
 function getKobayashiPersonality(groupJid, jid) {
-  const scope = groupJid || "global";
+  const randomPercent = () => Math.floor(Math.random() * 101);
   return {
-    caos: getOrCreateFunScore(scope, "perfil_caos", jid),
-    fofura: getOrCreateFunScore(scope, "perfil_fofura", jid),
-    aura: getOrCreateFunScore(scope, "perfil_aura", jid),
-    coragem: getOrCreateFunScore(scope, "perfil_coragem", jid),
-    misterio: getOrCreateFunScore(scope, "perfil_misterio", jid),
+    caos: randomPercent(),
+    fofura: randomPercent(),
+    aura: randomPercent(),
+    coragem: randomPercent(),
+    misterio: randomPercent(),
   };
 }
 
 function kobayashiPercentBar(value) {
-  const n = Math.max(0, Math.min(100, Number(value) || 0));
-  const blocks = Math.round(n / 10);
-  return `${"▰".repeat(blocks)}${"▱".repeat(10 - blocks)} ${n}%`;
+  const n = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+  const fullBlocks = Math.floor(n / 10);
+  const remainder = n % 10;
+  const partialBlocks = ["", "▏", "▎", "▍", "▍", "▌", "▋", "▊", "▉", "▉"];
+  const partial = remainder > 0 && fullBlocks < 10 ? partialBlocks[remainder] : "";
+  const emptyBlocks = Math.max(0, 10 - fullBlocks - (partial ? 1 : 0));
+  return `${"█".repeat(fullBlocks)}${partial}${"□".repeat(emptyBlocks)} ${n}%`;
 }
 
 function getTwoTargetsFromMessage(info, sender, text) {
