@@ -391,5 +391,24 @@
       "Rankings percentuais do /menubn sorteiam novamente participantes e valores em cada execução.",
       "/chance, /sorte, /lucy e comandos semelhantes permanecem aleatórios."
     ]
+  },
+  "2.0.33": {
+    "version": "2.0.33",
+    "title": "MSG Global — Avisos em todos os grupos",
+    "date": "2026-09-12",
+    "commands": [
+      {
+        "name": "msg",
+        "category": "Dono",
+        "note": "envia aviso em todos os grupos marcando todos"
+      }
+    ],
+    "changes": [
+      "Novo /msg texto, exclusivo do dono principal.",
+      "Envia o aviso para todos os grupos em que a Kobayashi participa.",
+      "Marca todos os participantes de cada grupo através de mentions.",
+      "Mostra ao dono quantos grupos receberam e quantos envios falharam.",
+      "Incluído pequeno intervalo entre grupos para reduzir disparos simultâneos."
+    ]
   }
 }

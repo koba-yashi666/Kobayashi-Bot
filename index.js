@@ -9215,6 +9215,79 @@ break;
 
 
 
+case "msg": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
+  }
+
+  const aviso = String(q || "").trim();
+  if (!aviso) {
+    return reply(
+      `📢 *AVISO GLOBAL*\n\n` +
+      `Use: *${prefix}msg texto do aviso*\n\n` +
+      `A Kobayashi enviará a mensagem em todos os grupos em que estiver, marcando todos os participantes.`
+    );
+  }
+
+  let groups = {};
+  try {
+    groups = await conn.groupFetchAllParticipating();
+  } catch (e) {
+    console.error("[MSG GLOBAL] Falha ao listar grupos:", e);
+    return reply("❌ Não consegui carregar a lista de grupos agora.");
+  }
+
+  const entries = Object.entries(groups || {});
+  if (!entries.length) return reply("📭 A Kobayashi não está participando de nenhum grupo.");
+
+  let enviados = 0;
+  let falhas = 0;
+
+  await reply(
+    `📢🐉 *ENVIO GLOBAL INICIADO*\n\n` +
+    `🏘️ Grupos encontrados: *${entries.length}*\n` +
+    `⏳ Vou enviar o aviso marcando todos os participantes.`
+  );
+
+  for (const [groupJid, cachedMeta] of entries) {
+    try {
+      let meta = cachedMeta;
+      try {
+        meta = await conn.groupMetadata(groupJid);
+      } catch {}
+
+      const mentions = [...new Set(
+        (meta?.participants || [])
+          .map((p) => p?.id || p?.jid)
+          .filter(Boolean)
+      )];
+
+      await conn.sendMessage(groupJid, {
+        text:
+          `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n` +
+          `${aviso}\n\n` +
+          `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
+        mentions
+      });
+
+      enviados++;
+      // Pequeno intervalo para evitar disparos simultâneos em muitos grupos.
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    } catch (e) {
+      falhas++;
+      console.error(`[MSG GLOBAL] Falha em ${groupJid}:`, e?.message || e);
+    }
+  }
+
+  return reply(
+    `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n` +
+    `📨 Enviados: *${enviados}*\n` +
+    `❌ Falhas: *${falhas}*\n` +
+    `🏘️ Total: *${entries.length}*`
+  );
+}
+break;
+
 // líderes / múltiplos donos • v0.1.19
 case "dono1":
 case "dono2":
