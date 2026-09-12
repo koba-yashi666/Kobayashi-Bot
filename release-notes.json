@@ -324,5 +324,15 @@
       "Dono, líder e ADM continuam sendo estados independentes: um dono que também for ADM pode aparecer com ambos como ✅.",
       "Mantido apenas um handler ativo do /perfil."
     ]
+  },
+  "2.0.28": {
+    "version": "2.0.28",
+    "title": "Dono — Hierarquia Completa",
+    "date": "2026-09-12",
+    "changes": [
+      "Dono principal recebe Dono, Líder e Premium automaticamente no /perfil.",
+      "ADM continua aparecendo somente quando o dono realmente é ADM/dono do grupo atual.",
+      "Permissões dos demais membros permanecem reais."
+    ]
   }
 }

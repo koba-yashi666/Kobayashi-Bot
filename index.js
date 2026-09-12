@@ -6253,6 +6253,7 @@ case "perfil": {
       finalNorms.has(normalizeProfileJid(dono));
 
     const isTargetLeader =
+      isTargetOwner ||
       [...finalDigits].some((digits) => leaderNumbers.includes(digits)) ||
       [...targetAliases].some((jid) => {
         try { return isLeaderJid(jid); } catch { return false; }
@@ -6339,6 +6340,7 @@ case "perfil": {
     const rpgAdvanced = rpgPlayer?.advancedClass ? (advancedNames[rpgPlayer.advancedClass] || rpgPlayer.advancedClass) : "Nenhuma";
 
     const premium = Boolean(
+      isTargetOwner ||
       targetParticipant?.premium ||
       cfgPerfil?.premium?.includes?.(number) ||
       cfgPerfil?.premiums?.includes?.(number)
