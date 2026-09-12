@@ -312,5 +312,17 @@
       "Mantido suporte a /perfil, /perfil @membro e /perfil respondendo a uma mensagem.",
       "Conselho da Koba muda diariamente entre frases próprias do bot."
     ]
+  },
+  "2.0.27": {
+    "version": "2.0.27",
+    "title": "Perfil Kobayashi — Hierarquia ADM Fix",
+    "date": "2026-09-12",
+    "changes": [
+      "Corrigida a detecção de administradores no /perfil.",
+      "O perfil agora compara JID normal, LID, número telefônico e aliases resolvidos pelo Baileys.",
+      "A lista real de administradores do grupo e o metadata do participante são usados em conjunto.",
+      "Dono, líder e ADM continuam sendo estados independentes: um dono que também for ADM pode aparecer com ambos como ✅.",
+      "Mantido apenas um handler ativo do /perfil."
+    ]
   }
 }

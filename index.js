@@ -6191,21 +6191,89 @@ case "perfil": {
     const targetJid = targetPN || normalizeJid(target) || target;
     const number = targetJid?.split("@")[0] || target?.split("@")[0] || "desconhecido";
 
-    const targetParticipant = isGroup ? groupMembers.find((p) => {
-      const raw = p?.id || p?.jid || p?.participant;
-      return normalizeJid(raw) === targetJid || raw === target;
-    }) : null;
+    // 🐉 Perfil 2.0.27 — resolução robusta de hierarquia (PN + LID + aliases).
+    // O WhatsApp pode entregar o mesmo membro como @s.whatsapp.net ou @lid.
+    const targetAliases = new Set([target, targetJid].filter(Boolean));
+    try {
+      const pn = await getPNForJid(conn, targetJid || target, target);
+      if (pn) targetAliases.add(pn);
+    } catch {}
+
+    const normalizeProfileJid = (jid) => {
+      try { return normalizeJid(jid); } catch { return String(jid || ""); }
+    };
+    const profileDigits = (jid) => String(jid || "").split("@")[0].replace(/\D/g, "");
+
+    const targetNorms = new Set([...targetAliases].map(normalizeProfileJid).filter(Boolean));
+    const targetDigits = new Set([...targetAliases].map(profileDigits).filter((x) => x.length >= 8));
+
+    let targetParticipant = null;
+    if (isGroup) {
+      for (const p of groupMembers || []) {
+        const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
+        for (const id of [...ids]) {
+          try {
+            const pn = await getPNForJid(conn, id, id);
+            if (pn) ids.push(pn);
+          } catch {}
+        }
+
+        const matches = ids.some((id) => {
+          const norm = normalizeProfileJid(id);
+          const digits = profileDigits(id);
+          return targetAliases.has(id) ||
+            targetNorms.has(norm) ||
+            (digits.length >= 8 && targetDigits.has(digits));
+        });
+
+        if (matches) {
+          targetParticipant = p;
+          for (const id of ids) targetAliases.add(id);
+          break;
+        }
+      }
+    }
+
+    // Atualiza aliases depois de localizar o participante real no metadata.
+    const finalNorms = new Set([...targetAliases].map(normalizeProfileJid).filter(Boolean));
+    const finalDigits = new Set([...targetAliases].map(profileDigits).filter((x) => x.length >= 8));
 
     const cfgPerfil = readSettingsFile();
-    const perfilOwnerNumber = String(cfgPerfil?.ownerNumber || cfgPerfil?.dono || "").replace(/\D/g, "");
+    const perfilOwnerNumber = String(
+      cfgPerfil?.ownerNumber || cfgPerfil?.dono || ownerNumber || ""
+    ).replace(/\D/g, "");
+
     const leaderNumbers = Array.isArray(cfgPerfil?.leaders)
       ? cfgPerfil.leaders.map((x) => String(x || "").replace(/\D/g, "")).filter(Boolean)
       : [];
 
-    const isTargetOwner = number === perfilOwnerNumber || targetJid === dono || target === dono;
-    const isTargetLeader = leaderNumbers.includes(number);
-    const participantRole = targetParticipant?.admin;
-    const isTargetAdmin = participantRole === "admin" || participantRole === "superadmin";
+    const isTargetOwner =
+      finalDigits.has(perfilOwnerNumber) ||
+      [...targetAliases].some((jid) => isMainOwnerJid(jid)) ||
+      finalNorms.has(normalizeProfileJid(dono));
+
+    const isTargetLeader =
+      [...finalDigits].some((digits) => leaderNumbers.includes(digits)) ||
+      [...targetAliases].some((jid) => {
+        try { return isLeaderJid(jid); } catch { return false; }
+      });
+
+    const participantRole = String(targetParticipant?.admin || "").toLowerCase();
+    const adminByMetadata = participantRole === "admin" || participantRole === "superadmin";
+
+    // getGroupAdmins já é a fonte usada pelo restante da Kobayashi.
+    // Aqui comparamos por JID normalizado E número para suportar LID.
+    const adminByList = isGroup && Array.isArray(groupAdmins)
+      ? groupAdmins.some((adminJid) => {
+          const norm = normalizeProfileJid(adminJid);
+          const digits = profileDigits(adminJid);
+          return targetAliases.has(adminJid) ||
+            finalNorms.has(norm) ||
+            (digits.length >= 8 && finalDigits.has(digits));
+        })
+      : false;
+
+    const isTargetAdmin = adminByMetadata || adminByList;
     const isGroupOwner = participantRole === "superadmin";
 
     let name = target === sender
