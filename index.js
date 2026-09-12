@@ -240,15 +240,8 @@ function setFunMode(groupJid, enabled) {
 }
 
 function getOrCreateFunScore(groupJid, category, jid) {
-  const db = readFunDb();
-  if (!db.scores[groupJid]) db.scores[groupJid] = {};
-  if (!db.scores[groupJid][category]) db.scores[groupJid][category] = {};
-  if (!Number.isInteger(db.scores[groupJid][category][jid])) {
-    // Persistente: o primeiro valor sorteado permanece até o DB ser limpo.
-    db.scores[groupJid][category][jid] = Math.floor(Math.random() * 101);
-    writeFunDb(db);
-  }
-  return db.scores[groupJid][category][jid];
+  // v2.0.32: todo resultado percentual é novo em cada execução.
+  return Math.floor(Math.random() * 101);
 }
 
 function getKobayashiPersonality(groupJid, jid) {

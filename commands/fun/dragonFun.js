@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  stablePercent, getRank, traitText, mediaFor, startForca, guessForca,
+  traitText, mediaFor, startForca, guessForca,
   startAnagram, answerSimple, startQuiz, startEnigma, startWordle, guessWordle,
   randomTruth, randomDare, randomNever, daily, work, transfer, gamble, topCoins,
   proposeMarriage, acceptMarriage, marriageOf, divorce, familyAction, getFamily,
@@ -103,8 +103,28 @@ export default {
 
   // RPG clássico desligado = nenhuma resposta aos comandos desse sistema.
   if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled) return;
-  if(RANKS.includes(n)){const trait=n.slice(4);const jids=(ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean);const rows=getRank(jids,trait,10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
-  if(TRAITS.includes(n)){const val=stablePercent(target,n);const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);return sendMedia(ctx,mediaFor(n),txt,mentions);}
+  if(RANKS.includes(n)){
+    const trait=n.slice(4);
+    const jids=[...new Set((ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean))];
+    for(let i=jids.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [jids[i],jids[j]]=[jids[j],jids[i]];
+    }
+    const rows=jids.slice(0,10)
+      .map(jid=>({jid,score:Math.floor(Math.random()*101)}))
+      .sort((a,b)=>b.score-a.score);
+    return ctx.conn.sendMessage(ctx.from,{
+      text:`🏆 *RANK ${trait.toUpperCase()}*\n\n`+
+        rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — *${x.score}%*`).join("\n")+
+        `\n\n🎲 Pessoas e porcentagens são sorteadas novamente a cada uso.`,
+      mentions:rows.map(x=>x.jid)
+    },{quoted:ctx.info});
+  }
+  if(TRAITS.includes(n)){
+    const val=Math.floor(Math.random()*101);
+    const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);
+    return sendMedia(ctx,mediaFor(n),txt,mentions);
+  }
   if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);const cap=actionCaption(n,tag(ctx.sender),tag(target));return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}
   if(n==="forca"||n==="fc"){if(ctx.args?.length){const r=guessForca(ctx.from,ctx.sender,ctx.args.join(" "));if(r.win)return ctx.reply(`🎉 Acertou! A palavra era *${r.word}*. +60 coins.`);if(r.lose)return ctx.reply(`💀 Fim de jogo! A palavra era *${r.word}*.`);if(r.ok)return ctx.reply(`🪢 ${r.masked}\n❤️ Tentativas: ${r.tries}\n💡 ${r.hint}`);}const s=startForca(ctx.from,ctx.sender);const mask=[...s.word].map(x=>x===" "?" ":"_ ").join("");return ctx.reply(`🪢 *FORCA*\n\n${mask}\n💡 Dica: ${s.hint}\n📚 Tema: ${s.theme}\n\nResponda com *${ctx.prefix}forca letra/palavra*`);}
   if(n==="anagrama"){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Acertou! *${r.answer}* +50 coins.`):ctx.reply("❌ Ainda não. Tente novamente!");}const s=startAnagram(ctx.from,ctx.sender);return ctx.reply(`🔀 *ANAGRAMA*\n\n🔤 *${s.scrambled.toUpperCase()}*\n💡 ${s.hint}\n\nResponda: *${ctx.prefix}anagrama resposta*`);}

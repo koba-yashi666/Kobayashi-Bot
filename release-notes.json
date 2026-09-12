@@ -378,5 +378,18 @@
       "Caos, Fofura, Aura, Coragem e Mistério agora são sorteados de 0% a 100% a cada uso do /perfil.",
       "A barra proporcional da v2.0.30 foi mantida."
     ]
+  },
+  "2.0.32": {
+    "version": "2.0.32",
+    "title": "Porcentagens 100% Aleatórias",
+    "date": "2026-09-12",
+    "changes": [
+      "Todas as porcentagens do /perfil são sorteadas novamente a cada uso.",
+      "Todos os medidores percentuais do /menubn agora sorteiam um novo valor em toda execução.",
+      "Traits como linda, lindo, gay, hetero, lesbica, gado, feio, corno, bebado, gostoso, gostosa, golpista, otaku e os demais deixam de usar porcentagem estável.",
+      "/shipo deixa de reutilizar compatibilidade anterior.",
+      "Rankings percentuais do /menubn sorteiam novamente participantes e valores em cada execução.",
+      "/chance, /sorte, /lucy e comandos semelhantes permanecem aleatórios."
+    ]
   }
 }
