@@ -37,6 +37,7 @@ import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/system/commandControl.js";
 import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePendingUpdateNews } from "./lib/features/system/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate, getRentalPlan, listRentalPlans, formatPlan, normalizeGroupJid, registerRentalByPlan, registerPartnerRental, registerTrialRental, renewRentalByPlan, setRentalWarnings } from "./lib/features/rental/rentalSystem.js";
+import { setRentalResponsible, resetRentalResponsibleWarning, getRentalResponsible, ensureRentalResponsibleRuntime } from "./lib/features/rental/rentalResponsible.js";
 import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, formatAntiTravaStatus } from "./lib/features/moderation/antiTrava.js";
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/moderation/antiSpam.js";
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
@@ -2101,7 +2102,9 @@ if (isGroup && sender && !info.key.fromMe && sender !== botNumber && !isWhitelis
 
 
 // ==========================================
-// 🐉 KOBAYASHI RENTAL SYSTEM • v0.1.57
+ensureRentalResponsibleRuntime(conn);
+
+// 🐉 KOBAYASHI RENTAL SYSTEM • v2.0.29
 // ==========================================
 if (isCmd && command && !SoDonoPrincipal) {
   const rentalSettings = getRentalSettings();
@@ -2111,22 +2114,21 @@ if (isCmd && command && !SoDonoPrincipal) {
   ]);
 
   let blockedByRental = false;
-  let rentalState = null;
+  let rentalState = isGroup ? getRental(from) : null;
+  const expiredRental = Boolean(isGroup && rentalState?.exists && !rentalState?.active && !rentalState?.permanent);
 
-  if (rentalSettings.globalRestrictionEnabled) {
-    if (!isGroup) {
-      blockedByRental = true;
-    } else {
-      rentalState = getRental(from);
-      blockedByRental = !rentalState.active;
-    }
+  // Se um aluguel registrado venceu, trava absoluta: somente o dono principal usa comandos.
+  if (expiredRental) {
+    blockedByRental = true;
+  } else if (rentalSettings.globalRestrictionEnabled) {
+    if (!isGroup) blockedByRental = true;
+    else blockedByRental = !rentalState?.active;
   } else if (rentalSettings.groupRestrictionEnabled && isGroup) {
-    rentalState = getRental(from);
-    blockedByRental = !rentalState.active;
+    blockedByRental = !rentalState?.active;
   }
 
-  if (blockedByRental && !rentalSafeCommands.has(command)) {
-    const expired = rentalState?.exists && !rentalState?.active;
+  if (blockedByRental && (expiredRental || !rentalSafeCommands.has(command))) {
+    const expired = expiredRental;
     await reply(
       `🐉🌸 *KOBAYASHI • ACESSO RESTRITO*\n\n` +
       `${expired ? "⏳ O aluguel deste grupo expirou." : "🔒 Este grupo não possui um aluguel ativo."}\n\n` +
@@ -2769,23 +2771,63 @@ break;
 case "registrar_aluguel":
 case "rg_aluguel": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar aluguéis.");
-  let targetJid = isGroup ? from : null;
-  let planArg = args[0];
-  const possibleJid = normalizeGroupJid(args[0]);
-  if (possibleJid) { targetJid = possibleJid; planArg = args[1]; }
-  if (!targetJid) return reply(`Use: *${prefix}registrar_aluguel ID_DO_GRUPO 1*`);
-  const plan = getRentalPlan(planArg);
-  if (!plan) return reply(`📦 Informe o plano 1, 2, 3 ou 4. Ex.: *${prefix}registrar_aluguel ${targetJid} 1*`);
-  let targetName = targetJid === from ? groupName : targetJid;
-  try { targetName = (await conn.groupMetadata(targetJid))?.subject || targetName; } catch {}
-  const rental = registerRentalByPlan(targetJid, targetName, plan.id, sender);
-  return reply(
-    `✅🐉 *ALUGUEL REGISTRADO*\n\n` +
-    `🏷️ Grupo: *${targetName}*\n🆔 ${targetJid}\n` +
-    `📦 ${formatPlan(plan)}\n` +
-    `📅 Início: *${formatRentalDate(rental.rentedAt)}*\n` +
-    `⌛ Expira: *${formatRentalDate(rental.expiresAt)}*`
-  );
+  if (!isGroup) return reply(`🐉 Use *${prefix}rg_aluguel* dentro do grupo que será alugado.`);
+
+  const ctx = info.message?.extendedTextMessage?.contextInfo ||
+    info.message?.imageMessage?.contextInfo ||
+    info.message?.videoMessage?.contextInfo || {};
+  const responsible = ctx?.mentionedJid?.[0] || ctx?.participant || null;
+
+  if (!responsible) {
+    return reply(
+      `👤 *RESPONSÁVEL OBRIGATÓRIO*\n\n` +
+      `Marque ou responda a mensagem da pessoa responsável pelo aluguel.\n\n` +
+      `📦 Por plano:\n*${prefix}rg_aluguel @responsavel plano 1*\n\n` +
+      `⏳ Por tempo:\n*${prefix}rg_aluguel @responsavel 30D*`
+    );
+  }
+
+  // Remove @menção dos argumentos para interpretar apenas plano/tempo.
+  const cleanArgs = args.filter((x) => !String(x).startsWith("@"));
+  let mode = String(cleanArgs[0] || "").toLowerCase();
+  let value = cleanArgs[1];
+
+  // Aceita também: /rg_aluguel @fulano 30D
+  if (mode !== "plano") {
+    value = cleanArgs[0];
+    mode = "tempo";
+  }
+
+  let targetName = groupName || from;
+  try { targetName = (await conn.groupMetadata(from))?.subject || targetName; } catch {}
+
+  let rental, description;
+  if (mode === "plano") {
+    const plan = getRentalPlan(value);
+    if (!plan) return reply(`📦 Plano inválido. Use *${prefix}rg_aluguel @responsavel plano 1* até *plano 4*.`);
+    rental = registerRentalByPlan(from, targetName, plan.id, sender);
+    description = `📦 ${formatPlan(plan)}`;
+  } else {
+    const duration = parseRentalDuration(value);
+    if (!duration) return reply(`⏳ Tempo inválido. Ex.: *${prefix}rg_aluguel @responsavel 30D*`);
+    rental = registerRental(from, targetName, duration.ms, sender, { source:"manual-responsible" });
+    description = `⏳ Duração: *${formatRentalDuration(duration.ms)}*`;
+  }
+
+  setRentalResponsible(from, responsible);
+
+  return conn.sendMessage(from,{
+    text:
+      `✅🐉 *ALUGUEL REGISTRADO*\n\n` +
+      `🏷️ Grupo: *${targetName}*\n` +
+      `${description}\n` +
+      `👤 Responsável: @${String(responsible).split("@")[0]}\n` +
+      `📅 Início: *${formatRentalDate(rental.rentedAt)}*\n` +
+      `⌛ Expira: *${formatRentalDate(rental.expiresAt)}*\n\n` +
+      `⚠️ Quando faltar *1 semana*, a Kobayashi marcará o responsável.\n` +
+      `🔒 Se vencer sem renovação, somente o dono principal poderá usar comandos.`,
+    mentions:[responsible]
+  },{quoted:info});
 }
 break;
 
@@ -2832,23 +2874,40 @@ break;
 case "renovar_aluguel":
 case "renovar_alugel": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode renovar aluguéis.");
-  let targetJid = isGroup ? from : null;
-  let planArg = args[0];
-  const possibleJid = normalizeGroupJid(args[0]);
-  if (possibleJid) { targetJid = possibleJid; planArg = args[1]; }
-  if (!targetJid) return reply(`Use: *${prefix}renovar_aluguel ID_DO_GRUPO 1*`);
-  const plan = getRentalPlan(planArg);
-  if (!plan) return reply(`📦 Informe o plano 1, 2, 3 ou 4.`);
+  const targetJid = isGroup ? from : normalizeGroupJid(args[0]);
+  if (!targetJid) return reply(`Use no grupo: *${prefix}renovar_aluguel plano 1* ou *${prefix}renovar_aluguel 30D*`);
+
+  const offset = isGroup ? 0 : 1;
+  const first = String(args[offset] || "").toLowerCase();
+  const second = args[offset+1];
   const current = getRental(targetJid);
+  if (!current.exists) return reply("🌸 Esse grupo ainda não possui aluguel registrado.");
   if (current.permanent) return reply("♾️ Este grupo possui aluguel permanente.");
-  let targetName = current.rental?.groupName || targetJid;
-  try { targetName = (await conn.groupMetadata(targetJid))?.subject || targetName; } catch {}
-  const result = renewRentalByPlan(targetJid, targetName, plan.id, sender, { partner: Boolean(current.rental?.partner) });
-  return reply(
-    `♻️🐉 *ALUGUEL RENOVADO*\n\n🏷️ ${targetName}\n📦 ${plan.name}` +
-    `${result.rental.partner ? ` + ${plan.partnerBonusDays}d parceria` : ""}\n` +
-    `⏳ Restante: *${formatRentalDuration(result.rental.expiresAt - Date.now())}*\n⌛ Nova expiração: *${formatRentalDate(result.rental.expiresAt)}*`
-  );
+
+  let targetName=current.rental?.groupName||targetJid;
+  try { targetName=(await conn.groupMetadata(targetJid))?.subject||targetName; } catch {}
+
+  let result, description;
+  if(first==="plano"){
+    const plan=getRentalPlan(second);
+    if(!plan)return reply(`📦 Plano inválido. Use *${prefix}renovar_aluguel plano 1* até *plano 4*.`);
+    result=renewRentalByPlan(targetJid,targetName,plan.id,sender,{partner:Boolean(current.rental?.partner)});
+    description=`📦 ${plan.name}`;
+  }else{
+    const duration=parseRentalDuration(first);
+    if(!duration)return reply(`Use *${prefix}renovar_aluguel plano 1* ou *${prefix}renovar_aluguel 30D*.`);
+    result=renewRental(targetJid,targetName,duration.ms,sender,{source:"manual-renewal"});
+    description=`⏳ +${formatRentalDuration(duration.ms)}`;
+  }
+
+  resetRentalResponsibleWarning(targetJid);
+  const responsible=getRentalResponsible(targetJid);
+  return conn.sendMessage(from,{
+    text:`♻️🐉 *ALUGUEL RENOVADO*\n\n🏷️ *${targetName}*\n${description}\n` +
+      `${responsible?`👤 Responsável: @${String(responsible).split("@")[0]}\n`:""}` +
+      `⌛ Nova expiração: *${formatRentalDate(result.rental.expiresAt)}*`,
+    mentions:responsible?[responsible]:[]
+  },{quoted:info});
 }
 break;
 

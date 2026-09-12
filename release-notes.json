@@ -334,5 +334,30 @@
       "ADM continua aparecendo somente quando o dono realmente é ADM/dono do grupo atual.",
       "Permissões dos demais membros permanecem reais."
     ]
+  },
+  "2.0.29": {
+    "version": "2.0.29",
+    "title": "Aluguel — Responsável e Vencimento",
+    "date": "2026-09-12",
+    "commands": [
+      {
+        "name": "rg_aluguel",
+        "category": "Dono / Aluguel",
+        "note": "agora exige responsável e aceita plano ou duração"
+      },
+      {
+        "name": "renovar_aluguel",
+        "category": "Dono / Aluguel",
+        "note": "renova por plano ou duração e mantém o responsável"
+      }
+    ],
+    "changes": [
+      "/rg_aluguel @fulano plano X registra o grupo no plano escolhido.",
+      "/rg_aluguel @fulano 30D registra duração personalizada.",
+      "Responsável pelo aluguel é obrigatório.",
+      "Uma semana antes do vencimento o bot marca o responsável automaticamente.",
+      "Após o vencimento, todos os comandos ficam bloqueados para não-donos; somente o dono principal continua usando o bot.",
+      "/renovar_aluguel limpa o aviso de vencimento e preserva o responsável."
+    ]
   }
 }
