@@ -9230,6 +9230,23 @@ break;
 
 
 
+case "cita": {
+  if (!isGroup) return reply("👥 O comando *cita* só pode ser usado em grupos.");
+  if (!isGroupAdmins && !SoDono) return reply("🛡️ Apenas *ADMs* podem usar o comando *cita*.");
+
+  const participantes = [...new Set(
+    (groupMembers || []).map((p) => p?.id || p?.jid || p?.participant).filter(Boolean)
+  )];
+  if (!participantes.length) return reply("❌ Não consegui carregar os participantes deste grupo.");
+
+  const texto = String(q || "").trim();
+  return conn.sendMessage(from, {
+    text: texto ? `📢 *${texto}*` : "📢🐉 *ATENÇÃO, GRUPO!*",
+    mentions: participantes
+  }, { quoted: info });
+}
+break;
+
 case "msg": {
   if (!SoDonoPrincipal) {
     return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");

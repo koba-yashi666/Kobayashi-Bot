@@ -468,5 +468,23 @@
       "Removidas referências textuais externas.",
       "Identidade da V3 padronizada exclusivamente como Kobayashi Bot."
     ]
+  },
+  "3.0.2": {
+    "version": "3.0.2",
+    "title": "Cita — Marcar Todos",
+    "date": "2026-09-13",
+    "commands": [
+      {
+        "name": "cita",
+        "category": "Admin",
+        "note": "marca todos do grupo"
+      }
+    ],
+    "changes": [
+      "Novo /cita para marcar todos.",
+      "/cita texto marca todos junto com o aviso.",
+      "Restrito a ADM/dono.",
+      "Adicionado ao menu ADM e /helpcmd."
+    ]
   }
 }
