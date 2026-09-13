@@ -60,7 +60,7 @@
     "version": "1.0.19",
     "title": "Perfil + Dragon Fun Upgrade",
     "changes": [
-      "/perfil remodelado usando referências do Hutao Bot, Nazuna Bot e do pack de decoração.",
+      "/perfil remodelado usando referências do Kobayashi Bot, Kobayashi Bot e do pack de decoração.",
       "Perfil agora destaca identidade, humor diário, bio, cargo, Level, atividade, Dragon Social, aura e advertências.",
       "Comandos do /menubn receberam textos próprios em vez de respostas genéricas.",
       "Beijo, abraço, carinho/cafuné, tapa, chute, mordida, soco e outras interações ganharam frases mais próximas das referências originais.",
@@ -449,13 +449,24 @@
     ],
     "changes": [
       "Grande salto para a linha v3.0.",
-      "Compatibilidade de nomes/aliases inspirada nas bases Nazuna e Hutao para os sistemas que a Kobayashi já possui.",
+      "Compatibilidade de nomes/aliases inspirada nas bases Kobayashi para os sistemas que a Kobayashi já possui.",
       "Central V3 adicionada ao menu principal.",
       "Novo pacote de ferramentas locais sem API: cálculo, texto, sorteios, Base64, UUID e utilidades.",
       "Novo AntiPalavra local por grupo.",
       "Novo sistema de respostas automáticas locais por grupo.",
       "Sistemas já existentes da Kobayashi foram preservados: aluguel, Admin Center, logs, proteção, stickers, Level, Dragon Social, jogos, RPG clássico e Dragon RPG.",
       "Comandos que dependem de APIs externas foram separados e não fazem parte desta versão."
+    ]
+  },
+  "3.0.1": {
+    "version": "3.0.1",
+    "title": "MSG Sem Limite + Identidade Kobayashi",
+    "date": "2026-09-13",
+    "changes": [
+      "Removido o limite artificial de caracteres do /msg.",
+      "Avisos grandes são divididos automaticamente em partes.",
+      "Removidas referências textuais externas.",
+      "Identidade da V3 padronizada exclusivamente como Kobayashi Bot."
     ]
   }
 }

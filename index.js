@@ -2637,7 +2637,7 @@ if (isCmd) {
     "zerarrpgg"
   ]);
 
-  // Kobayashi V3.0 • ferramentas locais / compatibilidade Nazuna + Hutao
+  // Kobayashi V3.0 • ferramentas locais / compatibilidade Kobayashi
   const v3PassiveHandled = await processV3PassiveMessage({
     conn, info, from, sender, body, isGroup, isCmd, permissions: modularPermissions
   });
@@ -2703,7 +2703,7 @@ switch (command) {
 
 // ==========================================
 // 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.5
-// Inspirado no fluxo de aluguel/ativação do Hutao,
+// Inspirado no fluxo de aluguel/ativação do Kobayashi,
 // refeito para a arquitetura e banco do Kobayashi.
 // ==========================================
 case "planos":
@@ -3395,7 +3395,7 @@ case "debugbv": {
     `🏠 Grupo: ${from}\n` +
     `📢 Status: ${cfg.enabled ? "🟢 ATIVADO" : "🔴 DESATIVADO"}\n` +
     `⏱️ Tempo: ${cfg.delaySeconds}s\n` +
-    `🔌 Handler Nazuna: ${typeof conn.kobayashiHandleGroupParticipantsUpdate === "function" ? "✅ OK" : "❌ AUSENTE"}\n\n` +
+    `🔌 Handler Kobayashi: ${typeof conn.kobayashiHandleGroupParticipantsUpdate === "function" ? "✅ OK" : "❌ AUSENTE"}\n\n` +
     `🧪 Use *${prefix}testebv* para testar o texto.`
   );
 }
@@ -3603,7 +3603,7 @@ case "aceitar": {
         source: "command-add"
       });
     } else {
-      console.error("[WELCOME NAZUNA] Handler não encontrado no socket.");
+      console.error("[WELCOME Kobayashi] Handler não encontrado no socket.");
     }
 
     const qtd = targets.length;
@@ -4091,7 +4091,7 @@ case "togif": {
 
     fsx.writeFileSync(inputWebp, stickerBuffer);
 
-    // Mesmo fluxo usado pelo Nazuna:
+    // Mesmo fluxo usado pelo Kobayashi:
     // WebP animado -> GIF via Sharp -> MP4 com gifPlayback via FFmpeg.
     const sharpModule = await import("sharp");
     const sharp = sharpModule.default || sharpModule;
@@ -4477,14 +4477,14 @@ case "play": {
         `🌸 Preparando seu áudio...`
     }, { quoted: info });
 
-    // Rota de áudio usada pelo sistema do Hutao V10.
+    // Rota de áudio usada pelo sistema do Kobayashi V10.
     const apiUrl =
       `https://yuta-apis.xyz/api/downloads/ytaudio2?url=${encodeURIComponent(video.url)}`;
 
     const response = await fetch(apiUrl, {
       headers: {
         "Authorization": yutaToken,
-        "x-yuta-client": "HutaoBot-MD",
+        "x-yuta-client": "KobayashiBot-MD",
         "x-yuta-apikey": "lmonly_92848OlfQmCn836B53OSR1mEk7X7n8o63l8",
         "Accept": "application/json"
       }
@@ -4499,7 +4499,7 @@ case "play": {
     const contentType = String(response.headers.get("content-type") || "").toLowerCase();
     const buffer = Buffer.from(await response.arrayBuffer());
 
-    // O endpoint do Hutao retorna o áudio diretamente.
+    // O endpoint do Kobayashi retorna o áudio diretamente.
     // Se a API devolver JSON de erro, mostramos uma mensagem mais clara.
     if (contentType.includes("application/json")) {
       let apiData = null;
@@ -9277,13 +9277,24 @@ case "msg": {
           .filter(Boolean)
       )];
 
-      await conn.sendMessage(groupJid, {
-        text:
-          `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n` +
-          `${aviso}\n\n` +
-          `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
-        mentions
-      });
+      const MAX_MSG_CHUNK = 55000;
+      const partes = [];
+      for (let i = 0; i < aviso.length; i += MAX_MSG_CHUNK) {
+        partes.push(aviso.slice(i, i + MAX_MSG_CHUNK));
+      }
+      if (!partes.length) partes.push(aviso);
+
+      for (let i = 0; i < partes.length; i++) {
+        const multi = partes.length > 1 ? `\n📄 *Parte ${i + 1}/${partes.length}*` : "";
+        await conn.sendMessage(groupJid, {
+          text:
+            `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮${multi}\n\n` +
+            `${partes[i]}\n\n` +
+            `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
+          mentions
+        });
+        if (i < partes.length - 1) await new Promise((resolve) => setTimeout(resolve, 500));
+      }
 
       enviados++;
       // Pequeno intervalo para evitar disparos simultâneos em muitos grupos.

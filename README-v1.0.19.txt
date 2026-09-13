@@ -1,8 +1,8 @@
 Kobayashi Bot v1.0.19 — Perfil + Dragon Fun Upgrade
 
 REFERÊNCIAS USADAS
-- Hutao Bot: estilo e textos próprios das interações/brincadeiras.
-- Nazuna Bot: estrutura de perfil com foto/bio/humor e textos individuais dos medidores.
+- Kobayashi Bot: estilo e textos próprios das interações/brincadeiras.
+- Kobayashi Bot: estrutura de perfil com foto/bio/humor e textos individuais dos medidores.
 - Pack decoração-menu: molduras e organização visual.
 
 PRINCIPAIS MUDANÇAS
