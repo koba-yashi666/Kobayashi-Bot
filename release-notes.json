@@ -623,5 +623,21 @@
       "Suporte a /ban_msg add, /ban_msg del, /ban_msg list, /ban_msg on e /ban_msg off.",
       "O comando foi adicionado ao menu do dono e ao /helpcmd."
     ]
+  },
+  "3.0.9": {
+    "version": "3.0.9",
+    "title": "Blacklist Purge Global Fix",
+    "date": "2026-09-14",
+    "changes": [
+      "Corrigida a remoção do /ban_msg.",
+      "Criada varredura direta de todos os grupos em que a Kobayashi participa.",
+      "A remoção só é tentada nos grupos onde a Kobayashi é ADM.",
+      "A busca do alvo reconhece PN, LID, phoneNumber, participant e variação BR com/sem nono dígito.",
+      "A remoção tenta os identificadores reais encontrados nos metadados do grupo.",
+      "/listanegrag agora vasculha todos os grupos mesmo quando o número já estava cadastrado.",
+      "/listanegra agora também vasculha todos os grupos onde a Kobayashi é ADM e remove a pessoa.",
+      "As respostas mostram grupos verificados, grupos com ADM, onde o usuário foi encontrado, remoções e falhas.",
+      "A auditoria do /ban_msg passou a incluir o resultado completo da varredura."
+    ]
   }
 }

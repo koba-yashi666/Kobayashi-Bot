@@ -850,26 +850,229 @@ async function removeBlacklistedFromGroup(conn, groupJid, rawJid, { announce=fal
   }
 }
 
-async function purgeGlobalBlacklistedUser(conn, rawJid) {
+function blacklistDigits(value = "") {
+  return String(value || "")
+    .split("@")[0]
+    .split(":")[0]
+    .replace(/\D/g, "");
+}
+
+function blacklistNumberVariants(value = "") {
+  const n = blacklistDigits(value);
+  const set = new Set();
+  if (!n) return set;
+  set.add(n);
+
+  // Compatibilidade BR: WhatsApp pode expor celular com/sem 9º dígito.
+  if (n.startsWith("55") && n.length >= 12) {
+    const ddd = n.slice(2, 4);
+    const local = n.slice(4);
+    if (local.length === 9 && local.startsWith("9")) set.add(`55${ddd}${local.slice(1)}`);
+    if (local.length === 8) set.add(`55${ddd}9${local}`);
+  }
+  return set;
+}
+
+function blacklistJidMatches(a, b) {
+  if (!a || !b) return false;
+  if (String(a) === String(b)) return true;
+
+  try {
+    if (normalizeJid(a) === normalizeJid(b)) return true;
+  } catch {}
+
+  const av = blacklistNumberVariants(a);
+  const bv = blacklistNumberVariants(b);
+  return [...av].some((v) => bv.has(v));
+}
+
+async function buildBlacklistTargetAliases(conn, rawJid) {
+  const aliases = new Set([rawJid].filter(Boolean));
+
+  try {
+    const pn = await getPNForJid(conn, rawJid, rawJid);
+    if (pn) aliases.add(pn);
+  } catch {}
+
+  // Se chegou um PN, mantém também a forma normalizada.
+  try {
+    const normalized = normalizeJid(rawJid);
+    if (normalized) aliases.add(normalized);
+  } catch {}
+
+  return [...aliases].filter(Boolean);
+}
+
+async function resolveParticipantForBlacklist(conn, participants, targetAliases) {
+  // 1) comparação direta / normalizada / número.
+  for (const p of participants || []) {
+    const ids = [
+      p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid
+    ].filter(Boolean);
+
+    if (ids.some((id) => targetAliases.some((alias) => blacklistJidMatches(id, alias)))) {
+      return p;
+    }
+  }
+
+  // 2) fallback LID -> PN em cada participante.
+  // É mais custoso, por isso só roda quando a comparação normal falha.
+  for (const p of participants || []) {
+    const ids = [
+      p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid
+    ].filter(Boolean);
+
+    for (const id of ids) {
+      try {
+        const pn = await getPNForJid(conn, id, p?.phoneNumber || p?.id || id);
+        if (pn && targetAliases.some((alias) => blacklistJidMatches(pn, alias))) {
+          return p;
+        }
+      } catch {}
+    }
+  }
+
+  return null;
+}
+
+async function botIsAdminInMetadata(conn, participants = []) {
+  const botIds = new Set([
+    conn?.user?.id,
+    conn?.user?.lid,
+    conn?.user?.phoneNumber
+  ].filter(Boolean));
+
+  try {
+    const pn = await getPNForJid(
+      conn,
+      conn?.user?.id,
+      conn?.user?.phoneNumber || conn?.user?.lid || conn?.user?.id
+    );
+    if (pn) botIds.add(pn);
+  } catch {}
+
+  const botParticipant = (participants || []).find((p) => {
+    const ids = [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean);
+    return ids.some((id) => [...botIds].some((botId) => blacklistJidMatches(id, botId)));
+  });
+
+  return Boolean(botParticipant?.admin === "admin" || botParticipant?.admin === "superadmin" || botParticipant?.admin);
+}
+
+async function removeResolvedParticipant(conn, groupJid, participant) {
+  // Tenta os identificadores reais fornecidos pelos metadados.
+  // Isso cobre servidores que esperam PN e servidores novos que entregam LID.
+  const candidates = [...new Set([
+    participant?.id,
+    participant?.jid,
+    participant?.participant,
+    participant?.phoneNumber,
+    participant?.lid
+  ].filter(Boolean))];
+
+  let lastError = null;
+  for (const target of candidates) {
+    try {
+      await conn.groupParticipantsUpdate(groupJid, [target], "remove");
+      return { ok:true, target };
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  return {
+    ok:false,
+    error:lastError?.message || String(lastError || "Falha ao remover")
+  };
+}
+
+async function purgeUserFromAdminGroups(conn, rawJid, {
+  announce = true,
+  source = "blacklist-purge"
+} = {}) {
   let groups = {};
   try {
     groups = await conn.groupFetchAllParticipating();
   } catch (e) {
-    console.error("[LISTA NEGRA GLOBAL PURGE] não foi possível listar grupos:", e?.message || e);
-    return { checked:0, removed:0, failures:0 };
+    console.error(`[${source}] não foi possível listar grupos:`, e?.message || e);
+    return { checked:0, adminGroups:0, found:0, removed:0, failures:0, details:[] };
   }
 
-  let checked=0, removed=0, failures=0;
+  const targetAliases = await buildBlacklistTargetAliases(conn, rawJid);
+  let checked=0, adminGroups=0, found=0, removed=0, failures=0;
+  const details=[];
+
   for (const groupJid of Object.keys(groups || {})) {
     checked++;
-    const result = await removeBlacklistedFromGroup(conn, groupJid, rawJid, {
-      announce:true,
-      source:"global-purge"
-    });
-    if (result.removed) removed++;
-    else if (result.reason === "remove-error") failures++;
+
+    let metadata;
+    try {
+      // Sempre busca metadados atualizados em vez de depender só do cache.
+      metadata = await conn.groupMetadata(groupJid);
+    } catch (e) {
+      details.push({ groupJid, status:"metadata-error", error:e?.message || String(e) });
+      continue;
+    }
+
+    const participants = metadata?.participants || [];
+    const isAdmin = await botIsAdminInMetadata(conn, participants);
+    if (!isAdmin) {
+      details.push({ groupJid, name:metadata?.subject, status:"bot-not-admin" });
+      continue;
+    }
+
+    adminGroups++;
+
+    const participant = await resolveParticipantForBlacklist(conn, participants, targetAliases);
+    if (!participant) {
+      details.push({ groupJid, name:metadata?.subject, status:"not-in-group" });
+      continue;
+    }
+
+    found++;
+    const removal = await removeResolvedParticipant(conn, groupJid, participant);
+
+    if (removal.ok) {
+      removed++;
+      details.push({
+        groupJid,
+        name:metadata?.subject,
+        status:"removed",
+        target:removal.target
+      });
+
+      if (announce) {
+        await conn.sendMessage(groupJid, {
+          text:
+            `🖤🔨 *LISTA NEGRA • REMOÇÃO GLOBAL*\n\n` +
+            `Um usuário bloqueado foi removido automaticamente pela Kobayashi.\n` +
+            `📌 Origem: *${source}*`
+        }).catch(() => {});
+      }
+    } else {
+      failures++;
+      details.push({
+        groupJid,
+        name:metadata?.subject,
+        status:"remove-error",
+        error:removal.error
+      });
+      console.error(`[${source}] falha em ${groupJid}:`, removal.error);
+    }
+
+    // Pequeno intervalo para não disparar alterações de participantes em rajada.
+    await new Promise((resolve) => setTimeout(resolve, 350));
   }
-  return { checked, removed, failures };
+
+  return { checked, adminGroups, found, removed, failures, details };
+}
+
+// Mantém compatibilidade com chamadas antigas.
+async function purgeGlobalBlacklistedUser(conn, rawJid) {
+  return purgeUserFromAdminGroups(conn, rawJid, {
+    announce:true,
+    source:"lista-negra-global"
+  });
 }
 
 function ensureBlacklistJoinGuard(conn) {
@@ -1908,18 +2111,14 @@ if (
         });
       }
 
-      const purgeBanMsg = await purgeGlobalBlacklistedUser(conn, targetBanMsg)
-        .catch(() => ({ removed: 0, failed: 0 }));
+      const purgeBanMsg = await purgeUserFromAdminGroups(conn, targetBanMsg, {
+        announce:true,
+        source:"BAN MSG"
+      }).catch(() => ({
+        checked:0, adminGroups:0, found:0, removed:0, failures:0
+      }));
 
-      // Garante tentativa imediata no grupo atual mesmo se a varredura global
-      // não conseguir trabalhar com os metadados em cache.
-      let currentGroupRemoved = false;
-      if (isBotGroupAdmins) {
-        try {
-          await conn.groupParticipantsUpdate(from, [targetBanMsg], "remove");
-          currentGroupRemoved = true;
-        } catch {}
-      }
+      const currentGroupRemoved = Number(purgeBanMsg?.removed || 0) > 0;
 
       const detectedName = String(pushname || senderParticipant?.notify || "Usuário").trim();
       const detectedNumber = String(targetBanMsg).split("@")[0] || "desconhecido";
@@ -1947,8 +2146,11 @@ if (
         `╰────────────────\n\n` +
         `╭─〔 ✅ *RESULTADO* 〕\n` +
         `│ 🖤 Lista Negra Global: *ATIVADA*\n` +
-        `│ 🔨 Remoções globais: *${Number(purgeBanMsg?.removed || 0)}*\n` +
-        `│ 👥 Grupo atual: *${currentGroupRemoved ? "removido" : (isBotGroupAdmins ? "tentativa executada" : "bot sem ADM")}*\n` +
+        `│ 🔎 Grupos verificados: *${Number(purgeBanMsg?.checked || 0)}*\n` +
+        `│ 🛡️ Grupos onde sou ADM: *${Number(purgeBanMsg?.adminGroups || 0)}*\n` +
+        `│ 👤 Encontrado em: *${Number(purgeBanMsg?.found || 0)}*\n` +
+        `│ 🔨 Removido de: *${Number(purgeBanMsg?.removed || 0)}*\n` +
+        `│ ❌ Falhas: *${Number(purgeBanMsg?.failures || 0)}*\n` +
         `╰────────────────`;
 
       await conn.sendMessage(dono, {
@@ -3517,25 +3719,30 @@ case "listanegraglobal": {
   }
 
   const existing = getGlobalBlacklistEntry(target);
-  if (existing) {
-    return conn.sendMessage(from, {
-      text: `ℹ️ @${target.split("@")[0]} já está na lista negra global.`,
-      mentions: [target]
-    }, { quoted: info });
+
+  if (!existing) {
+    addGlobalBlacklist(target, {
+      reason: "Adicionado manualmente pelo dono",
+      by: sender
+    });
   }
 
-  addGlobalBlacklist(target, {
-    reason: "Adicionado manualmente pelo dono",
-    by: sender
+  // Sempre vasculha novamente todos os grupos. Assim /listanegrag também
+  // funciona como uma varredura manual para alguém já cadastrado.
+  const purge = await purgeUserFromAdminGroups(conn, target, {
+    announce:true,
+    source:"Lista Negra Global"
   });
-
-  const purge = await purgeGlobalBlacklistedUser(conn, target);
 
   return conn.sendMessage(from, {
     text:
       `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
-      `👤 @${target.split("@")[0]} foi adicionado.\n` +
-      `🔨 Removido agora de *${purge.removed}* grupo(s) onde foi encontrado e a Kobayashi era ADM.\n` +
+      `👤 @${target.split("@")[0]} ${existing ? "já estava cadastrado e foi vasculhado novamente." : "foi adicionado."}\n` +
+      `🔎 Grupos verificados: *${purge.checked}*\n` +
+      `🛡️ Onde a Kobayashi é ADM: *${purge.adminGroups}*\n` +
+      `👤 Encontrado em: *${purge.found}*\n` +
+      `🔨 Removido de: *${purge.removed}*\n` +
+      `❌ Falhas: *${purge.failures}*\n` +
       `🚪 Se entrar novamente em qualquer grupo monitorado, será removido automaticamente.\n` +
       `🚫 A Kobayashi também continuará ignorando esse número no PV.`,
     mentions: [target]
@@ -10320,9 +10527,11 @@ case "blacklist": {
     const reason = args.slice(2).join(" ").trim();
     if (!reason) return reply(`⚠️ Informe o motivo.\nExemplo: *${prefix}listanegra add @membro golpes*`);
     addBlacklist(from,target,sender,reason);
-    const blacklistRemoval = await removeBlacklistedFromGroup(conn, from, target, {
-      announce:false,
-      source:"local-add"
+    // Além de registrar o bloqueio local, vasculha TODOS os grupos
+    // onde a Kobayashi é ADM e remove a pessoa imediatamente.
+    const blacklistRemoval = await purgeUserFromAdminGroups(conn, target, {
+      announce:true,
+      source:"Lista Negra"
     });
     addPunishmentHistory(from, target, {
       type: "blacklist_add",
@@ -10331,7 +10540,19 @@ case "blacklist": {
       source: "manual"
     });
     addAdminLog(from,{type:"blacklist_add",actor:sender,target,detail:reason});
-    return conn.sendMessage(from,{text:`⛔ @${target.split('@')[0]} adicionado à lista negra.\n📝 Motivo: *${reason}*${blacklistRemoval.removed?'\n🔨 Removido do grupo imediatamente.\n🚪 Se entrar novamente, será removido automaticamente.':(isBotGroupAdmins?'\n⚠️ Não consegui remover agora, mas o bloqueio automático continua ativo.':'\n⚠️ Preciso ser ADM para remover automaticamente.')}`,mentions:[target]},{quoted:info});
+    return conn.sendMessage(from,{
+      text:
+        `⛔ @${target.split('@')[0]} adicionado à lista negra.\n` +
+        `📝 Motivo: *${reason}*\n\n` +
+        `🌐 *VARREDURA DE GRUPOS*\n` +
+        `🔎 Verificados: *${blacklistRemoval.checked}*\n` +
+        `🛡️ Kobayashi ADM: *${blacklistRemoval.adminGroups}*\n` +
+        `👤 Encontrado em: *${blacklistRemoval.found}*\n` +
+        `🔨 Removido de: *${blacklistRemoval.removed}*\n` +
+        `❌ Falhas: *${blacklistRemoval.failures}*\n\n` +
+        `🚪 Neste grupo, se entrar novamente, continuará sendo removido automaticamente.`,
+      mentions:[target]
+    },{quoted:info});
   }
   const ok=removeBlacklist(from,target);
   if (ok) {
