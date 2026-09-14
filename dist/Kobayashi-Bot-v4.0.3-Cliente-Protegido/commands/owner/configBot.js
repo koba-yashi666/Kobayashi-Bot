@@ -1,0 +1,42 @@
+/* Kobayashi Protected Distribution v4.0.3 */
+import { readSettingsFile, getConfiguredLeaders } from "\x2e\x2e\x2f\x2e\x2e\x2f\x6c\x69\x62\x2f\x63\x6f\x6e\x66\x69\x67\x2f\x73\x65\x74\x74\x69\x6e\x67\x73\x53\x74\x6f\x72\x65\x2e\x6a\x73";
+
+export default {
+  name: "\x63\x6f\x6e\x66\x69\x67\x62\x6f\x74",
+  aliases: ["\x70\x61\x69\x6e\x65\x6c\x62\x6f\x74"],
+  category: "\x64\x6f\x6e\x6f",
+  description: "\x4d\x6f\x73\x74\x72\x61\x20\x63\x6f\x6e\x66\x69\x67\x75\x72\x61\xe7\xf5\x65\x73\x20\x67\x65\x72\x61\x69\x73\x20\x73\x65\x67\x75\x72\x61\x73\x20\x64\x6f\x20\x62\x6f\x74\x2e",
+  usage: "\x63\x6f\x6e\x66\x69\x67\x62\x6f\x74",
+  permission: "\x44\x6f\x6e\x6f",
+
+  async execute(ctx) {
+    const {
+      permissions,
+      reply,
+      version,
+      commandCount,
+      groupsCount,
+    } = ctx;
+
+    if (!permissions.isOwner) {
+      return reply("\ud83d\x20\x41\x70\x65\x6e\x61\x73\x20\x6f\x20\x64\x6f\x6e\x6f\x20\x70\x72\x69\x6e\x63\x69\x70\x61\x6c\x20\x70\x6f\x64\x65\x20\x61\x62\x72\x69\x72\x20\x65\x73\x74\x65\x20\x70\x61\x69\x6e\x65\x6c\x2e");
+    }
+
+    const cfg = readSettingsFile();
+    const leaders = getConfiguredLeaders();
+
+    return reply(
+      `╭══════ ❀ 👑 ❀ ══════╮\n` +
+      `      *CONFIG DO BOT*\n` +
+      `╰══════ ❀ 🐉 ❀ ══════╯\n\n` +
+      `🤖 *Nome:* ${cfg.NomeDoBot || "\x4b\x6f\x62\x61\x79\x61\x73\x68\x69\x20\x42\x6f\x74"}\n` +
+      `🎐 *Prefixo:* ${cfg.prefix || "/"}\n` +
+      `💮 *Versão:* ${version}\n` +
+      `👑 *Líderes:* ${leaders.length}/5\n` +
+      `👥 *Grupos:* ${groupsCount}\n` +
+      `🧩 *Comandos:* ${commandCount}\n\n` +
+      `🛡️ Tokens, chaves e caminhos internos ficam ocultos por segurança.\n` +
+      `🌸 Kobayashi • Painel principal`
+    );
+  },
+};

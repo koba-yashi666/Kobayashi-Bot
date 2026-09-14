@@ -744,5 +744,18 @@
       "Suporte a canal stable e base URL configurável por argumento ou variável KOBAYASHI_RELEASE_BASE_URL.",
       "Modo --dry-run permite testar toda a geração antes de existir uma hospedagem pública de releases."
     ]
+  },
+  "4.0.4": {
+    "version": "4.0.4",
+    "title": "BAN MSG Local Delete + Remove + Autoria",
+    "date": "2026-09-14",
+    "changes": [
+      "BAN MSG agora apaga a mensagem que acionou a regra no grupo de origem.",
+      "BAN MSG remove explicitamente o autor do grupo onde o texto foi enviado antes do purge global.",
+      "Lista Negra Global e remoção nos demais grupos continuam ativas.",
+      "Auditoria informa separadamente mensagem apagada e remoção do grupo atual.",
+      "Ajuda do /ban_msg atualizada com o novo comportamento.",
+      "Aviso de autoria e proibição de venda sem autorização incluído nos arquivos principais e módulos de licença."
+    ]
   }
 }

@@ -1,4 +1,11 @@
 /*
+ * KOBAYASHI BOT
+ * Criador: Luiz G. / Kobayashi
+ * A venda, revenda ou comercialização desta base sem autorização do criador
+ * é estritamente proibida.
+ * © Luiz G. / Kobayashi.
+ */
+/*
  * KOBAYASHI BOT • BETA
  * Conexão WhatsApp via código de pareamento.
  */

@@ -1,3 +1,10 @@
+/*
+ * KOBAYASHI BOT
+ * Criador: Luiz G. / Kobayashi
+ * A venda, revenda ou comercialização desta base sem autorização do criador
+ * é estritamente proibida.
+ * © Luiz G. / Kobayashi.
+ */
 /* 🐉 KOBAYASHI BOT
 Bot criado por Luiz G. / Kobayashi.
 
@@ -69,6 +76,7 @@ import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } f
 import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage } from "./lib/features/owner/globalManagement.js";
 import { getBanMessageConfig, setBanMessageEnabled, listBanMessages, addBanMessage, removeBanMessage, matchBanMessage } from "./lib/features/moderation/banMessage.js";
 import { activateLicense, validateLicense, getEffectiveLicense, getLicenseConfig, maskLicenseKey } from "./lib/features/license/licenseManager.js";
+import { createLicense, listLicenses, getLicense, blockLicense, reactivateLicense, revokeInstallation } from "./lib/features/license/licenseAdmin.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -2100,6 +2108,39 @@ if (
     const targetBanMsg = normalizeBlacklistJid(resolvedBanMsgJid);
 
     if (targetBanMsg) {
+      // v4.0.4 — ação imediata no grupo onde o BAN MSG foi disparado.
+      // A Kobayashi precisa ser ADM para apagar a mensagem de outro membro
+      // e para remover o participante.
+      let banMsgDeleted = false;
+      let banMsgDeleteError = "";
+      try {
+        await conn.sendMessage(from, { delete: info.key });
+        banMsgDeleted = true;
+      } catch (e) {
+        banMsgDeleteError = e?.message || String(e);
+      }
+
+      let banMsgCurrentGroupRemoved = false;
+      let banMsgCurrentGroupRemoveError = "";
+      try {
+        const currentMetadata = await conn.groupMetadata(from);
+        const currentParticipants = currentMetadata?.participants || [];
+        const aliases = await buildBlacklistTargetAliases(conn, targetBanMsg);
+        const currentTarget = await resolveParticipantForBlacklist(conn, currentParticipants, aliases);
+
+        if (currentTarget) {
+          const localRemoval = await removeResolvedParticipant(conn, from, currentTarget);
+          banMsgCurrentGroupRemoved = Boolean(localRemoval?.ok);
+          if (!localRemoval?.ok) {
+            banMsgCurrentGroupRemoveError = localRemoval?.error || "remoção recusada";
+          }
+        } else {
+          banMsgCurrentGroupRemoveError = "participante não localizado no grupo atual";
+        }
+      } catch (e) {
+        banMsgCurrentGroupRemoveError = e?.message || String(e);
+      }
+
       const alreadyGlobal = getGlobalBlacklistEntry(targetBanMsg);
 
       if (!alreadyGlobal) {
@@ -2118,8 +2159,6 @@ if (
       }).catch(() => ({
         checked:0, adminGroups:0, found:0, removed:0, failures:0
       }));
-
-      const currentGroupRemoved = Number(purgeBanMsg?.removed || 0) > 0;
 
       const detectedName = String(pushname || senderParticipant?.notify || "Usuário").trim();
       const detectedNumber = String(targetBanMsg).split("@")[0] || "desconhecido";
@@ -2146,12 +2185,16 @@ if (
         `│ ${String(body).slice(0, 3500)}\n` +
         `╰────────────────\n\n` +
         `╭─〔 ✅ *RESULTADO* 〕\n` +
+        `│ 🗑️ Mensagem apagada: *${banMsgDeleted ? "SIM ✅" : "NÃO ❌"}*\n` +
+        `│ 👢 Removido deste grupo: *${banMsgCurrentGroupRemoved ? "SIM ✅" : "NÃO ❌"}*\n` +
         `│ 🖤 Lista Negra Global: *ATIVADA*\n` +
         `│ 🔎 Grupos verificados: *${Number(purgeBanMsg?.checked || 0)}*\n` +
         `│ 🛡️ Grupos onde sou ADM: *${Number(purgeBanMsg?.adminGroups || 0)}*\n` +
         `│ 👤 Encontrado em: *${Number(purgeBanMsg?.found || 0)}*\n` +
         `│ 🔨 Removido de: *${Number(purgeBanMsg?.removed || 0)}*\n` +
         `│ ❌ Falhas: *${Number(purgeBanMsg?.failures || 0)}*\n` +
+        (!banMsgDeleted && banMsgDeleteError ? `│ ⚠️ Apagar: ${banMsgDeleteError}\n` : "") +
+        (!banMsgCurrentGroupRemoved && banMsgCurrentGroupRemoveError ? `│ ⚠️ Remoção local: ${banMsgCurrentGroupRemoveError}\n` : "") +
         `╰────────────────`;
 
       await conn.sendMessage(dono, {
@@ -2162,7 +2205,7 @@ if (
       addAdminLog(from, {
         type: "ban_msg",
         actor: targetBanMsg,
-        detail: `BAN MSG acionado: ${banMsgRule.text}`
+        detail: `BAN MSG acionado: ${banMsgRule.text} | mensagem_apagada=${banMsgDeleted} | removido_grupo_atual=${banMsgCurrentGroupRemoved} | purge_global=${Number(purgeBanMsg?.removed || 0)}`
       });
 
       // Não deixa a mensagem seguir para os demais sistemas do bot.
@@ -3590,8 +3633,9 @@ case "banmsg": {
     return reply(
       `🚨🐉 *BAN MSG GLOBAL*\n\n` +
       `Registra textos proibidos. Quando alguém enviar uma frase cadastrada:\n` +
+      `• a mensagem é *apagada*;\n` +
       `• entra na *Lista Negra Global*;\n` +
-      `• é removido do grupo;\n` +
+      `• é removido do grupo onde enviou o texto;\n` +
       `• a Kobayashi tenta removê-lo de todos os outros grupos;\n` +
       `• você recebe uma auditoria com nome, número, grupo, horário e texto.\n\n` +
       `➕ *${prefix}ban_msg texto proibido*\n` +
@@ -9880,6 +9924,102 @@ case "activatelicense": {
       `${e?.message || e}`
     );
   }
+}
+break;
+
+// administração de licenças v4.0.2
+case "licencacriar": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode criar licenças.");
+  const customer = String(q || args.join(" ") || "").trim();
+  if (!customer) return reply(`Use: *${prefix}licencacriar Nome do comprador*`);
+  try {
+    const result = await createLicense({ customer, plan:"permanent", updates:true, maxInstallations:1 });
+    return reply(
+      `🔑🐉 *LICENÇA CRIADA*\n\n` +
+      `👤 Cliente: *${result.customer || customer}*\n` +
+      `🎟️ Plano: *${result.plan || "permanent"}*\n` +
+      `🔑 Chave: *${result.key}*\n` +
+      `💻 Instalações: *${result.maxInstallations || 1}*\n` +
+      `⬆️ Updates: *${result.updates === false ? "BLOQUEADOS ⛔" : "LIBERADOS ✅"}*`
+    );
+  } catch (e) {
+    return reply(`❌ ${e?.message || e}`);
+  }
+}
+break;
+
+case "licencas": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode listar licenças.");
+  try {
+    const result = await listLicenses();
+    const items = Array.isArray(result?.licenses) ? result.licenses : [];
+    if (!items.length) return reply("🔑 Nenhuma licença cadastrada.");
+    const lines = items.slice(0, 30).map((x, i) =>
+      `${i+1}. ${x.blocked ? "⛔" : "✅"} *${x.key}* — ${x.customer || "-"} — ${x.plan || "-"}`
+    );
+    return reply(`🔑🐉 *LICENÇAS KOBAYASHI*\n\n${lines.join("\n")}`);
+  } catch (e) {
+    return reply(`❌ ${e?.message || e}`);
+  }
+}
+break;
+
+case "licencaver": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode consultar licenças.");
+  const key = String(q || args.join(" ") || "").trim();
+  if (!key) return reply(`Use: *${prefix}licencaver KOBA-XXXX-XXXX-XXXX*`);
+  try {
+    const result = await getLicense(key);
+    const installs = Array.isArray(result?.installations) ? result.installations : [];
+    return reply(
+      `🔑🐉 *DETALHES DA LICENÇA*\n\n` +
+      `🔑 Chave: *${result.key || key}*\n` +
+      `👤 Cliente: *${result.customer || "-"}*\n` +
+      `🎟️ Plano: *${result.plan || "-"}*\n` +
+      `📌 Status: *${result.blocked ? "BLOQUEADA ⛔" : "ATIVA ✅"}*\n` +
+      `⬆️ Updates: *${result.updates === false ? "BLOQUEADOS ⛔" : "LIBERADOS ✅"}*\n` +
+      `💻 Instalações: *${installs.length}/${result.maxInstallations || 1}*\n` +
+      (installs.length ? `\n${installs.map((x,i)=>`${i+1}. ${x.installationId}`).join("\n")}` : "")
+    );
+  } catch (e) {
+    return reply(`❌ ${e?.message || e}`);
+  }
+}
+break;
+
+case "licencabloquear": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode bloquear licenças.");
+  const key = String(q || args.join(" ") || "").trim();
+  if (!key) return reply(`Use: *${prefix}licencabloquear KOBA-XXXX-XXXX-XXXX*`);
+  try {
+    await blockLicense(key);
+    return reply(`⛔ Licença *${key}* bloqueada.`);
+  } catch (e) { return reply(`❌ ${e?.message || e}`); }
+}
+break;
+
+case "licencareativar": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode reativar licenças.");
+  const key = String(q || args.join(" ") || "").trim();
+  if (!key) return reply(`Use: *${prefix}licencareativar KOBA-XXXX-XXXX-XXXX*`);
+  try {
+    await reactivateLicense(key);
+    return reply(`✅ Licença *${key}* reativada.`);
+  } catch (e) { return reply(`❌ ${e?.message || e}`); }
+}
+break;
+
+case "licencadesvincular": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode desvincular instalações.");
+  const raw = String(q || args.join(" ") || "").trim();
+  const [key, installationId] = raw.split(/\s+/);
+  if (!key || !installationId) {
+    return reply(`Use: *${prefix}licencadesvincular KOBA-XXXX-XXXX-XXXX ID-DA-INSTALACAO*`);
+  }
+  try {
+    await revokeInstallation(key, installationId);
+    return reply(`✅ Instalação desvinculada da licença *${key}*.`);
+  } catch (e) { return reply(`❌ ${e?.message || e}`); }
 }
 break;
 

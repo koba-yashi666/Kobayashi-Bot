@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "4.0.3",
-  "description": "Kobayashi Bot v4.0.3 - Publicador de Updates Oficiais",
+  "version": "4.0.4",
+  "description": "Kobayashi Bot v4.0.4 - BAN MSG Local Delete + Remove + Autoria",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

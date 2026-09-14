@@ -1,3 +1,10 @@
+/*
+ * KOBAYASHI BOT
+ * Criador: Luiz G. / Kobayashi
+ * A venda, revenda ou comercialização desta base sem autorização do criador
+ * é estritamente proibida.
+ * © Luiz G. / Kobayashi.
+ */
 import { spawnSync } from 'node:child_process';
 
 function hasBaileys() {

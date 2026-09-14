@@ -1,0 +1,3 @@
+/* Kobayashi Protected Distribution v4.0.3 */
+// Compatibility bridge — Kobayashi Bot v1.0
+export * from "\x2e\x2f\x63\x6f\x72\x65\x2f\x64\x72\x61\x67\x6f\x6e\x43\x6f\x72\x65\x2e\x6a\x73";
