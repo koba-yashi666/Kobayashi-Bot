@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 
 const ROOT = process.cwd();
-const VERSION = "4.0.1";
+const VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, "version.json"), "utf8"))?.version || "0.0.0";
 const DIST_ROOT = path.join(ROOT, "dist");
 const WORK = path.join(DIST_ROOT, `Kobayashi-Bot-v${VERSION}-Cliente-Protegido`);
 const ZIP = path.join(DIST_ROOT, `Kobayashi-Bot-v${VERSION}-Cliente-Protegido.zip`);

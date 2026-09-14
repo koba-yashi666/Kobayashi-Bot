@@ -686,5 +686,63 @@
       "O pacote protegido continua instalável em hospedagem comum, VPS ou Termux com npm install.",
       "Build protegido inclui relatório de arquivos removidos, arquivos protegidos e SHA-256."
     ]
+  },
+  "4.0.2": {
+    "version": "4.0.2",
+    "title": "License Server Admin + Key Management",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "licencacriar",
+        "category": "Dono",
+        "note": "gera licença permanente para comprador"
+      },
+      {
+        "name": "licencas",
+        "category": "Dono",
+        "note": "lista licenças"
+      },
+      {
+        "name": "licencaver",
+        "category": "Dono",
+        "note": "detalha uma licença e instalações"
+      },
+      {
+        "name": "licencabloquear",
+        "category": "Dono",
+        "note": "bloqueia licença"
+      },
+      {
+        "name": "licencareativar",
+        "category": "Dono",
+        "note": "reativa licença"
+      },
+      {
+        "name": "licencadesvincular",
+        "category": "Dono",
+        "note": "remove vínculo de uma instalação"
+      }
+    ],
+    "changes": [
+      "Cliente administrativo para servidor de licenças.",
+      "Token administrativo separado da chave dos compradores.",
+      "Gestão de licenças pelo WhatsApp apenas para o dono principal.",
+      "Suporte a limite de instalações e desvinculação manual.",
+      "Servidor de licenças separado incluído como ZIP independente."
+    ]
+  },
+  "4.0.3": {
+    "version": "4.0.3",
+    "title": "Publicador de Updates Oficiais",
+    "date": "2026-09-14",
+    "changes": [
+      "Novo npm run release:client gera o pacote protegido do comprador e os arquivos de publicação em uma única etapa.",
+      "latest.json é gerado automaticamente com versão, canal, downloadUrl, SHA-256, minimumVersion e notas.",
+      "Changelog JSON da versão é criado automaticamente a partir de release-notes.json.",
+      "build:client agora lê a versão diretamente de version.json, eliminando versão fixa no gerador.",
+      "Arquivo PUBLICAR-vX.Y.Z.txt é criado com URLs, SHA-256 e comandos de configuração dos clientes.",
+      "Suporte a canal stable e base URL configurável por argumento ou variável KOBAYASHI_RELEASE_BASE_URL.",
+      "Modo --dry-run permite testar toda a geração antes de existir uma hospedagem pública de releases."
+    ]
   }
 }
