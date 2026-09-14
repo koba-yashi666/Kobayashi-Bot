@@ -2790,7 +2790,10 @@ if (isCmd) {
     conn, info, from, sender, command, args, q, prefix, reply, reagir,
     isGroup, groupName, groupMembers,
     groupAdmins: Array.isArray(groupAdmins) ? groupAdmins : [],
-    permissions: modularPermissions
+    permissions: modularPermissions,
+    isMainOwner: SoDonoPrincipal,
+    isOwner: SoDono,
+    isLeader: SoLider
   });
   if (globalManagementHandled) continue;
 

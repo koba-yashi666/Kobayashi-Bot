@@ -570,5 +570,15 @@
       "O número configurado, configuração inicial, variável KOBAYASHI_OWNER e fallback do criador são aceitos.",
       "Novo /debugdono para diagnosticar a identidade sem revelar o número completo."
     ]
+  },
+  "3.0.6": {
+    "version": "3.0.6",
+    "title": "Permissão do dono nos comandos globais",
+    "date": "2026-09-14",
+    "changes": [
+      "Corrigida a divergência entre /debugdono e os comandos novos de gestão.",
+      "Gestão global agora usa diretamente SoDonoPrincipal, já validado pelo núcleo.",
+      "/grupos, /grupo, /clientes, /alugueis, /statusglobal, /estatisticas, /comandosmaisusados e /erros passam a reconhecer o mesmo dono que /debugdono."
+    ]
   }
 }
