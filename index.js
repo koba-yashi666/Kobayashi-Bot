@@ -1566,16 +1566,85 @@ const botNumber = await getPNForJid(conn, conn.user.id, conn.user.lid || conn.us
 
 const groupMembers = isGroup ? groupMetadata.participants : "";
 
-const dono = ownerNumber + "@s.whatsapp.net";
-const SoDonoPrincipal = sender === dono || isMainOwnerJid(sender);
-const SoLider = isLeaderJid(sender);
-const SoDono = SoDonoPrincipal || SoLider;
+// 👑 Dono principal • resolução robusta PN/LID
+// O WhatsApp pode entregar o mesmo usuário como @s.whatsapp.net, @lid,
+// participant ou participantAlt. A checagem abaixo compara todas as
+// identidades conhecidas e também o número configurado apenas pelos dígitos.
 const runtimeSettings = readSettingsFile();
+const configuredOwnerNumber = onlyDigits(
+  runtimeSettings?.ownerNumber || ownerNumber || ""
+);
+const dono = configuredOwnerNumber
+  ? `${configuredOwnerNumber}@s.whatsapp.net`
+  : `${onlyDigits(ownerNumber || "")}@s.whatsapp.net`;
+
+const senderParticipant = isGroup
+  ? (groupMetadata?.participants || []).find((p) => {
+      const ids = [
+        p?.id,
+        p?.jid,
+        p?.participant,
+        p?.phoneNumber,
+        p?.lid
+      ].filter(Boolean).map(String);
+
+      const incoming = [
+        rawSender,
+        sender,
+        info?.key?.participant,
+        info?.key?.participantAlt,
+        senderLid
+      ].filter(Boolean).map(String);
+
+      return ids.some((id) => incoming.includes(id));
+    })
+  : null;
+
+const ownerIdentityCandidates = [
+  sender,
+  rawSender,
+  senderLid,
+  info?.key?.participant,
+  info?.key?.participantAlt,
+  senderParticipant?.id,
+  senderParticipant?.jid,
+  senderParticipant?.participant,
+  senderParticipant?.phoneNumber,
+  senderParticipant?.lid
+].filter(Boolean);
+
+const jidDigits = (jid) => {
+  const local = String(jid || "").split("@")[0].split(":")[0];
+  return onlyDigits(local);
+};
+
+const ownerMatchedByNumber = Boolean(
+  configuredOwnerNumber &&
+  ownerIdentityCandidates.some((jid) => jidDigits(jid) === configuredOwnerNumber)
+);
+
+const ownerMatchedByStore = ownerIdentityCandidates.some((jid) => {
+  try {
+    return isMainOwnerJid(jid);
+  } catch {
+    return false;
+  }
+});
+
+const SoDonoPrincipal = ownerMatchedByNumber || ownerMatchedByStore;
+const SoLider = ownerIdentityCandidates.some((jid) => {
+  try {
+    return isLeaderJid(jid);
+  } catch {
+    return false;
+  }
+});
+const SoDono = SoDonoPrincipal || SoLider;
 
 // 🛰️ SENTINEL WA • recebe alertas assinados enviados pelo número observador.
 // É processado antes do Anti-PV para a própria proteção do PV não bloquear a ponte.
 configureSentinelBridgeRuntime(conn, {
-  ownerJids: [dono],
+  ownerJids: [...new Set([dono, ...ownerIdentityCandidates].filter(Boolean))],
   isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
 });
 const sentinelWaResult = await processSentinelWhatsAppMessage({

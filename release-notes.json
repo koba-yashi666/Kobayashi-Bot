@@ -539,5 +539,17 @@
       "Status global do processo.",
       "Comandos distribuídos nos menus existentes; nenhum menu novo."
     ]
+  },
+  "3.0.4": {
+    "version": "3.0.4",
+    "title": "Correção de reconhecimento do dono",
+    "date": "2026-09-14",
+    "changes": [
+      "Corrigido reconhecimento do dono principal quando o WhatsApp entrega identidade em formato LID.",
+      "A validação agora considera PN, LID, participant, participantAlt e metadados do participante.",
+      "O número configurado do dono é comparado pelos dígitos, evitando falha por formatação.",
+      "Líderes também recebem a mesma resolução robusta de identidade.",
+      "Sentinel passa a receber as identidades resolvidas do dono."
+    ]
   }
 }
