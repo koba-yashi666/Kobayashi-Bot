@@ -580,5 +580,48 @@
       "Gestão global agora usa diretamente SoDonoPrincipal, já validado pelo núcleo.",
       "/grupos, /grupo, /clientes, /alugueis, /statusglobal, /estatisticas, /comandosmaisusados e /erros passam a reconhecer o mesmo dono que /debugdono."
     ]
+  },
+  "3.0.7": {
+    "version": "3.0.7",
+    "title": "Moderação V3",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "protecao",
+        "category": "Admin",
+        "note": "painel e perfis de proteção baixa, media, alta e off"
+      }
+    ],
+    "changes": [
+      "O /protecao existente foi aprimorado em vez de criar um novo menu ou comando concorrente.",
+      "Novo /protecao baixa para proteção leve.",
+      "Novo /protecao media para proteção equilibrada.",
+      "Novo /protecao alta para proteção rígida.",
+      "Novo /protecao off para desligar os módulos automáticos controlados pelos perfis.",
+      "Perfis configuram AntiLink, AntiTelegram, AntiSpam, AntiFake, AntiTrava, AntiMenção, AntiTextão, AntiFlood, AntiDelete e AntiEdit.",
+      "Apenas um modo de AntiLink fica ativo por perfil.",
+      "O /protecao sem argumento continua exibindo o painel.",
+      "Comando integrado ao /menuadm e /helpcmd."
+    ]
+  },
+  "3.0.8": {
+    "version": "3.0.8",
+    "title": "BAN MSG Global",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "ban_msg",
+        "category": "Dono",
+        "note": "registra textos proibidos e aplica Lista Negra Global automaticamente"
+      }
+    ],
+    "changes": [
+      "Novo /ban_msg para registrar frases proibidas globalmente.",
+      "Ao detectar uma frase registrada, o autor é adicionado automaticamente à Lista Negra Global.",
+      "A Kobayashi tenta remover o autor do grupo atual e de todos os grupos em que o encontrar e possuir permissão.",
+      "Auditoria automática é enviada ao dono com texto, nome, número, grupo e horário do ocorrido.",
+      "Suporte a /ban_msg add, /ban_msg del, /ban_msg list, /ban_msg on e /ban_msg off.",
+      "O comando foi adicionado ao menu do dono e ao /helpcmd."
+    ]
   }
 }

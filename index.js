@@ -67,6 +67,7 @@ import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinel
 import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } from "./lib/features/v3/v3Suite.js";
 
 import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage } from "./lib/features/owner/globalManagement.js";
+import { getBanMessageConfig, setBanMessageEnabled, listBanMessages, addBanMessage, removeBanMessage, matchBanMessage } from "./lib/features/moderation/banMessage.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -110,6 +111,136 @@ function toggleGroupProtection(groupJid, key) {
   db[groupJid][key] = !Boolean(db[groupJid][key]);
   fs.writeFileSync(PROTECTION_DB, JSON.stringify(db, null, 2), "utf8");
   return Boolean(db[groupJid][key]);
+}
+
+function setGroupProtection(groupJid, key, enabled) {
+  const db = readProtectionDb();
+  if (!db[groupJid]) db[groupJid] = {};
+  db[groupJid][key] = Boolean(enabled);
+  fs.writeFileSync(PROTECTION_DB, JSON.stringify(db, null, 2), "utf8");
+  return Boolean(db[groupJid][key]);
+}
+
+function setYuriProtectionState(groupJid, key, enabled) {
+  const current = Boolean(getYuriProtection(groupJid)?.[key]);
+  if (current !== Boolean(enabled)) toggleYuriProtection(groupJid, key);
+  return Boolean(getYuriProtection(groupJid)?.[key]);
+}
+
+function applyProtectionPreset(groupJid, level) {
+  const normalized = String(level || "").toLowerCase();
+
+  const presets = {
+    baixa: {
+      link: "light",
+      telegram: true,
+      antiSpam: false,
+      antiFake: false,
+      antiTrava: true,
+      antiMention: true,
+      mentionLimit: 20,
+      antiLongText: true,
+      textLimit: 12000,
+      antiFloodMessage: false,
+      floodLimit: 10,
+      commandFlood: null,
+      antiDelete: false,
+      antiEdit: false,
+      punishment: "adv",
+      emergency: false
+    },
+    media: {
+      link: "group",
+      telegram: true,
+      antiSpam: true,
+      antiFake: false,
+      antiTrava: true,
+      antiMention: true,
+      mentionLimit: 15,
+      antiLongText: true,
+      textLimit: 8000,
+      antiFloodMessage: true,
+      floodLimit: 10,
+      commandFlood: 8,
+      antiDelete: true,
+      antiEdit: false,
+      punishment: "adv",
+      emergency: false
+    },
+    alta: {
+      link: "hard",
+      telegram: true,
+      antiSpam: true,
+      antiFake: true,
+      antiTrava: true,
+      antiMention: true,
+      mentionLimit: 10,
+      antiLongText: true,
+      textLimit: 5000,
+      antiFloodMessage: true,
+      floodLimit: 7,
+      commandFlood: 5,
+      antiDelete: true,
+      antiEdit: true,
+      punishment: "ban",
+      emergency: true
+    },
+    off: {
+      link: "off",
+      telegram: false,
+      antiSpam: false,
+      antiFake: false,
+      antiTrava: false,
+      antiMention: false,
+      mentionLimit: 20,
+      antiLongText: false,
+      textLimit: 12000,
+      antiFloodMessage: false,
+      floodLimit: 10,
+      commandFlood: null,
+      antiDelete: false,
+      antiEdit: false,
+      punishment: "adv",
+      emergency: false
+    }
+  };
+
+  const cfg = presets[normalized];
+  if (!cfg) return null;
+
+  // Só um modo de AntiLink fica ativo por vez.
+  setGroupProtection(groupJid, "antilink", cfg.link === "hard");
+  setGroupProtection(groupJid, "antilinkgp", cfg.link === "group");
+  setGroupProtection(groupJid, "antilinklight", cfg.link === "light");
+  setGroupProtection(groupJid, "antitelegram", cfg.telegram);
+
+  setAntiSpamEnabled(groupJid, cfg.antiSpam);
+  setAntiFakeEnabled(groupJid, cfg.antiFake);
+
+  updateAntiTravaConfig(groupJid, {
+    enabled: cfg.antiTrava,
+    antiMention: cfg.antiMention,
+    mentionLimit: cfg.mentionLimit,
+    antiLongText: cfg.antiLongText,
+    textLimit: cfg.textLimit,
+    antiFloodMessage: cfg.antiFloodMessage,
+    floodLimit: cfg.floodLimit,
+    punishment: cfg.punishment,
+    emergency: cfg.emergency
+  });
+
+  configureAntiFlood(groupJid, cfg.commandFlood);
+  setYuriProtectionState(groupJid, "antidel", cfg.antiDelete);
+  setYuriProtectionState(groupJid, "antiedit", cfg.antiEdit);
+
+  return {
+    level: normalized,
+    links: getGroupProtection(groupJid),
+    antiSpam: getAntiSpamConfig(groupJid),
+    antiFake: getAntiFakeConfig(groupJid),
+    antiTrava: getAntiTravaConfig(groupJid),
+    yuri: getYuriProtection(groupJid)
+  };
 }
 
 function detectLinkTypes(text = "") {
@@ -1737,6 +1868,106 @@ if (!SoDonoPrincipal && sender && isGloballyBlacklisted(sender)) {
   continue;
 }
 
+
+// 🚨 BAN MSG GLOBAL v3.0.8
+// Detecta frases registradas pelo dono. O autor é removido, entra na
+// Lista Negra Global e é expulso dos demais grupos onde a Kobayashi puder agir.
+if (
+  isGroup &&
+  !info.key.fromMe &&
+  !SoDonoPrincipal &&
+  !isCmd &&
+  sender &&
+  body
+) {
+  const banMsgRule = matchBanMessage(body);
+
+  if (banMsgRule) {
+    const resolvedBanMsgJid =
+      (await getPNForJid(
+        conn,
+        sender,
+        senderParticipant?.phoneNumber ||
+        info?.key?.participantAlt ||
+        senderParticipant?.id
+      ).catch(() => null)) ||
+      sender;
+
+    const targetBanMsg = normalizeBlacklistJid(resolvedBanMsgJid);
+
+    if (targetBanMsg) {
+      const alreadyGlobal = getGlobalBlacklistEntry(targetBanMsg);
+
+      if (!alreadyGlobal) {
+        addGlobalBlacklist(targetBanMsg, {
+          reason: `BAN MSG: ${banMsgRule.text}`,
+          by: "ban_msg",
+          sourceGroup: from,
+          sourceMessage: String(body).slice(0, 2000),
+          createdAt: Date.now()
+        });
+      }
+
+      const purgeBanMsg = await purgeGlobalBlacklistedUser(conn, targetBanMsg)
+        .catch(() => ({ removed: 0, failed: 0 }));
+
+      // Garante tentativa imediata no grupo atual mesmo se a varredura global
+      // não conseguir trabalhar com os metadados em cache.
+      let currentGroupRemoved = false;
+      if (isBotGroupAdmins) {
+        try {
+          await conn.groupParticipantsUpdate(from, [targetBanMsg], "remove");
+          currentGroupRemoved = true;
+        } catch {}
+      }
+
+      const detectedName = String(pushname || senderParticipant?.notify || "Usuário").trim();
+      const detectedNumber = String(targetBanMsg).split("@")[0] || "desconhecido";
+      const occurredAt = new Date().toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        hour12: false
+      });
+
+      const ownerAudit =
+        `╭═══════ ❀ 🐉 ❀ ═══════╮\n` +
+        `   🚨 *BAN MSG • AUDITORIA* 🚨\n` +
+        `╰═══════ ❀ 🖤 ❀ ═══════╯\n\n` +
+        `╭─〔 🛡️ *OCORRÊNCIA* 〕\n` +
+        `│ 👤 Nome › *${detectedName || "Usuário"}*\n` +
+        `│ 📱 Número › @${detectedNumber}\n` +
+        `│ 👥 Grupo › *${groupName || "Grupo"}*\n` +
+        `│ 🆔 Grupo ID › ${from}\n` +
+        `│ 🕒 Horário › *${occurredAt}*\n` +
+        `╰────────────────\n\n` +
+        `╭─〔 🚫 *REGRA ACIONADA* 〕\n` +
+        `│ ${banMsgRule.text}\n` +
+        `╰────────────────\n\n` +
+        `╭─〔 💬 *TEXTO ENVIADO* 〕\n` +
+        `│ ${String(body).slice(0, 3500)}\n` +
+        `╰────────────────\n\n` +
+        `╭─〔 ✅ *RESULTADO* 〕\n` +
+        `│ 🖤 Lista Negra Global: *ATIVADA*\n` +
+        `│ 🔨 Remoções globais: *${Number(purgeBanMsg?.removed || 0)}*\n` +
+        `│ 👥 Grupo atual: *${currentGroupRemoved ? "removido" : (isBotGroupAdmins ? "tentativa executada" : "bot sem ADM")}*\n` +
+        `╰────────────────`;
+
+      await conn.sendMessage(dono, {
+        text: ownerAudit,
+        mentions: [targetBanMsg]
+      }).catch((e) => console.error("[BAN MSG AUDITORIA]", e?.message || e));
+
+      addAdminLog(from, {
+        type: "ban_msg",
+        actor: targetBanMsg,
+        detail: `BAN MSG acionado: ${banMsgRule.text}`
+      });
+
+      // Não deixa a mensagem seguir para os demais sistemas do bot.
+      continue;
+    }
+  }
+}
+
 // 🐉 UPDATE NEWS v0.3.6
 // Após um /update, a notícia fica pendente em disco. Na primeira atividade
 // recebida depois do reinício, a Kobayashi publica o resumo no chat que iniciou a atualização.
@@ -3143,6 +3374,96 @@ case "alugel_permanente": {
 }
 break;
 
+
+case "ban_msg":
+case "banmsg": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o dono principal pode gerenciar o *BAN MSG Global*.");
+  }
+
+  const action = String(args?.[0] || "").trim().toLowerCase();
+
+  if (!action) {
+    return reply(
+      `🚨🐉 *BAN MSG GLOBAL*\n\n` +
+      `Registra textos proibidos. Quando alguém enviar uma frase cadastrada:\n` +
+      `• entra na *Lista Negra Global*;\n` +
+      `• é removido do grupo;\n` +
+      `• a Kobayashi tenta removê-lo de todos os outros grupos;\n` +
+      `• você recebe uma auditoria com nome, número, grupo, horário e texto.\n\n` +
+      `➕ *${prefix}ban_msg texto proibido*\n` +
+      `➕ *${prefix}ban_msg add texto proibido*\n` +
+      `➖ *${prefix}ban_msg del 1*\n` +
+      `📋 *${prefix}ban_msg list*\n` +
+      `✅ *${prefix}ban_msg on*\n` +
+      `⛔ *${prefix}ban_msg off*`
+    );
+  }
+
+  if (["on","off"].includes(action)) {
+    const enabled = setBanMessageEnabled(action === "on");
+    return reply(
+      `🚨 *BAN MSG Global:* ${enabled ? "ATIVADO ✅" : "DESATIVADO ⛔"}`
+    );
+  }
+
+  if (["list","lista","ver"].includes(action)) {
+    const cfg = getBanMessageConfig();
+    const entries = listBanMessages();
+    if (!entries.length) {
+      return reply(
+        `🚨🐉 *BAN MSG GLOBAL*\n\n` +
+        `Status: *${cfg.enabled ? "ATIVO ✅" : "DESATIVADO ⛔"}*\n` +
+        `📦 Nenhum texto registrado.`
+      );
+    }
+
+    const lines = entries.slice(0, 100).map((entry, i) =>
+      `${i + 1}. ${entry.text}`
+    ).join("\n");
+
+    return reply(
+      `🚨🐉 *BAN MSG GLOBAL*\n\n` +
+      `Status: *${cfg.enabled ? "ATIVO ✅" : "DESATIVADO ⛔"}*\n` +
+      `📦 Textos: *${entries.length}*\n\n${lines}\n\n` +
+      `Para remover: *${prefix}ban_msg del número*`
+    );
+  }
+
+  if (["del","rm","remove","remover"].includes(action)) {
+    const query = args.slice(1).join(" ").trim();
+    if (!query) return reply(`Use: *${prefix}ban_msg del 1* ou responda com o texto cadastrado.`);
+
+    const result = removeBanMessage(query);
+    if (!result.ok) return reply("❌ Não encontrei esse texto no BAN MSG.");
+
+    return reply(`✅ Texto removido do BAN MSG:\n\n*${result.entry.text}*`);
+  }
+
+  const textToAdd = action === "add"
+    ? args.slice(1).join(" ").trim()
+    : args.join(" ").trim();
+
+  if (!textToAdd) {
+    return reply(`Use: *${prefix}ban_msg texto proibido*`);
+  }
+
+  const result = addBanMessage(textToAdd, sender);
+  if (!result.ok && result.reason === "exists") {
+    return reply(`ℹ️ Esse texto já está registrado no BAN MSG:\n\n*${result.entry.text}*`);
+  }
+  if (!result.ok) {
+    return reply("❌ Não consegui registrar esse texto.");
+  }
+
+  return reply(
+    `✅🚨 *BAN MSG REGISTRADO*\n\n` +
+    `📝 Texto: *${result.entry.text}*\n` +
+    `🌐 Alcance: *GLOBAL*\n\n` +
+    `Quem enviar esse texto será colocado automaticamente na *Lista Negra Global* e removido dos grupos onde a Kobayashi conseguir agir.`
+  );
+}
+break;
 
 case "listanegrag":
 case "blacklistg":
@@ -8689,17 +9010,99 @@ break;
 case "painelprotecao":
 case "protecao": {
   if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  const yuriProtection = getYuriProtection(from);
-  return reply(buildProtectionPanel({
-    prefix,
-    protections: getGroupProtection(from),
-    antiTrava: getAntiTravaConfig(from),
-    antiSpam: getAntiSpamConfig(from),
-    antiDelete: Boolean(yuriProtection?.antidel),
-    antiEdit: Boolean(yuriProtection?.antiedit),
-    sentinel: getSentinelStatus(from)
-  }));
+  if (!isGroupAdmins && !SoDono) return reply(mess.onlyAdmins());
+
+  const action = String(args?.[0] || "").trim().toLowerCase();
+
+  // Sem argumento: mantém o painel tradicional.
+  if (!action || ["status","ver","painel"].includes(action)) {
+    const yuriProtection = getYuriProtection(from);
+    return reply(
+      buildProtectionPanel({
+        prefix,
+        protections: getGroupProtection(from),
+        antiTrava: getAntiTravaConfig(from),
+        antiSpam: getAntiSpamConfig(from),
+        antiDelete: Boolean(yuriProtection?.antidel),
+        antiEdit: Boolean(yuriProtection?.antiedit),
+        sentinel: getSentinelStatus(from)
+      }) +
+      `\n\n╭━━〔 🐉 *MODERAÇÃO V3* 〕━━╮\n` +
+      `┃ ${prefix}protecao baixa\n` +
+      `┃ ${prefix}protecao media\n` +
+      `┃ ${prefix}protecao alta\n` +
+      `┃ ${prefix}protecao off\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  const aliases = {
+    leve: "baixa",
+    low: "baixa",
+    medio: "media",
+    média: "media",
+    médio: "media",
+    normal: "media",
+    high: "alta",
+    forte: "alta",
+    maxima: "alta",
+    máxima: "alta",
+    desativar: "off",
+    desligar: "off"
+  };
+  const preset = aliases[action] || action;
+
+  if (!["baixa","media","alta","off"].includes(preset)) {
+    return reply(
+      `🛡️🐉 *MODERAÇÃO V3*\n\n` +
+      `Escolha um nível:\n` +
+      `• *${prefix}protecao baixa*\n` +
+      `• *${prefix}protecao media*\n` +
+      `• *${prefix}protecao alta*\n` +
+      `• *${prefix}protecao off*\n\n` +
+      `Use *${prefix}protecao* para conferir o painel atual.`
+    );
+  }
+
+  const applied = applyProtectionPreset(from, preset);
+  if (!applied) return reply("❌ Não consegui aplicar esse perfil de proteção.");
+
+  addAdminLog(from, {
+    type: "protecao_preset",
+    actor: sender,
+    detail: `Preset de proteção: ${preset}`
+  });
+
+  const labels = {
+    baixa: "🟢 BAIXA",
+    media: "🟡 MÉDIA",
+    alta: "🔴 ALTA",
+    off: "⚪ DESATIVADA"
+  };
+
+  const descriptions = {
+    baixa:
+      "AntiLink Light + Telegram, AntiTrava, AntiMenção e AntiTextão. Punições mais leves.",
+    media:
+      "AntiLink de grupos + Telegram, AntiSpam, AntiTrava, AntiFlood, AntiMenção, AntiTextão e AntiDelete.",
+    alta:
+      "AntiLink completo, AntiTelegram, AntiSpam, AntiFake, AntiTrava, AntiFlood, AntiMenção, AntiTextão, AntiDelete, AntiEdit e emergência.",
+    off:
+      "Desativa os módulos automáticos controlados pelo perfil. Lista branca e configurações manuais continuam preservadas."
+  };
+
+  const adminWarning = !isBotGroupAdmins && preset !== "off"
+    ? `\n\n⚠️ *Atenção:* eu não sou ADM. Algumas proteções não conseguirão apagar mensagens ou remover membros.`
+    : "";
+
+  return reply(
+    `╭━━〔 🛡️🐉 *MODERAÇÃO V3* 〕━━╮\n` +
+    `┃ Perfil: *${labels[preset]}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+    `${descriptions[preset]}` +
+    `${adminWarning}\n\n` +
+    `📊 Use *${prefix}protecao* ou *${prefix}statusgrupo* para conferir tudo.`
+  );
 }
 break;
 
