@@ -1566,21 +1566,79 @@ const botNumber = await getPNForJid(conn, conn.user.id, conn.user.lid || conn.us
 
 const groupMembers = isGroup ? groupMetadata.participants : "";
 
-// 👑 Dono principal • resolução robusta PN/LID
-// O WhatsApp pode entregar o mesmo usuário como @s.whatsapp.net, @lid,
-// participant ou participantAlt. A checagem abaixo compara todas as
-// identidades conhecidas e também o número configurado apenas pelos dígitos.
+// 👑 Dono principal • reconhecimento definitivo PN/LID/BR
+// Aceita:
+// - PN normal (@s.whatsapp.net)
+// - LID resolvido pelo Baileys
+// - participant / participantAlt / phoneNumber / jid / lid
+// - variação brasileira antiga sem o 9º dígito
+// - número principal configurado + fallback do criador
 const runtimeSettings = readSettingsFile();
-const configuredOwnerNumber = onlyDigits(
-  runtimeSettings?.ownerNumber || ownerNumber || ""
-);
-const dono = configuredOwnerNumber
-  ? `${configuredOwnerNumber}@s.whatsapp.net`
-  : `${onlyDigits(ownerNumber || "")}@s.whatsapp.net`;
+
+const CREATOR_OWNER_FALLBACK = "5515997075304";
+
+const normalizeOwnerDigits = (value) => {
+  let n = onlyDigits(String(value || ""));
+  // Remove prefixos internos que às vezes aparecem antes do número real.
+  if (n.length > 13 && n.startsWith("0")) n = n.replace(/^0+/, "");
+  return n;
+};
+
+const ownerNumberVariants = (value) => {
+  const n = normalizeOwnerDigits(value);
+  const set = new Set();
+  if (!n) return set;
+  set.add(n);
+
+  // Brasil: 55 + DDD + celular. O WhatsApp pode expor o PN com ou sem o 9.
+  if (n.startsWith("55")) {
+    const ddd = n.slice(2, 4);
+    const local = n.slice(4);
+
+    if (local.length === 9 && local.startsWith("9")) {
+      set.add(`55${ddd}${local.slice(1)}`);
+    }
+    if (local.length === 8) {
+      set.add(`55${ddd}9${local}`);
+    }
+  }
+  return set;
+};
+
+const configuredOwnerCandidates = [
+  runtimeSettings?.ownerNumber,
+  ownerNumber,
+  process.env.KOBAYASHI_OWNER,
+  CREATOR_OWNER_FALLBACK
+].filter(Boolean);
+
+const configuredOwnerVariants = new Set();
+for (const n of configuredOwnerCandidates) {
+  for (const variant of ownerNumberVariants(n)) configuredOwnerVariants.add(variant);
+}
+
+const primaryOwnerDigits =
+  normalizeOwnerDigits(runtimeSettings?.ownerNumber) ||
+  normalizeOwnerDigits(ownerNumber) ||
+  CREATOR_OWNER_FALLBACK;
+
+const dono = `${primaryOwnerDigits}@s.whatsapp.net`;
+
+const incomingIdentityCandidates = [
+  rawSender,
+  sender,
+  senderLid,
+  info?.key?.participant,
+  info?.key?.participantAlt,
+  info?.participant,
+  info?.participantAlt,
+  info?.message?.extendedTextMessage?.contextInfo?.participant,
+  info?.message?.extendedTextMessage?.contextInfo?.participantAlt
+].filter(Boolean);
 
 const senderParticipant = isGroup
   ? (groupMetadata?.participants || []).find((p) => {
-      const ids = [
+      const participantIds = [
         p?.id,
         p?.jid,
         p?.participant,
@@ -1588,57 +1646,70 @@ const senderParticipant = isGroup
         p?.lid
       ].filter(Boolean).map(String);
 
-      const incoming = [
-        rawSender,
-        sender,
-        info?.key?.participant,
-        info?.key?.participantAlt,
-        senderLid
-      ].filter(Boolean).map(String);
-
-      return ids.some((id) => incoming.includes(id));
+      return participantIds.some((id) =>
+        incomingIdentityCandidates.some((incoming) => String(incoming) === id)
+      );
     })
   : null;
 
-const ownerIdentityCandidates = [
-  sender,
-  rawSender,
-  senderLid,
-  info?.key?.participant,
-  info?.key?.participantAlt,
+const ownerIdentityCandidates = [...new Set([
+  ...incomingIdentityCandidates,
   senderParticipant?.id,
   senderParticipant?.jid,
   senderParticipant?.participant,
   senderParticipant?.phoneNumber,
   senderParticipant?.lid
-].filter(Boolean);
+].filter(Boolean).map(String))];
 
-const jidDigits = (jid) => {
+const jidLocalDigits = (jid) => {
   const local = String(jid || "").split("@")[0].split(":")[0];
-  return onlyDigits(local);
+  return normalizeOwnerDigits(local);
 };
 
-const ownerMatchedByNumber = Boolean(
-  configuredOwnerNumber &&
-  ownerIdentityCandidates.some((jid) => jidDigits(jid) === configuredOwnerNumber)
-);
+const ownerMatchedByNumber = ownerIdentityCandidates.some((jid) => {
+  const digits = jidLocalDigits(jid);
+  if (!digits) return false;
+  const variants = ownerNumberVariants(digits);
+  return [...variants].some((variant) => configuredOwnerVariants.has(variant));
+});
 
 const ownerMatchedByStore = ownerIdentityCandidates.some((jid) => {
   try {
-    return isMainOwnerJid(jid);
+    return Boolean(isMainOwnerJid(jid));
   } catch {
     return false;
   }
 });
 
-const SoDonoPrincipal = ownerMatchedByNumber || ownerMatchedByStore;
+// Se sender foi convertido para PN, valida também o PN resolvido explicitamente.
+let resolvedOwnerPn = null;
+for (const jid of ownerIdentityCandidates) {
+  try {
+    const candidate = await getPNForJid(conn, jid);
+    if (candidate) {
+      resolvedOwnerPn = candidate;
+      const variants = ownerNumberVariants(jidLocalDigits(candidate));
+      if ([...variants].some((variant) => configuredOwnerVariants.has(variant))) break;
+      resolvedOwnerPn = null;
+    }
+  } catch {}
+}
+
+const ownerMatchedByResolvedPn = Boolean(resolvedOwnerPn);
+
+const SoDonoPrincipal =
+  ownerMatchedByNumber ||
+  ownerMatchedByStore ||
+  ownerMatchedByResolvedPn;
+
 const SoLider = ownerIdentityCandidates.some((jid) => {
   try {
-    return isLeaderJid(jid);
+    return Boolean(isLeaderJid(jid));
   } catch {
     return false;
   }
 });
+
 const SoDono = SoDonoPrincipal || SoLider;
 
 // 🛰️ SENTINEL WA • recebe alertas assinados enviados pelo número observador.
@@ -9324,6 +9395,24 @@ case "cita": {
     text: texto ? `📢 *${texto}*` : "📢🐉 *ATENÇÃO, GRUPO!*",
     mentions: participantes
   }, { quoted: info });
+}
+break;
+
+case "debugdono": {
+  const safeIds = ownerIdentityCandidates.map((jid) => {
+    const value = String(jid);
+    if (value.includes("@lid")) return `LID: ${value}`;
+    const digits = jidLocalDigits(value);
+    return digits ? `PN: ...${digits.slice(-4)}` : value;
+  });
+
+  return reply(
+    `👑🐉 *DIAGNÓSTICO DE DONO*\n\n` +
+    `Reconhecido como dono: *${SoDonoPrincipal ? "SIM ✅" : "NÃO ❌"}*\n` +
+    `Identidades detectadas: *${safeIds.length}*\n` +
+    `${safeIds.slice(0, 8).map((v, i) => `${i + 1}. ${v}`).join("\n") || "Nenhuma"}\n\n` +
+    `Use este comando para diagnosticar reconhecimento sem expor o número completo.`
+  );
 }
 break;
 

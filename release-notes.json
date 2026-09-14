@@ -551,5 +551,24 @@
       "Líderes também recebem a mesma resolução robusta de identidade.",
       "Sentinel passa a receber as identidades resolvidas do dono."
     ]
+  },
+  "3.0.5": {
+    "version": "3.0.5",
+    "title": "Reconhecimento definitivo do dono",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "debugdono",
+        "category": "Dono",
+        "note": "diagnóstico seguro da identidade detectada"
+      }
+    ],
+    "changes": [
+      "Reconhecimento do dono agora aceita PN, LID, participant, participantAlt, phoneNumber e JID.",
+      "Adicionado tratamento da variação brasileira com ou sem o 9º dígito.",
+      "A Kobayashi tenta resolver LID para PN antes de negar permissão de dono.",
+      "O número configurado, configuração inicial, variável KOBAYASHI_OWNER e fallback do criador são aceitos.",
+      "Novo /debugdono para diagnosticar a identidade sem revelar o número completo."
+    ]
   }
 }
