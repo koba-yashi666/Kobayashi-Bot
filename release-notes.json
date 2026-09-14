@@ -486,5 +486,58 @@
       "Restrito a ADM/dono.",
       "Adicionado ao menu ADM e /helpcmd."
     ]
+  },
+  "3.0.3": {
+    "version": "3.0.3",
+    "title": "Gestão Global + Estatísticas",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "grupos",
+        "category": "Dono"
+      },
+      {
+        "name": "grupo",
+        "category": "Dono"
+      },
+      {
+        "name": "clientes",
+        "category": "Dono"
+      },
+      {
+        "name": "alugueis",
+        "category": "Dono"
+      },
+      {
+        "name": "statusglobal",
+        "category": "Dono"
+      },
+      {
+        "name": "estatisticas",
+        "category": "Dono"
+      },
+      {
+        "name": "comandosmaisusados",
+        "category": "Dono"
+      },
+      {
+        "name": "erros",
+        "category": "Dono"
+      },
+      {
+        "name": "atividadegp",
+        "category": "Geral"
+      },
+      {
+        "name": "infogrupo",
+        "category": "Geral"
+      }
+    ],
+    "changes": [
+      "Gestão global dos grupos e clientes.",
+      "Estatísticas de uso, comandos e atividade.",
+      "Status global do processo.",
+      "Comandos distribuídos nos menus existentes; nenhum menu novo."
+    ]
   }
 }

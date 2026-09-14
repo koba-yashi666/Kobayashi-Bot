@@ -66,6 +66,7 @@ import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/koba
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
 import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } from "./lib/features/v3/v3Suite.js";
 
+import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage } from "./lib/features/owner/globalManagement.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -2642,6 +2643,16 @@ if (isCmd) {
     conn, info, from, sender, body, isGroup, isCmd, permissions: modularPermissions
   });
   if (v3PassiveHandled && !isCmd) continue;
+
+  trackGlobalUsage({ from, sender, command, isGroup });
+
+  const globalManagementHandled = await runGlobalManagementCommand(command, {
+    conn, info, from, sender, command, args, q, prefix, reply, reagir,
+    isGroup, groupName, groupMembers,
+    groupAdmins: Array.isArray(groupAdmins) ? groupAdmins : [],
+    permissions: modularPermissions
+  });
+  if (globalManagementHandled) continue;
 
   const v3Handled = await runV3Standalone(command, {
     conn, info, from, sender, command, args, q, prefix, reply, reagir,
