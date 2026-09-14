@@ -671,5 +671,20 @@
       "Adicionados comandos Termux para configurar, ativar, validar e consultar licença.",
       "A instalação do criador mantém acesso de desenvolvimento enquanto o serviço remoto ainda não foi publicado."
     ]
+  },
+  "4.0.1": {
+    "version": "4.0.1",
+    "title": "Distribuição Protegida + Build Cliente",
+    "date": "2026-09-14",
+    "changes": [
+      "Nova esteira npm run build:client para gerar a edição de comprador a partir da fonte oficial.",
+      "Build do comprador remove node_modules, caches NPM, backups do updater, ZIPs antigos, READMEs históricos e artefatos de desenvolvimento.",
+      "Bancos locais, sessão do WhatsApp, lista negra, RPG, aluguel, logs e estado de licença não são enviados no pacote do comprador.",
+      "settings/settings.json do comprador é gerado limpo, sem token, sessão ou números administrativos da instalação do criador.",
+      "Arquivos JavaScript sensíveis recebem ofuscação compatível com ESM baseada em codificação de literais de texto e banner de proteção.",
+      "Créditos oficiais, licença, updater, assets necessários e comandos permanecem no pacote.",
+      "O pacote protegido continua instalável em hospedagem comum, VPS ou Termux com npm install.",
+      "Build protegido inclui relatório de arquivos removidos, arquivos protegidos e SHA-256."
+    ]
   }
 }

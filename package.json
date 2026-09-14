@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "4.0.0",
-  "description": "Kobayashi Bot v4.0.0 - Licenciamento e Atualizador Oficial",
+  "version": "4.0.1",
+  "description": "Kobayashi Bot v4.0.1 - Distribuicao Protegida e Build de Cliente",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
@@ -17,7 +17,8 @@
     "license:activate": "node tools/license-cli.mjs activate",
     "license:validate": "node tools/license-cli.mjs validate",
     "license:clear": "node tools/license-cli.mjs clear",
-    "license:configure": "node tools/license-cli.mjs configure"
+    "license:configure": "node tools/license-cli.mjs configure",
+    "build:client": "node scripts/build-client.mjs"
   },
   "keywords": [
     "whatsapp",
