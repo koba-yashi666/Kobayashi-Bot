@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "3.0.9",
-  "description": "Kobayashi Bot v2.0.0 - Dragon RPG Foundation",
+  "version": "4.0.0",
+  "description": "Kobayashi Bot v4.0.0 - Licenciamento e Atualizador Oficial",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
@@ -12,7 +12,12 @@
     "dev": "node --watch connection.js",
     "direct": "node bootstrap.js",
     "check:imports": "node tools/check-local-imports.mjs",
-    "prestart": "npm run check:imports"
+    "prestart": "npm run check:imports",
+    "license:status": "node tools/license-cli.mjs status",
+    "license:activate": "node tools/license-cli.mjs activate",
+    "license:validate": "node tools/license-cli.mjs validate",
+    "license:clear": "node tools/license-cli.mjs clear",
+    "license:configure": "node tools/license-cli.mjs configure"
   },
   "keywords": [
     "whatsapp",

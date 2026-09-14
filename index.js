@@ -68,6 +68,7 @@ import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } f
 
 import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage } from "./lib/features/owner/globalManagement.js";
 import { getBanMessageConfig, setBanMessageEnabled, listBanMessages, addBanMessage, removeBanMessage, matchBanMessage } from "./lib/features/moderation/banMessage.js";
+import { activateLicense, validateLicense, getEffectiveLicense, getLicenseConfig, maskLicenseKey } from "./lib/features/license/licenseManager.js";
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -9780,36 +9781,107 @@ break;
 // teste de atualização v0.1.4
 case "statusatt":
 case "attstatus":
-case "statusupdate": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+case "statusupdate":
+case "verificarupdate": {
+  if (!SoDono) return reply(mess.onlyOwner());
 
   reagir("✅");
 
   try {
+    const license = getEffectiveLicense();
     const status = await checkUpdate();
     const sincronizado = !status.available && String(status.local) === String(status.remote);
 
     return reply(
-      `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
-      `📦 Versão carregada: *${status.local}*\n` +
-      `☁️ Versão no GitHub: *${status.remote}*\n` +
-      `🔄 Sincronização: *${sincronizado ? "ATUALIZADO ✅" : "ATUALIZAÇÃO PENDENTE ⚠️"}*\n\n` +
+      `🐉🌸 *KOBAYASHI UPDATE • V4*\n\n` +
+      `📦 Instalada: *${status.local}*\n` +
+      `☁️ Disponível: *${status.remote}*\n` +
+      `📡 Canal: *${status.channel || "stable"}*\n` +
+      `🔄 Estado: *${sincronizado ? "ATUALIZADO ✅" : "ATUALIZAÇÃO DISPONÍVEL ⚠️"}*\n\n` +
+      `🔑 Licença: *${license.valid ? "ATIVA ✅" : "NÃO ATIVADA ❌"}*\n` +
+      `🎟️ Plano: *${license.plan || "-"}*\n` +
+      `⬆️ Updates: *${license.updates ? "LIBERADOS ✅" : "BLOQUEADOS ⛔"}*\n\n` +
       (status.available
-        ? `🔄 Ainda existe uma atualização disponível no GitHub.`
-        : `🌸 Kobayashi está sincronizada com a versão publicada.`)
+        ? `Use *${prefix}atualizar* para instalar a versão oficial.`
+        : `🌸 Kobayashi está sincronizada.`)
     );
   } catch (e) {
+    const license = getEffectiveLicense();
     return reply(
-      `🐉🌸 *STATUS DA ATUALIZAÇÃO*\n\n` +
-      `📦 Versão carregada: *${getLocalVersion()}*\n` +
-      `📦 Versão local lida dinamicamente: *${getLocalVersion()}* ✅\n` +
-      `⚠️ Só não consegui consultar o GitHub agora.`
+      `🐉🌸 *KOBAYASHI UPDATE • V4*\n\n` +
+      `📦 Versão: *${getLocalVersion()}*\n` +
+      `🔑 Licença: *${license.valid ? "ATIVA ✅" : "NÃO ATIVADA ❌"}*\n` +
+      `⚠️ Não consegui consultar a atualização agora.\n` +
+      `Detalhe: ${e?.message || e}`
     );
   }
 }
 break;
 //
+
+// licença oficial v4
+case "licenca":
+case "license": {
+  if (!SoDono) return reply(mess.onlyOwner());
+
+  let license = getEffectiveLicense();
+  if (license.mode !== "creator" && license.key && license.needsOnlineValidation) {
+    try {
+      license = await validateLicense({ version: getLocalVersion() });
+    } catch {}
+  }
+
+  const cfg = getLicenseConfig();
+  const cacheText = license.mode === "creator"
+    ? "não necessário"
+    : (license.cached ? "válido ✅" : "pendente/expirado ⚠️");
+
+  return reply(
+    `╭━━〔 🔑🐉 *LICENÇA KOBAYASHI* 〕━━╮\n` +
+    `┃ 📦 Versão: *${getLocalVersion()}*\n` +
+    `┃ 🔐 Status: *${license.valid ? "ATIVA ✅" : "NÃO ATIVADA ❌"}*\n` +
+    `┃ 🎟️ Plano: *${license.plan || "-"}*\n` +
+    `┃ 👤 Cliente: *${license.customer || "-"}*\n` +
+    `┃ ⬆️ Updates: *${license.updates ? "LIBERADOS ✅" : "BLOQUEADOS ⛔"}*\n` +
+    `┃ 🔑 Chave: *${maskLicenseKey(license.key)}*\n` +
+    `┃ 💾 Cache: *${cacheText}*\n` +
+    `┃ 📡 Canal: *${cfg.channel || "stable"}*\n` +
+    `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+  );
+}
+break;
+
+case "ativarlicenca":
+case "activatelicense": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode ativar a licença.");
+
+  const key = String(q || args.join(" ") || "").trim();
+  if (!key) {
+    return reply(
+      `🔑 *ATIVAÇÃO DA LICENÇA*\n\n` +
+      `Use: *${prefix}ativarlicenca SUA-CHAVE*\n\n` +
+      `No Termux também funciona:\n` +
+      `*npm run license:activate -- SUA-CHAVE*`
+    );
+  }
+
+  reagir("🔑");
+  try {
+    const result = await activateLicense(key, getLocalVersion());
+    return reply(
+      `✅🐉 *LICENÇA ATIVADA!*\n\n` +
+      `🎟️ Plano: *${result.plan || "-"}*\n` +
+      `👤 Cliente: *${result.customer || "-"}*\n` +
+      `⬆️ Atualizações: *${result.updates ? "LIBERADAS ✅" : "BLOQUEADAS ⛔"}*`
+    );
+  } catch (e) {
+    return reply(
+      `❌ *Não foi possível ativar a licença.*\n\n` +
+      `${e?.message || e}`
+    );
+  }
+}
+break;
 
 // versão e atualização
 case "version":
@@ -9825,14 +9897,15 @@ case "v": {
     return reply(
       `🐉🌸 *KOBAYASHI BOT • VERSÃO*\n\n` +
       `📦 Instalada: *${status.local}*\n` +
-      `☁️ GitHub: *${status.remote}*\n\n` +
+      `☁️ Oficial: *${status.remote}*\n` +
+      `📡 Canal: *${status.channel || "stable"}*\n\n` +
       situacao
     );
   } catch (e) {
     return reply(
       `🐉🌸 *KOBAYASHI BOT • VERSÃO*\n\n` +
       `📦 Instalada: *${getLocalVersion()}*\n` +
-      `⚠️ Não consegui consultar o GitHub agora.\n` +
+      `⚠️ Não consegui consultar o canal oficial agora.\n` +
       `Detalhe: ${e?.message || e}`
     );
   }
@@ -9844,7 +9917,7 @@ case "atualizar": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar configurações críticas do bot.");
 
   reagir("🔄");
-  await reply("🐉🌸 *Verificando atualização...*\n\nNão desligue o bot durante o processo.");
+  await reply("🐉🌸 *Verificando licença e atualização oficial...*\n\nNão desligue o bot durante o processo.");
 
   try {
     const result = await applyUpdate();

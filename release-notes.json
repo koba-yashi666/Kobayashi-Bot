@@ -639,5 +639,37 @@
       "As respostas mostram grupos verificados, grupos com ADM, onde o usuário foi encontrado, remoções e falhas.",
       "A auditoria do /ban_msg passou a incluir o resultado completo da varredura."
     ]
+  },
+  "4.0.0": {
+    "version": "4.0.0",
+    "title": "Licença + Atualizador Oficial",
+    "date": "2026-09-14",
+    "commands": [
+      {
+        "name": "licenca",
+        "category": "Dono",
+        "note": "mostra licença, plano, cliente, cache e updates"
+      },
+      {
+        "name": "ativarlicenca",
+        "category": "Dono",
+        "note": "ativa a instalação usando uma chave"
+      },
+      {
+        "name": "verificarupdate",
+        "category": "Dono",
+        "note": "verifica o canal oficial sem instalar"
+      }
+    ],
+    "changes": [
+      "Fundação do sistema de venda permanente da Kobayashi.",
+      "Licenças remotas configuráveis com cache local de 7 dias.",
+      "Licença permanente continua rodando mesmo com indisponibilidade temporária do servidor; o servidor é exigido para ativação e revalidações quando necessário.",
+      "Atualizador V4 suporta manifesto oficial, canal stable, downloadUrl, SHA-256 e minimumVersion.",
+      "Atualizador preserva settings, sessão/bancos em files/database, files/license, .env, .git e node_modules.",
+      "Backup e rollback continuam ativos antes de substituir arquivos.",
+      "Adicionados comandos Termux para configurar, ativar, validar e consultar licença.",
+      "A instalação do criador mantém acesso de desenvolvimento enquanto o serviço remoto ainda não foi publicado."
+    ]
   }
 }
