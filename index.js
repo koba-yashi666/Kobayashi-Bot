@@ -3623,6 +3623,69 @@ case "alugel_permanente": {
 break;
 
 
+case "listaban_msg":
+case "listabanmsg": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o dono principal pode consultar o *BAN MSG Global*.");
+  }
+
+  const cfg = getBanMessageConfig();
+  const entries = listBanMessages();
+
+  if (!entries.length) {
+    return reply(
+      `🚨🐉 *LISTA BAN MSG*\n\n` +
+      `Status: *${cfg.enabled ? "ATIVO ✅" : "DESATIVADO ⛔"}*\n` +
+      `📦 Nenhum texto registrado.`
+    );
+  }
+
+  const lines = entries.slice(0, 100).map((entry, i) =>
+    `${i + 1}. ${entry.text}`
+  ).join("\n");
+
+  return reply(
+    `🚨🐉 *LISTA BAN MSG*\n\n` +
+    `Status: *${cfg.enabled ? "ATIVO ✅" : "DESATIVADO ⛔"}*\n` +
+    `📦 Textos cadastrados: *${entries.length}*\n\n${lines}\n\n` +
+    `🗑️ Para remover: *${prefix}rmban_msg número*\n` +
+    `Ex.: *${prefix}rmban_msg 2*`
+  );
+}
+break;
+
+case "rmban_msg":
+case "rmbanmsg": {
+  if (!SoDonoPrincipal) {
+    return reply("👑 Apenas o dono principal pode remover textos do *BAN MSG Global*.");
+  }
+
+  const query = args.join(" ").trim();
+  if (!query) {
+    return reply(
+      `🗑️🐉 *REMOVER BAN MSG*\n\n` +
+      `Use *${prefix}rmban_msg número* para remover pela posição da lista.\n` +
+      `Ex.: *${prefix}rmban_msg 2*\n\n` +
+      `Você também pode informar o texto cadastrado.`
+    );
+  }
+
+  const result = removeBanMessage(query);
+  if (!result.ok) {
+    return reply(
+      `❌ Não encontrei esse registro no BAN MSG.\n\n` +
+      `Use *${prefix}listaban_msg* para conferir a lista.`
+    );
+  }
+
+  return reply(
+    `✅🗑️ *BAN MSG REMOVIDO*\n\n` +
+    `📝 Texto: *${result.entry.text}*\n\n` +
+    `Esse texto não acionará mais o BAN MSG.`
+  );
+}
+break;
+
 case "ban_msg":
 case "banmsg": {
   if (!SoDonoPrincipal) {

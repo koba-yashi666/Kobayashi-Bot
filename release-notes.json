@@ -769,5 +769,17 @@
       "Novos comandos: /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon.",
       "A venda/revenda da Kobayashi Bot sem autorização do criador permanece estritamente proibida."
     ]
+  },
+  "4.0.6": {
+    "version": "4.0.6",
+    "title": "BAN MSG — Lista e Remoção Dedicadas",
+    "date": "2026-09-15",
+    "changes": [
+      "Novo /listaban_msg: lista os textos cadastrados e mostra o status do BAN MSG.",
+      "Novo /rmban_msg: remove uma regra pelo número exibido em /listaban_msg ou pelo texto cadastrado.",
+      "Os dois comandos são exclusivos do dono principal e foram adicionados ao /menudono.",
+      "O /ban_msg original continua responsável por cadastrar textos e ligar/desligar o sistema.",
+      "Mantida a proibição de venda/revenda da Kobayashi Bot sem autorização do criador."
+    ]
   }
 }
