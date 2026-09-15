@@ -781,5 +781,38 @@
       "O /ban_msg original continua responsável por cadastrar textos e ligar/desligar o sistema.",
       "Mantida a proibição de venda/revenda da Kobayashi Bot sem autorização do criador."
     ]
+  },
+  "4.0.7": {
+    "version": "4.0.7",
+    "title": "Menu Dragon RPG — Masmorras + Craft",
+    "date": "2026-09-15",
+    "changes": [
+      "Adicionados /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon ao menu existente do Dragon RPG.",
+      "Os novos comandos também aparecem em /rpgcomandos.",
+      "Nenhum novo menu foi criado."
+    ]
+  },
+  "4.0.8": {
+    "version": "4.0.8",
+    "title": "Dragon RPG 3.0 — Correção de Conflito de Roteamento",
+    "date": "2026-09-15",
+    "changes": [
+      "Os comandos de Masmorras e Crafting agora possuem roteamento prioritário próprio.",
+      "Aliases /masmorras, /dungeons, /masmorra, /dungeon, /materiais, /receitas, /crafts, /craft e /descansodungeon foram isolados do RPG genérico.",
+      "Os handlers do Dragon RPG 3.0 foram reposicionados antes do processamento genérico que podia interceptá-los.",
+      "Cada novo comando foi verificado para possuir somente um handler no switch principal.",
+      "Mantido o menu Dragon RPG atualizado da v4.0.7."
+    ]
+  },
+  "4.0.9": {
+    "version": "4.0.9",
+    "title": "Dragon RPG — Bosses 20%",
+    "date": "2026-09-15",
+    "changes": [
+      "Cada região de /explorar tem 20% de chance de gerar um Boss temático como combate real.",
+      "Bosses de exploração entram no sistema normal de atacar, defender, habilidade, item e fugir.",
+      "Cada masmorra tem 20% de chance de Boss; Bosses têm 55% de chance base de vitória e recompensas maiores.",
+      "Bosses adicionados: Guardião Ancestral, Sentinela Dracônico, Titã das Chamas, Devorador do Abismo e Dragão Alfa Ancestral."
+    ]
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "4.0.6",
-  "description": "Kobayashi Bot v4.0.6 - Listaban_msg e Rmban_msg",
+  "version": "4.0.9",
+  "description": "Kobayashi Bot v4.0.9 - Bosses 20% Dragon RPG",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
