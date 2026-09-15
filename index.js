@@ -77,6 +77,8 @@ import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage }
 import { getBanMessageConfig, setBanMessageEnabled, listBanMessages, addBanMessage, removeBanMessage, matchBanMessage } from "./lib/features/moderation/banMessage.js";
 import { activateLicense, validateLicense, getEffectiveLicense, getLicenseConfig, maskLicenseKey } from "./lib/features/license/licenseManager.js";
 import { createLicense, listLicenses, getLicense, blockLicense, reactivateLicense, revokeInstallation } from "./lib/features/license/licenseAdmin.js";
+import { DUNGEONS, RECIPES, MATERIALS, profile as dungeonProfile, dungeon as runDungeon, craft as craftDungeon, rest as restDungeon, fmt as fmtMaterials, needs as fmtNeeds } from "./lib/features/rpg/dungeonCraft.js";
+
 const jsCommandSource = (await import("node:fs")).default.readFileSync(new URL("./index.js", import.meta.url), "utf8");
 
 // ─────────────────────────────────────────────
@@ -10975,6 +10977,35 @@ buttonsV2: buttons
 }
 break;
 //
+
+case "masmorras": case "dungeons": {
+ const rows=Object.entries(DUNGEONS).map(([id,d])=>`${d.emoji} *${id}* — ${d.name} | Nv.${d.min}+ | ⚡${d.energy}`);
+ return reply(`🐉🏰 *MASMORRAS*\n\n${rows.join("\n")}\n\nUse *${prefix}masmorra nome*`);
+} break;
+case "masmorra": case "dungeon": {
+ if(!isGroup)return reply("🐉 Use este comando em um grupo.");
+ const id=String(args[0]||"").toLowerCase(); if(!id)return reply(`Use *${prefix}masmorras*.`);
+ let lv=1; try{lv=Number(userLevel||1)||1}catch{}
+ const r=runDungeon(sender,id,lv);
+ if(!r.ok){if(r.e==="LEVEL")return reply(`🔒 Nível necessário: *${r.need}*.`);if(r.e==="ENERGY")return reply(`⚡ Energia insuficiente: *${r.energy}/${r.need}*.`);if(r.e==="COOLDOWN")return reply(`⏳ Aguarde *${Math.ceil(r.wait/60000)} min*.`);return reply("❌ Masmorra inexistente.");}
+ if(!r.win)return reply(`${r.x.emoji} *${r.x.name}*\n\n💀 Derrota.\n⚡ Energia: *${r.energy}*`);
+ return reply(`${r.x.emoji} *${r.x.name} CONCLUÍDA!*\n\n🏆 Vitória\n✨ XP: *${r.xp}*\n🪙 Coins: *${r.coins}*\n\n🎒 *Drops:*\n${fmtMaterials(r.drops)}\n\n⚡ Energia: *${r.energy}*`);
+} break;
+case "materiais": {
+ const u=dungeonProfile(sender); return reply(`🎒🐉 *MATERIAIS*\n\n${fmtMaterials(u.materials)||"Nenhum material ainda."}\n\n⚡ ${u.energy}/100 | 🏰 ${u.runs} exploração(ões)`);
+} break;
+case "receitas": case "crafts": {
+ const rows=Object.entries(RECIPES).map(([id,r])=>`${r.name} — *${id}*\n${fmtNeeds(r.needs)}`);
+ return reply(`⚒️🐉 *RECEITAS*\n\n${rows.join("\n\n")}\n\nUse *${prefix}craft item*`);
+} break;
+case "craft": {
+ const id=String(args[0]||"").toLowerCase(),r=craftDungeon(sender,id);
+ if(!r.ok){if(r.e==="MATERIALS")return reply(`❌ Faltam materiais:\n${fmtNeeds(r.missing)}`);return reply(`❌ Receita inexistente. Use *${prefix}receitas*.`);}
+ return reply(`⚒️✨ *CRAFT CONCLUÍDO!*\n\n${r.r.name}\n🎒 Quantidade criada: *${r.count}*`);
+} break;
+case "descansodungeon": {
+ const r=restDungeon(sender); return reply(`😴🐉 Energia recuperada: *${r.before} → ${r.after}*.`);
+} break;
 
 default:
 reply(`🐉🌸 Não encontrei esse comando. Dá uma olhada no *${prefix}menu* pra ver tudo que eu sei fazer.`);

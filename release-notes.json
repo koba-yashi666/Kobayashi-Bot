@@ -757,5 +757,17 @@
       "Ajuda do /ban_msg atualizada com o novo comportamento.",
       "Aviso de autoria e proibição de venda sem autorização incluído nos arquivos principais e módulos de licença."
     ]
+  },
+  "4.0.5": {
+    "version": "4.0.5",
+    "title": "Dragon RPG 3.0 — Masmorras + Crafting",
+    "date": "2026-09-14",
+    "changes": [
+      "Novas masmorras: Floresta Ancestral, Caverna Dracônica, Ruínas Arcanas e Abismo Sombrio.",
+      "Novo sistema persistente de materiais, energia, cooldown, drops e crafting.",
+      "Receitas iniciais: poção, espada, arco, cajado, armadura e amuleto.",
+      "Novos comandos: /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon.",
+      "A venda/revenda da Kobayashi Bot sem autorização do criador permanece estritamente proibida."
+    ]
   }
 }
