@@ -814,5 +814,16 @@
       "Cada masmorra tem 20% de chance de Boss; Bosses têm 55% de chance base de vitória e recompensas maiores.",
       "Bosses adicionados: Guardião Ancestral, Sentinela Dracônico, Titã das Chamas, Devorador do Abismo e Dragão Alfa Ancestral."
     ]
+  },
+  "4.0.10": {
+    "version": "4.0.10",
+    "title": "Dragon RPG — Reconhecimento de Comandos",
+    "date": "2026-09-15",
+    "changes": [
+      "Corrigidos os registradores DRAGON_RPG_COMMANDS e KOBA_TRIGGER_COMMANDS.",
+      "/dragonrpg, /masmorras, /masmorra, /materiais, /receitas e /craft passam pelo roteamento do Dragon RPG.",
+      "Aliases /rpg, /menurpg, /dungeons, /dungeon e /crafts também foram sincronizados.",
+      "Mantido /modorpg on/off para ativação opcional por grupo."
+    ]
   }
 }
