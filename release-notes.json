@@ -925,5 +925,28 @@
       "Continua restrito a ADM/dono e agora contém falhas de envio sem derrubar o fluxo.",
       "Pacote cumulativo mantém Core v5.0.0, Jogos v5.1.0 e Social v5.2.0."
     ]
+  },
+  "5.2.2": {
+    "version": "5.2.2",
+    "title": "Hotfix AdminPro Imports",
+    "date": "2026-09-16",
+    "changes": [
+      "Corrigidos imports listNotes/addNote/removeNote do adminPro que foram renomeados acidentalmente durante a integração Social 2.0.",
+      "Mantido Social V5 isolado via namespace socialV5, evitando colisão com o AdminPro.",
+      "Mantido Cita 2.0 da v5.2.1.",
+      "Pacote cumulativo inclui v5.0.0 até v5.2.2."
+    ]
+  },
+  "5.2.3": {
+    "version": "5.2.3",
+    "title": "Cita Invisível",
+    "date": "2026-09-16",
+    "changes": [
+      "/cita agora funciona somente respondendo uma mensagem.",
+      "Reenvia apenas a mensagem marcada, sem título CITAÇÃO, moldura ou texto adicional.",
+      "Todos os membros continuam mencionados de forma oculta.",
+      "Suporte a reenvio de texto, imagem e vídeo/GIF com legenda original.",
+      "Mantém o hotfix AdminPro da v5.2.2 e todas as partes cumulativas da V5."
+    ]
   }
 }

@@ -49,7 +49,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/moderation/antiSpam.js";
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickers/stickerSources.js";
-import { getRules, setRules, clearRules, v5ListNotes, v5AddNote, v5RemoveNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
+import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
 import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/social/dragonSocial.js";
@@ -10413,48 +10413,60 @@ case "cita": {
   if (!isGroup) return reply("👥 O comando *cita* só pode ser usado em grupos.");
   if (!isGroupAdmins && !SoDono) return reply("🛡️ Apenas *ADMs* podem usar o comando *cita*.");
 
-  // v5.2.1: estilo de citação/hidetag aprimorado, sem expor a lista de números no texto.
   const participantes = [...new Set(
     (groupMembers || [])
       .map((p) => p?.id || p?.jid || p?.participant)
       .filter(Boolean)
   )];
+  if (!participantes.length) return reply("❌ Não consegui carregar os participantes deste grupo.");
 
-  if (!participantes.length) {
-    return reply("❌ Não consegui carregar os participantes deste grupo.");
-  }
-
-  // Quando usado respondendo uma mensagem, cita o conteúdo respondido.
-  const quotedMsg =
-    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
-    info?.message?.imageMessage?.contextInfo?.quotedMessage ||
-    info?.message?.videoMessage?.contextInfo?.quotedMessage ||
+  const ctx =
+    info?.message?.extendedTextMessage?.contextInfo ||
+    info?.message?.imageMessage?.contextInfo ||
+    info?.message?.videoMessage?.contextInfo ||
+    info?.message?.documentMessage?.contextInfo ||
     null;
 
-  const quotedText = quotedMsg
-    ? String(
-        quotedMsg?.conversation ||
-        quotedMsg?.extendedTextMessage?.text ||
-        quotedMsg?.imageMessage?.caption ||
-        quotedMsg?.videoMessage?.caption ||
-        quotedMsg?.documentMessage?.caption ||
-        ""
-      ).trim()
-    : "";
+  const quoted = ctx?.quotedMessage || null;
+  if (!quoted) {
+    return reply(`↩️ Responda a mensagem que deseja citar usando *${prefix}cita*.`);
+  }
 
-  const textoDigitado = String(q || "").trim();
-  const texto = textoDigitado || quotedText || "🐉 Atenção, grupo!";
-
-  // Mantém a mensagem visualmente limpa: todos são mencionados de forma oculta.
-  // Se o ADM respondeu uma mensagem, a resposta continua vinculada à mensagem original.
+  // Cita invisível: reenvia somente o conteúdo respondido.
+  // Não acrescenta título, moldura, aviso ou lista visível de membros.
   try {
-    return await conn.sendMessage(from, {
-      text: `╭━━〔 📢 *CITAÇÃO* 〕━━╮\n\n${texto}\n\n╰━━〔 🐉 *KOBAYASHI* 〕━━╯`,
-      mentions: participantes
-    }, { quoted: info });
+    if (quoted.conversation || quoted.extendedTextMessage?.text) {
+      const text = String(quoted.conversation || quoted.extendedTextMessage?.text || "");
+      return await conn.sendMessage(from, { text, mentions: participantes });
+    }
+
+    if (quoted.imageMessage) {
+      const buffer = await downloadContentFromMessage(quoted.imageMessage, "image");
+      let data = Buffer.alloc(0);
+      for await (const chunk of buffer) data = Buffer.concat([data, chunk]);
+      return await conn.sendMessage(from, {
+        image: data,
+        caption: quoted.imageMessage.caption || "",
+        mentions: participantes
+      });
+    }
+
+    if (quoted.videoMessage) {
+      const stream = await downloadContentFromMessage(quoted.videoMessage, "video");
+      let data = Buffer.alloc(0);
+      for await (const chunk of stream) data = Buffer.concat([data, chunk]);
+      return await conn.sendMessage(from, {
+        video: data,
+        caption: quoted.videoMessage.caption || "",
+        gifPlayback: !!quoted.videoMessage.gifPlayback,
+        mentions: participantes
+      });
+    }
+
+    return reply("⚠️ Esse tipo de mensagem ainda não pode ser reenviado pelo *cita*.");
   } catch (e) {
-    console.error("[CITA] Falha ao citar grupo:", e?.message || e);
-    return reply("❌ Não consegui citar os membros agora. Tente novamente em alguns instantes.");
+    console.error("[CITA INVISÍVEL] Falha:", e?.message || e);
+    return reply("❌ Não consegui reenviar essa mensagem agora.");
   }
 }
 break;
