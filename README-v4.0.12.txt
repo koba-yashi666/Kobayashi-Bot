@@ -1,0 +1,1 @@
+KOBAYASHI BOT v4.0.12\n\n/entrada_membro +5511999999999\nConsulta dia/mês hora:minuto. Registro silencioso a partir desta versão.\n\nCriador: Luiz G. / Kobayashi.\nVenda/revenda sem autorização é proibida.\n

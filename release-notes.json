@@ -825,5 +825,28 @@
       "Aliases /rpg, /menurpg, /dungeons, /dungeon e /crafts também foram sincronizados.",
       "Mantido /modorpg on/off para ativação opcional por grupo."
     ]
+  },
+  "4.0.11": {
+    "version": "4.0.11",
+    "title": "Lista Negra — Multi-Add",
+    "date": "2026-09-15",
+    "changes": [
+      "/listanegra sem argumentos agora explica o uso e mostra a lista atual.",
+      "/listanegra não exige mais add: enviar o número adiciona imediatamente.",
+      "/listanegra aceita vários números de uma vez.",
+      "/listanegrag aceita vários números de uma vez e executa a varredura global para cada alvo.",
+      "Mantidas as proteções do dono principal e os registros de moderação."
+    ]
+  },
+  "4.0.12": {
+    "version": "4.0.12",
+    "title": "Entrada do Membro",
+    "date": "2026-09-16",
+    "changes": [
+      "Novo /entrada_membro número mostra dia/mês, hora e minuto da entrada registrada.",
+      "A entrada é registrada silenciosamente; nenhuma mensagem é enviada no momento em que o membro entra.",
+      "O comando só consulta membros atualmente presentes no grupo.",
+      "Datas anteriores à atualização não podem ser recuperadas retroativamente pelo WhatsApp/Baileys."
+    ]
   }
 }

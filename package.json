@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "4.0.10",
-  "description": "Kobayashi Bot v4.0.10 - Dragon RPG Command Recognition Fix",
+  "version": "4.0.12",
+  "description": "Kobayashi Bot v4.0.12 - Entrada do Membro",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
