@@ -49,7 +49,7 @@ import { getAntiTravaConfig, updateAntiTravaConfig, inspectPotentialTrava, forma
 import { getAntiSpamConfig, setAntiSpamEnabled, inspectAntiSpam, formatAntiSpamStatus } from "./lib/features/moderation/antiSpam.js";
 import { addPunishmentHistory, getPunishmentHistory, clearPunishmentHistory, formatPunishmentHistory, getRecidivismSummary } from "./lib/features/moderation/moderationHistory.js";
 import { listStickerSources, setStickerSourceMode, addStickerTemplateSource, removeStickerSource, getRandomStickerBuffer } from "./lib/features/stickers/stickerSources.js";
-import { getRules, setRules, clearRules, listNotes, addNote, removeNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
+import { getRules, setRules, clearRules, v5ListNotes, v5AddNote, v5RemoveNote, clearNotes, getBlacklist, isBlacklisted, addBlacklist, removeBlacklist, getBlacklistMeta } from "./lib/features/moderation/adminPro.js";
 import { isGloballyBlacklisted, addGlobalBlacklist, removeGlobalBlacklist, getGlobalBlacklistEntry, listGlobalBlacklist, normalizeBlacklistJid } from "./lib/features/moderation/globalBlacklist.js";
 import { markPrincipalSeen, configureSentinelRuntime, getSentinelStatus, setSentinelGroupEnabled, startSentinelPairing, stopSentinel, getSentinelLogs, setSentinelDelay } from "./lib/features/moderation/sentinelSystem.js";
 import { getSocialProfile, claimDaily, transferCoins, getCoinRank, recordGame, getAchievements, recordSocialInteraction, getEconomySummary, awardLevelUpCoins, getShopItems, buyShopItem, getInventory, equipTitle, unequipTitle, openDragonBox, getActiveTitle, getShopUsage, getAntiFarmConfig, setAntiFarmEnabled, getAntiFarmUsage } from "./lib/features/social/dragonSocial.js";
@@ -81,6 +81,9 @@ import { DUNGEONS, RECIPES, MATERIALS, profile as dungeonProfile, dungeon as run
 
 
 import { getMemberEntry, recordMemberEntry } from "./lib/features/moderation/memberEntryHistory.js";
+import { getCoreStatus, cleanCoreTemp } from "./lib/features/core/coreStability.js";
+import {gamesEnabled,setGamesEnabled,startForca,playForca,startVelha,playVelha,boardVelha,startConnect4,playConnect4,boardConnect4} from "./lib/features/games/gamesV5.js";
+import * as socialV5 from "./lib/features/social/socialV5.js";
 const DRAGON_RPG_V3_COMMANDS = new Set([
   "masmorras",
   "dungeons",
@@ -3371,6 +3374,53 @@ switch (command) {
 // Inspirado no fluxo de aluguel/ativação do Kobayashi,
 // refeito para a arquitetura e banco do Kobayashi.
 // ==========================================
+case "jogos":{if(!isGroup)return reply(mess.onlyGroup());const o=String(args[0]||"").toLowerCase();if(["on","off"].includes(o)){if(!isGroupAdmins)return reply(mess.onlyAdmins());return reply(`🎮 Jogos 2.0 *${setGamesEnabled(from,o==="on")?"ON":"OFF"}* neste grupo.`)}return reply(`🎮 *JOGOS 2.0* — ${gamesEnabled(from)?"ON":"OFF"}\n\nADM: ${prefix}jogos on/off\n${prefix}forca • ${prefix}letra A\n${prefix}velha @membro • ${prefix}jogada 5\n${prefix}connect4 @membro • ${prefix}c4 4`)}break;
+case "forca":{if(!isGroup)return reply(mess.onlyGroup());if(!gamesEnabled(from))return reply(`🎮 Desativado. ADM: *${prefix}jogos on*`);const f=startForca(from,sender);return reply(`🪢 *FORCA*\n\n${[...f.word].map(()=>"_").join(" ")}\n❤️ 0/6\nUse *${prefix}letra A*`)}break;
+case "letrajogo":{if(!gamesEnabled(from))return reply("🎮 Jogos 2.0 desativados.");const r=playForca(from,args[0]);if(r.error)return reply(`⚠️ Nenhuma partida ou letra inválida.`);return reply(`🪢 *FORCA*\n\n${r.mask}\n❤️ ${r.f.errors}/6${r.win?`\n🏆 Palavra: *${r.word}*`:r.lose?`\n💀 Palavra: *${r.word}*`:""}`)}break;
+case "velha":{if(!gamesEnabled(from))return reply(`🎮 Desativado. ADM: *${prefix}jogos on*`);const t=getTargetFromMessage(info,null);if(!t||t===sender)return reply(`Use *${prefix}velha @membro*`);const v=startVelha(from,sender,t);return conn.sendMessage(from,{text:`❌⭕ *VELHA*\n\n${boardVelha(v)}\nVez de @${sender.split("@")[0]}\n${prefix}jogada 1-9`,mentions:[sender,t]},{quoted:info})}break;
+case "jogada":{if(!gamesEnabled(from))return reply("🎮 Jogos desativados.");const r=playVelha(from,sender,args[0]);if(r.error)return reply("⚠️ Jogada inválida ou não é sua vez.");return conn.sendMessage(from,{text:`❌⭕ *VELHA*\n\n${boardVelha(r.v)}${r.won?`\n🏆 @${sender.split("@")[0]} venceu!`:r.draw?"\n🤝 Empate!":`\nVez de @${r.v.turn.split("@")[0]}`}`,mentions:r.won?[sender]:r.draw?[]:[r.v.turn]},{quoted:info})}break;
+case "connect4":case "conecta4":{if(!gamesEnabled(from))return reply(`🎮 Desativado. ADM: *${prefix}jogos on*`);const t=getTargetFromMessage(info,null);if(!t||t===sender)return reply(`Use *${prefix}connect4 @membro*`);const c=startConnect4(from,sender,t);return conn.sendMessage(from,{text:`🔴🟡 *CONNECT 4*\n\n${boardConnect4(c)}\nVez de @${sender.split("@")[0]}\n${prefix}c4 1-7`,mentions:[sender,t]},{quoted:info})}break;
+case "c4":{if(!gamesEnabled(from))return reply("🎮 Jogos desativados.");const r=playConnect4(from,sender,args[0]);if(r.error)return reply("⚠️ Jogada inválida ou não é sua vez.");return conn.sendMessage(from,{text:`🔴🟡 *CONNECT 4*\n\n${boardConnect4(r.c)}${r.won?`\n🏆 @${sender.split("@")[0]} venceu!`:r.draw?"\n🤝 Empate!":`\nVez de @${r.c.turn.split("@")[0]}`}`,mentions:r.won?[sender]:r.draw?[]:[r.c.turn]},{quoted:info})}break;
+
+case "social": {
+ if(!isGroup)return reply(mess.onlyGroup());const o=String(args[0]||"").toLowerCase();
+ if(["on","off"].includes(o)){if(!isGroupAdmins)return reply(mess.onlyAdmins());return reply(`💞 Social 2.0 *${socialV5.v5SetSocialEnabled(from,o==="on")?"ON":"OFF"}* neste grupo.`)}
+ return reply(`💞 *SOCIAL 2.0* — ${socialV5.v5SocialEnabled(from)?"ON":"OFF"}\n\nADM: ${prefix}social on/off\n${prefix}afk motivo\n${prefix}rep @membro\n${prefix}presente @membro presente\n${prefix}socialperfil @membro\n${prefix}nota texto\n${prefix}notas\n${prefix}rmnota número`);
+} break;
+case "afk": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply(`💞 Social 2.0 desativado. ADM: *${prefix}social on*`);
+ const a=socialV5.v5SetAfk(from,sender,args.join(" "));return reply(`💤 AFK ativado.\n📝 ${a.reason}`);
+} break;
+case "rep": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
+ const t=getTargetFromMessage(info,null);if(!t||t===sender)return reply(`Use *${prefix}rep @membro*`);
+ const r=socialV5.v5AddRep(from,sender,t);if(r.cooldown)return reply(`⏳ Você já deu reputação recentemente. Tente novamente mais tarde.`);
+ return conn.sendMessage(from,{text:`⭐ @${t.split("@")[0]} recebeu +1 reputação!\n🏆 Reputação: *${r.rep}*`,mentions:[t]},{quoted:info});
+} break;
+case "presente": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
+ const t=getTargetFromMessage(info,null);if(!t||t===sender)return reply(`Use *${prefix}presente @membro chocolate*`);
+ const item=args.filter(a=>!a.includes("@")).join(" ").trim()||"🎁 Presente";socialV5.v5GiveGift(from,sender,t,item);
+ return conn.sendMessage(from,{text:`🎁 @${sender.split("@")[0]} deu *${item}* para @${t.split("@")[0]}!`,mentions:[sender,t]},{quoted:info});
+} break;
+case "socialperfil": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
+ const t=getTargetFromMessage(info,null)||sender,p=socialV5.v5ProfileSocial(from,t);
+ return conn.sendMessage(from,{text:`💞 *PERFIL SOCIAL*\n\n👤 @${t.split("@")[0]}\n⭐ Reputação: *${p.rep}*\n🎁 Presentes: *${p.gifts.length}*\n🏅 Conquistas: *${p.achievements.length}*\n${p.achievements.length?`✨ ${p.achievements.join(", ")}`:""}`,mentions:[t]},{quoted:info});
+} break;
+case "nota": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ const text=args.join(" ").trim();if(!text)return reply(`Use *${prefix}nota texto*`);const n=socialV5.v5AddNote(from,sender,text);return reply(`📝 Nota *#${n.id}* salva.`);
+} break;
+case "notas": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
+ const n=socialV5.v5ListNotes(from);return reply(n.length?`📝 *NOTAS DO GRUPO*\n\n${n.slice(-30).map(x=>`#${x.id} — ${x.text}`).join("\n")}`:"📝 Nenhuma nota salva.");
+} break;
+case "rmnota": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ return reply(socialV5.v5RemoveNote(from,args[0])?"🗑️ Nota removida.":"❌ Nota não encontrada.");
+} break;
+
 case "planos":
 case "plans": {
   const plans = listRentalPlans();
@@ -10363,16 +10413,49 @@ case "cita": {
   if (!isGroup) return reply("👥 O comando *cita* só pode ser usado em grupos.");
   if (!isGroupAdmins && !SoDono) return reply("🛡️ Apenas *ADMs* podem usar o comando *cita*.");
 
+  // v5.2.1: estilo de citação/hidetag aprimorado, sem expor a lista de números no texto.
   const participantes = [...new Set(
-    (groupMembers || []).map((p) => p?.id || p?.jid || p?.participant).filter(Boolean)
+    (groupMembers || [])
+      .map((p) => p?.id || p?.jid || p?.participant)
+      .filter(Boolean)
   )];
-  if (!participantes.length) return reply("❌ Não consegui carregar os participantes deste grupo.");
 
-  const texto = String(q || "").trim();
-  return conn.sendMessage(from, {
-    text: texto ? `📢 *${texto}*` : "📢🐉 *ATENÇÃO, GRUPO!*",
-    mentions: participantes
-  }, { quoted: info });
+  if (!participantes.length) {
+    return reply("❌ Não consegui carregar os participantes deste grupo.");
+  }
+
+  // Quando usado respondendo uma mensagem, cita o conteúdo respondido.
+  const quotedMsg =
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
+    info?.message?.imageMessage?.contextInfo?.quotedMessage ||
+    info?.message?.videoMessage?.contextInfo?.quotedMessage ||
+    null;
+
+  const quotedText = quotedMsg
+    ? String(
+        quotedMsg?.conversation ||
+        quotedMsg?.extendedTextMessage?.text ||
+        quotedMsg?.imageMessage?.caption ||
+        quotedMsg?.videoMessage?.caption ||
+        quotedMsg?.documentMessage?.caption ||
+        ""
+      ).trim()
+    : "";
+
+  const textoDigitado = String(q || "").trim();
+  const texto = textoDigitado || quotedText || "🐉 Atenção, grupo!";
+
+  // Mantém a mensagem visualmente limpa: todos são mencionados de forma oculta.
+  // Se o ADM respondeu uma mensagem, a resposta continua vinculada à mensagem original.
+  try {
+    return await conn.sendMessage(from, {
+      text: `╭━━〔 📢 *CITAÇÃO* 〕━━╮\n\n${texto}\n\n╰━━〔 🐉 *KOBAYASHI* 〕━━╯`,
+      mentions: participantes
+    }, { quoted: info });
+  } catch (e) {
+    console.error("[CITA] Falha ao citar grupo:", e?.message || e);
+    return reply("❌ Não consegui citar os membros agora. Tente novamente em alguns instantes.");
+  }
 }
 break;
 
@@ -10811,6 +10894,32 @@ break;
 //
 
 // dono
+case "statuscore":
+case "corestatus": {
+  if(!SoDono)return reply(mess.onlyOwner());
+  const st=getCoreStatus();
+  const up=Math.floor(st.uptimeMs/1000);
+  return reply(
+    `🐉🛡️ *KOBAYASHI CORE V5*\n\n`+
+    `⏱️ Uptime: *${Math.floor(up/86400)}d ${Math.floor(up%86400/3600)}h ${Math.floor(up%3600/60)}m*\n`+
+    `🧠 RAM RSS: *${st.rssMB} MB*\n`+
+    `📦 Heap: *${st.heapUsedMB}/${st.heapTotalMB} MB*\n`+
+    `🧹 Temporários removidos: *${st.deletedTemp}*\n`+
+    `💾 Espaço liberado: *${st.freedMB} MB*\n`+
+    `⚠️ Alertas: *${st.warnings.length}*\n`+
+    `❌ Erros capturados: *${st.errors.length}*`
+  );
+}
+break;
+
+case "limpartemp":
+case "cleantemp": {
+  if(!SoDono)return reply(mess.onlyOwner());
+  const r=await cleanCoreTemp();
+  return reply(`🧹🐉 *LIMPEZA CONCLUÍDA*\n\n🗑️ Arquivos removidos: *${r.deleted}*\n💾 Liberado: *${r.freedMB} MB*`);
+}
+break;
+
 case "reiniciar":
 case "rr":
 if (!SoDono) return reply(mess.onlyOwner());
@@ -10855,7 +10964,7 @@ case "anotar": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   if (!q.trim()) return reply(`📝 Use: *${prefix}anotacao texto da anotação*`);
-  const note = addNote(from, q, sender);
+  const note = v5AddNote(from, q, sender);
   addAdminLog(from, { type: "anotacao", actor: sender, detail: `Nota #${note.id} criada` });
   return reply(`✅📝 Anotação *#${note.id}* salva.\n\n${note.text}`);
 }
@@ -10865,7 +10974,7 @@ case "anotacoes":
 case "notas": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  const notes = listNotes(from);
+  const notes = v5ListNotes(from);
   if (!notes.length) return reply("📝 Não há anotações administrativas neste grupo.");
   const lines = notes.slice(-30).map(n => `*#${n.id}* • ${n.text}\n   👤 @${String(n.by||'').split('@')[0] || 'desconhecido'}`).join("\n\n");
   const mentions = [...new Set(notes.map(n=>n.by).filter(Boolean))];
@@ -10879,7 +10988,7 @@ case "rmanotacao": {
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   const id = Number(args[0]);
   if (!Number.isInteger(id)) return reply(`🗑️ Use: *${prefix}delanotacao 3*`);
-  const ok = removeNote(from, id);
+  const ok = v5RemoveNote(from, id);
   return reply(ok ? `✅ Anotação *#${id}* removida.` : `❌ Não encontrei a anotação #${id}.`);
 }
 break;

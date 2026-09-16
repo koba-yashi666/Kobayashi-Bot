@@ -1,11 +1,4 @@
 /*
- * KOBAYASHI BOT
- * Criador: Luiz G. / Kobayashi
- * A venda, revenda ou comercialização desta base sem autorização do criador
- * é estritamente proibida.
- * © Luiz G. / Kobayashi.
- */
-/*
  * KOBAYASHI BOT • BETA
  * Conexão WhatsApp via código de pareamento.
  */
@@ -34,6 +27,9 @@ import {
   banner3,
 } from "./settings/imports/consts.js";
 import { getAntiFakeConfig, checkAntiFakeParticipant } from "./lib/features/moderation/antiFake.js";
+
+import { ensureCoreStability } from "./lib/features/core/coreStability.js";
+ensureCoreStability();
 
 const AUTH_DIR = "./files/database/qr-code";
 const msgStore = new NodeCache({ stdTTL: 10 * 60, useClones: false });

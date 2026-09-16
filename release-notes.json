@@ -872,5 +872,58 @@
       "Envios entre grupos ganharam intervalo maior e falhas ficam isoladas por grupo.",
       "Se a listagem de grupos falhar, /msg aborta com segurança e mantém o processo online."
     ]
+  },
+  "5.0.0": {
+    "version": "5.0.0",
+    "title": "Core & Estabilidade V5",
+    "date": "2026-09-16",
+    "changes": [
+      "Novo Core V5 inspirado em conceitos de monitoramento/otimização estudados nas bases de referência, reimplementado para a arquitetura Kobayashi.",
+      "Monitor de RAM/heap, uptime, warnings e erros de processo.",
+      "Manutenção automática a cada 10 minutos e limpeza segura de temporários com mais de 6 horas.",
+      "Handlers para unhandledRejection e uncaughtException evitam quedas por rejeições comuns; erros críticos de recurso deixam a hospedagem reiniciar o processo.",
+      "Novos comandos de dono /statuscore e /limpartemp.",
+      "Nenhum sistema opcional de grupo é ativado automaticamente."
+    ]
+  },
+  "5.1.0": {
+    "version": "5.1.0",
+    "title": "Jogos 2.0 — Parte 1",
+    "date": "2026-09-16",
+    "changes": [
+      "Jogos 2.0 OFF por padrão; ADM ativa com /jogos on.",
+      "Forca: /forca e /letrajogo.",
+      "Jogo da Velha multiplayer: /velha e /jogada.",
+      "Connect 4 multiplayer: /connect4 e /c4.",
+      "Banco games-v5.json persistente e fora do ZIP.",
+      "Pacote cumulativo inclui v5.0.0 Core & Estabilidade."
+    ]
+  },
+  "5.2.0": {
+    "version": "5.2.0",
+    "title": "Social 2.0",
+    "date": "2026-09-16",
+    "changes": [
+      "Novo Social 2.0 OFF por padrão; ADM controla com /social on/off.",
+      "AFK persistente com motivo.",
+      "Reputação entre membros com cooldown de 12 horas e conquistas automáticas.",
+      "Sistema de presentes e conquistas sociais.",
+      "Perfil social com reputação, presentes e conquistas.",
+      "Notas de grupo gerenciadas por ADM.",
+      "Pacote cumulativo inclui Core v5.0.0 e Jogos 2.0 v5.1.0."
+    ]
+  },
+  "5.2.1": {
+    "version": "5.2.1",
+    "title": "Cita 2.0",
+    "date": "2026-09-16",
+    "changes": [
+      "/cita foi substituído pela implementação 2.0; não existe handler duplicado.",
+      "/cita texto envia o texto marcando todos de forma oculta.",
+      "/cita usado em resposta reaproveita o texto/caption da mensagem respondida quando nenhum texto adicional é informado.",
+      "Suporta texto, legenda de imagem, vídeo e documento na mensagem respondida.",
+      "Continua restrito a ADM/dono e agora contém falhas de envio sem derrubar o fluxo.",
+      "Pacote cumulativo mantém Core v5.0.0, Jogos v5.1.0 e Social v5.2.0."
+    ]
   }
 }
