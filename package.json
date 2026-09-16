@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "4.0.12",
-  "description": "Kobayashi Bot v4.0.12 - Entrada do Membro",
+  "version": "4.0.13",
+  "description": "Kobayashi Bot v4.0.13 - Lista Negra Global Batch Parser",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

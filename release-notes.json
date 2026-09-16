@@ -848,5 +848,17 @@
       "O comando só consulta membros atualmente presentes no grupo.",
       "Datas anteriores à atualização não podem ser recuperadas retroativamente pelo WhatsApp/Baileys."
     ]
+  },
+  "4.0.13": {
+    "version": "4.0.13",
+    "title": "Lista Negra Global — Lotes",
+    "date": "2026-09-16",
+    "changes": [
+      "/listanegrag reconhece listas com um telefone por linha, espaços, hífens comuns/Unicode e espaços invisíveis de textos copiados.",
+      "Aceita números internacionais, como +63, além de +55.",
+      "Remove números duplicados do mesmo lote automaticamente.",
+      "Primeiro persiste todos os números válidos na lista negra global e só depois executa a varredura de remoção.",
+      "Em lotes, retorna a quantidade de números salvos na lista negra global e mantém todos persistidos para remoção automática futura."
+    ]
   }
 }

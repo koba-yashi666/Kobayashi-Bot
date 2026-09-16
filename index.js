@@ -3816,71 +3816,96 @@ case "listanegraglobal": {
 
   if (!args.length) {
     const entries=listGlobalBlacklist();
-    const preview=entries.length
-      ? `\n📋 *Bloqueados (${entries.length}):*\n${entries.slice(0,50).map((e,i)=>`${i+1}. @${e.jid.split("@")[0]}`).join("\n")}`
-      : "\n📋 Nenhum número está bloqueado globalmente.";
-    return conn.sendMessage(from,{
-      text:
-        `╭━━〔 🖤 *LISTA NEGRA GLOBAL* 〕━━╮\n` +
-        `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-        `📌 *Como usar:*\n` +
-        `• ${prefix}listanegrag +5511999999999\n` +
-        `• ${prefix}listanegrag +5511999999999 +5521988888888 +5531977777777\n\n` +
-        `🐉 Envie um ou vários números e eles serão adicionados imediatamente.` +
-        preview,
-      mentions:entries.slice(0,50).map(e=>e.jid)
-    },{quoted:info});
+    return reply(
+      `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
+      `📦 Salvos: *${entries.length}*\n\n` +
+      `Cole um ou vários números, inclusive um por linha:\n\n` +
+      `${prefix}listanegrag +55 21 98093-7319\n+55 11 95941-7992\n+63 975 062 4668`
+    );
   }
 
-  // Extrai vários números; o + no início de cada número é o separador mais seguro.
-  const raw=args.join(" ").trim();
-  const chunks=raw.split(/(?=\+\d{10,})/g).map(x=>x.trim()).filter(Boolean);
-  let targets=chunks.map(normalizeBlacklistJid).filter(Boolean);
-  // Compatibilidade com entrada simples sem +.
-  if (!targets.length) {
-    const one=normalizeBlacklistJid(raw);
-    if (one) targets=[one];
+  // v4.0.13: parser tolerante para listas copiadas/coladas.
+  // Normaliza NBSP, hífens Unicode, marcas invisíveis e aceita um número por linha.
+  const raw=args.join(" ")
+    .replace(/[\u00A0\u2007\u202F]/g," ")
+    .replace(/[\u200B-\u200D\u2060\uFEFF\u202C\u202D\u202E]/g,"")
+    .replace(/[‐‑‒–—―−]/g,"-");
+
+  // Cada "+" inicia um novo telefone. Assim espaços/hífens dentro do telefone
+  // não confundem a separação entre números.
+  const pieces=raw.split(/(?=\+\s*\d)/g).map(x=>x.trim()).filter(Boolean);
+  const targets=[];
+  const invalid=[];
+
+  for(const piece of pieces){
+    const digits=piece.replace(/\D/g,"");
+    // E.164: 8 a 15 dígitos; mantém números internacionais como +63...
+    if(digits.length<8 || digits.length>15){ invalid.push(piece); continue; }
+    const jid=normalizeBlacklistJid("+"+digits);
+    if(jid && !targets.includes(jid)) targets.push(jid);
+    else if(!jid) invalid.push(piece);
   }
-  targets=[...new Set(targets)];
 
-  if (!targets.length) return reply(`❌ Nenhum número válido.\nEx.: *${prefix}listanegrag +5511999999999 +5521988888888*`);
+  if(!targets.length){
+    return reply(`❌ Nenhum número válido encontrado.\n\nExemplo:\n*${prefix}listanegrag +55 21 98093-7319*\n*+55 11 95941-7992*`);
+  }
 
-  const added=[], existing=[], protectedOwner=[], failed=[];
-  let checked=0,adminGroups=0,found=0,removed=0,failures=0;
+  let newlyAdded=0, alreadySaved=0, protectedOwner=0, saveFailures=0;
+  let checked=0,adminGroups=0,found=0,removed=0,removeFailures=0;
+  const savedTargets=[];
 
-  for (const target of targets) {
-    if (target===dono || isMainOwnerJid(target)) { protectedOwner.push(target); continue; }
-    try {
-      const old=getGlobalBlacklistEntry(target);
-      if (!old) {
-        addGlobalBlacklist(target,{reason:"Adicionado manualmente pelo dono",by:sender});
-        added.push(target);
-      } else existing.push(target);
-
-      const purge=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Lista Negra Global"});
-      checked+=Number(purge.checked||0); adminGroups+=Number(purge.adminGroups||0);
-      found+=Number(purge.found||0); removed+=Number(purge.removed||0); failures+=Number(purge.failures||0);
-    } catch(e) {
-      console.error("[LISTANEGRAG MULTI]",target,e?.message||e);
-      failed.push(target);
+  // Primeiro SALVA todos. A remoção é feita depois, evitando perder o restante
+  // da lista se alguma varredura individual falhar.
+  for(const target of targets){
+    if(target===dono || isMainOwnerJid(target)){protectedOwner++;continue}
+    try{
+      const existing=getGlobalBlacklistEntry(target);
+      if(!existing){
+        addGlobalBlacklist(target,{reason:"Adicionado em lote pelo dono",by:sender});
+        newlyAdded++;
+      }else alreadySaved++;
+      // Confirma persistência antes da fase de remoção.
+      if(getGlobalBlacklistEntry(target)) savedTargets.push(target);
+      else saveFailures++;
+    }catch(e){
+      saveFailures++;
+      console.error("[LISTANEGRAG SAVE]",target,e?.message||e);
     }
   }
 
-  const mentions=[...added,...existing,...protectedOwner,...failed];
+  // Depois varre/remover cada alvo já persistido.
+  for(const target of savedTargets){
+    try{
+      const purge=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Lista Negra Global"});
+      checked+=Number(purge.checked||0);
+      adminGroups+=Number(purge.adminGroups||0);
+      found+=Number(purge.found||0);
+      removed+=Number(purge.removed||0);
+      removeFailures+=Number(purge.failures||0);
+    }catch(e){
+      removeFailures++;
+      console.error("[LISTANEGRAG PURGE]",target,e?.message||e);
+    }
+  }
+
+  // Para lote, resposta curta como solicitado.
+  if(targets.length>1){
+    return reply(
+      `🖤🌐 *${savedTargets.length} números adicionados na lista negra global*\n\n` +
+      `💾 Salvos para remoção automática: *${savedTargets.length}*\n` +
+      (alreadySaved?`ℹ️ Já estavam salvos: *${alreadySaved}*\n`:"") +
+      (protectedOwner?`🛡️ Dono protegido: *${protectedOwner}*\n`:"") +
+      (invalid.length?`⚠️ Entradas inválidas ignoradas: *${invalid.length}*\n`:"") +
+      (saveFailures?`❌ Falhas ao salvar: *${saveFailures}*\n`:"") +
+      `🔨 Removidos agora: *${removed}*`
+    );
+  }
+
+  const target=savedTargets[0];
+  if(!target)return reply("⚠️ O número não pôde ser salvo na lista negra global.");
   return conn.sendMessage(from,{
-    text:
-      `🖤🌐 *LISTA NEGRA GLOBAL ATUALIZADA*\n\n` +
-      `✅ Adicionados: *${added.length}*\n` +
-      `ℹ️ Já cadastrados: *${existing.length}*\n` +
-      `🛡️ Dono protegido: *${protectedOwner.length}*\n` +
-      `❌ Falhas: *${failed.length}*\n\n` +
-      `🌐 *VARREDURA*\n` +
-      `🔎 Grupos verificados: *${checked}*\n` +
-      `🛡️ Kobayashi ADM: *${adminGroups}*\n` +
-      `👤 Encontrados: *${found}*\n` +
-      `🔨 Removidos: *${removed}*\n` +
-      `❌ Falhas de remoção: *${failures}*`,
-    mentions
+    text:`🖤🌐 @${target.split("@")[0]} foi salvo na lista negra global.\n🔨 Removido de: *${removed}* grupo(s).`,
+    mentions:[target]
   },{quoted:info});
 }
 break;
