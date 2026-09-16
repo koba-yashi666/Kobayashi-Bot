@@ -10414,59 +10414,105 @@ case "cita": {
   if (!isGroupAdmins && !SoDono) return reply("🛡️ Apenas *ADMs* podem usar o comando *cita*.");
 
   const participantes = [...new Set(
-    (groupMembers || [])
-      .map((p) => p?.id || p?.jid || p?.participant)
-      .filter(Boolean)
+    (groupMembers || []).map(p => p?.id || p?.jid || p?.participant).filter(Boolean)
   )];
   if (!participantes.length) return reply("❌ Não consegui carregar os participantes deste grupo.");
 
-  const ctx =
+  const contextInfo =
     info?.message?.extendedTextMessage?.contextInfo ||
     info?.message?.imageMessage?.contextInfo ||
     info?.message?.videoMessage?.contextInfo ||
     info?.message?.documentMessage?.contextInfo ||
     null;
 
-  const quoted = ctx?.quotedMessage || null;
-  if (!quoted) {
-    return reply(`↩️ Responda a mensagem que deseja citar usando *${prefix}cita*.`);
-  }
+  const quoted = contextInfo?.quotedMessage;
+  if (!quoted) return reply(`↩️ Responda a mensagem desejada usando *${prefix}cita*.`);
 
-  // Cita invisível: reenvia somente o conteúdo respondido.
-  // Não acrescenta título, moldura, aviso ou lista visível de membros.
+  // CITA v5.2.4
+  // Baseado no comportamento observado nas bases de referência:
+  // reenvia o conteúdo marcado sem cabeçalho/texto extra e injeta mentions ocultas.
   try {
-    if (quoted.conversation || quoted.extendedTextMessage?.text) {
-      const text = String(quoted.conversation || quoted.extendedTextMessage?.text || "");
+    const unwrap = (msg) =>
+      msg?.viewOnceMessage?.message ||
+      msg?.viewOnceMessageV2?.message ||
+      msg?.viewOnceMessageV2Extension?.message ||
+      msg?.ephemeralMessage?.message ||
+      msg?.documentWithCaptionMessage?.message ||
+      msg;
+
+    const qm = unwrap(quoted);
+
+    const baixar = async (node, tipo) => {
+      const stream = await downloadContentFromMessage(node, tipo);
+      const chunks = [];
+      for await (const chunk of stream) chunks.push(chunk);
+      return Buffer.concat(chunks);
+    };
+
+    if (qm?.conversation || qm?.extendedTextMessage?.text) {
+      const text = String(qm.conversation || qm.extendedTextMessage.text || "");
       return await conn.sendMessage(from, { text, mentions: participantes });
     }
 
-    if (quoted.imageMessage) {
-      const buffer = await downloadContentFromMessage(quoted.imageMessage, "image");
-      let data = Buffer.alloc(0);
-      for await (const chunk of buffer) data = Buffer.concat([data, chunk]);
+    if (qm?.imageMessage) {
+      const m = qm.imageMessage;
+      const data = await baixar(m, "image");
       return await conn.sendMessage(from, {
         image: data,
-        caption: quoted.imageMessage.caption || "",
-        mentions: participantes
+        caption: m.caption || "",
+        mentions: participantes,
+        mimetype: m.mimetype || undefined
       });
     }
 
-    if (quoted.videoMessage) {
-      const stream = await downloadContentFromMessage(quoted.videoMessage, "video");
-      let data = Buffer.alloc(0);
-      for await (const chunk of stream) data = Buffer.concat([data, chunk]);
+    if (qm?.videoMessage) {
+      const m = qm.videoMessage;
+      const data = await baixar(m, "video");
       return await conn.sendMessage(from, {
         video: data,
-        caption: quoted.videoMessage.caption || "",
-        gifPlayback: !!quoted.videoMessage.gifPlayback,
+        caption: m.caption || "",
+        mentions: participantes,
+        mimetype: m.mimetype || undefined,
+        gifPlayback: !!m.gifPlayback
+      });
+    }
+
+    if (qm?.audioMessage) {
+      const m = qm.audioMessage;
+      const data = await baixar(m, "audio");
+      return await conn.sendMessage(from, {
+        audio: data,
+        mentions: participantes,
+        mimetype: m.mimetype || "audio/ogg; codecs=opus",
+        ptt: true
+      });
+    }
+
+    if (qm?.stickerMessage) {
+      const m = qm.stickerMessage;
+      const data = await baixar(m, "sticker");
+      return await conn.sendMessage(from, {
+        sticker: data,
         mentions: participantes
       });
     }
 
-    return reply("⚠️ Esse tipo de mensagem ainda não pode ser reenviado pelo *cita*.");
+    if (qm?.documentMessage) {
+      const m = qm.documentMessage;
+      const data = await baixar(m, "document");
+      return await conn.sendMessage(from, {
+        document: data,
+        fileName: m.fileName || "arquivo",
+        mimetype: m.mimetype || "application/octet-stream",
+        caption: m.caption || "",
+        mentions: participantes
+      });
+    }
+
+    return reply("⚠️ Esse tipo de mensagem ainda não é compatível com o *cita*.");
   } catch (e) {
-    console.error("[CITA INVISÍVEL] Falha:", e?.message || e);
-    return reply("❌ Não consegui reenviar essa mensagem agora.");
+    console.error("[CITA] Erro ao reenviar conteúdo marcado:", e?.message || e);
+    return reply("❌ Erro ao reenviar a mensagem marcada. Tente novamente.");
   }
 }
 break;

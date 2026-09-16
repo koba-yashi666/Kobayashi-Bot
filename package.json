@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "5.2.3",
-  "description": "Kobayashi Bot v5.2.3 - Cita Invisível",
+  "version": "5.2.4",
+  "description": "Kobayashi Bot v5.2.4 - Cita Hidetag",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {

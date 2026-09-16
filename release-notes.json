@@ -948,5 +948,18 @@
       "Suporte a reenvio de texto, imagem e vídeo/GIF com legenda original.",
       "Mantém o hotfix AdminPro da v5.2.2 e todas as partes cumulativas da V5."
     ]
+  },
+  "5.2.4": {
+    "version": "5.2.4",
+    "title": "Cita Hidetag",
+    "date": "2026-09-16",
+    "changes": [
+      "/cita refeito após inspeção das bases de referência enviadas.",
+      "Responde uma mensagem e reenvia somente o conteúdo original com menções ocultas.",
+      "Sem cabeçalho, moldura, texto de citação ou lista visível de números.",
+      "Suporta texto, imagem, vídeo/GIF, áudio/PTT, figurinha e documento.",
+      "Suporta wrappers de mensagem efêmera, visualização única e documento com legenda.",
+      "Mantém as correções cumulativas anteriores da V5."
+    ]
   }
 }
