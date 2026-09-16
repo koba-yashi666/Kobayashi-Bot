@@ -860,5 +860,17 @@
       "Primeiro persiste todos os números válidos na lista negra global e só depois executa a varredura de remoção.",
       "Em lotes, retorna a quantidade de números salvos na lista negra global e mantém todos persistidos para remoção automática futura."
     ]
+  },
+  "4.0.14": {
+    "version": "4.0.14",
+    "title": "MSG Global — Proteção Anti-429",
+    "date": "2026-09-16",
+    "changes": [
+      "/msg agora trata falhas 429 e 500 de groupFetchAllParticipating sem encerrar a Kobayashi.",
+      "Adicionado retry único com espera; em rate limit o bot não martela a API do WhatsApp.",
+      "O envio prioriza metadata já retornada pela lista de grupos, reduzindo consultas groupMetadata desnecessárias.",
+      "Envios entre grupos ganharam intervalo maior e falhas ficam isoladas por grupo.",
+      "Se a listagem de grupos falhar, /msg aborta com segurança e mantém o processo online."
+    ]
   }
 }

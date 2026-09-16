@@ -10395,84 +10395,103 @@ case "debugdono": {
 break;
 
 case "msg": {
-  if (!SoDonoPrincipal) {
-    return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
+
+  const aviso=String(q||"").trim();
+  if(!aviso)return reply(`📢 *AVISO GLOBAL*\n\nUse: *${prefix}msg texto do aviso*`);
+
+  // v4.0.14: o WhatsApp pode responder 429/500 ao groupFetchAllParticipating.
+  // O erro agora é tratado e nunca é relançado para o processo principal.
+  const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+  const statusOf=(e)=>Number(e?.data||e?.output?.statusCode||e?.output?.payload?.statusCode||e?.statusCode||0);
+  let groups=null;
+
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      groups=await conn.groupFetchAllParticipating();
+      if(groups && typeof groups==="object")break;
+    }catch(e){
+      const status=statusOf(e);
+      console.error(`[MSG GLOBAL] groupFetch tentativa ${attempt}/2 (${status||"sem status"}):`,e?.message||e);
+      if(attempt===1){
+        // Um único retry com espera maior; não martela a API em caso de rate limit.
+        await sleep(status===429 ? 12000 : 5000);
+      }
+    }
   }
 
-  const aviso = String(q || "").trim();
-  if (!aviso) {
+  if(!groups || typeof groups!=="object"){
     return reply(
-      `📢 *AVISO GLOBAL*\n\n` +
-      `Use: *${prefix}msg texto do aviso*\n\n` +
-      `A Kobayashi enviará a mensagem em todos os grupos em que estiver, marcando todos os participantes.`
+      `⚠️🐉 *AVISO GLOBAL NÃO INICIADO*\n\n`+
+      `O WhatsApp limitou temporariamente a consulta dos grupos (429/500).\n`+
+      `A Kobayashi continuou online e nenhum envio foi repetido.\n\n`+
+      `⏳ Aguarde alguns minutos antes de usar *${prefix}msg* novamente.`
     );
   }
 
-  let groups = {};
-  try {
-    groups = await conn.groupFetchAllParticipating();
-  } catch (e) {
-    console.error("[MSG GLOBAL] Falha ao listar grupos:", e);
-    return reply("❌ Não consegui carregar a lista de grupos agora.");
-  }
+  const entries=Object.entries(groups);
+  if(!entries.length)return reply("📭 A Kobayashi não está participando de nenhum grupo.");
 
-  const entries = Object.entries(groups || {});
-  if (!entries.length) return reply("📭 A Kobayashi não está participando de nenhum grupo.");
+  let enviados=0,falhas=0,rateLimits=0;
+  await reply(`📢🐉 *ENVIO GLOBAL INICIADO*\n\n🏘️ Grupos encontrados: *${entries.length}*\n🛡️ Modo seguro anti-429 ativado.`);
 
-  let enviados = 0;
-  let falhas = 0;
+  const MAX_MSG_CHUNK=55000;
+  const partes=[];
+  for(let i=0;i<aviso.length;i+=MAX_MSG_CHUNK)partes.push(aviso.slice(i,i+MAX_MSG_CHUNK));
+  if(!partes.length)partes.push(aviso);
 
-  await reply(
-    `📢🐉 *ENVIO GLOBAL INICIADO*\n\n` +
-    `🏘️ Grupos encontrados: *${entries.length}*\n` +
-    `⏳ Vou enviar o aviso marcando todos os participantes.`
-  );
-
-  for (const [groupJid, cachedMeta] of entries) {
-    try {
-      let meta = cachedMeta;
-      try {
-        meta = await conn.groupMetadata(groupJid);
-      } catch {}
-
-      const mentions = [...new Set(
-        (meta?.participants || [])
-          .map((p) => p?.id || p?.jid)
-          .filter(Boolean)
-      )];
-
-      const MAX_MSG_CHUNK = 55000;
-      const partes = [];
-      for (let i = 0; i < aviso.length; i += MAX_MSG_CHUNK) {
-        partes.push(aviso.slice(i, i + MAX_MSG_CHUNK));
+  for(const [groupJid,cachedMeta] of entries){
+    try{
+      // Prioriza metadata já devolvida pelo fetch global. Evita uma requisição extra
+      // para cada grupo e reduz muito a chance de 429.
+      let meta=cachedMeta;
+      if(!Array.isArray(meta?.participants)){
+        try{
+          meta=await conn.groupMetadata(groupJid);
+          await sleep(600);
+        }catch(e){
+          console.error(`[MSG GLOBAL] metadata ${groupJid}:`,e?.message||e);
+          meta=cachedMeta||{};
+        }
       }
-      if (!partes.length) partes.push(aviso);
 
-      for (let i = 0; i < partes.length; i++) {
-        const multi = partes.length > 1 ? `\n📄 *Parte ${i + 1}/${partes.length}*` : "";
-        await conn.sendMessage(groupJid, {
-          text:
-            `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮${multi}\n\n` +
-            `${partes[i]}\n\n` +
-            `╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
-          mentions
-        });
-        if (i < partes.length - 1) await new Promise((resolve) => setTimeout(resolve, 500));
+      const mentions=[...new Set((meta?.participants||[]).map(p=>p?.id||p?.jid).filter(Boolean))];
+
+      for(let i=0;i<partes.length;i++){
+        const multi=partes.length>1?`\n📄 *Parte ${i+1}/${partes.length}*`:"";
+        try{
+          await conn.sendMessage(groupJid,{
+            text:`╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮${multi}\n\n${partes[i]}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
+            mentions
+          });
+        }catch(e){
+          const status=statusOf(e);
+          if(status===429){
+            rateLimits++;
+            console.error(`[MSG GLOBAL] 429 em ${groupJid}; aguardando antes de continuar.`);
+            await sleep(15000);
+          }
+          throw e;
+        }
+        if(i<partes.length-1)await sleep(1000);
       }
 
       enviados++;
-      // Pequeno intervalo para evitar disparos simultâneos em muitos grupos.
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    } catch (e) {
+      // Ritmo conservador entre grupos para evitar rajada de requests.
+      await sleep(2500);
+    }catch(e){
       falhas++;
-      console.error(`[MSG GLOBAL] Falha em ${groupJid}:`, e?.message || e);
+      console.error(`[MSG GLOBAL] Falha em ${groupJid}:`,e?.message||e);
+      // Qualquer falha fica contida no grupo atual; o bot não encerra.
+      await sleep(statusOf(e)===429?15000:2500);
     }
   }
 
   return reply(
-    `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n` +
-    `📨 Enviados: *${enviados}*\n` +
-    `❌ Falhas: *${falhas}*\n` +
+    `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n`+
+    `📨 Enviados: *${enviados}*\n`+
+    `❌ Falhas: *${falhas}*\n`+
+    `⚠️ Limitações 429 detectadas: *${rateLimits}*\n`+
     `🏘️ Total: *${entries.length}*`
   );
 }
