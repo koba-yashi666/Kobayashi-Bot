@@ -74,7 +74,19 @@ function actionCaption(command, actor, target){
   return bank[command] || `💞 ${actor} interagiu com ${target}!`;
 }
 function ms(ms){const h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return `${h}h ${m}m`;}
-async function sendMedia(ctx,url,caption,mentions=[]){ if(!url)return ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info}); try{const isVideo=/\.(mp4|gif)(?:$|\?)/i.test(url); await ctx.conn.sendMessage(ctx.from,isVideo?{video:{url},gifPlayback:true,caption,mentions}:{image:{url},caption,mentions},{quoted:ctx.info});}catch{await ctx.conn.sendMessage(ctx.from,{text:caption,mentions},{quoted:ctx.info});}}
+async function sendMedia(ctx,url,caption,mentions=[]){
+  const safeMentions=[...new Set((mentions||[]).filter(Boolean))];
+  if(!url) return ctx.conn.sendMessage(ctx.from,{text:caption,mentions:safeMentions},{quoted:ctx.info});
+  try{
+    const isVideo=/\.(mp4|gif)(?:$|\?)/i.test(url);
+    await ctx.conn.sendMessage(ctx.from,isVideo
+      ? {video:{url},gifPlayback:true,caption,mentions:safeMentions}
+      : {image:{url},caption,mentions:safeMentions},{quoted:ctx.info});
+  }catch(e){
+    console.error("[DRAGON FUN MEDIA]",ctx.command,e?.message||e);
+    return ctx.conn.sendMessage(ctx.from,{text:caption,mentions:safeMentions},{quoted:ctx.info});
+  }
+}
 function menu(p){return buildFunMenu(p);}
 function rpgMenu(p){return `╭━━〔 🐉⚔️ *DRAGON RPG 0.9* 〕━━╮\n👤 ${p}perfilrpg | ${p}carteira | ${p}toprpg\n💰 ${p}daily | ${p}work | ${p}mine | ${p}fish | ${p}explore\n🎰 ${p}dados 20 | ${p}coinflip cara 50 | ${p}slots 30 | ${p}roleta preto 50\n🛒 ${p}loja | ${p}comprar picareta | ${p}inv\n🌱 ${p}plantar trigo | ${p}colher | ${p}cook sopa\n⚔️ ${p}dungeon | ${p}bossrpg | ${p}arena | ${p}torneio\n🔨 ${p}forge espada | ${p}encantar espada | ${p}reparar espada\n🐾 ${p}pets | ${p}adotar dragao | ${p}feed 1 | ${p}train 1\n🏰 ${p}classe | ${p}casa | ${p}auction | ${p}mercado\n📜 ${p}missoes | ${p}conquistas | ${p}prestige\n╰━━━━━━━━━━━━━━━━━━━━━━╯`;}
 
@@ -125,7 +137,11 @@ export default {
     const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);
     return sendMedia(ctx,mediaFor(n),txt,mentions);
   }
-  if(ACTIONS.includes(n)){if(target===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);const cap=actionCaption(n,tag(ctx.sender),tag(target));return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}
+  if(ACTIONS.includes(n)){
+    if(!target || target===ctx.sender) return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);
+    const cap=actionCaption(n,tag(ctx.sender),tag(target));
+    return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);
+  }
   if(n==="forca"||n==="fc"){if(ctx.args?.length){const r=guessForca(ctx.from,ctx.sender,ctx.args.join(" "));if(r.win)return ctx.reply(`🎉 Acertou! A palavra era *${r.word}*. +60 coins.`);if(r.lose)return ctx.reply(`💀 Fim de jogo! A palavra era *${r.word}*.`);if(r.ok)return ctx.reply(`🪢 ${r.masked}\n❤️ Tentativas: ${r.tries}\n💡 ${r.hint}`);}const s=startForca(ctx.from,ctx.sender);const mask=[...s.word].map(x=>x===" "?" ":"_ ").join("");return ctx.reply(`🪢 *FORCA*\n\n${mask}\n💡 Dica: ${s.hint}\n📚 Tema: ${s.theme}\n\nResponda com *${ctx.prefix}forca letra/palavra*`);}
   if(n==="anagrama"){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Acertou! *${r.answer}* +50 coins.`):ctx.reply("❌ Ainda não. Tente novamente!");}const s=startAnagram(ctx.from,ctx.sender);return ctx.reply(`🔀 *ANAGRAMA*\n\n🔤 *${s.scrambled.toUpperCase()}*\n💡 ${s.hint}\n\nResponda: *${ctx.prefix}anagrama resposta*`);}
   if(["quiz","trivia"].includes(n)){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Resposta certa: *${r.answer}*. +50 coins.`):ctx.reply("❌ Resposta incorreta. Tente de novo!");}const s=startQuiz(ctx.from,ctx.sender);return ctx.reply(`🧠 *QUIZ • ${s.category.toUpperCase()}*\n\n${s.question}\n\nResponda: *${ctx.prefix}quiz resposta*`);}

@@ -996,5 +996,17 @@
       "Adicionado ao menu de diversão.",
       "Modo Brincadeira precisa estar ativo."
     ]
+  },
+  "5.2.8": {
+    "version": "5.2.8",
+    "title": "Hotfix /comer no MenuBN",
+    "date": "2026-09-17",
+    "changes": [
+      "/comer confirmado como ação do Dragon Fun/MenuBN.",
+      "Corrigida validação de alvo ausente no /comer e demais ações.",
+      "Falha no GIF/vídeo remoto agora cai para resposta em texto sem silenciar o comando.",
+      "Menções nulas são filtradas antes do envio.",
+      "/comer adicionado visivelmente ao MenuBN e ao helpcmd."
+    ]
   }
 }
