@@ -3421,6 +3421,23 @@ case "rmnota": {
  return reply(socialV5.v5RemoveNote(from,args[0])?"🗑️ Nota removida.":"❌ Nota não encontrada.");
 } break;
 
+case "morder": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  const alvo = getTargetFromMessage(info, null);
+  if (!alvo || alvo === sender) return reply(`🦷 Use *${prefix}morder @membro*`);
+  try {
+    return await conn.sendMessage(from, {
+      video: { url: "./media/acoes/morder.mp4" },
+      caption: `🦷 @${sender.split("@")[0]} mordeu @${alvo.split("@")[0]}!`,
+      mentions: [sender, alvo]
+    }, { quoted: info });
+  } catch (e) {
+    console.error("[MORDER] Falha ao enviar vídeo:", e?.message || e);
+    return reply("❌ Não consegui enviar o vídeo do *morder* agora.");
+  }
+}
+break;
+
 case "planos":
 case "plans": {
   const plans = listRentalPlans();

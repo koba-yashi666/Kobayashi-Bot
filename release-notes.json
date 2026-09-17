@@ -961,5 +961,16 @@
       "Suporta wrappers de mensagem efêmera, visualização única e documento com legenda.",
       "Mantém as correções cumulativas anteriores da V5."
     ]
+  },
+  "5.2.5": {
+    "version": "5.2.5",
+    "title": "Morder com Vídeo",
+    "date": "2026-09-17",
+    "changes": [
+      "/morder agora envia o vídeo personalizado fornecido pelo criador.",
+      "O vídeo foi incorporado em media/acoes/morder.mp4.",
+      "/morder @membro marca autor e alvo na legenda.",
+      "Pacote cumulativo mantém todas as atualizações da V5 até v5.2.5."
+    ]
   }
 }
