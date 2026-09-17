@@ -41,6 +41,7 @@ import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLeve
 } from "./lib/features/social/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/moderation/yuriProtection.js";
 import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/moderation/antiFake.js";
+import { DRAGON_COMMUNITY_GROUPS, addDragonBan, removeDragonBan, listDragonBans, purgeDragonBannedUser } from "./lib/features/moderation/dragonBan.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/system/commandControl.js";
 import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePendingUpdateNews } from "./lib/features/system/updateNews.js";
 import { getRental, registerRental, renewRental, removeRental, setPermanentRental, listRentals, setRentalRestriction, getRentalSettings, parseRentalDuration, formatRentalDuration, formatRentalDate, getRentalPlan, listRentalPlans, formatPlan, normalizeGroupJid, registerRentalByPlan, registerPartnerRental, registerTrialRental, renewRentalByPlan, setRentalWarnings } from "./lib/features/rental/rentalSystem.js";
@@ -3401,6 +3402,27 @@ if (isCmd) {
   }
 
 switch (command) {
+case "dragonban": {
+ if(!SoDonoPrincipal)return reply(mess.onlyOwner());
+ if(!isGroup)return reply(mess.onlyGroup());
+ const target=getTargetFromMessage(info,null);
+ if(!target||target===sender)return reply(`🐉 Use *${prefix}dragonban @membro motivo* ou responda à mensagem.`);
+ const reason=args.filter(a=>!a.includes("@")).join(" ").trim()||"Sem motivo informado";
+ addDragonBan(target,sender,reason);
+ const results=await purgeDragonBannedUser(conn,target);
+ const removed=results.filter(x=>x.status==="removido"),absent=results.filter(x=>x.status==="ausente"),failed=results.filter(x=>x.status==="erro");
+ return conn.sendMessage(from,{text:`🐉🚫 *DRAGON BAN APLICADO*\n\n👤 Alvo: @${target.split("@")[0]}\n📝 Motivo: ${reason}\n\n✅ Removido: *${removed.length}/${DRAGON_COMMUNITY_GROUPS.length} grupos*\n➖ Ausente: *${absent.length}*\n⚠️ Falhas: *${failed.length}*${failed.length?`\n\n${failed.map(x=>`• ${x.name}: não foi possível remover`).join("\n")}`:""}`,mentions:[target]},{quoted:info});
+} break;
+case "rmdragonban": {
+ if(!SoDonoPrincipal)return reply(mess.onlyOwner());
+ const target=getTargetFromMessage(info,null);if(!target)return reply(`Use *${prefix}rmdragonban @membro*.`);
+ return reply(removeDragonBan(target)?"✅ Dragon Ban removido.":"❌ Membro não está no Dragon Ban.");
+} break;
+case "listadragonban": {
+ if(!SoDonoPrincipal)return reply(mess.onlyOwner());
+ const rows=listDragonBans();if(!rows.length)return reply("🐉 A lista Dragon Ban está vazia.");
+ return conn.sendMessage(from,{text:`🐉🚫 *LISTA DRAGON BAN*\n\n${rows.slice(0,50).map((x,i)=>`${i+1}. @${x.target.split("@")[0]} — ${x.reason}`).join("\n")}`,mentions:rows.slice(0,50).map(x=>x.target)},{quoted:info});
+} break;
 
 // ==========================================
 // 🏷️🐉 KOBAYASHI RENTAL SYSTEM • v0.8.5
