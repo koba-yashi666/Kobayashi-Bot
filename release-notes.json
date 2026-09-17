@@ -972,5 +972,17 @@
       "/morder @membro marca autor e alvo na legenda.",
       "Pacote cumulativo mantém todas as atualizações da V5 até v5.2.5."
     ]
+  },
+  "5.2.6": {
+    "version": "5.2.6",
+    "title": "Morder — Vídeo Routing Fix",
+    "date": "2026-09-17",
+    "changes": [
+      "Corrigido /morder que estava no menu/handler, mas não no registro KOBA_TRIGGER_COMMANDS.",
+      "/morder agora alcança o handler real de vídeo.",
+      "Vídeo passa a ser lido diretamente com fs.readFileSync, seguindo o método já comprovado pelo /carinho.",
+      "/morder respeita Modo Brincadeira como as demais ações.",
+      "Mantém media/acoes/morder.mp4 dentro do pacote cumulativo."
+    ]
   }
 }

@@ -1574,6 +1574,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "missao",
   "missoes",
   "modobrincadeira",
+  "morder",
   "mododragonrpg",
   "modoemergencia",
   "modorpg",
@@ -3423,11 +3424,12 @@ case "rmnota": {
 
 case "morder": {
   if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
   const alvo = getTargetFromMessage(info, null);
   if (!alvo || alvo === sender) return reply(`🦷 Use *${prefix}morder @membro*`);
   try {
     return await conn.sendMessage(from, {
-      video: { url: "./media/acoes/morder.mp4" },
+      video: fs.readFileSync(path.join(process.cwd(), "media", "acoes", "morder.mp4")),
       caption: `🦷 @${sender.split("@")[0]} mordeu @${alvo.split("@")[0]}!`,
       mentions: [sender, alvo]
     }, { quoted: info });
