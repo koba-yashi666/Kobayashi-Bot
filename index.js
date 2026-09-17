@@ -1236,6 +1236,8 @@ function normalizeKobaIntentText(value=""){
 
 // Registro completo dos comandos reconhecidos pelo bot.
 // O Koba Trigger só dispara se a primeira ação corresponder a um comando real.
+const citaLargeGroupCooldown = new Map();
+
 const KOBA_TRIGGER_COMMANDS = new Set([
   "0",
   "1",
@@ -3169,6 +3171,35 @@ if (
   continue;
 }
 
+// V5.3 • Social aprimorado: sair do AFK automaticamente e avisar quando alguém AFK é mencionado.
+if (isGroup && sender && socialV5.v5SocialEnabled(from)) {
+  const socialCtx =
+    info?.message?.extendedTextMessage?.contextInfo ||
+    info?.message?.imageMessage?.contextInfo ||
+    info?.message?.videoMessage?.contextInfo ||
+    info?.message?.documentMessage?.contextInfo ||
+    {};
+  const socialMentions = Array.isArray(socialCtx?.mentionedJid) ? socialCtx.mentionedJid : [];
+  const socialPassive = socialV5.v5ProcessSocialMessage(from, sender, socialMentions);
+
+  if (socialPassive.returned && command !== "afk") {
+    await conn.sendMessage(from, {
+      text: `👋 @${sender.split("@")[0]} voltou! Ficou AFK por *${socialV5.v5FormatDuration(socialPassive.returned.duration)}*.`,
+      mentions: [sender]
+    }, { quoted: info }).catch(() => {});
+  }
+
+  if (socialPassive.afkMentions?.length) {
+    const rows = socialPassive.afkMentions.map(x =>
+      `💤 @${x.jid.split("@")[0]} está AFK há *${socialV5.v5FormatDuration(x.duration)}*.\n📝 ${x.reason}`
+    );
+    await conn.sendMessage(from, {
+      text: rows.join("\n\n"),
+      mentions: socialPassive.afkMentions.map(x => x.jid)
+    }, { quoted: info }).catch(() => {});
+  }
+}
+
 if (isCmd) {
   const modularPermissions = createPermissions({
     sender,
@@ -3396,8 +3427,8 @@ case "afk": {
 case "rep": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
  const t=getTargetFromMessage(info,null);if(!t||t===sender)return reply(`Use *${prefix}rep @membro*`);
- const r=socialV5.v5AddRep(from,sender,t);if(r.cooldown)return reply(`⏳ Você já deu reputação recentemente. Tente novamente mais tarde.`);
- return conn.sendMessage(from,{text:`⭐ @${t.split("@")[0]} recebeu +1 reputação!\n🏆 Reputação: *${r.rep}*`,mentions:[t]},{quoted:info});
+ const r=socialV5.v5AddRep(from,sender,t);if(r.cooldown)return reply(`⏳ Você já deu reputação recentemente. Aguarde *${socialV5.v5FormatDuration(r.cooldown)}*.`);
+ return conn.sendMessage(from,{text:`⭐ @${t.split("@")[0]} recebeu +1 reputação!\n🏆 Reputação: *${r.rep}*\n🎖️ Rank social: *${r.rank}*`,mentions:[t]},{quoted:info});
 } break;
 case "presente": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
@@ -3408,7 +3439,8 @@ case "presente": {
 case "socialperfil": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
  const t=getTargetFromMessage(info,null)||sender,p=socialV5.v5ProfileSocial(from,t);
- return conn.sendMessage(from,{text:`💞 *PERFIL SOCIAL*\n\n👤 @${t.split("@")[0]}\n⭐ Reputação: *${p.rep}*\n🎁 Presentes: *${p.gifts.length}*\n🏅 Conquistas: *${p.achievements.length}*\n${p.achievements.length?`✨ ${p.achievements.join(", ")}`:""}`,mentions:[t]},{quoted:info});
+ const afkLine=p.afk?`\n💤 AFK há: *${socialV5.v5FormatDuration(Date.now()-p.afk.since)}*\n📝 Motivo: ${p.afk.reason}`:"";
+ return conn.sendMessage(from,{text:`💞 *PERFIL SOCIAL 2.1*\n\n👤 @${t.split("@")[0]}\n⭐ Reputação: *${p.rep}*\n🎖️ Rank: *${p.rank}*\n🤝 Reputações dadas: *${p.repGiven}*\n🎁 Presentes: *${p.gifts.length}*\n🏅 Conquistas: *${p.achievements.length}*${afkLine}\n${p.achievements.length?`✨ ${p.achievements.join(", ")}`:""}`,mentions:[t]},{quoted:info});
 } break;
 case "nota": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");if(!isGroupAdmins)return reply(mess.onlyAdmins());
@@ -3416,7 +3448,10 @@ case "nota": {
 } break;
 case "notas": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");
- const n=socialV5.v5ListNotes(from);return reply(n.length?`📝 *NOTAS DO GRUPO*\n\n${n.slice(-30).map(x=>`#${x.id} — ${x.text}`).join("\n")}`:"📝 Nenhuma nota salva.");
+ const n=socialV5.v5ListNotes(from);
+ const rows=n.slice(-30).map(x=>{const by=x.by?` • @${String(x.by).split("@")[0]}`:"";const dt=x.at?` • ${new Date(x.at).toLocaleDateString("pt-BR")}`:"";return `#${x.id} — ${x.text}${by}${dt}`;});
+ const noteMentions=n.slice(-30).map(x=>x.by).filter(Boolean);
+ return n.length?conn.sendMessage(from,{text:`📝 *NOTAS DO GRUPO*\n\n${rows.join("\n")}`,mentions:noteMentions},{quoted:info}):reply("📝 Nenhuma nota salva.");
 } break;
 case "rmnota": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");if(!isGroupAdmins)return reply(mess.onlyAdmins());
@@ -10457,6 +10492,15 @@ case "cita": {
     (groupMembers || []).map(p => p?.id || p?.jid || p?.participant).filter(Boolean)
   )];
   if (!participantes.length) return reply("❌ Não consegui carregar os participantes deste grupo.");
+
+  // Proteção contra disparos repetidos de hidetag em grupos grandes.
+  if (participantes.length >= 150 && !SoDono) {
+    const now = Date.now();
+    const last = Number(citaLargeGroupCooldown.get(from) || 0);
+    const wait = 30_000 - (now - last);
+    if (wait > 0) return reply(`⏳ Em grupos grandes, aguarde *${Math.ceil(wait/1000)}s* antes de usar o *cita* novamente.`);
+    citaLargeGroupCooldown.set(from, now);
+  }
 
   const contextInfo =
     info?.message?.extendedTextMessage?.contextInfo ||

@@ -1020,5 +1020,22 @@
       "/macetar nome usa o item preparado selecionado; sem nome usa o primeiro disponível.",
       "MenuBN atualizado para mostrar /macetar no lugar de /comer."
     ]
+  },
+  "5.3.0": {
+    "version": "5.3.0",
+    "title": "Mega Melhorias — Parte 1",
+    "date": "2026-09-17",
+    "changes": [
+      "Social 2.1: AFK é removido automaticamente quando o membro volta a falar.",
+      "Social 2.1: mencionar alguém AFK mostra motivo e tempo ausente, com anti-spam de aviso.",
+      "Reputação aprimorada com ranks Novato, Boa Companhia, Conhecido, Respeitado, Famoso e Lendário.",
+      "Perfil Social agora mostra rank, reputações dadas, presentes, conquistas e estado AFK.",
+      "Notas de grupo agora exibem autor e data quando disponíveis.",
+      "Dragon Fun: validação de alvo aprimorada para ações por marcação/resposta.",
+      "Dragon Fun: falha de GIF/vídeo remoto agora usa fallback em texto em vez de deixar o comando sem resposta.",
+      "Cita/Hidetag: proteção de 30s contra disparos repetidos em grupos com 150+ participantes.",
+      "Compatibilidade preservada com bancos existentes; nenhum banco de usuário é sobrescrito.",
+      "Sistemas opcionais continuam desligados por padrão."
+    ]
   }
 }
