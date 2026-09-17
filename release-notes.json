@@ -997,16 +997,17 @@
       "Modo Brincadeira precisa estar ativo."
     ]
   },
-  "5.2.8": {
-    "version": "5.2.8",
-    "title": "Hotfix /comer no MenuBN",
+  "5.2.9": {
+    "version": "5.2.9",
+    "title": "Correção definitiva do /comer",
     "date": "2026-09-17",
     "changes": [
-      "/comer confirmado como ação do Dragon Fun/MenuBN.",
-      "Corrigida validação de alvo ausente no /comer e demais ações.",
-      "Falha no GIF/vídeo remoto agora cai para resposta em texto sem silenciar o comando.",
-      "Menções nulas são filtradas antes do envio.",
-      "/comer adicionado visivelmente ao MenuBN e ao helpcmd."
+      "Corrigido conflito interno: /comer estava simultaneamente em ACTIONS e RPG.",
+      "Removido /comer das interações com alvo; agora ele chega ao sistema RPG correto.",
+      "/comer consome uma comida preparada no inventário.",
+      "/comer nome permite escolher a comida; sem nome consome a primeira disponível.",
+      "Se não houver comida, orienta usar /cozinhar primeiro.",
+      "/comer permanece no MenuBN."
     ]
   }
 }
