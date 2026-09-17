@@ -1009,5 +1009,16 @@
       "Se não houver comida, orienta usar /cozinhar primeiro.",
       "/comer permanece no MenuBN."
     ]
+  },
+  "5.2.10": {
+    "version": "5.2.10",
+    "title": "Comando /macetar",
+    "date": "2026-09-17",
+    "changes": [
+      "/comer foi substituído por /macetar.",
+      "/macetar mantém o mesmo modo de ativação e funcionamento do antigo /comer.",
+      "/macetar nome usa o item preparado selecionado; sem nome usa o primeiro disponível.",
+      "MenuBN atualizado para mostrar /macetar no lugar de /comer."
+    ]
   }
 }

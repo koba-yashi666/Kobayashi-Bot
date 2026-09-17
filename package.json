@@ -1,7 +1,7 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "5.2.9",
-  "description": "Kobayashi Bot v5.2.9 - Comer Routing Definitivo",
+  "version": "5.2.10",
+  "description": "Kobayashi Bot v5.2.10 - Macetar",
   "main": "bootstrap.js",
   "type": "module",
   "engines": {
