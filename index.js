@@ -1574,6 +1574,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "missao",
   "missoes",
   "modobrincadeira",
+  "morde",
   "morder",
   "mododragonrpg",
   "modoemergencia",
@@ -3421,6 +3422,26 @@ case "rmnota": {
  if(!isGroup)return reply(mess.onlyGroup());if(!socialV5.v5SocialEnabled(from))return reply("💞 Social 2.0 desativado.");if(!isGroupAdmins)return reply(mess.onlyAdmins());
  return reply(socialV5.v5RemoveNote(from,args[0])?"🗑️ Nota removida.":"❌ Nota não encontrada.");
 } break;
+
+case "morde": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isFunModeEnabled(from)) return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  const target = getTargetFromMessage(info, null);
+  if (!target || target === sender) return reply(`🦷 Marque alguém ou responda à mensagem da pessoa.\nEx.: *${prefix}morde @membro*`);
+  const gifPath = path.join(process.cwd(), "media", "acoes", "morde.mp4");
+  if (!fs.existsSync(gifPath)) return reply("⚠️ O GIF do /morde não foi encontrado.");
+  try {
+    return await conn.sendMessage(from, {
+      video: fs.readFileSync(gifPath), gifPlayback: true,
+      caption: `🦷 @${sender.split("@")[0]} mordeu @${target.split("@")[0]}!`,
+      mentions: [sender, target]
+    }, { quoted: info });
+  } catch (e) {
+    console.error("[MORDE] Falha ao enviar GIF:", e?.message || e);
+    return reply("❌ Não consegui enviar o GIF do *morde* agora.");
+  }
+}
+break;
 
 case "morder": {
   if (!isGroup) return reply(mess.onlyGroup());

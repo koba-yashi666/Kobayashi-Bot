@@ -984,5 +984,17 @@
       "/morder respeita Modo Brincadeira como as demais ações.",
       "Mantém media/acoes/morder.mp4 dentro do pacote cumulativo."
     ]
+  },
+  "5.2.7": {
+    "version": "5.2.7",
+    "title": "Novo /morde com GIF",
+    "date": "2026-09-17",
+    "changes": [
+      "Novo /morde separado do /morder.",
+      "/morde @membro envia o vídeo fornecido como GIF.",
+      "Funciona por marcação ou resposta.",
+      "Adicionado ao menu de diversão.",
+      "Modo Brincadeira precisa estar ativo."
+    ]
   }
 }
