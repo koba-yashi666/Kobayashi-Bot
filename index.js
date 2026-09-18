@@ -6936,7 +6936,36 @@ break;
 case "koban":
 case "kobaban": {
   if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  // KobaBan exclusivo do criador pelo LID oficial.
+  const KOBABAN_OWNER_LID = "69119714017511@lid";
+  const senderCandidates = [
+    sender,
+    info?.key?.participant,
+    info?.participant,
+    info?.message?.extendedTextMessage?.contextInfo?.participant,
+    info?.message?.imageMessage?.contextInfo?.participant,
+    info?.message?.videoMessage?.contextInfo?.participant
+  ].filter(Boolean).map(String);
+
+  let senderParticipant = null;
+  try {
+    const meta = await conn.groupMetadata(from);
+    senderParticipant = (meta?.participants || []).find(p => {
+      const ids = [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).map(String);
+      return ids.some(id => senderCandidates.includes(id));
+    }) || null;
+  } catch {}
+
+  const senderLid =
+    senderCandidates.find(id => id.endsWith("@lid")) ||
+    senderParticipant?.lid ||
+    (String(senderParticipant?.id || "").endsWith("@lid") ? senderParticipant.id : null) ||
+    (String(senderParticipant?.jid || "").endsWith("@lid") ? senderParticipant.jid : null);
+
+  if (senderLid !== KOBABAN_OWNER_LID) {
+    return reply("👑🐉 O *KobaBan* é exclusivo do criador da Kobayashi.");
+  }
   if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
 
   const target = resolveBanTarget(info, args);

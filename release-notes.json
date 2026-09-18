@@ -1112,5 +1112,17 @@
       "Consulta os campos LID do metadata atual do WhatsApp/Baileys.",
       "Adicionado ao menu geral e /helpcmd."
     ]
+  },
+  "5.3.8": {
+    "version": "5.3.8",
+    "title": "KobaBan exclusivo do criador",
+    "date": "2026-09-18",
+    "changes": [
+      "/kobaban agora valida exclusivamente o LID oficial configurado do criador.",
+      "Administradores comuns não podem mais executar KobaBan.",
+      "A validação procura o LID no evento e no metadata do participante para suportar grupos em modo LID.",
+      "A Kobayashi ainda precisa ser administradora para remover o alvo.",
+      "O /ban comum continua inalterado para administradores."
+    ]
   }
 }
