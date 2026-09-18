@@ -1578,6 +1578,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "missoes",
   "modobrincadeira",
   "morde",
+  "julgar",
   "morder",
   "mododragonrpg",
   "modoemergencia",

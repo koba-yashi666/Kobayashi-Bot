@@ -1091,5 +1091,16 @@
       "Arquivo local antigo .gif removido.",
       "Legenda do comando atualizada."
     ]
+  },
+  "5.3.6": {
+    "version": "5.3.6",
+    "title": "Comando /julgar",
+    "date": "2026-09-18",
+    "changes": [
+      "Novo /julgar no MenuBN.",
+      "Funciona por @marcação ou resposta.",
+      "Resultados e veredito aleatórios a cada uso.",
+      "Independente do Dragon RPG."
+    ]
   }
 }

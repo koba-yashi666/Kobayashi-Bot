@@ -14,11 +14,12 @@ const TRAITS = [
 ];
 const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","comer","socar","soco","chorao","chorona"];
 const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
+const JUDGE = ["julgar","judge"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
 const ECON = [];
 const RPG = [];
 const RANKS = TRAITS.map(x=>`rank${x}`);
-export const dragonFunAliases=[...new Set([...TRAITS,...ACTIONS,...GAME_ALIASES,...SOCIAL,...ECON,...RPG,...RANKS])];
+export const dragonFunAliases=[...new Set([...TRAITS,...ACTIONS,...GAME_ALIASES,...JUDGE,...SOCIAL,...ECON,...RPG,...RANKS])];
 
 function ctxInfo(info){return info?.message?.extendedTextMessage?.contextInfo||info?.message?.imageMessage?.contextInfo||info?.message?.videoMessage?.contextInfo||{};}
 function targetOf(ctx){const c=ctxInfo(ctx.info);return c?.mentionedJid?.[0]||c?.participant||null;}
@@ -117,6 +118,16 @@ export default {
     const val=Math.floor(Math.random()*101);
     const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);
     return sendMedia(ctx,mediaFor(n),txt,mentions);
+  }
+  if(JUDGE.includes(n)){
+    if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`🤖 Marque alguém ou responda à mensagem da pessoa.\nExemplo: *${ctx.prefix}julgar @membro*`);
+    const pick=a=>a[Math.floor(Math.random()*a.length)];
+    const vergonha=Math.floor(Math.random()*101),caos=Math.floor(Math.random()*101),suspeita=Math.floor(Math.random()*101);
+    const inteligencia=pick(["em manutenção 🛠️","questionável 🤨","funcionando por milagre 🙏","acima da média (talvez) 🧠","foi tomar café ☕","modo economia de energia 🔋"]);
+    const redflags=Math.floor(Math.random()*11);
+    const besteira=pick(["BAIXA 😇","MÉDIA 😶","ALTA 🤡","ABSURDA 💀","LENDÁRIA 🐉"]);
+    const veredito=pick(["culpado de ser esquisito","inocente por falta de provas","culpado de causar caos no grupo","suspeito demais para ser liberado","condenado a mandar figurinha até segunda ordem","absolvido pela Kobayashi... desta vez","100% cidadão duvidoso"]);
+    return ctx.conn.sendMessage(ctx.from,{text:`🤖 *ANALISANDO O SUSPEITO...* 🔎\n\n👤 Suspeito: ${tag(target)}\n📊 Nível de vergonha: *${vergonha}%*\n🧠 Inteligência: *${inteligencia}*\n💀 Chance de fazer merda hoje: *${caos}%*\n🚩 Red flags detectadas: *${redflags}*\n🕵️ Nível de suspeita: *${suspeita}%*\n🗣️ Capacidade de falar besteira: *${besteira}*\n\n⚖️ *Veredito da Kobayashi:* ${veredito}.`,mentions:[target]},{quoted:ctx.info});
   }
   if(ACTIONS.includes(n)){
     if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);
