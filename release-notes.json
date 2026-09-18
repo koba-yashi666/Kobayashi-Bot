@@ -1057,5 +1057,18 @@
       "/dragonban aceita @membro, número internacional ou resposta.",
       "/rmdragonban aceita @membro ou número."
     ]
+  },
+  "5.3.3": {
+    "version": "5.3.3",
+    "title": "Dragon RPG Único",
+    "date": "2026-09-17",
+    "changes": [
+      "RPG clássico/normal removido do roteamento modular.",
+      "/modorpg removido do sistema e da ajuda.",
+      "Aliases /rpg e /menurpg continuam apontando para o Dragon RPG para compatibilidade.",
+      "Economia/RPG antigo do Dragon Fun deixou de interceptar comandos.",
+      "Dragon RPG permanece como único RPG da Kobayashi.",
+      "Jogos, Social e Modo Brincadeira continuam independentes."
+    ]
   }
 }

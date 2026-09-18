@@ -1,6 +1,6 @@
 {
   "name": "kobayashi-bot-beta",
-  "version": "5.3.2",
+  "version": "5.3.3",
   "description": "Kobayashi Bot v5.3.0 - Mega Melhorias",
   "main": "bootstrap.js",
   "type": "module",

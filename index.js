@@ -1581,7 +1581,6 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "morder",
   "mododragonrpg",
   "modoemergencia",
-  "modorpg",
   "moeda",
   "motivacional",
   "mutar",
@@ -3356,9 +3355,9 @@ if (isCmd) {
   const dragonRpgModeEnabled = !isGroup || isDragonRpgEnabled(from);
   const dragonRpgOwnsCommand = DRAGON_RPG_COMMANDS.has(command);
 
-  // Se o Dragon RPG estiver ligado, ele recebe primeiro os aliases compartilhados.
-  // Assim o RPG clássico não consegue responder ao mesmo comando.
-  const skipModularForDragonRpg = dragonRpgModeEnabled && dragonRpgOwnsCommand;
+  // Dragon RPG é o único sistema RPG da Kobayashi.
+  // Seus comandos nunca são enviados ao Dragon Fun como comandos de RPG.
+  const skipModularForDragonRpg = dragonRpgOwnsCommand;
 
   const modularHandled = skipModularForDragonRpg ? false : await runModularCommand(command, {
     conn,
@@ -8884,8 +8883,8 @@ case "dragonrpgmode": {
   setDragonRpgEnabled(from, enabled, sender);
 
   return reply(enabled
-    ? `🐉🔥 *Dragon RPG ativado neste grupo!*\n\nOs comandos da versão 2.x voltaram a responder.\n🎮 O RPG clássico continua sendo controlado separadamente por *${prefix}modorpg*.`
-    : `🐉💤 *Dragon RPG desativado neste grupo!*\n\nEnquanto estiver desligado, nenhum comando do Dragon RPG responderá.\n🎮 O RPG clássico continua independente em *${prefix}modorpg*.`);
+    ? `🐉🔥 *Dragon RPG ativado neste grupo!*\n\nOs comandos do Dragon RPG voltaram a responder.`
+    : `🐉💤 *Dragon RPG desativado neste grupo!*\n\nEnquanto estiver desligado, nenhum comando do Dragon RPG responderá.`);
 }
 break;
 

@@ -3,21 +3,20 @@ import path from "node:path";
 import {
   traitText, mediaFor, startForca, guessForca,
   startAnagram, answerSimple, startQuiz, startEnigma, startWordle, guessWordle,
-  randomTruth, randomDare, randomNever, daily, work, transfer, gamble, topCoins,
+  randomTruth, randomDare, randomNever, gamble,
   proposeMarriage, acceptMarriage, marriageOf, divorce, familyAction, getFamily,
-  getUser, shop, buy, inventory, simpleRpgAction
+  simpleRpgAction
 } from "../../lib/features/social/dragonFunV09.js";
-import { isRpgEnabled, setRpgEnabled } from "../../lib/features/social/rpgSettings.js";
 import { buildFunMenu } from "../../lib/ui/menuTheme.js";
 
 const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
 ];
 const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","socar","soco","chorao","chorona"];
-const GAME_ALIASES = ["modorpg","menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
+const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
-const ECON = ["menurpg","rpg","perfilrpg","carteira","gold","vergold","daily","diario","work","trabalhar","mine","minerar","fish","pescar","hunt","cacar","caçar","explore","explorar","crime","roubar","assaltar","doargold","pix","rankgold","toprpg","topriqueza","loja","comprar","inv","inventario"];
-const RPG = ["emprego","vagas","demitir","habilidades","desafiosemanal","desafiomensal","investir","sell","plantar","cultivar","farm","colher","coletar","harvest","plantacao","horta","cozinhar","cook","receitas","ingredientes","sementes","macetar","vendercomida","masmorra","dungeon","bossrpg","arena","torneio","guerra","desafio","forge","forjar","encantar","enchant","dismantle","desmontar","reparar","materiais","precos","equipamentos","pets","adotar","feed","train","evolve","renamepet","petbattle","petbet","equippet","unequippet","classe","class","casa","house","auction","mercado","missoes","quests","conquistas","achievements","prestige","evoluir","streak","reivindicar","claim","speedup","boost","tributos","meustats","criarcla","cla","convidar","convite","rmconvite","aceitarconvite","recusarconvite","expulsar","sair","lojapremium","comprarpremium","propriedades","cprop","cprops","doar","presente","reputacao","rep","vote","eventos","loteria","corrida","leilao","investir","evoluir","reivindicar","speedup"];
+const ECON = [];
+const RPG = [];
 const RANKS = TRAITS.map(x=>`rank${x}`);
 export const dragonFunAliases=[...new Set([...TRAITS,...ACTIONS,...GAME_ALIASES,...SOCIAL,...ECON,...RPG,...RANKS])];
 
@@ -97,25 +96,6 @@ export default {
   const mentions=target?[target]:[];
   if(["dragonfun","menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games"].includes(n)) return ctx.reply(menu(ctx.prefix));
 
-  const rpgEnabled = !ctx.isGroup || isRpgEnabled(ctx.from);
-
-  if(n === "modorpg"){
-    if(!ctx.isGroup) return ctx.reply("🐉 O controle do RPG é configurado por grupo.");
-    if(!ctx.permissions?.isAdmin) return ctx.reply("🛡️ Apenas administradores podem ativar ou desativar o modo RPG.");
-    const enabled = !rpgEnabled;
-    setRpgEnabled(ctx.from, enabled, ctx.sender);
-    return ctx.reply(enabled
-      ? "🎮⚔️ *RPG clássico ativado neste grupo!*\nOs comandos do RPG clássico voltaram a funcionar."
-      : `🎮💤 *RPG clássico desativado neste grupo!*\nEnquanto estiver desligado, ele não responderá aos comandos.\nUse *${ctx.prefix}modorpg* para reativar.`);
-  }
-
-  if(["menurpg","rpg"].includes(n)){
-    if(!rpgEnabled) return;
-    return ctx.reply(rpgMenu(ctx.prefix) + `\n\n🛡️ ADM: *${ctx.prefix}modorpg* controla somente o RPG clássico.`);
-  }
-
-  // RPG clássico desligado = nenhuma resposta aos comandos desse sistema.
-  if((ECON.includes(n) || RPG.includes(n)) && !rpgEnabled) return;
   if(RANKS.includes(n)){
     const trait=n.slice(4);
     const jids=[...new Set((ctx.groupMembers||[]).map(x=>x.id||x.jid).filter(Boolean))];
@@ -152,14 +132,6 @@ export default {
   if(["dados","dice","coinflip","moeda","cassino","slots","slotmachine","roleta","roulette"].includes(n)){let game="slots",choice="",bet=10;if(["dados","dice"].includes(n)){game="dice";bet=ctx.args?.[0];}else if(["coinflip","moeda"].includes(n)){game="coinflip";choice=ctx.args?.[0];bet=ctx.args?.[1];}else if(["roleta","roulette"].includes(n)){game="roulette";choice=ctx.args?.[0];bet=ctx.args?.[1];}else bet=ctx.args?.[0];const r=gamble(ctx.sender,game,bet,choice);if(!r.ok)return ctx.reply("💸 Saldo insuficiente ou aposta inválida.");return ctx.reply(`🎰 *${game.toUpperCase()}*\n${r.result}\n\n${r.win?`🏆 Ganhou *${r.prize}* coins!`:`💥 Perdeu *${r.bet}* coins.`}\n💰 Saldo: ${r.u.coins}`);}
   if(["jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","gartic","quiz_animais","amongus","roletaban"].includes(n)){const r=simpleRpgAction(ctx.sender,n,ctx.args?.join(" "));return ctx.reply(`🎮 *${n.toUpperCase()}*\n${r.text}\n⭐ Lv.${r.u.level} • 💰 ${r.u.coins}`);}
   if(["revelar_gartic","revelar_animal","revelar_enigma","revelar_anagrama","resetv","pular","responder","confirmar","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","reset_vord","pontos","checkpts","rankpts"].includes(n)){return ctx.reply(`🎲 *${n.toUpperCase()}* integrado ao Dragon Fun 2.0.\nUse *${ctx.prefix}menubn* para iniciar uma rodada ou consultar os jogos disponíveis.`);}
-  if(n==="daily"||n==="diario"){const r=daily(ctx.sender);return r.ok?ctx.reply(`🎁 Daily recebido: *${r.amount} coins*\n🔥 Streak: ${r.u.streak}\n💰 Saldo: ${r.u.coins}`):ctx.reply(`⏳ Daily já coletado. Volte em ${ms(r.wait)}.`);}
-  if(["work","trabalhar","mine","minerar","fish","pescar","hunt","cacar","explore","explorar","crime"].includes(n)){const map={trabalhar:"work",minerar:"mine",pescar:"fish",cacar:"hunt",explorar:"explore"};const r=work(ctx.sender,map[n]||n);return r.ok?sendMedia(ctx,mediaFor(n),`${r.amount>=0?"✅":"💥"} *${n.toUpperCase()}*\nResultado: ${r.amount>=0?"+":""}${r.amount} coins\n💰 Saldo: ${r.u.coins}`):ctx.reply(`⏳ Aguarde ${ms(r.wait)} para tentar novamente.`);}
-  if(["perfilrpg","carteira","gold","vergold"].includes(n)){const u=getUser(target);return ctx.conn.sendMessage(ctx.from,{text:`🐉 *DRAGON CARD*\n👤 ${tag(target)}\n⭐ Nível: ${u.level}\n✨ XP: ${u.xp}\n💰 Coins: ${u.coins}\n🏦 Banco: ${u.bank}\n🏆 Vitórias: ${u.wins}\n💥 Derrotas: ${u.losses}`,mentions:[target]},{quoted:ctx.info});}
-  if(["rankgold","toprpg","topriqueza"].includes(n)){const rows=topCoins(10);return ctx.conn.sendMessage(ctx.from,{text:`🏆 *RANK DRAGON COINS*\n\n`+rows.map((x,i)=>`${i+1}. ${tag(x.jid)} — 💰 ${x.coins} | Lv.${x.level}`).join("\n"),mentions:rows.map(x=>x.jid)},{quoted:ctx.info});}
-  if(["pix","doargold"].includes(n)){if(!target||target===ctx.sender)return ctx.reply(`Marque alguém: *${ctx.prefix}${c} @user 100*`);const amount=Number(ctx.args?.find(x=>/^\d+$/.test(x)));const r=transfer(ctx.sender,target,amount);return r.ok?ctx.conn.sendMessage(ctx.from,{text:`💸 ${tag(ctx.sender)} enviou *${r.amount} coins* para ${tag(target)}.`,mentions:[ctx.sender,target]},{quoted:ctx.info}):ctx.reply(r.reason==="saldo"?"💸 Saldo insuficiente.":"Informe um valor válido.");}
-  if(n==="loja"){const s=shop();return ctx.reply(`🛒 *LOJA DRAGON*\n\n`+Object.entries(s).map(([id,x])=>`• *${id}* — ${x.name} — ${x.price} coins`).join("\n")+`\n\nUse *${ctx.prefix}comprar item [qtd]*`);}
-  if(n==="comprar"){const r=buy(ctx.sender,ctx.args?.[0],ctx.args?.[1]);return r.ok?ctx.reply(`✅ Comprou ${r.qty}x ${r.x.name} por ${r.total} coins.\n💰 Saldo: ${r.u.coins}`):ctx.reply(r.reason==="saldo"?"💸 Saldo insuficiente.":`Item não encontrado. Veja *${ctx.prefix}loja*.`);}
-  if(["inv","inventario"].includes(n)){const inv=inventory(target),rows=Object.entries(inv);return ctx.reply(rows.length?`🎒 *INVENTÁRIO*\n\n`+rows.map(([k,v])=>`• ${k}: ${v}`).join("\n"):"🎒 Inventário vazio.");}
   if(n==="casar"){if(!target||target===ctx.sender)return ctx.reply(`💍 Marque alguém: *${ctx.prefix}casar @user*`);const r=proposeMarriage(ctx.sender,target);return r.ok?ctx.conn.sendMessage(ctx.from,{text:`💍 ${tag(ctx.sender)} pediu ${tag(target)} em casamento!\n${tag(target)}, use *${ctx.prefix}aceitarcasamento* para aceitar.`,mentions:[ctx.sender,target]},{quoted:ctx.info}):ctx.reply("💔 Uma das pessoas já está em um relacionamento.");}
   if(["aceitarcasamento","aceitarpedido"].includes(n)){const r=acceptMarriage(ctx.sender);return r.ok?ctx.conn.sendMessage(ctx.from,{text:`💒 ${tag(ctx.sender)} e ${tag(r.partner)} agora são um casal!`,mentions:[ctx.sender,r.partner]},{quoted:ctx.info}):ctx.reply("Não existe pedido de casamento pendente para você.");}
   if(n==="divorciar"){const r=divorce(ctx.sender);return r.ok?ctx.conn.sendMessage(ctx.from,{text:`💔 ${tag(ctx.sender)} e ${tag(r.partner)} se divorciaram.`,mentions:[ctx.sender,r.partner]},{quoted:ctx.info}):ctx.reply("Você não está casado(a).");}
@@ -169,7 +141,6 @@ export default {
   if(n==="deserdar"){if(!target||target===ctx.sender)return ctx.reply("Marque quem deseja remover da família.");familyAction(ctx.sender,target,"remove");return ctx.conn.sendMessage(ctx.from,{text:`👋 ${tag(target)} foi removido(a) da família.`,mentions:[target]},{quoted:ctx.info});}
   if(["shipo","casal"].includes(n)){if(!target||target===ctx.sender)return ctx.reply("Marque alguém para shippar.");const v=stablePercent(`${ctx.sender}:${target}`,"ship");return ctx.conn.sendMessage(ctx.from,{text:`💘 *SHIPÔMETRO*\n${tag(ctx.sender)} ❤️ ${tag(target)}\nCompatibilidade: *${v}%*`,mentions:[ctx.sender,target]},{quoted:ctx.info});}
   if(["sn","chance"].includes(n)){return ctx.reply(`🔮 Chance: *${Math.floor(Math.random()*101)}%*`);}
-  if(RPG.includes(n)){const r=simpleRpgAction(ctx.sender,n,ctx.args?.join(" "));return ctx.reply(`${r.text}\n⭐ Lv.${r.u.level} • ✨ ${r.u.xp} XP • 💰 ${r.u.coins}`);}
   return ctx.reply(menu(ctx.prefix));
  }
 };
