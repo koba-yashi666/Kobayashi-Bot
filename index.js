@@ -3405,9 +3405,12 @@ switch (command) {
 case "dragonban": {
  if(!SoDonoPrincipal)return reply(mess.onlyOwner());
  if(!isGroup)return reply(mess.onlyGroup());
- const target=getTargetFromMessage(info,null);
- if(!target||target===sender)return reply(`🐉 Use *${prefix}dragonban @membro motivo* ou responda à mensagem.`);
- const reason=args.filter(a=>!a.includes("@")).join(" ").trim()||"Sem motivo informado";
+ const mentionedTarget=getTargetFromMessage(info,null);
+ const rawNumber=String(args?.[0]||"").replace(/\D/g,"");
+ const numberTarget=rawNumber.length>=8?`${rawNumber}@s.whatsapp.net`:null;
+ const target=mentionedTarget||numberTarget;
+ if(!target||target===sender)return reply(`🐉 Use *${prefix}dragonban @membro motivo*\n📱 Ou: *${prefix}dragonban 5511999999999 motivo*\n↩️ Também funciona respondendo à mensagem.`);
+ const reason=args.filter((a,i)=>!a.includes("@")&&!(i===0&&numberTarget)).join(" ").trim()||"Sem motivo informado";
  addDragonBan(target,sender,reason);
  const results=await purgeDragonBannedUser(conn,target);
  const removed=results.filter(x=>x.status==="removido"),absent=results.filter(x=>x.status==="ausente"),failed=results.filter(x=>x.status==="erro");
@@ -3415,7 +3418,10 @@ case "dragonban": {
 } break;
 case "rmdragonban": {
  if(!SoDonoPrincipal)return reply(mess.onlyOwner());
- const target=getTargetFromMessage(info,null);if(!target)return reply(`Use *${prefix}rmdragonban @membro*.`);
+ const mentionedTarget=getTargetFromMessage(info,null);
+ const rawNumber=String(args?.[0]||"").replace(/\D/g,"");
+ const target=mentionedTarget||(rawNumber.length>=8?`${rawNumber}@s.whatsapp.net`:null);
+ if(!target)return reply(`Use *${prefix}rmdragonban @membro* ou *${prefix}rmdragonban 5511999999999*.`);
  return reply(removeDragonBan(target)?"✅ Dragon Ban removido.":"❌ Membro não está no Dragon Ban.");
 } break;
 case "listadragonban": {
