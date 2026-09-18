@@ -1081,5 +1081,15 @@
       "Ativação por @marcação ou resposta à mensagem.",
       "Fallback em texto se a mídia não puder ser enviada."
     ]
+  },
+  "5.3.5": {
+    "version": "5.3.5",
+    "title": "/comer mídia corrigida",
+    "date": "2026-09-18",
+    "changes": [
+      "Mídia do /comer convertida de GIF para MP4 com gifPlayback para melhor compatibilidade com WhatsApp/Baileys.",
+      "Arquivo local antigo .gif removido.",
+      "Legenda do comando atualizada."
+    ]
   }
 }

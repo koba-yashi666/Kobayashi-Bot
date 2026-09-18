@@ -65,7 +65,7 @@ function actionCaption(command, actor, target){
     soco: `🥊 ${actor} acertou um soco de brincadeira em ${target}!`,
     lamber: `👅💖 ${actor} deu uma lambida em ${target}. Isso ficou estranho bem rápido.`,
     matar: `💀🎭 ${actor} eliminou ${target} dramaticamente... no faz de conta, obviamente.`,
-    comer: `🍜 ${actor} chamou ${target} pra comer alguma coisa. Finalmente uma interação pacífica.`,
+    comer: `😏 ${actor} foi dar uma escapadinha bem suspeita com ${target}... e a Kobayashi não vai perguntar os detalhes. 💦`,
     louca: `🍽️😤 ${actor} mandou ${target} lavar a louça. A guerra começou.`,
     chorao: `😭 ${actor} declarou que ${target} está no modo chorão hoje.`,
     chorona: `😭 ${actor} declarou que ${target} está no modo chorona hoje.`
@@ -123,7 +123,7 @@ export default {
     const cap=actionCaption(n,tag(ctx.sender),tag(target));
     if(n==="comer"){
       try{
-        const local=fs.readFileSync(path.join(process.cwd(),"media","acoes","comer.gif"));
+        const local=fs.readFileSync(path.join(process.cwd(),"media","acoes","comer.mp4"));
         return ctx.conn.sendMessage(ctx.from,{video:local,gifPlayback:true,caption:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});
       }catch(e){console.error("[COMER GIF]",e?.message||e);return ctx.conn.sendMessage(ctx.from,{text:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});}
     }
