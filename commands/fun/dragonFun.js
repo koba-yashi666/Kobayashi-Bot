@@ -12,7 +12,7 @@ import { buildFunMenu } from "../../lib/ui/menuTheme.js";
 const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
 ];
-const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","socar","soco","chorao","chorona"];
+const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","comer","socar","soco","chorao","chorona"];
 const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
 const ECON = [];
@@ -118,7 +118,17 @@ export default {
     const txt=traitCaption(n,tag(target),val)||traitText(n,tag(target),val);
     return sendMedia(ctx,mediaFor(n),txt,mentions);
   }
-  if(ACTIONS.includes(n)){if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);const cap=actionCaption(n,tag(ctx.sender),tag(target));return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);}
+  if(ACTIONS.includes(n)){
+    if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);
+    const cap=actionCaption(n,tag(ctx.sender),tag(target));
+    if(n==="comer"){
+      try{
+        const local=fs.readFileSync(path.join(process.cwd(),"media","acoes","comer.gif"));
+        return ctx.conn.sendMessage(ctx.from,{video:local,gifPlayback:true,caption:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});
+      }catch(e){console.error("[COMER GIF]",e?.message||e);return ctx.conn.sendMessage(ctx.from,{text:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});}
+    }
+    return sendMedia(ctx,mediaFor(n),cap,[ctx.sender,target]);
+  }
   if(n==="forca"||n==="fc"){if(ctx.args?.length){const r=guessForca(ctx.from,ctx.sender,ctx.args.join(" "));if(r.win)return ctx.reply(`🎉 Acertou! A palavra era *${r.word}*. +60 coins.`);if(r.lose)return ctx.reply(`💀 Fim de jogo! A palavra era *${r.word}*.`);if(r.ok)return ctx.reply(`🪢 ${r.masked}\n❤️ Tentativas: ${r.tries}\n💡 ${r.hint}`);}const s=startForca(ctx.from,ctx.sender);const mask=[...s.word].map(x=>x===" "?" ":"_ ").join("");return ctx.reply(`🪢 *FORCA*\n\n${mask}\n💡 Dica: ${s.hint}\n📚 Tema: ${s.theme}\n\nResponda com *${ctx.prefix}forca letra/palavra*`);}
   if(n==="anagrama"){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Acertou! *${r.answer}* +50 coins.`):ctx.reply("❌ Ainda não. Tente novamente!");}const s=startAnagram(ctx.from,ctx.sender);return ctx.reply(`🔀 *ANAGRAMA*\n\n🔤 *${s.scrambled.toUpperCase()}*\n💡 ${s.hint}\n\nResponda: *${ctx.prefix}anagrama resposta*`);}
   if(["quiz","trivia"].includes(n)){if(ctx.args?.length){const r=answerSimple(ctx.from,ctx.sender,ctx.args.join(" "));return r.correct?ctx.reply(`✅ Resposta certa: *${r.answer}*. +50 coins.`):ctx.reply("❌ Resposta incorreta. Tente de novo!");}const s=startQuiz(ctx.from,ctx.sender);return ctx.reply(`🧠 *QUIZ • ${s.category.toUpperCase()}*\n\n${s.question}\n\nResponda: *${ctx.prefix}quiz resposta*`);}

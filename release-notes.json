@@ -1070,5 +1070,16 @@
       "Dragon RPG permanece como único RPG da Kobayashi.",
       "Jogos, Social e Modo Brincadeira continuam independentes."
     ]
+  },
+  "5.3.4": {
+    "version": "5.3.4",
+    "title": "/comer voltou",
+    "date": "2026-09-18",
+    "changes": [
+      "/comer voltou como comando do MenuBN/Dragon Fun, sem vínculo com RPG.",
+      "Usa o GIF enviado pelo criador salvo localmente.",
+      "Ativação por @marcação ou resposta à mensagem.",
+      "Fallback em texto se a mídia não puder ser enviada."
+    ]
   }
 }
