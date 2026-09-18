@@ -1102,5 +1102,15 @@
       "Resultados e veredito aleatórios a cada uso.",
       "Independente do Dragon RPG."
     ]
+  },
+  "5.3.7": {
+    "version": "5.3.7",
+    "title": "Comando /lid",
+    "date": "2026-09-18",
+    "changes": [
+      "Novo /lid por marcação, resposta ou no próprio usuário.",
+      "Consulta os campos LID do metadata atual do WhatsApp/Baileys.",
+      "Adicionado ao menu geral e /helpcmd."
+    ]
   }
 }

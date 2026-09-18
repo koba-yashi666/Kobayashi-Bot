@@ -1525,6 +1525,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "linda",
   "lindo",
   "linkgp",
+  "lid",
   "linkgrupo",
   "lista",
   "lista_alugel",
@@ -3402,6 +3403,22 @@ if (isCmd) {
   }
 
 switch (command) {
+case "lid": {
+ if(!isGroup)return reply("👤 Use este comando em um grupo.");
+ const ci=info?.message?.extendedTextMessage?.contextInfo||info?.message?.imageMessage?.contextInfo||info?.message?.videoMessage?.contextInfo||info?.message?.documentMessage?.contextInfo||info?.message?.stickerMessage?.contextInfo||{};
+ const target=(Array.isArray(ci?.mentionedJid)?ci.mentionedJid[0]:null)||ci?.participant||sender;
+ let participant=null;
+ try{
+  const meta=await conn.groupMetadata(from);
+  const ids=x=>[x?.id,x?.jid,x?.participant,x?.phoneNumber,x?.lid].filter(Boolean).map(String);
+  participant=(meta?.participants||[]).find(x=>ids(x).includes(String(target)))||null;
+ }catch{}
+ const lid=participant?.lid||(String(participant?.id||"").endsWith("@lid")?participant.id:null)||(String(participant?.jid||"").endsWith("@lid")?participant.jid:null)||(String(target||"").endsWith("@lid")?target:null);
+ const phone=participant?.phoneNumber||[participant?.id,participant?.jid,participant?.participant,target].find(x=>String(x||"").endsWith("@s.whatsapp.net"))||target;
+ if(!lid)return conn.sendMessage(from,{text:`🪪 *LID DO MEMBRO*\n\n👤 Alvo: @${String(phone).split("@")[0]}\n❌ O WhatsApp/Baileys não forneceu o LID desse participante no metadata atual.`,mentions:[phone].filter(Boolean)},{quoted:info});
+ return conn.sendMessage(from,{text:`🪪 *LID DO MEMBRO*\n\n👤 Alvo: @${String(phone).split("@")[0]}\n🆔 LID: *${lid}*`,mentions:[phone].filter(Boolean)},{quoted:info});
+} break;
+
 case "dragonban": {
  if(!SoDonoPrincipal)return reply(mess.onlyOwner());
  if(!isGroup)return reply(mess.onlyGroup());
