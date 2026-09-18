@@ -12,7 +12,7 @@ import { buildFunMenu } from "../../lib/ui/menuTheme.js";
 const TRAITS = [
 "personalidade","linda","lindo","gay","hetero","lesbica","puta","gado","feio","corno","vesgo","bebado","gostoso","gostosa","golpista","nazista","otaku","pobre","rico","burro","burra","inteligente","fiel","infiel","safado","safada","ladrao","ladra","sortudo","sortuda","azarado","azarada","forte","fraco","fraca","pegador","pegadora","otario","otaria","bobo","boba","nerd","preguicoso","preguicosa","trabalhador","trabalhadora","brabo","braba","malandro","malandra","simpatico","simpatica","engracado","engracada","charmoso","charmosa","ciumento","ciumenta","romantico","romantica","responsavel","irresponsavel","introvertido","introvertida","extrovertido","extrovertida","criativo","criativa","gamer","programador","programadora","visionario","visionaria","sonhador","sonhadora","viajante","caseiro","caseira","misterioso","misteriosa","zueiro","zueira","chance","sorte"
 ];
-const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","comer","socar","soco","chorao","chorona"];
+const ACTIONS = ["beijo","beijar","abraco","abraço","abracar","tapa","tapar","chute","chutar","carinho","cafune","matar","louca","louça","lamber","morder","comer","gozar","socar","soco","chorao","chorona"];
 const GAME_ALIASES = ["menubn","menujogos","menudiversao","menubrincadeiras","brincadeira","games","forca","fc","anagrama","quiz","trivia","enigma","wordle","palavra","ppt","pedrapapeltesoura","coinflip","moeda","dados","dice","cassino","slots","slotmachine","roleta","roulette","verdade","desafio","eununca","vord","jogodavelha","tictactoe","connect4","uno","stop","adedonha","cacapalavras","batalhanaval","dueloquiz","duelo","jogov","resetv","gartic","revelar_gartic","quiz_animais","revelar_animal","revelar_enigma","revelar_anagrama","participar","start_vord","help_vord","regras_vord","status_vord","rm_vord","add_vord","exit_vord","pular","reset_vord","responder","confirmar","pontos","checkpts","rankpts","sn","shipo","casal","cantada","piada","fato","conselho","elogio","reflexao","motivacional","quando","amongus","roletaban"];
 const JUDGE = ["julgar","judge"];
 const SOCIAL = ["casar","aceitarcasamento","aceitarpedido","divorciar","minhadupla","relacionamento","casais","familia","adotaruser","adotarfilho","deserdar","arvore","criar_familia","sair_familia","deletar_familia"];
@@ -67,6 +67,7 @@ function actionCaption(command, actor, target){
     lamber: `👅💖 ${actor} deu uma lambida em ${target}. Isso ficou estranho bem rápido.`,
     matar: `💀🎭 ${actor} eliminou ${target} dramaticamente... no faz de conta, obviamente.`,
     comer: `😏 ${actor} foi dar uma escapadinha bem suspeita com ${target}... e a Kobayashi não vai perguntar os detalhes. 💦`,
+    gozar: `😏 ${actor} aprontou com ${target}... 💦 Na próxima a Kobayashi nem quer saber.`,
     louca: `🍽️😤 ${actor} mandou ${target} lavar a louça. A guerra começou.`,
     chorao: `😭 ${actor} declarou que ${target} está no modo chorão hoje.`,
     chorona: `😭 ${actor} declarou que ${target} está no modo chorona hoje.`
@@ -132,9 +133,9 @@ export default {
   if(ACTIONS.includes(n)){
     if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`• Mencione o "@" ou responda a mensagem de alguém. 🤷‍♀️\n• Exemplo: *${ctx.prefix}${c} @membro*`);
     const cap=actionCaption(n,tag(ctx.sender),tag(target));
-    if(n==="comer"){
+    if(["comer","gozar"].includes(n)){
       try{
-        const local=fs.readFileSync(path.join(process.cwd(),"media","acoes","comer.mp4"));
+        const local=fs.readFileSync(path.join(process.cwd(),"media","acoes",`${n}.mp4`));
         return ctx.conn.sendMessage(ctx.from,{video:local,gifPlayback:true,caption:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});
       }catch(e){console.error("[COMER GIF]",e?.message||e);return ctx.conn.sendMessage(ctx.from,{text:cap,mentions:[ctx.sender,target]},{quoted:ctx.info});}
     }

@@ -1124,5 +1124,16 @@
       "A Kobayashi ainda precisa ser administradora para remover o alvo.",
       "O /ban comum continua inalterado para administradores."
     ]
+  },
+  "5.3.9": {
+    "version": "5.3.9",
+    "title": "Comando /gozar",
+    "date": "2026-09-18",
+    "changes": [
+      "Novo /gozar no MenuBN/Dragon Fun.",
+      "Vídeo local enviado pelo criador.",
+      "Funciona por @marcação ou resposta.",
+      "Independente do Dragon RPG."
+    ]
   }
 }
