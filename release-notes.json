@@ -1146,5 +1146,17 @@
       "/dragonrpg sem argumento abre o menu do Dragon RPG.",
       "Controle continua restrito a administradores do grupo ou dono principal."
     ]
+  },
+  "5.3.11": {
+    "version": "5.3.11",
+    "title": "Bang Global",
+    "date": "2026-09-19",
+    "changes": [
+      "Novo /bang exclusivo do dono principal.",
+      "Remove o alvo de todos os grupos em que a Kobayashi é administradora.",
+      "Aceita @marcação, número ou resposta à mensagem.",
+      "Exibe resumo com grupos verificados, encontrados, removidos e falhas.",
+      "O comando não adiciona o alvo à lista negra; realiza somente a remoção global."
+    ]
   }
 }

@@ -1312,6 +1312,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "b",
   "bam",
   "ban",
+  "bang",
   "banc",
   "banfake",
   "banghost",
@@ -7027,6 +7028,63 @@ case "kobaban": {
     console.error("Erro no KobaBan:", e);
     return reply("❌🐉 A Kobayashi tentou executar o ban, mas o WhatsApp recusou a remoção.");
   }
+}
+break;
+
+case "bang": {
+  if (!SoDonoPrincipal) return reply("👑🐉 O *Bang* é exclusivo do dono principal.");
+
+  const ctxInfo =
+    info?.message?.extendedTextMessage?.contextInfo ||
+    info?.message?.imageMessage?.contextInfo ||
+    info?.message?.videoMessage?.contextInfo ||
+    info?.message?.documentMessage?.contextInfo ||
+    info?.message?.stickerMessage?.contextInfo || {};
+
+  const mentioned = Array.isArray(ctxInfo?.mentionedJid) ? ctxInfo.mentionedJid[0] : null;
+  const quoted = ctxInfo?.participant || null;
+  const rawNumber = String(args?.[0] || "").replace(/\D/g, "");
+  const numberTarget = rawNumber.length >= 8 ? `${rawNumber}@s.whatsapp.net` : null;
+  const target = mentioned || quoted || numberTarget;
+
+  if (!target) {
+    return reply(`💥🐉 Informe quem será removido de todos os grupos onde a Kobayashi é ADM.\n\nExemplos:\n*${prefix}bang @membro*\n*${prefix}bang 5511999999999*\nOu responda à mensagem com *${prefix}bang*.`);
+  }
+
+  const targetDigits = String(target).split("@")[0].replace(/\D/g, "");
+  let groups = {};
+  try { groups = await conn.groupFetchAllParticipating(); }
+  catch (e) { console.error("[BANG] Falha ao buscar grupos:", e); return reply("❌ Não consegui carregar os grupos da Kobayashi."); }
+
+  let checked=0, adminGroups=0, found=0, removed=0, failed=0;
+  for (const [gid, cached] of Object.entries(groups || {})) {
+    checked++;
+    try {
+      const meta = cached?.participants ? cached : await conn.groupMetadata(gid);
+      const participants = Array.isArray(meta?.participants) ? meta.participants : [];
+      const botIds = [botNumber, conn?.user?.id, conn?.user?.lid].filter(Boolean).map(String);
+      const botP = participants.find(p => [p?.id,p?.jid,p?.lid,p?.phoneNumber].filter(Boolean).map(String).some(id => botIds.includes(id)));
+      if (!botP || !["admin","superadmin"].includes(String(botP.admin || ""))) continue;
+      adminGroups++;
+
+      const victim = participants.find(p => {
+        const ids=[p?.id,p?.jid,p?.lid,p?.phoneNumber].filter(Boolean).map(String);
+        if (ids.includes(String(target))) return true;
+        return ids.some(id => id.split("@")[0].replace(/\D/g,"") === targetDigits);
+      });
+      if (!victim) continue;
+      found++;
+
+      const victimJid = victim?.id || victim?.jid || victim?.phoneNumber || victim?.lid || target;
+      await conn.groupParticipantsUpdate(gid,[victimJid],"remove");
+      removed++;
+    } catch (e) {
+      failed++;
+      console.error(`[BANG] ${gid}:`, e?.message || e);
+    }
+  }
+
+  return reply(`💥🐉 *BANG GLOBAL CONCLUÍDO*\n\n🎯 Alvo: *${targetDigits || target}*\n🌐 Grupos verificados: *${checked}*\n🛡️ Grupos onde a Kobayashi é ADM: *${adminGroups}*\n👤 Alvo encontrado: *${found}*\n🚪 Removido com sucesso: *${removed}*\n⚠️ Falhas: *${failed}*`);
 }
 break;
 
