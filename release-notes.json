@@ -1181,5 +1181,17 @@
       "/add_prefixo continua compatível e sincroniza a lista de prefixos.",
       "Exclusivo do dono principal."
     ]
+  },
+  "5.3.14": {
+    "version": "5.3.14",
+    "title": "Dragon Fun Modular",
+    "date": "2026-09-19",
+    "changes": [
+      "Dragon Fun reorganizado em arquivos individuais por comando.",
+      "/comer, /gozar, /mamada, /gado e demais ações/medidores agora podem ser alterados isoladamente.",
+      "Roteador dragonFun.js reduzido e responsável apenas por encaminhar comandos.",
+      "Utilitários compartilhados movidos para dragonFun/_utils.js.",
+      "Jogos e social preservados em módulo separado para evitar regressões."
+    ]
   }
 }
