@@ -1135,5 +1135,16 @@
       "Funciona por @marcação ou resposta.",
       "Independente do Dragon RPG."
     ]
+  },
+  "5.3.10": {
+    "version": "5.3.10",
+    "title": "Dragon RPG on/off Fix",
+    "date": "2026-09-19",
+    "changes": [
+      "Corrigido /dragonrpg off para desativar o Dragon RPG do grupo.",
+      "/dragonrpg on ativa o sistema novamente.",
+      "/dragonrpg sem argumento abre o menu do Dragon RPG.",
+      "Controle continua restrito a administradores do grupo ou dono principal."
+    ]
   }
 }

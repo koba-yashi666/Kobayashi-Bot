@@ -8936,7 +8936,29 @@ case "dragonrpgmode": {
 }
 break;
 
-case "dragonrpg":
+case "dragonrpg": {
+  const dragonModeArg = String(args?.[0] || "").trim().toLowerCase();
+  const dragonModeOn = ["on","ativar","ligar","1"];
+  const dragonModeOff = ["off","desativar","desligar","0"];
+
+  if (dragonModeOn.includes(dragonModeArg) || dragonModeOff.includes(dragonModeArg)) {
+    if (!isGroup) return reply("🐉 O controle do Dragon RPG é configurado por grupo.");
+    if (!groupAdmins.includes(sender) && !SoDonoPrincipal) {
+      return reply("🛡️ Apenas administradores ou o dono principal podem alterar o Dragon RPG.");
+    }
+
+    const enabled = dragonModeOn.includes(dragonModeArg);
+    setDragonRpgEnabled(from, enabled, sender);
+    return reply(enabled
+      ? `🐉🔥 *Dragon RPG ativado neste grupo!*\n\nOs comandos do Dragon RPG voltaram a responder.`
+      : `🐉💤 *Dragon RPG desativado neste grupo!*\n\nEnquanto estiver desligado, nenhum comando do Dragon RPG responderá.`);
+  }
+
+  // Sem on/off, mantém /dragonrpg como portal/menu do RPG.
+  const dragonMenu = formatRpgMenu(prefix);
+  return reply(dragonMenu);
+}
+break;
 
 // === DRAGON RPG 3.0 — roteamento prioritário v4.0.8 ===
 case "masmorras": case "dungeons": {
