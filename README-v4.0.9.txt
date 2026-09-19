@@ -1,1 +1,0 @@
-KOBAYASHI BOT v4.0.9\n\nBosses: 20% em /explorar e 20% nas masmorras.\nBosses do explorar usam o combate normal do Dragon RPG.\n\nCriador: Luiz G. / Kobayashi.\nVenda/revenda sem autorização é estritamente proibida.\n
