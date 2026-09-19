@@ -1158,5 +1158,28 @@
       "Exibe resumo com grupos verificados, encontrados, removidos e falhas.",
       "O comando não adiciona o alvo à lista negra; realiza somente a remoção global."
     ]
+  },
+  "5.3.12": {
+    "version": "5.3.12",
+    "title": "Comando /mamada",
+    "date": "2026-09-19",
+    "changes": [
+      "Novo /mamada no MenuBN/Dragon Fun.",
+      "Usa vídeo local.",
+      "Funciona por marcação ou resposta.",
+      "Independente do Dragon RPG."
+    ]
+  },
+  "5.3.13": {
+    "version": "5.3.13",
+    "title": "MultiPrefixo",
+    "date": "2026-09-19",
+    "changes": [
+      "Novo /multiprefixo para usar vários prefixos simultaneamente.",
+      "Adicionar, remover, listar e resetar prefixos.",
+      "Até 10 prefixos ativos, com 1 a 3 caracteres cada.",
+      "/add_prefixo continua compatível e sincroniza a lista de prefixos.",
+      "Exclusivo do dono principal."
+    ]
   }
 }

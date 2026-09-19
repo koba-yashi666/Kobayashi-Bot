@@ -110,6 +110,11 @@ const settings = JSON.parse(
 );
 
 const { prefix, NomeDoBot, ownerNumber, ownerName } = settings;
+const configuredPrefixes = [...new Set(
+  (Array.isArray(settings.prefixes) ? settings.prefixes : [prefix])
+    .map(v => String(v || "").trim()).filter(Boolean)
+)];
+if (!configuredPrefixes.includes(String(prefix))) configuredPrefixes.unshift(String(prefix));
 
 const FUN_DB = path.join(process.cwd(), "files", "database", "brincadeiras.json");
 
@@ -1582,7 +1587,9 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "morde",
   "julgar",
   "gozar",
+  "mamada",
   "morder",
+  "multiprefixo",
   "mododragonrpg",
   "modoemergencia",
   "moeda",
@@ -1885,12 +1892,16 @@ if (!body && type === "stickerMessage") {
   }
 }
 
-const isCmd = body.startsWith(prefix);
+const activePrefixes = [...new Set(
+  (Array.isArray(readSettingsFile()?.prefixes) ? readSettingsFile().prefixes : configuredPrefixes)
+    .map(v => String(v || "").trim()).filter(Boolean)
+)].sort((a,b) => b.length - a.length);
+const usedPrefix = activePrefixes.find(p => body.startsWith(p)) || null;
+const isCmd = Boolean(usedPrefix);
 
 // Parser universal de comandos:
-// lê a mensagem inteira depois do prefixo e separa comando + complementos.
-// Ex.: /dragonrpg off -> rawCommand="dragonrpg", args=["off"], q="off".
-const fullCommandText = isCmd ? body.slice(prefix.length).trim() : "";
+// detecta qual dos prefixos configurados foi usado e separa comando + complementos.
+const fullCommandText = isCmd ? body.slice(usedPrefix.length).trim() : "";
 const commandParts = fullCommandText ? fullCommandText.split(/\s+/) : [];
 const rawCommand = isCmd
   ? String(commandParts.shift() || "").toLowerCase()
@@ -11049,6 +11060,44 @@ case "status_bot": {
 }
 break;
 
+case "multiprefixo": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode alterar os prefixos do bot.");
+  const cfg = readSettingsFile();
+  const atuais = [...new Set((Array.isArray(cfg.prefixes) ? cfg.prefixes : [cfg.prefix || prefix]).map(v=>String(v||"").trim()).filter(Boolean))];
+  const acao = String(args?.[0] || "").toLowerCase();
+  const valor = String(args?.[1] || "").trim();
+
+  if (!acao || ["ver","lista","listar"].includes(acao)) {
+    return reply(`⌨️🐉 *MULTIPREFIXO*\n\nPrefixos ativos: ${atuais.map(x=>`*${x}*`).join("  ")}\n\n➕ *${prefix}multiprefixo add !*\n➖ *${prefix}multiprefixo del !*\n♻️ *${prefix}multiprefixo reset*`);
+  }
+  if (["reset","limpar"].includes(acao)) {
+    cfg.prefixes=[String(cfg.prefix || prefix)];
+    writeSettingsFile(cfg);
+    return reply(`♻️ Multiprefixo resetado.\nPrefixo ativo: *${cfg.prefixes[0]}*`);
+  }
+  if (!["add","adicionar","del","remover","rm"].includes(acao))
+    return reply(`Use *${prefix}multiprefixo add !*, *${prefix}multiprefixo del !* ou *${prefix}multiprefixo ver*.`);
+  if (!valor || /\s/.test(valor) || valor.length > 3)
+    return reply("❌ O prefixo deve ter de 1 a 3 caracteres e não pode conter espaços.");
+
+  if (["add","adicionar"].includes(acao)) {
+    if (atuais.includes(valor)) return reply(`ℹ️ O prefixo *${valor}* já está ativo.`);
+    if (atuais.length >= 10) return reply("❌ Limite de *10 prefixos* atingido.");
+    cfg.prefixes=[...atuais,valor];
+    writeSettingsFile(cfg);
+    return reply(`✅ Prefixo *${valor}* adicionado.\n\nAtivos: ${cfg.prefixes.map(x=>`*${x}*`).join("  ")}`);
+  }
+
+  const novos=atuais.filter(x=>x!==valor);
+  if (novos.length===atuais.length) return reply(`ℹ️ O prefixo *${valor}* não está ativo.`);
+  if (!novos.length) return reply("❌ O bot precisa manter pelo menos um prefixo.");
+  cfg.prefixes=novos;
+  if (!novos.includes(String(cfg.prefix || ""))) cfg.prefix=novos[0];
+  writeSettingsFile(cfg);
+  return reply(`🗑️ Prefixo *${valor}* removido.\n\nAtivos: ${novos.map(x=>`*${x}*`).join("  ")}`);
+}
+break;
+
 case "prefixo": {
   if (!SoDono) return reply(mess.onlyOwner());
   const cfg = readSettingsFile();
@@ -11063,7 +11112,10 @@ case "add_prefixo": {
     return reply(`➕ Use: *${prefix}add_prefixo !*\nO prefixo deve ter de 1 a 3 caracteres e não pode conter espaços.`);
 
   const cfg = readSettingsFile();
+  const antigo = String(cfg.prefix || prefix);
   cfg.prefix = novo;
+  cfg.prefixes = [...new Set((Array.isArray(cfg.prefixes) ? cfg.prefixes : [antigo]).map(String).filter(Boolean).map(x => x === antigo ? novo : x))];
+  if (!cfg.prefixes.includes(novo)) cfg.prefixes.unshift(novo);
   writeSettingsFile(cfg);
   await reply(`✅🌸 Prefixo alterado de *${prefix}* para *${novo}*.\n♻️ Reiniciando para aplicar...`);
   setTimeout(() => process.exit(0), 1800);
