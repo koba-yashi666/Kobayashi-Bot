@@ -9047,7 +9047,7 @@ break;
 
 // === DRAGON RPG 3.0 — roteamento prioritário v4.0.8 ===
 case "masmorras": case "dungeons": {
- const rows=Object.entries(DUNGEONS).map(([id,d])=>`${d.emoji} *${id}* — ${d.name} | Nv.${d.min}+ | ⚡${d.energy}`);
+ const rows=Object.entries(DUNGEONS).map(([id,d])=>`${d.emoji} *${id}* — ${d.name} | Nv.${d.min}+ | ⚡${d.energy} | 👑 ${d.boss.chance}%`);
  return reply(`🐉🏰 *MASMORRAS*\n\n${rows.join("\n")}\n\nUse *${prefix}masmorra nome*`);
 } break;
 case "masmorra": case "dungeon": {
@@ -9060,7 +9060,7 @@ case "masmorra": case "dungeon": {
  return reply(`${r.boss ? "👑⚔️ *BOSS DA MASMORRA DERROTADO!*\\n\\n" : ""}${r.x.emoji} *${r.x.name} CONCLUÍDA!*\n\n🏆 Vitória${r.boss ? " contra o Boss!" : ""}\n✨ XP: *${r.xp}*\n🪙 Coins: *${r.coins}*\n\n🎒 *Drops:*\n${fmtMaterials(r.drops)}\n\n⚡ Energia: *${r.energy}*${r.boss ? "\\n🔥 Chance de Boss: *20%*." : ""}`);
 } break;
 case "materiais": {
- const u=dungeonProfile(sender); return reply(`🎒🐉 *MATERIAIS*\n\n${fmtMaterials(u.materials)||"Nenhum material ainda."}\n\n⚡ ${u.energy}/100 | 🏰 ${u.runs} exploração(ões)`);
+ const u=dungeonProfile(sender); return reply(`🎒🐉 *MATERIAIS*\n\n${fmtMaterials(u.materials)||"Nenhum material ainda."}\n\n⚡ ${u.energy}/100 | 🏰 ${u.runs} exploração(ões) | 👑 ${u.bosses||0} boss(es)`);
 } break;
 case "receitas": case "crafts": {
  const rows=Object.entries(RECIPES).map(([id,r])=>`${r.name} — *${id}*\n${fmtNeeds(r.needs)}`);
