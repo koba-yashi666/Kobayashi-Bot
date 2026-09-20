@@ -1216,5 +1216,40 @@
       "Ações, medidores e /julgar passam a exibir @ do número quando disponível.",
       "Mantém fallback para LID somente quando o WhatsApp/Baileys não fornece mapeamento PN."
     ]
+  },
+  "5.3.17": {
+    "version": "5.3.17",
+    "title": "Mamada LID Fix",
+    "date": "2026-09-20",
+    "changes": [
+      "Corrige a exibição da menção no /mamada quando o WhatsApp entrega identificador LID.",
+      "O comando passa a usar a marcação normalizada do alvo na legenda."
+    ]
+  },
+  "5.3.18": {
+    "version": "5.3.18",
+    "title": "Dragon RPG 2.0 — Parte 1 Lite",
+    "date": "2026-09-20",
+    "changes": [
+      "Início do Dragon RPG 2.0 em formato leve e incremental.",
+      "Masmorras passam a ter chance própria de encontro com Boss.",
+      "Adicionado sistema de loot ponderado e material raro Núcleo de Boss.",
+      "Novo craft de chave de dungeon integrado ao sistema existente.",
+      "Adicionado contador de Bosses derrotados, mantendo compatibilidade com saves antigos."
+    ],
+    "commands": [
+      "craft chave",
+      "masmorras"
+    ]
+  },
+  "5.3.19": {
+    "version": "5.3.19",
+    "title": "Novidades Fix + Dragon RPG 2.0 Lite",
+    "date": "2026-09-20",
+    "changes": [
+      "Corrigido /novidades que ainda mostrava a v5.3.16.",
+      "Adicionadas ao histórico as notas das versões v5.3.17 e v5.3.18.",
+      "Mantidas as novidades da Parte 1 Lite do Dragon RPG 2.0: Bosses, loot ponderado, Núcleo de Boss e craft de chave de dungeon."
+    ]
   }
 }
