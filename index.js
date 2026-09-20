@@ -3399,6 +3399,22 @@ if (isCmd) {
     commandCount: new Set([...switchCommandNames, ...modularCommandNames]).size,
     getGroupProtection,
     isFunModeEnabled,
+    resolveDisplayJid: async (rawJid) => {
+      if (!rawJid) return rawJid;
+      const raw = String(rawJid);
+      if (!raw.endsWith("@lid")) return raw;
+      try {
+        const participant = (groupMembers || []).find((p) =>
+          [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).map(String).includes(raw)
+        );
+        const directPN = [participant?.phoneNumber, participant?.jid, participant?.participant, participant?.id]
+          .find((v) => String(v || "").endsWith("@s.whatsapp.net"));
+        if (directPN) return directPN;
+        const pn = await getPNForJid(conn, raw, directPN || participant?.phoneNumber || raw);
+        if (pn && String(pn).endsWith("@s.whatsapp.net")) return pn;
+      } catch {}
+      return raw;
+    },
   });
 
   if (modularHandled) {

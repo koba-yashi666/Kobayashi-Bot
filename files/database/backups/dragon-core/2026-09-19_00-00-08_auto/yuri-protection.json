@@ -1,0 +1,20 @@
+{
+  "120363405231826649@g.us": {
+    "antidel": false,
+    "antiflood": true,
+    "floodInterval": 10,
+    "mutedUsers": {
+      "238173150048301@lid": true
+    }
+  },
+  "120363410594949336@g.us": {
+    "mutedUsers": {
+      "218743405854894@lid": true
+    }
+  },
+  "120363425846623574@g.us": {
+    "mutedUsers": {
+      "9410273402970@lid": true
+    }
+  }
+}

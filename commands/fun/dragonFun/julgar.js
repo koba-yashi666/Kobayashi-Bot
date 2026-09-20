@@ -1,6 +1,6 @@
-import { targetOf, tag } from "./_utils.js";
+import { targetOf, tag, displayJid } from "./_utils.js";
 export const aliases=["julgar","judge"];
-export default async function run(ctx){const explicitTarget=targetOf(ctx);const target=explicitTarget||ctx.sender;
+export default async function run(ctx){const explicitTarget=targetOf(ctx);const rawTarget=explicitTarget||ctx.sender;const target=await displayJid(ctx,rawTarget);
 
     if(!explicitTarget||explicitTarget===ctx.sender)return ctx.reply(`🤖 Marque alguém ou responda à mensagem da pessoa.\nExemplo: *${ctx.prefix}julgar @membro*`);
     const pick=a=>a[Math.floor(Math.random()*a.length)];

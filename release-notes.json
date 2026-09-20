@@ -1193,5 +1193,28 @@
       "Utilitários compartilhados movidos para dragonFun/_utils.js.",
       "Jogos e social preservados em módulo separado para evitar regressões."
     ]
+  },
+  "5.3.15": {
+    "version": "5.3.15",
+    "title": "Hospedagem Full Structure Fix",
+    "date": "2026-09-19",
+    "changes": [
+      "Pacote completo reconstruído sobre a árvore integral do bot.",
+      "Restaurados módulos exigidos pelo index.js que faltavam nos overlays cumulativos.",
+      "Dragon Fun modular v5.3.14 preservado.",
+      "Estrutura pronta para extrair diretamente na raiz do Pterodactyl.",
+      "Dados de sessão, autenticação, licença local e bancos de runtime não são incluídos."
+    ]
+  },
+  "5.3.16": {
+    "version": "5.3.16",
+    "title": "Dragon Fun LID Mention Fix",
+    "date": "2026-09-19",
+    "changes": [
+      "Corrige marcações dos comandos de brincadeira quando o WhatsApp entrega @lid.",
+      "Resolve LID para o JID de telefone usando metadados do grupo e getPNForJid.",
+      "Ações, medidores e /julgar passam a exibir @ do número quando disponível.",
+      "Mantém fallback para LID somente quando o WhatsApp/Baileys não fornece mapeamento PN."
+    ]
   }
 }

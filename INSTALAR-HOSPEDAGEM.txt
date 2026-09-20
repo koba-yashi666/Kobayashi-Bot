@@ -1,0 +1,4 @@
+KOBAYASHI v5.3.15 — INSTALAÇÃO PTERODACTYL
+Extraia o conteúdo deste ZIP DIRETAMENTE na raiz onde package.json e index.js são executados.
+Não deixe uma pasta Kobayashi-Bot-vX.Y.Z envolvendo os arquivos.
+Depois execute npm install e npm start (ou o comando de inicialização configurado no painel).

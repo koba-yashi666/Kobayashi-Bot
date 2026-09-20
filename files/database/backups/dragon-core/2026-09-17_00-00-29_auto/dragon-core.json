@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "groups": {},
+  "tasks": {
+    "f9c101c1": {
+      "id": "f9c101c1",
+      "groupJid": "120363424480268451@g.us",
+      "type": "rules",
+      "time": "13:02",
+      "text": null,
+      "enabled": true,
+      "recurring": "daily",
+      "createdBy": "5515997075304@s.whatsapp.net",
+      "createdAt": "2026-09-01T16:02:02.148Z",
+      "lastRunKey": "2026-09-16@13:02",
+      "lastRunAt": "2026-09-16T16:02:21.166Z"
+    },
+    "197b08d1": {
+      "id": "197b08d1",
+      "groupJid": "120363424480268451@g.us",
+      "type": "rules",
+      "time": "13:03",
+      "text": null,
+      "enabled": true,
+      "recurring": "daily",
+      "createdBy": "5515997075304@s.whatsapp.net",
+      "createdAt": "2026-09-01T16:02:09.719Z",
+      "lastRunKey": "2026-09-16@13:03",
+      "lastRunAt": "2026-09-16T16:03:20.905Z"
+    }
+  },
+  "runtime": {
+    "lastBackupDay": "2026-09-16",
+    "lastMigrationAt": "2026-09-17T02:49:29.375Z"
+  }
+}

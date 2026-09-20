@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "players": {
+    "5515997075304@s.whatsapp.net": {
+      "jid": "5515997075304@s.whatsapp.net",
+      "name": "✧༒☬ƙσႦαყαʂԋι☬༒✧",
+      "createdAt": "2026-09-05T20:36:55.393Z",
+      "updatedAt": "2026-09-05T20:36:55.393Z",
+      "level": 1,
+      "xp": 0,
+      "xpNext": 100,
+      "gold": 100,
+      "class": null,
+      "classChosenAt": null,
+      "faction": null,
+      "dragonClass": null,
+      "awakening": {
+        "unlocked": false,
+        "started": false,
+        "completed": false,
+        "startedAt": null,
+        "completedAt": null
+      },
+      "stats": {
+        "hp": 100,
+        "mana": 50,
+        "atk": 10,
+        "def": 10,
+        "mag": 10,
+        "agi": 10
+      },
+      "inventory": [
+        {
+          "id": "pocao_pequena",
+          "name": "Poção Pequena",
+          "icon": "🧪",
+          "qty": 2,
+          "type": "consumivel"
+        },
+        {
+          "id": "pao_aventureiro",
+          "name": "Pão de Aventureiro",
+          "icon": "🥖",
+          "qty": 1,
+          "type": "consumivel"
+        }
+      ],
+      "equipment": {
+        "weapon": null,
+        "armor": null,
+        "accessory": null
+      }
+    }
+  }
+}
