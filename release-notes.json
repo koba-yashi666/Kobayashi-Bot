@@ -1251,5 +1251,19 @@
       "Adicionadas ao histórico as notas das versões v5.3.17 e v5.3.18.",
       "Mantidas as novidades da Parte 1 Lite do Dragon RPG 2.0: Bosses, loot ponderado, Núcleo de Boss e craft de chave de dungeon."
     ]
+  },
+  "v5.3.20": {
+    "version": "5.3.20",
+    "title": "Add Dias no Aluguel",
+    "date": "2026-09-22",
+    "added": [
+      "/add_dias DIAS — adiciona dias ao vencimento do aluguel atual",
+      "Alias /adddias"
+    ],
+    "changed": [
+      "Disponível apenas para o dono principal",
+      "Preserva o vencimento existente quando o aluguel ainda está ativo",
+      "Reinicia os avisos de vencimento após adicionar dias"
+    ]
   }
 }

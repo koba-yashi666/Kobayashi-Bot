@@ -3747,6 +3747,54 @@ case "aluguel_gratis": {
 }
 break;
 
+case "add_dias":
+case "adddias": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode adicionar dias ao aluguel.");
+
+  // Dentro de um grupo: /add_dias 10
+  // Fora do grupo: /add_dias ID_DO_GRUPO 10
+  const targetJid = isGroup ? from : normalizeGroupJid(args[0]);
+  const daysArg = isGroup ? args[0] : args[1];
+  const days = Number(daysArg);
+
+  if (!targetJid || !Number.isInteger(days) || days <= 0 || days > 3650) {
+    return reply(
+      `➕🐉 *ADICIONAR DIAS AO ALUGUEL*\n\n` +
+      `No grupo: *${prefix}add_dias 10*\n` +
+      `Fora do grupo: *${prefix}add_dias ID_DO_GRUPO 10*\n\n` +
+      `Informe de 1 a 3650 dias.`
+    );
+  }
+
+  const current = getRental(targetJid);
+  if (!current.exists) return reply("🌸 Esse grupo ainda não possui aluguel registrado.");
+  if (current.permanent) return reply("♾️ Este grupo possui aluguel permanente e não precisa receber dias.");
+
+  let targetName = current.rental?.groupName || targetJid;
+  try { targetName = (await conn.groupMetadata(targetJid))?.subject || targetName; } catch {}
+
+  const result = renewRental(targetJid, targetName, days * 24 * 60 * 60 * 1000, sender, {
+    source: "manual-add-days"
+  });
+
+  resetRentalResponsibleWarning(targetJid);
+  const responsible = getRentalResponsible(targetJid);
+  const remainingDays = Math.max(0, Math.ceil((Number(result.rental.expiresAt) - Date.now()) / (24 * 60 * 60 * 1000)));
+
+  return conn.sendMessage(from, {
+    text:
+      `➕🐉 *DIAS ADICIONADOS AO ALUGUEL*\n\n` +
+      `🏷️ Grupo: *${targetName}*\n` +
+      `➕ Dias adicionados: *${days}*\n` +
+      `📅 Novo vencimento: *${formatRentalDate(result.rental.expiresAt)}*\n` +
+      `⏳ Tempo restante: *${remainingDays} dia(s)*` +
+      `${responsible ? `\n👤 Responsável: @${String(responsible).split("@")[0]}` : ""}\n\n` +
+      `✅ O período foi acrescentado com sucesso.`,
+    mentions: responsible ? [responsible] : []
+  }, { quoted: info });
+}
+break;
+
 case "renovar_aluguel":
 case "renovar_alugel": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode renovar aluguéis.");
