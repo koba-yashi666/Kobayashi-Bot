@@ -1265,5 +1265,19 @@
       "Preserva o vencimento existente quando o aluguel ainda está ativo",
       "Reinicia os avisos de vencimento após adicionar dias"
     ]
+  },
+  "v5.3.21": {
+    "version": "5.3.21",
+    "title": "Fotos de Boas-vindas e Saída",
+    "date": "2026-09-24",
+    "added": [
+      "/fotobv — define foto personalizada do bem-vindo por grupo",
+      "/fotosaiu — define foto personalizada quando um membro sai",
+      "/fotobv off e /fotosaiu off — removem as imagens personalizadas"
+    ],
+    "changed": [
+      "Welcome e despedida passam a enviar a imagem configurada com a legenda existente",
+      "Configuração persistente e individual por grupo; somente administradores podem alterar"
+    ]
   }
 }

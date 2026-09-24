@@ -547,7 +547,13 @@ async function startConnect() {
             );
 
             try {
-              await conn.sendMessage(from, message);
+              const fsM = (await import("node:fs")).default;
+              const welcomePhoto = String(settings?.welcomePhoto || "").trim();
+              if (welcomePhoto && fsM.existsSync(welcomePhoto)) {
+                await conn.sendMessage(from, { image: fsM.readFileSync(welcomePhoto), caption: message.text, mentions: message.mentions });
+              } else {
+                await conn.sendMessage(from, message);
+              }
             } catch (e) {
               // Fallback do Nazuna adaptado: se mentions/JID der problema, envia texto puro.
               console.error("[WELCOME NAZUNA] Falha com mentions, tentando texto:", e?.message || e);
@@ -572,7 +578,13 @@ async function startConnect() {
 
             const text = formatWelcomeText(bye, replacements);
             try {
-              await conn.sendMessage(from, { text, mentions: participants });
+              const fsM = (await import("node:fs")).default;
+              const byePhoto = String(settings?.byePhoto || "").trim();
+              if (byePhoto && fsM.existsSync(byePhoto)) {
+                await conn.sendMessage(from, { image: fsM.readFileSync(byePhoto), caption: text, mentions: participants });
+              } else {
+                await conn.sendMessage(from, { text, mentions: participants });
+              }
             } catch {
               await conn.sendMessage(from, { text });
             }

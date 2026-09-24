@@ -25,7 +25,7 @@ import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdm
 
 import { getGroupMetadata } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/group/groupSchedule.js";
-import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto } from "./lib/features/group/welcomeConfig.js";
+import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto, setByePhoto, removeByePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
 import { startPackageCapture, stopPackageCapture, captureStickerIfActive, getPackageCaptureStatus, saveCapturedPackage, getStickerPackage, listStickerPackages, deleteStickerPackage, getNextStickerFromPackage } from "./lib/features/stickers/stickerPackages.js";
 import { getWhitelist, isWhitelisted, addWhitelist, removeWhitelist } from "./lib/features/moderation/whitelist.js";
@@ -6408,6 +6408,18 @@ case "fotobv": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
+  const fotoBvOp = String(args?.[0] || "").toLowerCase();
+  if (["off", "remover", "remove"].includes(fotoBvOp)) {
+    const cfg = getWelcomeConfig(from);
+    const oldPhoto = String(cfg?.welcomePhoto || "").trim();
+    try {
+      const fsM = (await import("node:fs")).default;
+      if (oldPhoto && fsM.existsSync(oldPhoto)) fsM.unlinkSync(oldPhoto);
+    } catch {}
+    removeWelcomePhoto(from);
+    return reply("🗑️🌸 Foto do bem-vindo removida. O Welcome voltou ao padrão.");
+  }
+
   const quotedImage =
     info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
     info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.viewOnceMessage?.message?.imageMessage ||
@@ -6487,6 +6499,77 @@ case "rmfotobv": {
     `🗑️🌸 *Foto do bem-vindo removida!*\n\n` +
     `🐉 O Welcome voltou ao comportamento padrão.`
   );
+}
+break;
+
+case "fotosaiu":
+case "fotobye": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+
+  const op = String(args?.[0] || "").toLowerCase();
+  if (["off", "remover", "remove"].includes(op)) {
+    const cfg = getWelcomeConfig(from);
+    const oldPhoto = String(cfg?.byePhoto || "").trim();
+    try {
+      const fsM = (await import("node:fs")).default;
+      if (oldPhoto && fsM.existsSync(oldPhoto)) fsM.unlinkSync(oldPhoto);
+    } catch {}
+    removeByePhoto(from);
+    return reply("🗑️👋 Foto de saída removida. A despedida voltou ao padrão.");
+  }
+
+  const quotedImage =
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.viewOnceMessage?.message?.imageMessage ||
+    info?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.viewOnceMessageV2?.message?.imageMessage || null;
+  const directImage =
+    info?.message?.imageMessage ||
+    info?.message?.viewOnceMessage?.message?.imageMessage ||
+    info?.message?.viewOnceMessageV2?.message?.imageMessage || null;
+  const imageMessage = directImage || quotedImage;
+
+  if (!imageMessage) {
+    return reply(`🖼️👋 *FOTO DE SAÍDA*\n\nEnvie uma imagem com *${prefix}fotosaiu* na legenda\nou responda uma imagem usando *${prefix}fotosaiu*.\n\nPara remover: *${prefix}fotosaiu off*`);
+  }
+
+  try {
+    const { downloadContentFromMessage } = await import("@whiskeysockets/baileys");
+    const stream = await downloadContentFromMessage(imageMessage, "image");
+    let buffer = Buffer.alloc(0);
+    for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+    if (!buffer.length) throw new Error("Imagem vazia");
+
+    const fsM = (await import("node:fs")).default;
+    const pathM = (await import("node:path")).default;
+    const dir = pathM.join(process.cwd(), "files", "database", "welcome-media");
+    fsM.mkdirSync(dir, { recursive: true });
+    const safeGroup = String(from).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filePath = pathM.join(dir, `${safeGroup}-bye.jpg`);
+    fsM.writeFileSync(filePath, buffer);
+    setByePhoto(from, filePath);
+
+    return conn.sendMessage(from, { image: buffer, caption: "✅👋 *Foto de saída definida!*\n\n🐉 Esta imagem será enviada quando alguém sair do grupo." }, { quoted: info });
+  } catch (e) {
+    console.error("Erro /fotosaiu:", e?.message || e);
+    return reply("❌ Não consegui salvar essa imagem. Tente enviar a foto novamente.");
+  }
+}
+break;
+
+case "rmfotosaiu":
+case "rmfotobye": {
+  if (!isGroup) return reply(mess.onlyGroup());
+  if (!isGroupAdmins) return reply(mess.onlyAdmins());
+  const cfg = getWelcomeConfig(from);
+  const oldPhoto = String(cfg?.byePhoto || "").trim();
+  if (!oldPhoto) return reply("👋 Este grupo não possui uma foto personalizada de saída.");
+  try {
+    const fsM = (await import("node:fs")).default;
+    if (fsM.existsSync(oldPhoto)) fsM.unlinkSync(oldPhoto);
+  } catch {}
+  removeByePhoto(from);
+  return reply("🗑️👋 *Foto de saída removida!*\n\n🐉 A despedida voltou ao comportamento padrão.");
 }
 break;
 
