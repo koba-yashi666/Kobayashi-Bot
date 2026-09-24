@@ -173,7 +173,6 @@
       "Corrigido módulo da Lista Branca e normalização de JIDs/números.",
       "Anti-Trava agora ignora membros protegidos.",
       "ADVs automáticas não punem whitelist.",
-      "BanFake e Banghost ignoram whitelist.",
       "Remoção automática da lista negra local não expulsa whitelist.",
       "Comandos manuais de ADM continuam disponíveis."
     ]
@@ -598,7 +597,6 @@
       "Novo /protecao media para proteção equilibrada.",
       "Novo /protecao alta para proteção rígida.",
       "Novo /protecao off para desligar os módulos automáticos controlados pelos perfis.",
-      "Perfis configuram AntiLink, AntiTelegram, AntiSpam, AntiFake, AntiTrava, AntiMenção, AntiTextão, AntiFlood, AntiDelete e AntiEdit.",
       "Apenas um modo de AntiLink fica ativo por perfil.",
       "O /protecao sem argumento continua exibindo o painel.",
       "Comando integrado ao /menuadm e /helpcmd."
@@ -1290,19 +1288,14 @@
       "Compatível com a foto personalizada definida por /fotobv."
     ]
   },
-  "v5.3.23": {
-    "version": "5.3.23",
-    "title": "AntiFake +55 e Aceitar por Quantidade",
+  "v5.3.24": {
+    "version": "5.3.24",
+    "title": "Solicitações sem filtro por DDI",
     "date": "2026-09-24",
-    "added": [
-      "/add agora filtra solicitações e aprova somente números brasileiros (+55)",
-      "/aceitar N aceita a quantidade informada de solicitações, com limite de 200",
-      "Resolução LID -> número antes da verificação de país"
-    ],
     "changed": [
-      "Solicitações de outros DDIs são ignoradas pelo AntiFake em vez de aprovadas",
-      "IDs cujo número real não pode ser resolvido são ignorados por segurança",
-      "Retorno informa aceitos, ignorados pelo AntiFake e brasileiros ainda pendentes"
+      "/add volta a aceitar todas as solicitações pendentes do grupo",
+      "/aceitar N aceita a quantidade escolhida, de 1 a 200, sem filtrar país ou DDI",
+      "Removidos os comandos e filtros automáticos relacionados à verificação de país"
     ]
   }
 }

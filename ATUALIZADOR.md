@@ -327,22 +327,6 @@ O repositório do GitHub precisa manter a estrutura original de pastas.
 - `/lucy`: envia a imagem da Lucy com uma porcentagem aleatória de 0% a 100%.
 - Imagem incluída localmente em `media/lucy.jpg`.
 
-## v0.1.48-beta — AntiFake + BanFake
-- `/antifake on/off`: remove automaticamente novos números estrangeiros identificáveis.
-- `/banfake`: verifica membros atuais e remove estrangeiros identificáveis.
-- DDI padrão permitido: `+55` (Brasil).
-- Administradores não são removidos automaticamente.
-- Identificadores `@lid` sem telefone confiável são ignorados para evitar falsos positivos.
-- O Nazuna analisado possui a configuração `antifake`, mas não trazia a implementação operacional completa; o sistema foi adaptado para a arquitetura atual da Kobayashi.
-
-## v0.1.49-beta — AntiFake Hutao/LID Fix
-- Corrigido AntiFake para Baileys 7 com grupos que usam `@lid`.
-- O sistema agora resolve `LID -> número real (PN)` usando `conn.signalRepository.lidMapping.getPNForLID()`.
-- `/banfake` também usa a resolução LID-aware antes de classificar o DDI.
-- A remoção continua usando o JID original do participante, evitando conflito entre LID e PN.
-- Números cujo telefone não puder ser resolvido continuam ignorados para evitar falso positivo.
-- A correção foi motivada pela estrutura do HutaoBot v10, que também usa Baileys 7 e trabalha com o modelo moderno de identificadores.
-
 ## v0.1.50-beta — Yuri Pack 2 + Update News
 - `/soadm`: somente ADMs usam comandos no grupo.
 - `/blockcmd` e `/unblockcmd`: bloqueio de comandos por grupo.

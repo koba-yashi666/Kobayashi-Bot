@@ -47,8 +47,6 @@ return `╭══════ ❀ 守護 ❀ ══════╮
 │ 🔒 ${prefix}gp f
 │ 💤 ${prefix}inativos 7
 │ 🚨 ${prefix}antiflood 5
-│ 🌎 ${prefix}antifake on/off
-│ 🧹 ${prefix}banfake
 │ 🗑️ ${prefix}antidel
 │ ✏️ ${prefix}antiedit
 │ 🔇 ${prefix}mutar @

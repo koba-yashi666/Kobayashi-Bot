@@ -40,7 +40,6 @@ import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "
 import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel, resetGroupLevelRank, resetGlobalLevelRank
 } from "./lib/features/social/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/moderation/yuriProtection.js";
-import { getAntiFakeConfig, setAntiFakeEnabled, findForeignParticipants } from "./lib/features/moderation/antiFake.js";
 import { DRAGON_COMMUNITY_GROUPS, addDragonBan, removeDragonBan, listDragonBans, purgeDragonBannedUser } from "./lib/features/moderation/dragonBan.js";
 import { resolveCommandAlias, getGroupCommandConfig, setSoAdm, blockGroupCommand, unblockGroupCommand, isGroupCommandBlocked, blockGlobalCommand, unblockGlobalCommand, getGlobalCommandBlock, addCommandAlias, removeCommandAlias, listCommandAliases, trackCommandUsage, getMostUsedCommands, getCommandStats, getTotalCommandUsage } from "./lib/features/system/commandControl.js";
 import { getReleaseNotes, formatReleaseNotes, markPendingUpdateNews, consumePendingUpdateNews } from "./lib/features/system/updateNews.js";
@@ -172,7 +171,6 @@ function applyProtectionPreset(groupJid, level) {
       link: "light",
       telegram: true,
       antiSpam: false,
-      antiFake: false,
       antiTrava: true,
       antiMention: true,
       mentionLimit: 20,
@@ -190,7 +188,6 @@ function applyProtectionPreset(groupJid, level) {
       link: "group",
       telegram: true,
       antiSpam: true,
-      antiFake: false,
       antiTrava: true,
       antiMention: true,
       mentionLimit: 15,
@@ -208,7 +205,6 @@ function applyProtectionPreset(groupJid, level) {
       link: "hard",
       telegram: true,
       antiSpam: true,
-      antiFake: true,
       antiTrava: true,
       antiMention: true,
       mentionLimit: 10,
@@ -226,7 +222,6 @@ function applyProtectionPreset(groupJid, level) {
       link: "off",
       telegram: false,
       antiSpam: false,
-      antiFake: false,
       antiTrava: false,
       antiMention: false,
       mentionLimit: 20,
@@ -252,7 +247,6 @@ function applyProtectionPreset(groupJid, level) {
   setGroupProtection(groupJid, "antitelegram", cfg.telegram);
 
   setAntiSpamEnabled(groupJid, cfg.antiSpam);
-  setAntiFakeEnabled(groupJid, cfg.antiFake);
 
   updateAntiTravaConfig(groupJid, {
     enabled: cfg.antiTrava,
@@ -274,7 +268,6 @@ function applyProtectionPreset(groupJid, level) {
     level: normalized,
     links: getGroupProtection(groupJid),
     antiSpam: getAntiSpamConfig(groupJid),
-    antiFake: getAntiFakeConfig(groupJid),
     antiTrava: getAntiTravaConfig(groupJid),
     yuri: getYuriProtection(groupJid)
   };
@@ -1288,7 +1281,6 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "anotar",
   "antidel",
   "antiedit",
-  "antifake",
   "antifarm",
   "antifarmdiario",
   "antiflood",
@@ -1319,7 +1311,6 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "ban",
   "bang",
   "banc",
-  "banfake",
   "banghost",
   "batalhar",
   "bemvindo",
@@ -2461,7 +2452,7 @@ if (isGroup && isGroupAdmins && !info.key.fromMe) {
 
 // 🤍 WHITELIST HARD GUARD • v2.0.12
 // Proteção no nível do socket: qualquer remoção feita pelo bot passa por esta barreira.
-// Isso cobre AntiLink, AntiSpam, AntiTrava, BanFake, Banghost, Sentinel e handlers externos
+// Isso cobre AntiLink, AntiSpam, AntiTrava, Banghost, Sentinel e handlers externos
 // que usem o mesmo conn.groupParticipantsUpdate().
 if (!conn.__kobayashiWhitelistHardGuard) {
   const originalGroupParticipantsUpdate = conn.groupParticipantsUpdate.bind(conn);
@@ -4647,110 +4638,60 @@ case "aceitar": {
 
   try {
     const pending = await conn.groupRequestParticipantsList(from);
-
     if (!Array.isArray(pending) || !pending.length) {
       return reply("🌸 Não há solicitações pendentes para entrar no grupo.");
     }
 
-    // Resolve LID -> número real antes de aplicar o AntiFake.
-    // Se o número não puder ser resolvido, a solicitação é ignorada por segurança.
-    const resolved = [];
-    for (const item of pending) {
-      const raw = item?.jid || item?.id || item?.participant || item?.lid;
-      if (!raw) continue;
-
-      const alt = item?.phoneNumber || item?.participantAlt || null;
-      let pn = null;
-      try {
-        pn = await getPNForJid(conn, raw, alt);
-      } catch {}
-
-      const candidate = String(pn || alt || raw);
-      const digits = candidate.split("@")[0].replace(/\D/g, "");
-      const isPhoneJid = candidate.endsWith("@s.whatsapp.net") || String(pn || "").endsWith("@s.whatsapp.net");
-      const isBrazil = isPhoneJid && digits.startsWith("55");
-
-      resolved.push({ raw, pn, digits, isBrazil });
-    }
-
-    const brasileiros = resolved.filter((x) => x.isBrazil);
-    const antifake = resolved.filter((x) => !x.isBrazil);
-
-    // /aceitar N aceita somente N solicitações brasileiras (máximo 200).
-    // /add aprova todas as solicitações brasileiras encontradas.
-    let limit = brasileiros.length;
+    let limit = pending.length;
     if (command === "aceitar") {
       if (!args[0] || !/^\d+$/.test(String(args[0]))) {
         return reply(
           `🐉 *ACEITAR SOLICITAÇÕES*\n\n` +
           `Use: *${prefix}aceitar 5*\n` +
-          `📌 Limite por comando: *200* solicitações.\n` +
-          `🛡️ O AntiFake aceita apenas números do Brasil (+55).`
+          `📌 Limite por comando: *200* solicitações.`
         );
       }
-
       limit = Number(args[0]);
       if (!Number.isInteger(limit) || limit < 1 || limit > 200) {
         return reply("⚠️ Escolha uma quantidade entre *1 e 200*. Ex.: */aceitar 5*");
       }
     }
 
-    const selected = brasileiros.slice(0, limit);
-    const targets = selected.map((x) => x.raw);
+    const targets = pending
+      .slice(0, limit)
+      .map((item) => item?.jid || item?.id || item?.participant || item?.lid)
+      .filter(Boolean);
 
-    if (!targets.length) {
-      return reply(
-        `🛡️🇧🇷 *ANTIFAKE*\n\n` +
-        `Nenhuma solicitação brasileira (+55) disponível para aceitar.\n` +
-        `🌎 Ignoradas pelo AntiFake: *${antifake.length}*`
-      );
-    }
+    if (!targets.length) return reply("🌸 Não encontrei solicitações válidas para aceitar.");
 
     await conn.groupRequestParticipantsUpdate(from, targets, "approve");
-
-    // Aguarda o WhatsApp concluir a aprovação e usa o mesmo handler do evento real.
     await delay(1800);
 
     if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
       await conn.kobayashiHandleGroupParticipantsUpdate({
-        id: from,
-        action: "add",
-        participants: targets,
-        author: sender,
+        id: from, action: "add", participants: targets, author: sender,
         source: command === "aceitar" ? "command-aceitar" : "command-add"
       });
-    } else {
-      console.error("[WELCOME Kobayashi] Handler não encontrado no socket.");
     }
 
-    const qtd = targets.length;
-    const restantesBR = Math.max(0, brasileiros.length - qtd);
-
     addAdminLog(from, {
-      type: "add",
-      actor: sender,
-      detail: `${qtd} solicitação(ões) +55 aprovada(s); ${antifake.length} AntiFake ignorada(s)`,
+      type: "add", actor: sender,
+      detail: `${targets.length} solicitação(ões) aprovada(s)`,
     });
 
+    const remaining = Math.max(0, pending.length - targets.length);
     return reply(
-      `🇧🇷🐉 *SOLICITAÇÕES VERIFICADAS*\n\n` +
-      `✅ Aceitas: *${qtd}*\n` +
-      `🛡️ AntiFake (+55): *${antifake.length} ignorada(s)*` +
-      (restantesBR ? `\n⏳ Brasileiras ainda pendentes: *${restantesBR}*` : "") +
+      `🐉 *SOLICITAÇÕES ACEITAS*\n\n` +
+      `✅ Aceitas: *${targets.length}*` +
+      (remaining ? `\n⏳ Ainda pendentes: *${remaining}*` : "") +
       `\n\nO sistema de boas-vindas foi acionado para os novos membros.`
     );
-
   } catch (error) {
     console.error("[ADD/ACEITAR REQUESTS]", error?.stack || error?.message || error);
-    return reply(
-      `❌ Não consegui aceitar as solicitações do grupo.\n\n` +
-      `Confira se eu continuo como ADM e se existem solicitações pendentes.`
-    );
+    return reply(`❌ Não consegui aceitar as solicitações do grupo.\n\nConfira se eu continuo como ADM e se existem solicitações pendentes.`);
   }
 }
 break;
-
-
 
 case "rm_closegp":
 case "rmclosegp": {
@@ -6614,124 +6555,6 @@ case "lucy": {
       `😈 *LUCY METER* 😈\n\n` +
       `🔥 O nível de safadeza da Lucy é *${porcentagem}%*`
   }, { quoted: info });
-}
-break;
-
-
-case "antifake": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-
-  if (!isBotGroupAdmins) {
-    return reply(
-      "❌🐉 Eu preciso ser ADM para usar o AntiFake."
-    );
-  }
-
-  const raw = String(args?.[0] || "").toLowerCase();
-  const cfg = getAntiFakeConfig(from);
-
-  if (!raw) {
-    return reply(
-      `╭──────「 🛡️🌎 」──────╮\n` +
-      `         *ANTI-FAKE*\n` +
-      `╰─────────────────────╯\n\n` +
-      `Status: ${cfg.enabled ? "🟢 ON" : "⚪ OFF"}\n` +
-      `🇧🇷 DDI permitido: *+55*\n\n` +
-      `• *${prefix}antifake on*\n` +
-      `• *${prefix}antifake off*\n\n` +
-      `🌸 Quando ativado, novos números estrangeiros identificáveis são removidos automaticamente.`
-    );
-  }
-
-  if (!["on", "off"].includes(raw)) {
-    return reply(
-      `🌸 Use *${prefix}antifake on* ou *${prefix}antifake off*.`
-    );
-  }
-
-  const enabled = raw === "on";
-
-  setAntiFakeEnabled(from, enabled);
-
-  return reply(
-    enabled
-      ? `✅🛡️ *AntiFake ativado!*\n\n🇧🇷 Apenas números identificáveis com DDI +55 passam pelo filtro automático.`
-      : `⚪🛡️ *AntiFake desativado.*`
-  );
-}
-break;
-
-case "banfake": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-
-  if (!isBotGroupAdmins) {
-    return reply(
-      "❌🐉 Eu preciso ser ADM para remover membros."
-    );
-  }
-
-  const foreign = await findForeignParticipants(
-    conn,
-    from,
-    groupMembers || []
-  );
-
-  if (!foreign.length) {
-    return reply(
-      `✅🌸 Não encontrei números estrangeiros identificáveis no grupo.\n\n` +
-      `📌 Contas @lid sem telefone visível são ignoradas para evitar banimentos errados.`
-    );
-  }
-
-  const adminSet = new Set(groupAdmins || []);
-
-  const targets = foreign
-    .map((item) => item.jid)
-    .filter((jid) => !adminSet.has(jid))
-    .filter((jid) => !isWhitelisted(from, jid));
-
-  if (!targets.length) {
-    return reply(
-      "🌸 Os números estrangeiros encontrados são administradores ou estão na Lista Branca. Não removi ninguém automaticamente."
-    );
-  }
-
-  let removed = 0;
-  let failed = 0;
-
-  for (let i = 0; i < targets.length; i += 5) {
-    const batch = targets.slice(i, i + 5);
-
-    try {
-      await conn.groupParticipantsUpdate(
-        from,
-        batch,
-        "remove"
-      );
-
-      removed += batch.length;
-    } catch (error) {
-      failed += batch.length;
-
-      console.error(
-        "[BANFAKE]",
-        error?.message || error
-      );
-    }
-
-    await delay(800);
-  }
-
-  return reply(
-    `╭──────「 🧹🌎 」──────╮\n` +
-    `        *BANFAKE*\n` +
-    `╰─────────────────────╯\n\n` +
-    `✅ Removidos: *${removed}*\n` +
-    `❌ Falhas: *${failed}*\n\n` +
-    `🇧🇷 Filtro atual: DDI +55 permitido.`
-  );
 }
 break;
 
@@ -9960,7 +9783,7 @@ case "protecao": {
     media:
       "AntiLink de grupos + Telegram, AntiSpam, AntiTrava, AntiFlood, AntiMenção, AntiTextão e AntiDelete.",
     alta:
-      "AntiLink completo, AntiTelegram, AntiSpam, AntiFake, AntiTrava, AntiFlood, AntiMenção, AntiTextão, AntiDelete, AntiEdit e emergência.",
+      "AntiLink completo, AntiTelegram, AntiSpam, AntiTrava, AntiFlood, AntiMenção, AntiTextão, AntiDelete, AntiEdit e emergência.",
     off:
       "Desativa os módulos automáticos controlados pelo perfil. Lista branca e configurações manuais continuam preservadas."
   };

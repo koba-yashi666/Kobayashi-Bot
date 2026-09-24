@@ -10,7 +10,6 @@ import {
 } from "../../lib/features/core/dragonCore.js";
 import { getAntiSpamConfig } from "../../lib/features/moderation/antiSpam.js";
 import { getAntiTravaConfig } from "../../lib/features/moderation/antiTrava.js";
-import { getAntiFakeConfig } from "../../lib/features/moderation/antiFake.js";
 
 function taskLabel(type) {
   return ({ open: "🟢 Abrir grupo", close: "🔒 Fechar grupo", message: "💬 Mensagem", rules: "📖 Regras" })[type] || type;
@@ -35,13 +34,11 @@ export default {
     if (invoked === "seguranca" || action === "seguranca") {
       const spam = getAntiSpamConfig(from);
       const trava = getAntiTravaConfig(from);
-      const fake = getAntiFakeConfig(from);
       return reply(
         `╭━━〔 🛡️ *SEGURANÇA 2.0* 〕━━╮\n` +
         `┃ 🤖 Bot ADM: ${isBotGroupAdmins ? "✅" : "❌"}\n` +
         `┃ 🚨 AntiSpam: ${spam.enabled ? "🟢 ON" : "⚪ OFF"}\n` +
         `┃ 🧨 AntiTrava: ${trava.enabled ? "🟢 ON" : "⚪ OFF"}\n` +
-        `┃ 🌎 AntiFake: ${fake.enabled ? "🟢 ON" : "⚪ OFF"}\n` +
         `┃ 📋 Auditoria: 🟢 ON\n` +
         `╰━━━━━━━━━━━━━━━━━━━━╯\n\n` +
         `💡 As proteções continuam configuráveis pelos comandos próprios.`
