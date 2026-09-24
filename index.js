@@ -4652,35 +4652,63 @@ case "aceitar": {
       return reply("🌸 Não há solicitações pendentes para entrar no grupo.");
     }
 
-    let targets = pending
-      .map((item) => item?.jid || item?.id)
-      .filter(Boolean);
+    // Resolve LID -> número real antes de aplicar o AntiFake.
+    // Se o número não puder ser resolvido, a solicitação é ignorada por segurança.
+    const resolved = [];
+    for (const item of pending) {
+      const raw = item?.jid || item?.id || item?.participant || item?.lid;
+      if (!raw) continue;
 
-    const mentioned =
-      info?.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0] ||
-      null;
+      const alt = item?.phoneNumber || item?.participantAlt || null;
+      let pn = null;
+      try {
+        pn = await getPNForJid(conn, raw, alt);
+      } catch {}
 
-    const numero = String(q || "").replace(/\D/g, "");
+      const candidate = String(pn || alt || raw);
+      const digits = candidate.split("@")[0].replace(/\D/g, "");
+      const isPhoneJid = candidate.endsWith("@s.whatsapp.net") || String(pn || "").endsWith("@s.whatsapp.net");
+      const isBrazil = isPhoneJid && digits.startsWith("55");
 
-    if (mentioned) {
-      targets = targets.filter((jid) => jid === mentioned);
-    } else if (numero) {
-      targets = targets.filter(
-        (jid) => String(jid).split("@")[0] === numero
+      resolved.push({ raw, pn, digits, isBrazil });
+    }
+
+    const brasileiros = resolved.filter((x) => x.isBrazil);
+    const antifake = resolved.filter((x) => !x.isBrazil);
+
+    // /aceitar N aceita somente N solicitações brasileiras (máximo 200).
+    // /add aprova todas as solicitações brasileiras encontradas.
+    let limit = brasileiros.length;
+    if (command === "aceitar") {
+      if (!args[0] || !/^\d+$/.test(String(args[0]))) {
+        return reply(
+          `🐉 *ACEITAR SOLICITAÇÕES*\n\n` +
+          `Use: *${prefix}aceitar 5*\n` +
+          `📌 Limite por comando: *200* solicitações.\n` +
+          `🛡️ O AntiFake aceita apenas números do Brasil (+55).`
+        );
+      }
+
+      limit = Number(args[0]);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 200) {
+        return reply("⚠️ Escolha uma quantidade entre *1 e 200*. Ex.: */aceitar 5*");
+      }
+    }
+
+    const selected = brasileiros.slice(0, limit);
+    const targets = selected.map((x) => x.raw);
+
+    if (!targets.length) {
+      return reply(
+        `🛡️🇧🇷 *ANTIFAKE*\n\n` +
+        `Nenhuma solicitação brasileira (+55) disponível para aceitar.\n` +
+        `🌎 Ignoradas pelo AntiFake: *${antifake.length}*`
       );
     }
 
-    if (!targets.length) {
-      return reply("⚠️ Não encontrei essa pessoa entre as solicitações pendentes.");
-    }
+    await conn.groupRequestParticipantsUpdate(from, targets, "approve");
 
-    await conn.groupRequestParticipantsUpdate(
-      from,
-      targets,
-      "approve"
-    );
-
-    // Aguarda o WhatsApp concluir a aprovação e usa o MESMO handler do evento real.
+    // Aguarda o WhatsApp concluir a aprovação e usa o mesmo handler do evento real.
     await delay(1800);
 
     if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
@@ -4689,27 +4717,31 @@ case "aceitar": {
         action: "add",
         participants: targets,
         author: sender,
-        source: "command-add"
+        source: command === "aceitar" ? "command-aceitar" : "command-add"
       });
     } else {
       console.error("[WELCOME Kobayashi] Handler não encontrado no socket.");
     }
 
     const qtd = targets.length;
+    const restantesBR = Math.max(0, brasileiros.length - qtd);
 
     addAdminLog(from, {
       type: "add",
       actor: sender,
-      detail: `${qtd} solicitação(ões) aprovada(s)`,
+      detail: `${qtd} solicitação(ões) +55 aprovada(s); ${antifake.length} AntiFake ignorada(s)`,
     });
 
     return reply(
-      `🌸🐉 *${qtd} ${qtd === 1 ? "solicitação aceita" : "solicitações aceitas"}!*\n\n` +
-      `O sistema de boas-vindas foi acionado para os novos membros.`
+      `🇧🇷🐉 *SOLICITAÇÕES VERIFICADAS*\n\n` +
+      `✅ Aceitas: *${qtd}*\n` +
+      `🛡️ AntiFake (+55): *${antifake.length} ignorada(s)*` +
+      (restantesBR ? `\n⏳ Brasileiras ainda pendentes: *${restantesBR}*` : "") +
+      `\n\nO sistema de boas-vindas foi acionado para os novos membros.`
     );
 
   } catch (error) {
-    console.error("[ADD REQUESTS]", error?.stack || error?.message || error);
+    console.error("[ADD/ACEITAR REQUESTS]", error?.stack || error?.message || error);
     return reply(
       `❌ Não consegui aceitar as solicitações do grupo.\n\n` +
       `Confira se eu continuo como ADM e se existem solicitações pendentes.`

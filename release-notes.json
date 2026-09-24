@@ -1289,5 +1289,20 @@
       "Somente os membros recém-chegados são incluídos no array de menções.",
       "Compatível com a foto personalizada definida por /fotobv."
     ]
+  },
+  "v5.3.23": {
+    "version": "5.3.23",
+    "title": "AntiFake +55 e Aceitar por Quantidade",
+    "date": "2026-09-24",
+    "added": [
+      "/add agora filtra solicitações e aprova somente números brasileiros (+55)",
+      "/aceitar N aceita a quantidade informada de solicitações, com limite de 200",
+      "Resolução LID -> número antes da verificação de país"
+    ],
+    "changed": [
+      "Solicitações de outros DDIs são ignoradas pelo AntiFake em vez de aprovadas",
+      "IDs cujo número real não pode ser resolvido são ignorados por segurança",
+      "Retorno informa aceitos, ignorados pelo AntiFake e brasileiros ainda pendentes"
+    ]
   }
 }
