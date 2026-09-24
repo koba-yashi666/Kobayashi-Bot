@@ -311,6 +311,8 @@ async function startConnect() {
     // 🌸 KOBAYASHI WELCOME • BASE NAZUNA v0.1.33
     // ==========================================
     const welcomeRecentEvents = new Map();
+    const welcomePendingAdds = new Map();
+    const WELCOME_BATCH_MS = 5000;
 
 
     function normalizeWelcomeJid(value) {
@@ -380,16 +382,13 @@ async function startConnect() {
 
       const mentions = [...participants, ...(acceptedBy ? [acceptedBy] : [])];
       const amount = participants.length;
-      const memberTags = participants
-        .map((p) => `@${String(p).split("@")[0]}`)
-        .join("\n");
-
-      const membersText =
-        `${memberTags}\n` +
-        `> [ ${amount} ${amount === 1 ? "Membro Novo" : "Membros Novos"} 🪪 ]`;
+      const memberLabel = `@⁨[ ${amount} ${amount === 1 ? "Membro Novo" : "Membros Novos"} 🪪 ]⁩`;
+      const membersText = memberLabel;
 
       const replacements = {
-        "{user}": participants.length === 1 ? `@${String(participants[0]).split("@")[0]}` : memberTags,
+        // Em lote, evita listar cada @ individualmente no texto. O array `mentions`
+        // continua contendo somente os membros que acabaram de entrar.
+        "{user}": amount === 1 ? `@${String(participants[0]).split("@")[0]}` : memberLabel,
         "{group}": groupMetadata?.subject || "Grupo",
         "{count}": Array.isArray(groupMetadata?.participants) ? groupMetadata.participants.length : "?",
         "{membros}": membersText,
@@ -424,6 +423,73 @@ async function startConnect() {
       text += `\n${footer}`;
 
       return { text, mentions };
+    }
+
+    async function sendBatchedWelcome(groupJid) {
+      const pending = welcomePendingAdds.get(groupJid);
+      if (!pending) return;
+      welcomePendingAdds.delete(groupJid);
+
+      const participants = [...pending.participants];
+      if (!participants.length) return;
+
+      const groupMetadata = await conn.groupMetadata(groupJid).catch(() => pending.groupMetadata || null);
+      if (!groupMetadata) return;
+
+      const settings = await loadWelcomeSettings(groupJid);
+      if (!settings.enabled) return;
+
+      const message = await createWelcomeMessage(
+        groupMetadata,
+        participants,
+        settings,
+        pending.acceptedBy
+      );
+
+      try {
+        const fsM = (await import("node:fs")).default;
+        const welcomePhoto = String(settings?.welcomePhoto || "").trim();
+        if (welcomePhoto && fsM.existsSync(welcomePhoto)) {
+          await conn.sendMessage(groupJid, {
+            image: fsM.readFileSync(welcomePhoto),
+            caption: message.text,
+            mentions: message.mentions,
+          });
+        } else {
+          await conn.sendMessage(groupJid, message);
+        }
+      } catch (e) {
+        console.error("[WELCOME NAZUNA] Falha no welcome agrupado:", e?.message || e);
+        await conn.sendMessage(groupJid, { text: message.text }).catch(() => {});
+      }
+
+      console.log(`[WELCOME NAZUNA] ✅ Welcome agrupado enviado para ${participants.length} membro(s)`);
+    }
+
+    function queueWelcomeAdd(groupJid, participants, groupMetadata, acceptedBy = null) {
+      let pending = welcomePendingAdds.get(groupJid);
+      if (!pending) {
+        pending = {
+          participants: new Set(),
+          acceptedBy: normalizeWelcomeJid(acceptedBy),
+          groupMetadata,
+          timer: null,
+        };
+        welcomePendingAdds.set(groupJid, pending);
+      }
+
+      for (const jid of normalizeWelcomeParticipants(participants)) {
+        pending.participants.add(jid);
+      }
+      if (!pending.acceptedBy) pending.acceptedBy = normalizeWelcomeJid(acceptedBy);
+      pending.groupMetadata = groupMetadata || pending.groupMetadata;
+
+      clearTimeout(pending.timer);
+      pending.timer = setTimeout(() => {
+        sendBatchedWelcome(groupJid).catch((e) =>
+          console.error("[WELCOME NAZUNA] Erro ao descarregar fila:", e?.stack || e)
+        );
+      }, WELCOME_BATCH_MS);
     }
 
     async function handleGroupParticipantsUpdate(inf) {
@@ -539,28 +605,8 @@ async function startConnect() {
             const acceptedBy = normalizeWelcomeJid(
               inf?.author || inf?.actor || null
             );
-            const message = await createWelcomeMessage(
-              groupMetadata,
-              participants,
-              settings,
-              acceptedBy
-            );
-
-            try {
-              const fsM = (await import("node:fs")).default;
-              const welcomePhoto = String(settings?.welcomePhoto || "").trim();
-              if (welcomePhoto && fsM.existsSync(welcomePhoto)) {
-                await conn.sendMessage(from, { image: fsM.readFileSync(welcomePhoto), caption: message.text, mentions: message.mentions });
-              } else {
-                await conn.sendMessage(from, message);
-              }
-            } catch (e) {
-              // Fallback do Nazuna adaptado: se mentions/JID der problema, envia texto puro.
-              console.error("[WELCOME NAZUNA] Falha com mentions, tentando texto:", e?.message || e);
-              await conn.sendMessage(from, { text: message.text });
-            }
-
-            console.log(`[WELCOME NAZUNA] ✅ Welcome enviado para ${participants.length} membro(s)`);
+            queueWelcomeAdd(from, participants, groupMetadata, acceptedBy);
+            console.log(`[WELCOME NAZUNA] ⏳ ${participants.length} entrada(s) adicionada(s) à fila de 5s`);
             break;
           }
 

@@ -1279,5 +1279,15 @@
       "Welcome e despedida passam a enviar a imagem configurada com a legenda existente",
       "Configuração persistente e individual por grupo; somente administradores podem alterar"
     ]
+  },
+  "v5.3.22": {
+    "version": "5.3.22",
+    "title": "Boas-vindas Agrupado",
+    "changes": [
+      "Entradas ocorridas em uma janela de 5 segundos são reunidas em uma única mensagem de boas-vindas.",
+      "A mensagem mostra [ N Membros Novos 🪪 ] sem listar cada membro individualmente.",
+      "Somente os membros recém-chegados são incluídos no array de menções.",
+      "Compatível com a foto personalizada definida por /fotobv."
+    ]
   }
 }
