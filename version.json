@@ -1,5 +1,5 @@
 {
-  "version": "5.3.25",
-  "name": "Kobayashi Bot v5.3.25 Menubn Mention Fix",
-  "update": "Comandos do /menubn resolvem LID para @ do WhatsApp antes de exibir e mencionar"
+  "version": "5.3.26",
+  "name": "Kobayashi Bot v5.3.26 Namoro + Casamento 24h Fix",
+  "update": "Adiciona /namoro e /aceitar_namoro; casamento exige 24h de namoro e corrige pedidos pendentes"
 }

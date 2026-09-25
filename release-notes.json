@@ -1307,5 +1307,16 @@
       "Ranks de diversão priorizam o número/JID exibível e resolvem LID antes de montar texto e mentions",
       "Corrigidas legendas que ainda usavam o alvo bruto mesmo após a resolução do JID"
     ]
+  },
+  "v5.3.26": {
+    "version": "5.3.26",
+    "title": "Namoro + Casamento 24h Fix",
+    "changes": [
+      "Novos comandos /namoro e /aceitar_namoro.",
+      "Casamento só pode ser pedido entre o casal que está namorando.",
+      "Pedido de casamento é liberado após 24 horas completas de namoro.",
+      "/aceitarcasamento agora diferencia ausência de pedido, namoro inválido e tempo mínimo ainda não concluído.",
+      "Mantida a correção de menções LID da v5.3.25."
+    ]
   }
 }
