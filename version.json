@@ -1,5 +1,5 @@
 {
-  "version": "5.3.24",
-  "name": "Kobayashi Bot v5.3.23 Stable",
-  "update": "Solicitações sem filtro por DDI; /aceitar mantém limite de 200"
+  "version": "5.3.25",
+  "name": "Kobayashi Bot v5.3.25 Menubn Mention Fix",
+  "update": "Comandos do /menubn resolvem LID para @ do WhatsApp antes de exibir e mencionar"
 }
