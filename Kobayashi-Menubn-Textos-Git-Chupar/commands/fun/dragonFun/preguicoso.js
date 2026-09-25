@@ -1,0 +1,5 @@
+import { targetOf, tag, sendMedia, displayJid } from "./_utils.js";
+import { traitCaption } from "./_traitCaptions.js";
+import { traitText, mediaFor } from "../../../lib/features/social/dragonFunV09.js";
+export const aliases=["preguicoso"];
+export default async function run(ctx){const rawTarget=targetOf(ctx)||ctx.sender;const target=await displayJid(ctx,rawTarget);const value=Math.floor(Math.random()*101);const caption=traitCaption("preguicoso",tag(target),value)||traitText("preguicoso",tag(target),value);return sendMedia(ctx,mediaFor("preguicoso"),caption,[target]);}
