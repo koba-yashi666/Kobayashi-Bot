@@ -1,5 +1,5 @@
 {
-  "version": "5.3.26",
-  "name": "Kobayashi Bot v5.3.26 Namoro + Casamento 24h Fix",
-  "update": "Adiciona /namoro e /aceitar_namoro; casamento exige 24h de namoro e corrige pedidos pendentes"
+  "version": "5.3.27",
+  "name": "Kobayashi Bot v5.3.27 MenuBN + Chupar",
+  "update": "Adiciona /chupar ao MenuBN e preserva os textos personalizados"
 }
