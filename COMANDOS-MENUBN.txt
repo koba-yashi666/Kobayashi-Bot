@@ -1,0 +1,102 @@
+abraco.js: /abraco, /abracar
+azarada.js: /azarada
+azarado.js: /azarado
+bebado.js: /bebado
+beijo.js: /beijo, /beijar
+boba.js: /boba
+bobo.js: /bobo
+braba.js: /braba
+brabo.js: /brabo
+burra.js: /burra
+burro.js: /burro
+cafune.js: /cafune
+carinho.js: /carinho
+caseira.js: /caseira
+caseiro.js: /caseiro
+chance.js: /chance
+charmosa.js: /charmosa
+charmoso.js: /charmoso
+chorao.js: /chorao, /chorona
+chupar.js: /chupar
+chute.js: /chute, /chutar
+ciumenta.js: /ciumenta
+ciumento.js: /ciumento
+comer.js: /comer
+corno.js: /corno
+criativa.js: /criativa
+criativo.js: /criativo
+engracada.js: /engracada
+engracado.js: /engracado
+extrovertida.js: /extrovertida
+extrovertido.js: /extrovertido
+feio.js: /feio
+fiel.js: /fiel
+forte.js: /forte
+fraca.js: /fraca
+fraco.js: /fraco
+gado.js: /gado
+gamer.js: /gamer
+gay.js: /gay
+golpista.js: /golpista
+gostosa.js: /gostosa
+gostoso.js: /gostoso
+gozar.js: /gozar
+hetero.js: /hetero
+infiel.js: /infiel
+inteligente.js: /inteligente
+introvertida.js: /introvertida
+introvertido.js: /introvertido
+irresponsavel.js: /irresponsavel
+julgar.js: /julgar, /judge
+ladra.js: /ladra
+ladrao.js: /ladrao
+lamber.js: /lamber
+legacy.js: /menubn, /menujogos, /menudiversao, /menubrincadeiras, /brincadeira, /games, /forca, /fc, /anagrama, /quiz, /trivia, /enigma, /wordle, /palavra, /ppt, /pedrapapeltesoura, /coinflip, /moeda, /dados, /dice, /cassino, /slots, /slotmachine, /roleta, /roulette, /verdade, /desafio, /eununca, /vord, /jogodavelha, /tictactoe, /connect4, /uno, /stop, /adedonha, /cacapalavras, /batalhanaval, /dueloquiz, /duelo, /jogov, /resetv, /gartic, /revelar_gartic, /quiz_animais, /revelar_animal, /revelar_enigma, /revelar_anagrama, /participar, /start_vord, /help_vord, /regras_vord, /status_vord, /rm_vord, /add_vord, /exit_vord, /pular, /reset_vord, /responder, /confirmar, /pontos, /checkpts, /rankpts, /sn, /shipo, /casal, /cantada, /piada, /fato, /conselho, /elogio, /reflexao, /motivacional, /quando, /amongus, /roletaban
+lesbica.js: /lesbica
+linda.js: /linda
+lindo.js: /lindo
+louca.js: /louca, /louça
+malandra.js: /malandra
+malandro.js: /malandro
+mamada.js: /mamada
+matar.js: /matar
+misteriosa.js: /misteriosa
+misterioso.js: /misterioso
+morder.js: /morder
+nazista.js: /nazista
+nerd.js: /nerd
+otaku.js: /otaku
+otaria.js: /otaria
+otario.js: /otario
+pegador.js: /pegador
+pegadora.js: /pegadora
+personalidade.js: /personalidade
+pobre.js: /pobre
+preguicosa.js: /preguicosa
+preguicoso.js: /preguicoso
+programador.js: /programador
+programadora.js: /programadora
+puta.js: /puta
+responsavel.js: /responsavel
+rico.js: /rico
+romantica.js: /romantica
+romantico.js: /romantico
+safada.js: /safada
+safado.js: /safado
+simpatica.js: /simpatica
+simpatico.js: /simpatico
+socar.js: /socar, /soco
+sonhador.js: /sonhador
+sonhadora.js: /sonhadora
+sorte.js: /sorte
+sortuda.js: /sortuda
+sortudo.js: /sortudo
+tapa.js: /tapa, /tapar
+trabalhador.js: /trabalhador
+trabalhadora.js: /trabalhadora
+vesgo.js: /vesgo
+viajante.js: /viajante
+visionaria.js: /visionaria
+visionario.js: /visionario
+zueira.js: /zueira
+zueiro.js: /zueiro
