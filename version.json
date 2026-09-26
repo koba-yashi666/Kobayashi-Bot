@@ -1,5 +1,5 @@
 {
-  "version": "5.3.28",
-  "name": "Kobayashi Bot v5.3.28 Dragon RPG Classes 2.0",
-  "update": "Troca de classes, novas classes avançadas e habilidades únicas com custos especiais de Mana e HP"
+  "version": "5.3.29",
+  "name": "Kobayashi Bot v5.3.29 Equipamento RPG Fix",
+  "update": "Corrige conflito entre /equipar de títulos e equipamentos do Dragon RPG; adiciona /equiparrpg e /desequiparrpg."
 }

@@ -1331,5 +1331,15 @@
       "Trocar a classe base remove a classe avançada anterior para manter os requisitos consistentes.",
       "Arquivos e textos do MenuBN/Fun não foram alterados."
     ]
+  },
+  "v5.3.29": {
+    "version": "5.3.29",
+    "title": "Equipamento RPG Fix",
+    "changes": [
+      "Adicionado /equiparrpg <id> para equipamentos do Dragon RPG.",
+      "Adicionado /desequiparrpg <slot>.",
+      "Mantido /equipar para o sistema de títulos, evitando conflito.",
+      "Atualizados os textos internos do menu Dragon RPG apenas para os novos comandos."
+    ]
   }
 }
