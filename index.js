@@ -67,7 +67,7 @@ import {
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
   resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
-, formatAdvancedClasses, chooseAdvancedClass} from "./lib/features/rpg/dragonRpg.js";
+, formatAdvancedClasses, chooseAdvancedClass, switchHumanClass, switchAdvancedClass} from "./lib/features/rpg/dragonRpg.js";
 import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
 import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/kobaTrigger.js";
 import { configureSentinelBridgeRuntime, ensureSentinelBridgeServer, getSentinelBridgeStatus, rotateSentinelBridgeSecret, setSentinelBridgeEnabled, getSentinelBridgeLogs, processSentinelWhatsAppMessage, setSentinelWhatsAppNumber, setSentinelBridgeTestMode } from "./lib/features/moderation/sentinelBridge.js";
@@ -9136,6 +9136,21 @@ case "inventariorpg": {
 }
 break;
 
+case "trocarclasse": {
+  const advancedMode=["avancada","avançada","advanced"].includes(String(args?.[0]||"").toLowerCase());
+  const key=String(args?.[advancedMode?1:0]||"").toLowerCase();
+  if(!key)return reply(advancedMode?`🌟 Use *${prefix}trocarclasse avancada <classe>*.`:`🧭 Use *${prefix}trocarclasse <classe>*.`);
+  const r=advancedMode?switchAdvancedClass(sender,key):switchHumanClass(sender,key);
+  if(!r.ok){if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);if(r.reason==="combat")return reply(`⚔️ Você não pode trocar de classe durante uma batalha.`);if(r.reason==="same")return reply(`✨ Essa já é sua classe atual.`);if(r.reason==="requirements")return reply(`🔒 Requisitos incompletos para *${r.klass.name}*:
+${r.missing.map(x=>`• ${x.name}`).join("\n")}`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses* ou *${prefix}classesavancadas*.`);}
+  return reply(`${r.klass.icon} 🔄 *CLASSE ALTERADA!*
+
+${r.old?`${r.old.icon} ${r.old.name} ➜ `:""}${r.klass.icon} *${r.klass.name}*
+
+❤️ HP e 🔷 Mana foram restaurados. ${advancedMode?"Sua habilidade única já está disponível em /habilidades.":"Ao trocar a classe base, a classe avançada anterior é removida."}`);
+}
+break;
+
 case "classesavancadas": {
   const text = formatAdvancedClasses(sender, prefix);
   return reply(text || `🌱 Crie seu personagem primeiro com *${prefix}rpgcriar*.`);
@@ -9365,6 +9380,7 @@ case "rpghabilidade": {
   if (!r.ok) {
     if (r.reason === "no_battle") return reply(`🗺️ Você não está em batalha.`);
     if (r.reason === "mana") return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*, você tem *${r.current}*.`);
+    if (r.reason === "hp_cost") return reply(`❤️ HP insuficiente para o sacrifício. Precisa manter mais de *${r.required} HP*; você tem *${r.current}*.`);
     if (r.reason === "skill_level") return reply(`🔒 *${r.skill.name}* exige Nível RPG *${r.required}*.`);
     if (r.reason === "skill") return reply(`✨ Habilidade inválida. Veja *${prefix}habilidades*.`);
     return reply(`❌ Não foi possível usar a habilidade.`);

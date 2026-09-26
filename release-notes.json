@@ -1318,5 +1318,18 @@
       "/aceitarcasamento agora diferencia ausência de pedido, namoro inválido e tempo mínimo ainda não concluído.",
       "Mantida a correção de menções LID da v5.3.25."
     ]
+  },
+  "v5.3.28": {
+    "version": "5.3.28",
+    "title": "Dragon RPG Classes 2.0",
+    "date": "2026-09-26",
+    "changed": [
+      "Adiciona /trocarclasse <classe> e /trocarclasse avancada <classe> fora de batalha.",
+      "Adiciona Berserker, Druida, Sentinela e Cavaleiro Rúnico às classes avançadas.",
+      "Classes avançadas passam a possuir habilidades únicas.",
+      "Habilidades especiais podem consumir toda a Mana, porcentagem de HP ou combinar os dois recursos.",
+      "Trocar a classe base remove a classe avançada anterior para manter os requisitos consistentes.",
+      "Arquivos e textos do MenuBN/Fun não foram alterados."
+    ]
   }
 }
