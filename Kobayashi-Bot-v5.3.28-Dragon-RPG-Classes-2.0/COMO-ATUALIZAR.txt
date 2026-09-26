@@ -1,0 +1,15 @@
+Kobayashi Bot v5.3.28 — Dragon RPG Classes 2.0
+
+MenuBN/Fun NÃO são alterados por este pacote.
+
+TERMUX:
+cd ~/Kobayashi-Bot
+rm -rf /tmp/koba5328
+mkdir -p /tmp/koba5328
+unzip -o /sdcard/Download/Kobayashi-Bot-v5.3.28-Dragon-RPG-Classes-2.0.zip -d /tmp/koba5328
+cp -rf /tmp/koba5328/Kobayashi-Bot-v5.3.28-Dragon-RPG-Classes-2.0/. ~/Kobayashi-Bot/
+rm -rf /tmp/koba5328
+node --check index.js
+node --check lib/features/rpg/dragonRpg.js
+
+Depois reinicie o bot.
