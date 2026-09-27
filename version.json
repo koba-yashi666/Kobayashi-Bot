@@ -1,5 +1,5 @@
 {
-  "version": "5.3.29",
-  "name": "Kobayashi Bot v5.3.29 Equipamento RPG Fix",
-  "update": "Corrige conflito entre /equipar de títulos e equipamentos do Dragon RPG; adiciona /equiparrpg e /desequiparrpg."
+  "version": "5.3.30",
+  "name": "Kobayashi Bot v5.3.30 AntiFlood + Estatísticas",
+  "update": "AntiFlood inteligente com penalidade progressiva e painel de estatísticas de comandos."
 }

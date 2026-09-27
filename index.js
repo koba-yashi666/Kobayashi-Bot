@@ -2836,8 +2836,11 @@ if (isGroup && sender) {
     const flood = checkCommandFlood(from, sender);
 
     if (flood.blocked) {
+      const reincidencia = Number(flood.strikes || 0);
       await reply(
-        `⏳ Calma aí! Aguarde *${flood.waitSeconds}s* antes de usar outro comando.`
+        `⏳ *ANTI-FLOOD*\n\n` +
+        `Aguarde *${flood.waitSeconds}s* antes de usar outro comando.` +
+        `${reincidencia > 1 ? `\n⚠️ Reincidência: *${reincidencia}x* • o tempo aumenta se continuar.` : ""}`
       );
       continue;
     }
@@ -6218,6 +6221,44 @@ case "emergencia": {
   }
   const cfg = updateAntiTravaConfig(from, { emergency: action === "on" });
   return reply(`🚨 Modo de emergência *${cfg.emergency ? "ativado ✅" : "desativado ❌"}*.\nAtaques graves podem fechar o grupo por *${cfg.emergencySeconds}s*.`);
+}
+break;
+
+case "topcomandos":
+case "cmdtop": {
+  if (!SoDono && !isGroupAdmins) return reply("🛡️ Apenas ADMs podem consultar as estatísticas.");
+  const limit = Math.max(1, Math.min(20, Number(args?.[0] || 10)));
+  const rows = getMostUsedCommands(limit);
+  const total = getTotalCommandUsage();
+
+  if (!rows.length) return reply("📊 Ainda não há estatísticas de comandos registradas.");
+
+  const lista = rows.map((x, i) =>
+    `${i + 1}. *${prefix}${x.name}* — ${x.count} usos • ${x.uniqueUsers} usuários`
+  ).join("\\n");
+
+  return reply(
+    `📊 *ESTATÍSTICAS DE COMANDOS*\\n\\n` +
+    `🔢 Total registrado: *${total}*\\n\\n${lista}`
+  );
+}
+break;
+
+case "cmdinfo":
+case "comandoinfo": {
+  if (!SoDono && !isGroupAdmins) return reply("🛡️ Apenas ADMs podem consultar as estatísticas.");
+  const alvo = String(args?.[0] || "").trim();
+  if (!alvo) return reply(`📊 Use *${prefix}cmdinfo <comando>*.`);
+  const stat = getCommandStats(alvo);
+  if (!stat) return reply(`❌ Ainda não há uso registrado para *${alvo}*.`);
+
+  return reply(
+    `📊 *ESTATÍSTICA DO COMANDO*\\n\\n` +
+    `⚙️ Comando: *${prefix}${stat.name}*\\n` +
+    `🔢 Usos: *${stat.count}*\\n` +
+    `👥 Usuários únicos: *${stat.uniqueUsers}*\\n` +
+    `🕒 Último uso: *${stat.lastUsed ? new Date(stat.lastUsed).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "—"}*`
+  );
 }
 break;
 

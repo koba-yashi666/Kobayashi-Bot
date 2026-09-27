@@ -1,21 +1,23 @@
-Kobayashi Bot v5.3.29 — Equipamento RPG Fix
+Kobayashi Bot v5.3.30 — AntiFlood + Estatísticas
 
-NOVOS COMANDOS:
- /equiparrpg coracao_dragao
- /desequiparrpg acessorio
- /equipamentos
+Novidades:
+- /antiflood 5
+- /antiflood off
+- /topcomandos
+- /topcomandos 20
+- /cmdinfo menu
 
-Esta atualização NÃO altera MenuBN/Fun.
+A atualização não altera Fun/MenuBN nem os textos personalizados.
 
-Termux:
+TERMUX:
 cd ~/Kobayashi-Bot
-rm -rf ~/koba5329
-mkdir -p ~/koba5329
-unzip -o /sdcard/Download/Kobayashi-Bot-v5.3.29-Equipamento-RPG-Fix.zip -d ~/koba5329
-cp -rf ~/koba5329/. ~/Kobayashi-Bot/
-rm -rf ~/koba5329
+rm -rf ~/koba5330
+mkdir -p ~/koba5330
+unzip -o /sdcard/Download/Kobayashi-Bot-v5.3.30-AntiFlood-Estatisticas.zip -d ~/koba5330
+cp -rf ~/koba5330/. ~/Kobayashi-Bot/
+rm -rf ~/koba5330
 cat version.json
 git add .
 git status
-git commit -m "Kobayashi Bot v5.3.29 - Equipamento RPG Fix"
+git commit -m "Kobayashi Bot v5.3.30 - AntiFlood + Estatisticas"
 git push origin main

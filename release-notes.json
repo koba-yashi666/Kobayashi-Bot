@@ -1332,14 +1332,15 @@
       "Arquivos e textos do MenuBN/Fun não foram alterados."
     ]
   },
-  "v5.3.29": {
-    "version": "5.3.29",
-    "title": "Equipamento RPG Fix",
+  "v5.3.30": {
+    "version": "5.3.30",
+    "title": "AntiFlood + Estatísticas",
     "changes": [
-      "Adicionado /equiparrpg <id> para equipamentos do Dragon RPG.",
-      "Adicionado /desequiparrpg <slot>.",
-      "Mantido /equipar para o sistema de títulos, evitando conflito.",
-      "Atualizados os textos internos do menu Dragon RPG apenas para os novos comandos."
+      "AntiFlood de comandos agora detecta rajadas e reincidência.",
+      "Penalidade progressiva de espera, sem ban automático.",
+      "Novo /topcomandos [limite] para ADMs.",
+      "Novo /cmdinfo <comando> para ADMs.",
+      "Sistema existente de estatísticas foi reaproveitado e integrado aos comandos."
     ]
   }
 }
