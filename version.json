@@ -1,5 +1,5 @@
 {
-  "version": "5.3.30",
-  "name": "Kobayashi Bot v5.3.30 AntiFlood + Estatísticas",
-  "update": "AntiFlood inteligente com penalidade progressiva e painel de estatísticas de comandos."
+  "version": "5.3.31",
+  "name": "Kobayashi Bot v5.3.31 Bang + Ban Fix",
+  "update": "Corrige /bang e simplifica /ban."
 }

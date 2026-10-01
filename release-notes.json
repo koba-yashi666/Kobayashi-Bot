@@ -1342,5 +1342,16 @@
       "Novo /cmdinfo <comando> para ADMs.",
       "Sistema existente de estatísticas foi reaproveitado e integrado aos comandos."
     ]
+  },
+  "v5.3.31": {
+    "version": "5.3.31",
+    "title": "Bang + Ban Fix",
+    "date": "2026-10-01",
+    "changes": [
+      "/ban, /b e /banc removem sem motivo.",
+      "/bang trata falhas 429/500 sem derrubar o bot.",
+      "/bang reduz rajadas de consultas entre grupos.",
+      "Fun/MenuBN e textos personalizados não foram alterados."
+    ]
   }
 }
