@@ -1353,5 +1353,16 @@
       "/bang reduz rajadas de consultas entre grupos.",
       "Fun/MenuBN e textos personalizados não foram alterados."
     ]
+  },
+  "v5.3.32": {
+    "version": "5.3.32",
+    "title": "Anti-Msg Global + Auditoria",
+    "date": "2026-10-01",
+    "changes": [
+      "OFF por padrão; controle exclusivo do dono.",
+      "Correspondência exata da mensagem cadastrada.",
+      "Apaga, remove e adiciona à Lista Negra Global.",
+      "Auditoria: mensagem completa, regra, grupo, horário, @, número e resultado."
+    ]
   }
 }

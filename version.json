@@ -1,5 +1,5 @@
 {
-  "version": "5.3.31",
-  "name": "Kobayashi Bot v5.3.31 Bang + Ban Fix",
-  "update": "Corrige /bang e simplifica /ban."
+  "version": "5.3.32",
+  "name": "Kobayashi Bot v5.3.32 Anti-Msg Global",
+  "update": "Anti-Msg Global + auditoria"
 }
