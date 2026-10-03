@@ -1023,11 +1023,18 @@ async function purgeUserFromAdminGroups(conn, rawJid, {
 } = {}) {
   let groups = {};
   try {
-    groups = await conn.groupFetchAllParticipating();
-  } catch (e) {
-    console.error(`[${source}] não foi possível listar grupos:`, e?.message || e);
-    return { checked:0, adminGroups:0, found:0, removed:0, failures:0, details:[] };
+    const cached=conn?.store?.chats&&typeof conn.store.chats.all==="function"
+      ? conn.store.chats.all().filter(c=>String(c?.id||"").endsWith("@g.us")) : [];
+    for(const c of cached) if(c?.id) groups[c.id]=c;
+  } catch {}
+  try {
+    const live=await conn.groupFetchAllParticipating();
+    if(live&&typeof live==="object") groups={...groups,...live};
+  } catch(e) {
+    console.error(`[${source}] consulta global limitada; usando cache:`,e?.message||e);
   }
+  if(!Object.keys(groups).length)
+    return {checked:0,adminGroups:0,found:0,removed:0,failures:1,details:[]};
 
   const targetAliases = await buildBlacklistTargetAliases(conn, rawJid);
   let checked=0, adminGroups=0, found=0, removed=0, failures=0;
@@ -1092,7 +1099,7 @@ async function purgeUserFromAdminGroups(conn, rawJid, {
     }
 
     // Pequeno intervalo para não disparar alterações de participantes em rajada.
-    await new Promise((resolve) => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   return { checked, adminGroups, found, removed, failures, details };
@@ -4177,7 +4184,7 @@ case "listanegraglobal": {
   const target=savedTargets[0];
   if(!target)return reply("⚠️ O número não pôde ser salvo na lista negra global.");
   return conn.sendMessage(from,{
-    text:`🖤🌐 @${target.split("@")[0]} foi salvo na lista negra global.\n🔨 Removido de: *${removed}* grupo(s).`,
+    text:`🖤🌐 *LISTA NEGRA GLOBAL • VARREDURA*\n\n👤 @${target.split("@")[0]} salvo na Lista Negra Global.\n🌐 Grupos verificados: *${checked}*\n🛡️ Kobayashi ADM: *${adminGroups}*\n👤 Encontrado: *${found}*\n🔨 Removido: *${removed}*\n⚠️ Falhas: *${removeFailures}*\n\n♻️ O AutoGuard continua bloqueando reentrada.`,
     mentions:[target]
   },{quoted:info});
 }
@@ -7118,42 +7125,14 @@ case "kobaban": {
 break;
 
 case "bang": {
-  if (!SoDonoPrincipal) return reply("👑🐉 O *Bang* é exclusivo do dono principal.");
-  const ctxInfo=info?.message?.extendedTextMessage?.contextInfo||info?.message?.imageMessage?.contextInfo||info?.message?.videoMessage?.contextInfo||info?.message?.documentMessage?.contextInfo||info?.message?.stickerMessage?.contextInfo||{};
-  const mentioned=Array.isArray(ctxInfo?.mentionedJid)?ctxInfo.mentionedJid[0]:null;
-  const quoted=ctxInfo?.participant||null;
-  const rawNumber=String(args?.[0]||"").replace(/\D/g,"");
-  const target=mentioned||quoted||(rawNumber.length>=8?`${rawNumber}@s.whatsapp.net`:null);
-  if(!target) return reply(`💥🐉 Use *${prefix}bang @membro*, *${prefix}bang número* ou responda uma mensagem.`);
-  const targetDigits=String(target).split("@")[0].replace(/\D/g,"");
-  let groups={};
-  try {
-    const cached=conn?.store?.chats&&typeof conn.store.chats.all==="function"?conn.store.chats.all().filter(c=>String(c?.id||"").endsWith("@g.us")):[];
-    for(const c of cached) if(c?.id) groups[c.id]=c;
-    if(!Object.keys(groups).length){
-      try { groups=await conn.groupFetchAllParticipating(); }
-      catch(e){ console.error("[BANG] Rate limit:",e?.message||e); return reply("⚠️🐉 O WhatsApp limitou temporariamente a consulta global. Aguarde um pouco e tente novamente; a Kobayashi continua online."); }
-    }
-  } catch(e){ console.error("[BANG]",e?.message||e); return reply("❌🐉 Não consegui preparar a lista de grupos agora."); }
-  let checked=0,adminGroups=0,found=0,removed=0,failed=0;
-  for(const gid of Object.keys(groups||{})){
-    checked++;
-    try{
-      if(checked>1) await delay(350);
-      const meta=await conn.groupMetadata(gid);
-      const participants=Array.isArray(meta?.participants)?meta.participants:[];
-      const botIds=[botNumber,conn?.user?.id,conn?.user?.lid].filter(Boolean).map(String);
-      const botP=participants.find(p=>[p?.id,p?.jid,p?.lid,p?.phoneNumber].filter(Boolean).map(String).some(id=>botIds.includes(id)));
-      if(!botP||!["admin","superadmin"].includes(String(botP.admin||""))) continue;
-      adminGroups++;
-      const victim=participants.find(p=>{const ids=[p?.id,p?.jid,p?.lid,p?.phoneNumber].filter(Boolean).map(String);return ids.includes(String(target))||ids.some(id=>id.split("@")[0].replace(/\D/g,"")===targetDigits);});
-      if(!victim) continue;
-      found++;
-      const victimJid=victim?.id||victim?.jid||victim?.phoneNumber||victim?.lid||target;
-      await conn.groupParticipantsUpdate(gid,[victimJid],"remove"); removed++;
-    }catch(e){failed++;console.error(`[BANG] ${gid}:`,e?.message||e);}
-  }
-  return reply(`💥🐉 *BANG GLOBAL CONCLUÍDO*\n\n🎯 Alvo: *${targetDigits||target}*\n🌐 Grupos verificados: *${checked}*\n🛡️ Kobayashi ADM: *${adminGroups}*\n👤 Encontrado: *${found}*\n🚪 Removido: *${removed}*\n⚠️ Falhas: *${failed}*`);
+ if(!SoDonoPrincipal)return reply("👑🐉 O *Bang* é exclusivo do dono principal.");
+ const ci=info?.message?.extendedTextMessage?.contextInfo||info?.message?.imageMessage?.contextInfo||info?.message?.videoMessage?.contextInfo||info?.message?.documentMessage?.contextInfo||info?.message?.stickerMessage?.contextInfo||{};
+ const m=Array.isArray(ci?.mentionedJid)?ci.mentionedJid[0]:null,qtd=ci?.participant||null,raw=String(args?.[0]||"").replace(/\D/g,"");
+ const target=m||qtd||(raw.length>=8?`${raw}@s.whatsapp.net`:null);
+ if(!target)return reply(`💥🐉 Use *${prefix}bang @membro*, *${prefix}bang número* ou responda à mensagem.\n\nA Kobayashi verificará todos os grupos e removerá o alvo onde for ADM.`);
+ if(target===dono||isMainOwnerJid(target))return reply("🛡️🐉 O dono principal é protegido.");
+ const p=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Bang Global 2.0"});
+ return conn.sendMessage(from,{text:`💥🐉 *BANG GLOBAL 2.0*\n\n🎯 @${String(target).split("@")[0]}\n🌐 Grupos verificados: *${p.checked||0}*\n🛡️ Kobayashi ADM: *${p.adminGroups||0}*\n👤 Encontrado: *${p.found||0}*\n🚪 Removido: *${p.removed||0}*\n⚠️ Falhas: *${p.failures||0}*`,mentions:[target]},{quoted:info});
 }
 break;
 

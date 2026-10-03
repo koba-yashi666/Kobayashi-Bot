@@ -1364,5 +1364,16 @@
       "Apaga, remove e adiciona à Lista Negra Global.",
       "Auditoria: mensagem completa, regra, grupo, horário, @, número e resultado."
     ]
+  },
+  "v5.3.33": {
+    "version": "5.3.33",
+    "title": "Global Ban 2.0",
+    "date": "2026-10-03",
+    "changes": [
+      "/bang verifica todos os grupos e remove onde a Kobayashi é ADM.",
+      "/listanegrag salva e executa varredura global.",
+      "Fallback de cache em limitações 429.",
+      "Intervalo entre grupos aumentado para reduzir rajadas."
+    ]
   }
 }
