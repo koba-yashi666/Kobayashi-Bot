@@ -63,7 +63,7 @@ import { buildAdminCenter, buildGroupStatus, buildProtectionPanel, buildSystemsP
 import { ensureDragonCoreRuntime } from "./lib/features/core/dragonCore.js";
 import {
   getDragonRpgPlayer, createDragonRpgPlayer, chooseHumanClass, startDragonAwakening,
-  chooseDragonFaction, chooseDragonClass, startAwakeningBoss, transformDragon, returnHumanForm, useDragonSkill, restoreDragonEnergy, getAwakeningStatus, formatDragonRpgProfile, formatDragonRpgInventory,
+  chooseDragonFaction, chooseDragonClass, switchDragonClass, startAwakeningBoss, transformDragon, returnHumanForm, useDragonSkill, restoreDragonEnergy, getAwakeningStatus, formatDragonRpgProfile, formatDragonRpgInventory,
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
@@ -9297,6 +9297,12 @@ ${result.klass.desc}
 Veja: *${prefix}rpgperfil*`);
 }
 break;
+
+case "trocardragao": case "trocarclassedragao": case "trocarlinhagem": {
+ const key=String(args?.[0]||"").toLowerCase();if(!key)return reply(`🐲 Use *${prefix}trocardragao <classe>* — veja *${prefix}rpgclasses*.`);
+ const r=switchDragonClass(sender,key);if(!r.ok){if(r.reason==="combat")return reply("⚔️ Não pode trocar durante batalha.");if(r.reason==="locked")return reply("🔒 Conclua o Despertar primeiro.");if(r.reason==="same")return reply("🐉 Essa já é sua classe.");if(r.reason==="faction_mismatch")return reply(`⚠️ Essa linhagem é da facção *${factionName(r.required)}*.`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses*.`);}
+ return reply(`🐲🔄 *LINHAGEM ALTERADA!*\n\n${r.old?.icon||"🐉"} ${r.old?.name||""} ➜ ${r.klass.icon} *${r.klass.name}*\n❤️ HP e 🔷 Mana restaurados.\n👤 Forma humana restaurada; use *${prefix}transformar*.`);
+} break;
 
 case "transformar":
 case "formadragao": {
