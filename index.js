@@ -10824,10 +10824,38 @@ case "msg": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
 
   const aviso=String(q||"").trim();
-  if(!aviso)return reply(`📢 *AVISO GLOBAL*\n\nUse: *${prefix}msg texto do aviso*`);
 
-  // v4.0.14: o WhatsApp pode responder 429/500 ao groupFetchAllParticipating.
-  // O erro agora é tratado e nunca é relançado para o processo principal.
+  // /msg agora aceita:
+  // 1) texto normal;
+  // 2) imagem com o comando na legenda;
+  // 3) resposta a uma imagem usando /msg + legenda opcional.
+  const mediaTarget=getCurrentOrQuotedMedia(info);
+  const isImageMsg=Boolean(
+    mediaTarget?.message &&
+    getContentType(mediaTarget.message)==="imageMessage"
+  );
+
+  if(!aviso && !isImageMsg){
+    return reply(
+      `📢 *AVISO GLOBAL*\n\n`+
+      `📝 Texto: *${prefix}msg texto do aviso*\n`+
+      `🖼️ Imagem: envie uma foto com *${prefix}msg legenda* ou responda uma foto com *${prefix}msg legenda*.\n\n`+
+      `A legenda é opcional quando houver imagem.`
+    );
+  }
+
+  let globalImage=null;
+  if(isImageMsg){
+    try{
+      globalImage=await downloadMediaMessage(mediaTarget,"buffer",{});
+    }catch(e){
+      console.error("[MSG GLOBAL] Falha ao baixar imagem:",e?.message||e);
+      return reply("❌ Não consegui baixar a imagem do aviso global. Tente enviá-la novamente.");
+    }
+  }
+
+  // O WhatsApp pode responder 429/500 ao groupFetchAllParticipating.
+  // O erro fica contido para não derrubar o processo principal.
   const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
   const statusOf=(e)=>Number(e?.data||e?.output?.statusCode||e?.output?.payload?.statusCode||e?.statusCode||0);
   let groups=null;
@@ -10839,10 +10867,7 @@ case "msg": {
     }catch(e){
       const status=statusOf(e);
       console.error(`[MSG GLOBAL] groupFetch tentativa ${attempt}/2 (${status||"sem status"}):`,e?.message||e);
-      if(attempt===1){
-        // Um único retry com espera maior; não martela a API em caso de rate limit.
-        await sleep(status===429 ? 12000 : 5000);
-      }
+      if(attempt===1)await sleep(status===429?12000:5000);
     }
   }
 
@@ -10859,17 +10884,21 @@ case "msg": {
   if(!entries.length)return reply("📭 A Kobayashi não está participando de nenhum grupo.");
 
   let enviados=0,falhas=0,rateLimits=0;
-  await reply(`📢🐉 *ENVIO GLOBAL INICIADO*\n\n🏘️ Grupos encontrados: *${entries.length}*\n🛡️ Modo seguro anti-429 ativado.`);
+  await reply(
+    `📢🐉 *ENVIO GLOBAL INICIADO*\n\n`+
+    `🏘️ Grupos encontrados: *${entries.length}*\n`+
+    `🖼️ Imagem: *${globalImage?"SIM":"NÃO"}*\n`+
+    `🛡️ Modo seguro anti-429 ativado.`
+  );
 
   const MAX_MSG_CHUNK=55000;
   const partes=[];
-  for(let i=0;i<aviso.length;i+=MAX_MSG_CHUNK)partes.push(aviso.slice(i,i+MAX_MSG_CHUNK));
-  if(!partes.length)partes.push(aviso);
+  if(aviso){
+    for(let i=0;i<aviso.length;i+=MAX_MSG_CHUNK)partes.push(aviso.slice(i,i+MAX_MSG_CHUNK));
+  }
 
   for(const [groupJid,cachedMeta] of entries){
     try{
-      // Prioriza metadata já devolvida pelo fetch global. Evita uma requisição extra
-      // para cada grupo e reduz muito a chance de 429.
       let meta=cachedMeta;
       if(!Array.isArray(meta?.participants)){
         try{
@@ -10883,11 +10912,16 @@ case "msg": {
 
       const mentions=[...new Set((meta?.participants||[]).map(p=>p?.id||p?.jid).filter(Boolean))];
 
-      for(let i=0;i<partes.length;i++){
-        const multi=partes.length>1?`\n📄 *Parte ${i+1}/${partes.length}*`:"";
+      // Com imagem, o aviso é enviado em uma única mensagem com legenda.
+      if(globalImage){
+        const caption=aviso
+          ? `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n${aviso}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
+          : `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`;
+
         try{
           await conn.sendMessage(groupJid,{
-            text:`╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮${multi}\n\n${partes[i]}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
+            image:globalImage,
+            caption,
             mentions
           });
         }catch(e){
@@ -10899,22 +10933,39 @@ case "msg": {
           }
           throw e;
         }
-        if(i<partes.length-1)await sleep(1000);
+      }else{
+        for(let i=0;i<partes.length;i++){
+          const multi=partes.length>1?`\n📄 *Parte ${i+1}/${partes.length}*`:"";
+          try{
+            await conn.sendMessage(groupJid,{
+              text:`╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮${multi}\n\n${partes[i]}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`,
+              mentions
+            });
+          }catch(e){
+            const status=statusOf(e);
+            if(status===429){
+              rateLimits++;
+              console.error(`[MSG GLOBAL] 429 em ${groupJid}; aguardando antes de continuar.`);
+              await sleep(15000);
+            }
+            throw e;
+          }
+          if(i<partes.length-1)await sleep(1000);
+        }
       }
 
       enviados++;
-      // Ritmo conservador entre grupos para evitar rajada de requests.
       await sleep(2500);
     }catch(e){
       falhas++;
       console.error(`[MSG GLOBAL] Falha em ${groupJid}:`,e?.message||e);
-      // Qualquer falha fica contida no grupo atual; o bot não encerra.
       await sleep(statusOf(e)===429?15000:2500);
     }
   }
 
   return reply(
     `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n`+
+    `🖼️ Formato: *${globalImage?"IMAGEM"+(aviso?" + LEGENDA":""):"TEXTO"}*\n`+
     `📨 Enviados: *${enviados}*\n`+
     `❌ Falhas: *${falhas}*\n`+
     `⚠️ Limitações 429 detectadas: *${rateLimits}*\n`+
