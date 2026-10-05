@@ -1,18 +1,14 @@
 {
-  "version": "5.3.37",
-  "title": "Dragon RPG — Expansão e dificuldade",
+  "version": "5.3.38",
+  "title": "Sakura Channel — Menu decorado",
   "date": "2026-10-04",
   "added": [
-    "14 itens na loja RPG.",
-    "5 regiões, 10 criaturas, 5 chefes e 5 missões."
+    "Link do canal oficial no menu principal."
   ],
   "changed": [
-    "Guardião do Despertar com mais vida e escala de poder.",
-    "Combates dracônicos mais difíceis; escala adicional a partir do nível RPG 30.",
-    "Habilidades humanas: custo base ×4 e piso de 12–18% da Mana máxima.",
-    "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
-    "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
-    "/habilidades mostra o custo realmente debitado."
+    "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
+    "Mantém comandos, prefixos, saudação e dados do bot.",
+    "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1383,6 +1379,23 @@
       "Inimigos Hardcore resistem melhor a dano explosivo de habilidades.",
       "Monstros Hardcore podem acertar golpes brutais ocasionais.",
       "Recompensas sobem moderadamente para compensar o risco sem facilitar farm."
+    ]
+  },
+  "v5.3.37": {
+    "version": "5.3.37",
+    "title": "Dragon RPG — Expansão e dificuldade",
+    "date": "2026-10-04",
+    "added": [
+      "14 itens na loja RPG.",
+      "5 regiões, 10 criaturas, 5 chefes e 5 missões."
+    ],
+    "changed": [
+      "Guardião do Despertar com mais vida e escala de poder.",
+      "Combates dracônicos mais difíceis; escala adicional a partir do nível RPG 30.",
+      "Habilidades humanas: custo base ×4 e piso de 12–18% da Mana máxima.",
+      "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
+      "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
+      "/habilidades mostra o custo realmente debitado."
     ]
   }
 }
