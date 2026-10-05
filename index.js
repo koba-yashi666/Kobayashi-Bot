@@ -9333,7 +9333,7 @@ case "skilldragao": {
     if(r.reason==="mana")return reply(`🔷 Mana insuficiente. Precisa de *${r.required}*.`);
     return reply(`❌ Habilidade dracônica indisponível.`);
   }
-  return reply(`${r.skill.icon} *${r.skill.name}*\n💥 Dano: *${r.damage}*${r.victory?`\n🏆 Inimigo derrotado!`:""}`);
+  return reply(`${r.skill.icon} *${r.skill.name}*\n🔷 Mana gasta: *${r.manaCost}*\n💥 Dano: *${r.damage}*${r.victory?`\n🏆 Inimigo derrotado!`:""}`);
 }
 break;
 case "energiadragao":

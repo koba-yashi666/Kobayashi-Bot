@@ -1,13 +1,18 @@
 {
-  "version": "5.3.36",
-  "title": "Avisos globais com imagem",
+  "version": "5.3.37",
+  "title": "Dragon RPG — Expansão e dificuldade",
   "date": "2026-10-04",
-  "added": [],
+  "added": [
+    "14 itens na loja RPG.",
+    "5 regiões, 10 criaturas, 5 chefes e 5 missões."
+  ],
   "changed": [
-    "/msg reconhece fotos atuais e citadas em envelopes do WhatsApp.",
-    "Preserva quebras de linha e divide legendas longas.",
-    "Tenta recuperar mídia expirada; cancela se o download falhar.",
-    "Falhas de envio são contidas sem repetição automática."
+    "Guardião do Despertar com mais vida e escala de poder.",
+    "Combates dracônicos mais difíceis; escala adicional a partir do nível RPG 30.",
+    "Habilidades humanas: custo base ×4 e piso de 12–18% da Mana máxima.",
+    "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
+    "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
+    "/habilidades mostra o custo realmente debitado."
   ],
   "v1.0.14": {
     "version": "1.0.14",
