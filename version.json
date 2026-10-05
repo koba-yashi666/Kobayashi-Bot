@@ -1,5 +1,5 @@
 {
-  "version": "5.3.38",
-  "name": "Kobayashi Bot v5.3.38 — Sakura Channel",
-  "update": "Menu decorado com canal oficial; mantém RPG expandido e /msg com imagem."
+  "version": "5.3.39",
+  "name": "Kobayashi Bot v5.3.39 — Classes e rankings",
+  "update": "Troca de classe a cada 7 dias e resets de rankings por grupo."
 }

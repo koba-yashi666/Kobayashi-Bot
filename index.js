@@ -38,7 +38,7 @@ import { runModularCommand, getCommandHelpCatalog } from "./commands/registry.js
 import { createPermissions, permissionName } from "./lib/core/permissions.js";
 import { addAdminLog, getAdminLogs, clearAdminLogs, getAdminLogStats, cleanupAdminLogs } from "./lib/features/moderation/adminLogs.js";
 import { setAfk, getAfk, removeAfk, formatDuration as formatAfkDuration } from "./lib/features/social/afkSystem.js";
-import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel, resetGroupLevelRank, resetGlobalLevelRank
+import { trackActivity, getUserActivity, getTopActivity, getInactive, getTopLevel, getLevelInfoFromXp, isLevelEnabled, setLevelEnabled, getGlobalTopLevel, resetGroupLevelRank, resetGlobalLevelRank, resetGroupMessageRank, resetGroupActivityRanks, backupGroupActivityRanks
 } from "./lib/features/social/activityTracker.js";
 import { getYuriProtection, toggleYuriProtection, configureAntiFlood, checkCommandFlood, muteUser, unmuteUser, isMuted } from "./lib/features/moderation/yuriProtection.js";
 import { DRAGON_COMMUNITY_GROUPS, addDragonBan, removeDragonBan, listDragonBans, purgeDragonBannedUser } from "./lib/features/moderation/dragonBan.js";
@@ -68,7 +68,7 @@ import {
   formatRpgMenu, formatRpgCommands, formatRpgClasses, formatClassInfo, formatRpgHelp, factionName,
   formatRpgRegions, startRpgBattle, rpgAttack, rpgDefend, rpgSkill, rpgUseItem, rpgFlee, rpgRest,
   rpgSpendStat, formatBattleStart, formatBattleAction, formatRpgQuests, acceptRpgQuest, claimRpgQuest, formatRpgRank,
-  resetDragonRpgUsers, resetAllDragonRpg, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
+  resetDragonRpgUsers, resetAllDragonRpg, resetDragonRpgProgress, formatRpgShop, buyRpgItem, equipRpgItem, unequipRpgItem, formatRpgEquipment, formatRpgSkills
 , formatAdvancedClasses, chooseAdvancedClass, switchHumanClass, switchAdvancedClass} from "./lib/features/rpg/dragonRpg.js";
 import { isDragonRpgEnabled, setDragonRpgEnabled } from "./lib/features/rpg/dragonRpgMode.js";
 import { isKobaTriggerEnabled, setKobaTriggerEnabled } from "./lib/features/kobaTrigger.js";
@@ -1820,6 +1820,11 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "whitelist",
   "work",
   "xp",
+  "zerarank",
+  "zerarankmsg",
+  "zerarankrpg",
+  "zerarank-geral",
+  "zerarankgeral",
   "zeraranknivel",
   "zeraranknivelg",
   "zerarrpg",
@@ -5904,10 +5909,68 @@ case "classeslevel": {
 }
 break;
 
+case "zerarank":
+case "zerarankmsg":
+case "zerarankrpg":
+case "zerarank-geral":
+case "zerarankgeral": {
+  if(!isGroup)return reply(mess.onlyGroup());
+  if(!SoDonoPrincipal)return reply("👑 Apenas o dono principal pode zerar estes rankings.");
+  const all=["zerarank-geral","zerarankgeral"].includes(command);
+  const rpg=all||command==="zerarankrpg";
+  if(String(q||"").trim().toLowerCase()!=="confirmar"){
+    return reply(`⚠️ *RESET DE RANKINGS DO GRUPO*\n\n`+
+      (all?"Serão zerados: mensagens, nível/XP do grupo, Rank ADM e progressão RPG dos membros.\n":rpg?"Serão zerados nível, XP, atributos, pontos, combates, missões e despertar RPG dos membros.\n":"Será zerada a quantidade de mensagens; nível e XP serão mantidos.\n")+
+      (rpg?"Ouro, inventário e classe humana serão mantidos. Equipamentos serão desequipados; classes avançadas e linhagens deverão ser conquistadas novamente.\n⚠️ O personagem RPG é compartilhado: o reset também aparece nos outros grupos em que esses membros jogam.\n":"")+
+      `\n🛡️ Backup antes do reset.\nUse *${prefix}${command} confirmar*.`);
+  }
+  let rpgResult=null,activityResult=null,admReset=false;
+  try{
+    if(rpg){
+      // Busca atual obrigatória: não executa reset com uma lista parcial em cache.
+      const meta=await conn.groupMetadata(from);
+      if(!Array.isArray(meta?.participants)||!meta.participants.length)throw new Error("Lista atual de membros indisponível");
+      const jids=new Set();
+      for(const p of meta.participants){
+        for(const raw of [p.id,p.jid,p.phoneNumber,p.lid].filter(Boolean)){
+          jids.add(raw);try{const normalized=normalizeJid(raw);if(normalized)jids.add(normalized);}catch{}
+          const pn=await getPNForJid(conn,raw,raw);if(pn)jids.add(pn);
+        }
+      }
+      // Backup de atividade antes de qualquer alteração do reset geral.
+      if(all){
+        backupGroupActivityRanks(from);
+        const admFile=path.join(process.cwd(),"files","database","rank-adm.json");
+        if(fs.existsSync(admFile)){
+          const dir=path.join(process.cwd(),"files","database","backups","ranks");
+          fs.mkdirSync(dir,{recursive:true});
+          fs.copyFileSync(admFile,path.join(dir,`rank-adm-${Date.now()}.json`));
+        }
+      }
+      rpgResult=resetDragonRpgProgress([...jids],`rank-${from}`);
+    }
+    if(all||!rpg)activityResult=resetGroupActivityRanks(from,{messages:true,level:all});
+    if(all)admReset=resetAdminActivityRank(from);
+    return reply(`✅ *RANKINGS ZERADOS*\n\n`+
+      (activityResult?`💬 Contadores: *${activityResult.users}* membros.\n`:"")+
+      (all?"⭐ Nível do grupo: 1 e XP: 0.\n👑 Rank ADM zerado.\n":"")+
+      (rpgResult?`🐉 Progressão RPG reiniciada: *${rpgResult.reset}* personagens.\n🪙 Ouro e 🎒 inventário mantidos.\n`:"")+
+      "🛡️ Backups criados para os dados existentes.");
+  }catch(e){
+    console.error("[RESET RANK]",e?.message||e);
+    return reply(`❌ O reset não foi concluído.\n`+
+      (rpgResult?"🐉 A etapa RPG já foi aplicada.\n":"")+
+      (activityResult?"💬 A etapa de atividade já foi aplicada.\n":"")+
+      "Os backups disponíveis foram preservados. Confira antes de repetir.");
+  }
+}
+break;
+
 case "zeraranknivel": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode zerar o ranking de nível.");
 
+  if(String(q||"").trim().toLowerCase()!=="confirmar")return reply(`⭐ Zerar nível e XP deste grupo?\nUse *${prefix}zeraranknivel confirmar*. Contagem de mensagens mantida.`);
   const result = resetGroupLevelRank(from);
   return reply(
     `🏆🐉 *TEMPORADA DE NÍVEL ENCERRADA!*\n\n` +
@@ -9153,7 +9216,7 @@ case "trocarclasse": {
   const key=String(args?.[advancedMode?1:0]||"").toLowerCase();
   if(!key)return reply(advancedMode?`🌟 Use *${prefix}trocarclasse avancada <classe>*.`:`🧭 Use *${prefix}trocarclasse <classe>*.`);
   const r=advancedMode?switchAdvancedClass(sender,key):switchHumanClass(sender,key);
-  if(!r.ok){if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);if(r.reason==="combat")return reply(`⚔️ Você não pode trocar de classe durante uma batalha.`);if(r.reason==="same")return reply(`✨ Essa já é sua classe atual.`);if(r.reason==="requirements")return reply(`🔒 Requisitos incompletos para *${r.klass.name}*:
+  if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Trocas de classe compartilham um intervalo de *7 dias*.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para a próxima troca.`);if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);if(r.reason==="combat")return reply(`⚔️ Você não pode trocar de classe durante uma batalha.`);if(r.reason==="same")return reply(`✨ Essa já é sua classe atual.`);if(r.reason==="requirements")return reply(`🔒 Requisitos incompletos para *${r.klass.name}*:
 ${r.missing.map(x=>`• ${x.name}`).join("\n")}`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses* ou *${prefix}classesavancadas*.`);}
   return reply(`${r.klass.icon} 🔄 *CLASSE ALTERADA!*
 
@@ -9301,7 +9364,7 @@ break;
 
 case "trocardragao": case "trocarclassedragao": case "trocarlinhagem": {
  const key=String(args?.[0]||"").toLowerCase();if(!key)return reply(`🐲 Use *${prefix}trocardragao <classe>* — veja *${prefix}rpgclasses*.`);
- const r=switchDragonClass(sender,key);if(!r.ok){if(r.reason==="combat")return reply("⚔️ Não pode trocar durante batalha.");if(r.reason==="locked")return reply("🔒 Conclua o Despertar primeiro.");if(r.reason==="same")return reply("🐉 Essa já é sua classe.");if(r.reason==="faction_mismatch")return reply(`⚠️ Essa linhagem é da facção *${factionName(r.required)}*.`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses*.`);}
+ const r=switchDragonClass(sender,key);if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Trocas de classe compartilham um intervalo de *7 dias*.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para a próxima troca.`);if(r.reason==="combat")return reply("⚔️ Não pode trocar durante batalha.");if(r.reason==="locked")return reply("🔒 Conclua o Despertar primeiro.");if(r.reason==="same")return reply("🐉 Essa já é sua classe.");if(r.reason==="faction_mismatch")return reply(`⚠️ Essa linhagem é da facção *${factionName(r.required)}*.`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses*.`);}
  return reply(`🐲🔄 *LINHAGEM ALTERADA!*\n\n${r.old?.icon||"🐉"} ${r.old?.name||""} ➜ ${r.klass.icon} *${r.klass.name}*\n❤️ HP e 🔷 Mana restaurados.\n👤 Forma humana restaurada; use *${prefix}transformar*.`);
 } break;
 

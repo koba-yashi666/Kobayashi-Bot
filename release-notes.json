@@ -1,14 +1,18 @@
 {
-  "version": "5.3.38",
-  "title": "Sakura Channel — Menu decorado",
+  "version": "5.3.39",
+  "title": "Classes e novas temporadas",
   "date": "2026-10-04",
   "added": [
-    "Link do canal oficial no menu principal."
+    "/zerarank confirmar",
+    "/zerarankrpg confirmar",
+    "/zerarank-geral confirmar"
   ],
   "changed": [
-    "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
-    "Mantém comandos, prefixos, saudação e dados do bot.",
-    "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
+    "Trocas de classe base, avançada e dracônica compartilham intervalo de 7 dias.",
+    "/zeraranknivel confirmar reseta apenas nível/XP do grupo.",
+    "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
+    "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
+    "Backups e confirmação antes dos resets."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1396,6 +1400,19 @@
       "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
       "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
       "/habilidades mostra o custo realmente debitado."
+    ]
+  },
+  "v5.3.38": {
+    "version": "5.3.38",
+    "title": "Sakura Channel — Menu decorado",
+    "date": "2026-10-04",
+    "added": [
+      "Link do canal oficial no menu principal."
+    ],
+    "changed": [
+      "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
+      "Mantém comandos, prefixos, saudação e dados do bot.",
+      "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
     ]
   }
 }
