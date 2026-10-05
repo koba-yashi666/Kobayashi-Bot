@@ -18,6 +18,7 @@ WhatsApp: 5515997075304
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
+import { handleAntiStatus } from "./lib/features/moderation/antiStatus.js";
 import { removeAntiLinkParticipant } from "./lib/features/moderation/antiLinkRemoval.js";
 import { withAntiLinkGroupLock } from "./lib/features/moderation/antiLinkGroupLock.js";
 import fs from "fs";
@@ -142,6 +143,7 @@ function getGroupProtection(groupJid) {
     antilinkgp: Boolean(db?.[groupJid]?.antilinkgp),
     antilinklight: Boolean(db?.[groupJid]?.antilinklight),
     antitelegram: Boolean(db?.[groupJid]?.antitelegram),
+    antistts: Boolean(db?.[groupJid]?.antistts),
   };
 }
 
@@ -1300,6 +1302,8 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "antiflood",
   "antifloodmensagem",
   "antifloodmsg",
+  "antistts",
+  "antistatus",
   "antilink",
   "antilinkgp",
   "antilinklight",
@@ -2473,6 +2477,17 @@ if (isGroup && sender && !info.key.fromMe) {
 const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
+if(isGroup){
+  const antiStatusResult=await handleAntiStatus({
+    conn,info,enabled:getGroupProtection(from).antistts,
+    protectedMember:isGroupAdmins || isWhitelisted(from,sender) || (senderLid && isWhitelisted(from,senderLid)),
+    botIsAdmin:isBotGroupAdmins,
+    identities:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),
+    removeParticipant:ids=>removeAntiLinkParticipant(conn,from,ids,{resolvePN:id=>getPNForJid(conn,id,id)}),
+    log:entry=>addAdminLog(from,{...entry,actor:botNumber})
+  });
+  if(antiStatusResult.handled)continue;
+}
 // 👑 RankADM — registra apenas atividade feita enquanto o membro é ADM.
 if (isGroup && isGroupAdmins && !info.key.fromMe) {
   let rankAdmKind = null;
@@ -4365,6 +4380,20 @@ case "whitelist": {
 break;
 
 // proteção / diversão ADM • v0.1.20
+case "antistts":
+case "antistatus": {
+  if(!isGroup)return reply(mess.onlyGroup());
+  if(!isGroupAdmins)return reply(mess.onlyAdmins());
+  const mode=String(args[0]||"").toLowerCase();
+  if(mode && !["on","off","status"].includes(mode))return reply(`📵 Use *${prefix}antistts on*, *${prefix}antistts off* ou *${prefix}antistts status*.`);
+  if(mode==="status")return reply(`📵 *ANTISTTS:* ${getGroupProtection(from).antistts?"🟢 ATIVADO":"🔴 DESATIVADO"}`);
+  if((mode==="on"||(!mode&&!getGroupProtection(from).antistts))&&!isBotGroupAdmins)return reply("🛡️ O bot precisa ser administrador para ativar o AntiSTTS.");
+  const enabled=mode?setGroupProtection(from,"antistts",mode==="on"):toggleGroupProtection(from,"antistts");
+  addAdminLog(from,{type:"antistts",actor:sender,detail:enabled?"Proteção ativada":"Proteção desativada"});
+  return reply(`📵🐉 *ANTISTTS ${enabled?"ATIVADO":"DESATIVADO"}*\n\nApaga a menção recebida no grupo e remove o autor que marcou o grupo em status.\n🛡️ Administradores, donos e lista branca são preservados.\nO status privado original continua na conta do autor.\n\n${prefix}antistts on | off | status`);
+}
+break;
+
 case "antilink":
 case "antilinkgp":
 case "antilinklight":
@@ -9721,6 +9750,7 @@ case "adminlogs": {
   for (let i = 0; i < lower.length; i++) {
     const token = lower[i];
     if (["antilink", "link", "links"].includes(token)) type = "antilink";
+    if (["antistts", "antistatus"].includes(token)) type = "antistts";
     else if (["adv", "advertencia", "advertência", "advs"].includes(token)) type = "adv";
     else if (token === "hoje") {
       const d = new Date(); d.setHours(0,0,0,0); since = d.getTime(); dateLabel = "hoje";

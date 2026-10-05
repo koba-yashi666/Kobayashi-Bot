@@ -1,14 +1,16 @@
 {
-  "version": "5.3.41",
-  "title": "Correção da remoção AntiLink",
+  "version": "5.3.42",
+  "title": "AntiSTTS",
   "date": "2026-10-05",
-  "added": [],
+  "added": [
+    "/antistts on/off/status e alias /antistatus.",
+    "Detecção de menções reais do grupo em status, exclusão do aviso e remoção do autor.",
+    "/logs antistts."
+  ],
   "changed": [
-    "Remoção usa o identificador do membro nos metadados atuais (LID/número).",
-    "Tenta identificadores alternativos quando o primeiro falha.",
-    "Confirma status de remoção ou verifica ausência do membro.",
-    "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
-    "Mantém o fechamento e a reabertura temporários do grupo."
+    "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
+    "ADM, dono e lista branca preservados.",
+    "Identifica o remetente do evento e usa remoção LID/PN confirmada."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1442,6 +1444,19 @@
       "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
       "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
       "Resultados de exclusão e remoção são registrados sem presumir sucesso."
+    ]
+  },
+  "v5.3.41": {
+    "version": "5.3.41",
+    "title": "Correção da remoção AntiLink",
+    "date": "2026-10-05",
+    "added": [],
+    "changed": [
+      "Remoção usa o identificador do membro nos metadados atuais (LID/número).",
+      "Tenta identificadores alternativos quando o primeiro falha.",
+      "Confirma status de remoção ou verifica ausência do membro.",
+      "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
+      "Mantém o fechamento e a reabertura temporários do grupo."
     ]
   }
 }
