@@ -1,24 +1,13 @@
 {
-  "version": "1.0.13",
-  "title": "Kobayashi Sakura Dragon Menu + HelpCMD",
-  "date": "2026-09-03",
-  "added": [
-    "/helpcmd comando",
-    "Tema visual Sakura Dragon exclusivo da Kobayashi",
-    "Jardim Essencial",
-    "Santuário ADM",
-    "Ateliê de Escamas",
-    "Ascensão Dragon",
-    "Reino Dragon Social",
-    "Mercado das Escamas",
-    "Salão da Kanna",
-    "Câmara da Kobayashi"
-  ],
+  "version": "5.3.36",
+  "title": "Avisos globais com imagem",
+  "date": "2026-10-04",
+  "added": [],
   "changed": [
-    "Menu principal redesenhado com molduras florais e identidade Kobayashi",
-    "Submenus mostram somente os comandos, sem descrições ao lado",
-    "HelpCMD recebeu o mesmo tema visual dos menus",
-    "Categorias ganharam nomes próprios mantendo os comandos originais"
+    "/msg reconhece fotos atuais e citadas em envelopes do WhatsApp.",
+    "Preserva quebras de linha e divide legendas longas.",
+    "Tenta recuperar mídia expirada; cancela se o download falhar.",
+    "Falhas de envio são contidas sem repetição automática."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1374,6 +1363,21 @@
       "/listanegrag salva e executa varredura global.",
       "Fallback de cache em limitações 429.",
       "Intervalo entre grupos aumentado para reduzir rajadas."
+    ]
+  },
+  "v5.3.35": {
+    "version": "5.3.35",
+    "title": "Dragon RPG Hardcore",
+    "date": "2026-10-04",
+    "changes": [
+      "Habilidades comuns passam a gastar Mana proporcional à Mana máxima.",
+      "Habilidades dracônicas passam a consumir 12%–18% da Mana máxima, com custo mínimo elevado.",
+      "A partir do nível 50, inimigos escalam pelos atributos reais do jogador.",
+      "Nível 100+ recebe inimigos com HP, ataque e defesa adaptativos muito maiores.",
+      "Bosses Hardcore recebem escalonamento adicional.",
+      "Inimigos Hardcore resistem melhor a dano explosivo de habilidades.",
+      "Monstros Hardcore podem acertar golpes brutais ocasionais.",
+      "Recompensas sobem moderadamente para compensar o risco sem facilitar farm."
     ]
   }
 }

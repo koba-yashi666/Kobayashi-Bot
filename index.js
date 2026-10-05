@@ -17,6 +17,7 @@ WhatsApp: 5515997075304
 
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
+import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
@@ -10823,17 +10824,9 @@ break;
 case "msg": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
 
-  const aviso=String(q||"").trim();
-
-  // /msg agora aceita:
-  // 1) texto normal;
-  // 2) imagem com o comando na legenda;
-  // 3) resposta a uma imagem usando /msg + legenda opcional.
-  const mediaTarget=getCurrentOrQuotedMedia(info);
-  const isImageMsg=Boolean(
-    mediaTarget?.message &&
-    getContentType(mediaTarget.message)==="imageMessage"
-  );
+  const aviso=getGlobalNoticeText(fullCommandText);
+  const mediaTarget=getGlobalImageTarget(info);
+  const isImageMsg=Boolean(mediaTarget);
 
   if(!aviso && !isImageMsg){
     return reply(
@@ -10847,7 +10840,14 @@ case "msg": {
   let globalImage=null;
   if(isImageMsg){
     try{
-      globalImage=await downloadMediaMessage(mediaTarget,"buffer",{});
+      globalImage=await downloadMediaMessage(mediaTarget,"buffer",{}, {
+        logger: console,
+        ...(typeof conn.updateMediaMessage === "function"
+          ? { reuploadRequest: conn.updateMediaMessage.bind(conn) } : {})
+      });
+      if (!Buffer.isBuffer(globalImage) || !globalImage.length) {
+        throw new Error("Imagem vazia ou inválida");
+      }
     }catch(e){
       console.error("[MSG GLOBAL] Falha ao baixar imagem:",e?.message||e);
       return reply("❌ Não consegui baixar a imagem do aviso global. Tente enviá-la novamente.");
@@ -10912,10 +10912,11 @@ case "msg": {
 
       const mentions=[...new Set((meta?.participants||[]).map(p=>p?.id||p?.jid).filter(Boolean))];
 
-      // Com imagem, o aviso é enviado em uma única mensagem com legenda.
+      // Legendas longas seguem em partes para respeitar o limite da imagem.
       if(globalImage){
-        const caption=aviso
-          ? `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n${aviso}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
+        const imageText=aviso.slice(0,900);
+        const caption=imageText
+          ? `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n${imageText}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
           : `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`;
 
         try{
@@ -10932,6 +10933,13 @@ case "msg": {
             await sleep(15000);
           }
           throw e;
+        }
+        const remaining=aviso.slice(900);
+        for(let i=0;i<remaining.length;i+=MAX_MSG_CHUNK){
+          await sleep(1000);
+          await conn.sendMessage(groupJid, {
+            text:remaining.slice(i,i+MAX_MSG_CHUNK), mentions
+          });
         }
       }else{
         for(let i=0;i<partes.length;i++){
@@ -10967,7 +10975,7 @@ case "msg": {
     `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n`+
     `🖼️ Formato: *${globalImage?"IMAGEM"+(aviso?" + LEGENDA":""):"TEXTO"}*\n`+
     `📨 Enviados: *${enviados}*\n`+
-    `❌ Falhas: *${falhas}*\n`+
+    `❌ Grupos com falha (podem ter recebido parte do aviso): *${falhas}*\n`+
     `⚠️ Limitações 429 detectadas: *${rateLimits}*\n`+
     `🏘️ Total: *${entries.length}*`
   );
