@@ -1,16 +1,16 @@
 {
-  "version": "5.3.42",
-  "title": "AntiSTTS",
+  "version": "5.3.43",
+  "title": "Dragon RPG — Expansão",
   "date": "2026-10-05",
   "added": [
-    "/antistts on/off/status e alias /antistatus.",
-    "Detecção de menções reais do grupo em status, exclusão do aviso e remoção do autor.",
-    "/logs antistts."
+    "8 classes avançadas com habilidades próprias: Samurai, Monge, Bardo, Invocador, Caçador de Dragões, Templário, Cronomago e Xamã.",
+    "30 comandos novos de profissões, coleta, fabricação, economia, exploração, pets e conquistas.",
+    "/rpgexpansao com sintaxe e custos."
   ],
   "changed": [
-    "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
-    "ADM, dono e lista branca preservados.",
-    "Identifica o remetente do evento e usa remoção LID/PN confirmada."
+    "Cooldowns persistentes, ações bloqueadas durante combate e pagamentos validados.",
+    "Banco devolvido ao bolso ao zerar progressão; saldo preservado.",
+    "Atualização pequena e cumulativa; script Termux somente publica no GitHub."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1457,6 +1457,21 @@
       "Confirma status de remoção ou verifica ausência do membro.",
       "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
       "Mantém o fechamento e a reabertura temporários do grupo."
+    ]
+  },
+  "v5.3.42": {
+    "version": "5.3.42",
+    "title": "AntiSTTS",
+    "date": "2026-10-05",
+    "added": [
+      "/antistts on/off/status e alias /antistatus.",
+      "Detecção de menções reais do grupo em status, exclusão do aviso e remoção do autor.",
+      "/logs antistts."
+    ],
+    "changed": [
+      "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
+      "ADM, dono e lista branca preservados.",
+      "Identifica o remetente do evento e usa remoção LID/PN confirmada."
     ]
   }
 }

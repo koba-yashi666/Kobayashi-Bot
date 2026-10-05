@@ -1,3 +1,4 @@
+import { DRAGON_EXPANSION_COMMANDS, runDragonExpansion } from "./lib/features/rpg/dragonExpansion.js";
 /*
  * KOBAYASHI BOT
  * Criador: Luiz G. / Kobayashi
@@ -90,6 +91,7 @@ import { getCoreStatus, cleanCoreTemp } from "./lib/features/core/coreStability.
 import {gamesEnabled,setGamesEnabled,startForca,playForca,startVelha,playVelha,boardVelha,startConnect4,playConnect4,boardConnect4} from "./lib/features/games/gamesV5.js";
 import * as socialV5 from "./lib/features/social/socialV5.js";
 const DRAGON_RPG_V3_COMMANDS = new Set([
+  ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
   "masmorras",
   "dungeons",
   "masmorra",
@@ -1254,6 +1256,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
   "0",
   "1",
   "12345",
@@ -3284,6 +3287,7 @@ if (isCmd) {
   );
 
   const DRAGON_RPG_COMMANDS = new Set([
+  ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
   "atacar",
   "atributorpg",
   "batalhar",
@@ -9154,6 +9158,39 @@ case "craft": {
  if(!r.ok){if(r.e==="MATERIALS")return reply(`❌ Faltam materiais:\n${fmtNeeds(r.missing)}`);return reply(`❌ Receita inexistente. Use *${prefix}receitas*.`);}
  return reply(`⚒️✨ *CRAFT CONCLUÍDO!*\n\n${r.r.name}\n🎒 Quantidade criada: *${r.count}*`);
 } break;
+case "profissaorpg":
+case "pescarrpg":
+case "minerarrpg":
+case "coletarrpg":
+case "cortarrpg":
+case "bolsarpg":
+case "venderrpg":
+case "alquimiarpg":
+case "cozinharpg":
+case "forjarrpg":
+case "depositarrpg":
+case "sacarrpg":
+case "diariorpg":
+case "treinarrpg":
+case "expedirrpg":
+case "acamparrpg":
+case "adotarrpg":
+case "petrpg":
+case "alimentarrpg":
+case "treinopetrpg":
+case "tesourorpg":
+case "abrirbaurpg":
+case "pesquisarrpg":
+case "curandeirorpg":
+case "contratosrpg":
+case "entregarrpg":
+case "conquistasrpg":
+case "titulorpg":
+case "aprimorarrpg":
+case "reciclarrpg":
+case "rpgexpansao":
+  return reply(runDragonExpansion(sender, command, args, prefix));
+
 case "descansodungeon": {
  const r=restDungeon(sender); return reply(`😴🐉 Energia recuperada: *${r.before} → ${r.after}*.`);
 } break;
