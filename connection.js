@@ -10,6 +10,7 @@ import makeWASocket, {
   makeCacheableSignalKeyStore,
 } from "@whiskeysockets/baileys";
 
+import { recoverAntiLinkGroupLocks } from "./lib/features/moderation/antiLinkGroupLock.js";
 import NodeCache from "node-cache";
 import start from "./index.js";
 import { bindGroupCache, groupCache } from "./lib/groupCache.js";
@@ -638,6 +639,7 @@ async function startConnect() {
             break;
 
           case "open":
+            await recoverAntiLinkGroupLocks(conn);
             reconnecting = false;
             botReady = true;
             global.startTime = Math.floor(Date.now() / 1000);

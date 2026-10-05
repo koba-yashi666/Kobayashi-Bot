@@ -18,6 +18,7 @@ WhatsApp: 5515997075304
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
+import { withAntiLinkGroupLock } from "./lib/features/moderation/antiLinkGroupLock.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
@@ -3087,85 +3088,74 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
     const auditPreview = auditMessagePreview(info, body, type);
     const messageId = info?.key?.id || "não disponível";
 
-    // Responde diretamente à mensagem proibida ANTES de apagar/banir.
-    // Assim o aviso fica visualmente ligado ao link que acionou o AntiLink.
-    await conn.sendMessage(from, {
-      text:
-        action === "light"
-          ? `⚠️🌸 *Link proibido detectado.*\n@${sender.split("@")[0]}, esse tipo de link não é permitido aqui.`
-          : `🚫🐉 *PROIBIDO LINKS AQUI!*\n@${sender.split("@")[0]} será removido por enviar link proibido.`,
-      mentions: [sender]
-    }, { quoted: info }).catch((e) => {
-      console.error("Erro ao responder mensagem do AntiLink:", e?.message || e);
-    });
-
-    await delay(700);
-    await deleteDetectedMessage(conn, from, info);
-
-    let actionResult = "Mensagem removida";
-
-    if (action === "light") {
-      const result = await addAutomaticWarning(
-        conn,
-        from,
-        sender,
-        reason,
-        isBotGroupAdmins,
-        info
-      );
-
-      actionResult = result.removed
-        ? `Mensagem removida • 3/3 ADVs • membro removido`
-        : `Mensagem removida • ADV ${result.count}/3`;
-
-      if (!result.removed) {
-        await conn.sendMessage(from, {
-          text:
-            `⚠️🌸 *ANTILINK LIGHT*\n\n` +
-            `👤 @${sender.split("@")[0]}\n` +
-            `🗑️ Link apagado.\n` +
-            `⚠️ Advertências: *${result.count}/3*`,
-          mentions: [sender]
-        }).catch(() => {});
-      }
-
-      await notifyOwnerAntiLink(conn, dono, {
-        sender,
-        senderLid,
-        groupName,
-        groupJid: from,
-        messageId,
-        messageText: auditPreview,
-        actionResult
+    let actionResult = "";
+    await withAntiLinkGroupLock(conn, from, async () => {
+      // Responde diretamente à mensagem proibida ANTES de apagar/banir.
+      // Assim o aviso fica visualmente ligado ao link que acionou o AntiLink.
+      await conn.sendMessage(from, {
+        text:
+          action === "light"
+            ? `⚠️🌸 *Link proibido detectado.*\n@${sender.split("@")[0]}, esse tipo de link não é permitido aqui.`
+            : `🚫🐉 *PROIBIDO LINKS AQUI!*\n@${sender.split("@")[0]} será removido por enviar link proibido.`,
+        mentions: [sender]
+      }, { quoted: info }).catch((e) => {
+        console.error("Erro ao responder mensagem do AntiLink:", e?.message || e);
       });
-    } else {
-      let removed = false;
 
-      if (isBotGroupAdmins) {
-        try {
-          await conn.groupParticipantsUpdate(from, [sender], "remove");
-          removed = true;
-        } catch (e) {
-          console.error("Erro ao remover usuário pelo AntiLink:", e?.message || e);
+      const deleted = await deleteDetectedMessage(conn, from, info);
+      const deletionText = deleted ? "Mensagem removida" : "Falha ao apagar mensagem";
+      actionResult = deletionText;
+
+      if (action === "light") {
+        const result = await addAutomaticWarning(
+          conn,
+          from,
+          sender,
+          reason,
+          isBotGroupAdmins,
+          info
+        );
+
+        actionResult = result.removed
+          ? `${deletionText} • 3/3 ADVs • membro removido`
+          : `${deletionText} • ADV ${result.count}/3`;
+
+        if (!result.removed) {
+          await conn.sendMessage(from, {
+            text:
+              `⚠️🌸 *ANTILINK LIGHT*\n\n` +
+              `👤 @${sender.split("@")[0]}\n` +
+              `🗑️ ${deleted ? "Link apagado." : "Não consegui apagar o link."}\n` +
+              `⚠️ Advertências: *${result.count}/3*`,
+            mentions: [sender]
+          }).catch(() => {});
         }
+
+
+      } else {
+        let removed = false;
+
+        if (isBotGroupAdmins) {
+          try {
+            const result = await conn.groupParticipantsUpdate(from, [sender], "remove");
+            removed = Array.isArray(result) && result.some(p => /^2/.test(String(p?.status)));
+          } catch (e) {
+            console.error("Erro ao remover usuário pelo AntiLink:", e?.message || e);
+          }
+        }
+
+        actionResult = isBotGroupAdmins
+          ? (removed
+              ? `${deletionText} • membro removido`
+              : `${deletionText} • falha ao remover membro`)
+          : `${deletionText} • bot sem ADM para remover membro`;
+
+
       }
 
-      actionResult = isBotGroupAdmins
-        ? (removed
-            ? "Mensagem removida • membro removido"
-            : "Mensagem removida • falha ao remover membro")
-        : "Mensagem removida • bot sem ADM para remover membro";
+    }, { enabled: isBotGroupAdmins });
 
-      await notifyOwnerAntiLink(conn, dono, {
-        sender,
-        senderLid,
-        groupName,
-        groupJid: from,
-        messageId,
-        messageText: auditPreview,
-        actionResult
-      });
-    }
+    await notifyOwnerAntiLink(conn, dono, {sender,senderLid,groupName,groupJid:from,messageId,messageText:auditPreview,actionResult});
 
     // Também registra no histórico administrativo interno.
     addAdminLog(from, {

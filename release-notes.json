@@ -1,18 +1,17 @@
 {
-  "version": "5.3.39",
-  "title": "Classes e novas temporadas",
-  "date": "2026-10-04",
+  "version": "5.3.40",
+  "title": "AntiLink antiflood",
+  "date": "2026-10-05",
   "added": [
-    "/zerarank confirmar",
-    "/zerarankrpg confirmar",
-    "/zerarank-geral confirmar"
+    "Fechamento temporário durante a moderação de links.",
+    "Recuperação de grupos temporariamente fechados após reconexão."
   ],
   "changed": [
-    "Trocas de classe base, avançada e dracônica compartilham intervalo de 7 dias.",
-    "/zeraranknivel confirmar reseta apenas nível/XP do grupo.",
-    "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
-    "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
-    "Backups e confirmação antes dos resets."
+    "Fila por grupo: links simultâneos são tratados antes da reabertura.",
+    "Grupos já fechados permanecem fechados.",
+    "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
+    "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
+    "Resultados de exclusão e remoção são registrados sem presumir sucesso."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1413,6 +1412,23 @@
       "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
       "Mantém comandos, prefixos, saudação e dados do bot.",
       "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
+    ]
+  },
+  "v5.3.39": {
+    "version": "5.3.39",
+    "title": "Classes e novas temporadas",
+    "date": "2026-10-04",
+    "added": [
+      "/zerarank confirmar",
+      "/zerarankrpg confirmar",
+      "/zerarank-geral confirmar"
+    ],
+    "changed": [
+      "Trocas de classe base, avançada e dracônica compartilham intervalo de 7 dias.",
+      "/zeraranknivel confirmar reseta apenas nível/XP do grupo.",
+      "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
+      "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
+      "Backups e confirmação antes dos resets."
     ]
   }
 }

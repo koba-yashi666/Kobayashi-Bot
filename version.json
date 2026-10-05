@@ -1,5 +1,5 @@
 {
-  "version": "5.3.39",
-  "name": "Kobayashi Bot v5.3.39 — Classes e rankings",
-  "update": "Troca de classe a cada 7 dias e resets de rankings por grupo."
+  "version": "5.3.40",
+  "name": "Kobayashi Bot v5.3.40 — AntiLink antiflood",
+  "update": "Fecha temporariamente o grupo para apagar links e remover infratores; reabre ao finalizar."
 }
