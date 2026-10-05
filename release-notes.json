@@ -1,17 +1,14 @@
 {
-  "version": "5.3.40",
-  "title": "AntiLink antiflood",
+  "version": "5.3.41",
+  "title": "Correção da remoção AntiLink",
   "date": "2026-10-05",
-  "added": [
-    "Fechamento temporário durante a moderação de links.",
-    "Recuperação de grupos temporariamente fechados após reconexão."
-  ],
+  "added": [],
   "changed": [
-    "Fila por grupo: links simultâneos são tratados antes da reabertura.",
-    "Grupos já fechados permanecem fechados.",
-    "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
-    "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
-    "Resultados de exclusão e remoção são registrados sem presumir sucesso."
+    "Remoção usa o identificador do membro nos metadados atuais (LID/número).",
+    "Tenta identificadores alternativos quando o primeiro falha.",
+    "Confirma status de remoção ou verifica ausência do membro.",
+    "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
+    "Mantém o fechamento e a reabertura temporários do grupo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1429,6 +1426,22 @@
       "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
       "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
       "Backups e confirmação antes dos resets."
+    ]
+  },
+  "v5.3.40": {
+    "version": "5.3.40",
+    "title": "AntiLink antiflood",
+    "date": "2026-10-05",
+    "added": [
+      "Fechamento temporário durante a moderação de links.",
+      "Recuperação de grupos temporariamente fechados após reconexão."
+    ],
+    "changed": [
+      "Fila por grupo: links simultâneos são tratados antes da reabertura.",
+      "Grupos já fechados permanecem fechados.",
+      "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
+      "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
+      "Resultados de exclusão e remoção são registrados sem presumir sucesso."
     ]
   }
 }

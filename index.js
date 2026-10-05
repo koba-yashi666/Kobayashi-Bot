@@ -18,6 +18,7 @@ WhatsApp: 5515997075304
 import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
+import { removeAntiLinkParticipant } from "./lib/features/moderation/antiLinkRemoval.js";
 import { withAntiLinkGroupLock } from "./lib/features/moderation/antiLinkGroupLock.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -334,7 +335,10 @@ async function addAutomaticWarning(conn, groupJid, target, reason, botIsAdmin, q
 
   if (count >= 3 && botIsAdmin) {
     try {
-      await conn.groupParticipantsUpdate(groupJid, [target], "remove");
+      const removal = await removeAntiLinkParticipant(conn, groupJid,
+        [target, quotedInfo?.key?.participant, quotedInfo?.key?.participantAlt],
+        {resolvePN: id => getPNForJid(conn, id, id)});
+      if(!removal.ok)return {count,removed:false,error:removal.error||removal.reason};
       db[groupJid][target] = { count: 0, history: [] };
       writeAdvDb(db);
 
@@ -3134,20 +3138,19 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
 
       } else {
         let removed = false;
-
+        let removalError = "";
         if (isBotGroupAdmins) {
-          try {
-            const result = await conn.groupParticipantsUpdate(from, [sender], "remove");
-            removed = Array.isArray(result) && result.some(p => /^2/.test(String(p?.status)));
-          } catch (e) {
-            console.error("Erro ao remover usuário pelo AntiLink:", e?.message || e);
-          }
+          const result = await removeAntiLinkParticipant(conn, from,
+            [sender, senderLid, rawSender, info?.key?.participant, info?.key?.participantAlt],
+            {resolvePN: id => getPNForJid(conn, id, id)});
+          removed = result.ok;
+          removalError = result.error || result.reason || "";
         }
 
         actionResult = isBotGroupAdmins
           ? (removed
               ? `${deletionText} • membro removido`
-              : `${deletionText} • falha ao remover membro`)
+              : `${deletionText} • falha ao remover membro (${removalError})`)
           : `${deletionText} • bot sem ADM para remover membro`;
 
 
