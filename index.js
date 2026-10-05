@@ -9275,7 +9275,7 @@ case "trocarclasse": {
   const key=String(args?.[advancedMode?1:0]||"").toLowerCase();
   if(!key)return reply(advancedMode?`🌟 Use *${prefix}trocarclasse avancada <classe>*.`:`🧭 Use *${prefix}trocarclasse <classe>*.`);
   const r=advancedMode?switchAdvancedClass(sender,key):switchHumanClass(sender,key);
-  if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Trocas de classe compartilham um intervalo de *7 dias*.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para a próxima troca.`);if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);if(r.reason==="combat")return reply(`⚔️ Você não pode trocar de classe durante uma batalha.`);if(r.reason==="same")return reply(`✨ Essa já é sua classe atual.`);if(r.reason==="requirements")return reply(`🔒 Requisitos incompletos para *${r.klass.name}*:
+  if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Você usou as *4 trocas de classe do dia*. O limite renova à meia-noite de São Paulo.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para renovar o limite.`);if(r.reason==="missing")return reply(`🌱 Crie seu personagem primeiro.`);if(r.reason==="combat")return reply(`⚔️ Você não pode trocar de classe durante uma batalha.`);if(r.reason==="same")return reply(`✨ Essa já é sua classe atual.`);if(r.reason==="requirements")return reply(`🔒 Requisitos incompletos para *${r.klass.name}*:
 ${r.missing.map(x=>`• ${x.name}`).join("\n")}`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses* ou *${prefix}classesavancadas*.`);}
   return reply(`${r.klass.icon} 🔄 *CLASSE ALTERADA!*
 
@@ -9423,7 +9423,7 @@ break;
 
 case "trocardragao": case "trocarclassedragao": case "trocarlinhagem": {
  const key=String(args?.[0]||"").toLowerCase();if(!key)return reply(`🐲 Use *${prefix}trocardragao <classe>* — veja *${prefix}rpgclasses*.`);
- const r=switchDragonClass(sender,key);if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Trocas de classe compartilham um intervalo de *7 dias*.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para a próxima troca.`);if(r.reason==="combat")return reply("⚔️ Não pode trocar durante batalha.");if(r.reason==="locked")return reply("🔒 Conclua o Despertar primeiro.");if(r.reason==="same")return reply("🐉 Essa já é sua classe.");if(r.reason==="faction_mismatch")return reply(`⚠️ Essa linhagem é da facção *${factionName(r.required)}*.`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses*.`);}
+ const r=switchDragonClass(sender,key);if(!r.ok){if(r.reason==="class_cooldown")return reply(`⏳ Você usou as *4 trocas de classe do dia*. O limite renova à meia-noite de São Paulo.\nFaltam *${Math.ceil(r.remaining/3600000)} horas* para renovar o limite.`);if(r.reason==="combat")return reply("⚔️ Não pode trocar durante batalha.");if(r.reason==="locked")return reply("🔒 Conclua o Despertar primeiro.");if(r.reason==="same")return reply("🐉 Essa já é sua classe.");if(r.reason==="faction_mismatch")return reply(`⚠️ Essa linhagem é da facção *${factionName(r.required)}*.`);return reply(`❌ Classe inválida. Veja *${prefix}rpgclasses*.`);}
  return reply(`🐲🔄 *LINHAGEM ALTERADA!*\n\n${r.old?.icon||"🐉"} ${r.old?.name||""} ➜ ${r.klass.icon} *${r.klass.name}*\n❤️ HP e 🔷 Mana restaurados.\n👤 Forma humana restaurada; use *${prefix}transformar*.`);
 } break;
 

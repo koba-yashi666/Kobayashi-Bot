@@ -1,16 +1,12 @@
 {
-  "version": "5.3.43",
-  "title": "Dragon RPG — Expansão",
+  "version": "5.3.44",
+  "title": "Quatro trocas de classe por dia",
   "date": "2026-10-05",
-  "added": [
-    "8 classes avançadas com habilidades próprias: Samurai, Monge, Bardo, Invocador, Caçador de Dragões, Templário, Cronomago e Xamã.",
-    "30 comandos novos de profissões, coleta, fabricação, economia, exploração, pets e conquistas.",
-    "/rpgexpansao com sintaxe e custos."
-  ],
+  "added": [],
   "changed": [
-    "Cooldowns persistentes, ações bloqueadas durante combate e pagamentos validados.",
-    "Banco devolvido ao bolso ao zerar progressão; saldo preservado.",
-    "Atualização pequena e cumulativa; script Termux somente publica no GitHub."
+    "Até 4 trocas por dia, compartilhadas entre humana, avançada e dracônica.",
+    "Renovação à meia-noite de São Paulo; primeira escolha não consome troca.",
+    "Remove espera antiga de 7 dias para classes; profissão mantém intervalo próprio."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1472,6 +1468,21 @@
       "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
       "ADM, dono e lista branca preservados.",
       "Identifica o remetente do evento e usa remoção LID/PN confirmada."
+    ]
+  },
+  "v5.3.43": {
+    "version": "5.3.43",
+    "title": "Dragon RPG — Expansão",
+    "date": "2026-10-05",
+    "added": [
+      "8 classes avançadas com habilidades próprias: Samurai, Monge, Bardo, Invocador, Caçador de Dragões, Templário, Cronomago e Xamã.",
+      "30 comandos novos de profissões, coleta, fabricação, economia, exploração, pets e conquistas.",
+      "/rpgexpansao com sintaxe e custos."
+    ],
+    "changed": [
+      "Cooldowns persistentes, ações bloqueadas durante combate e pagamentos validados.",
+      "Banco devolvido ao bolso ao zerar progressão; saldo preservado.",
+      "Atualização pequena e cumulativa; script Termux somente publica no GitHub."
     ]
   }
 }
