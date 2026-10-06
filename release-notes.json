@@ -1,12 +1,10 @@
 {
-  "version": "5.3.45",
-  "title": "CafeBan",
+  "version": "5.3.46",
+  "title": "Café Ban decorado",
   "date": "2026-10-06",
-  "added": [
-    "/cafeban exclusivo do LID 267104301375529@lid, com imagem personalizada e motivo opcional."
-  ],
+  "added": [],
   "changed": [
-    "Remoção confirmada antes do anúncio; logs de moderação."
+    "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1494,6 +1492,17 @@
       "Até 4 trocas por dia, compartilhadas entre humana, avançada e dracônica.",
       "Renovação à meia-noite de São Paulo; primeira escolha não consome troca.",
       "Remove espera antiga de 7 dias para classes; profissão mantém intervalo próprio."
+    ]
+  },
+  "v5.3.45": {
+    "version": "5.3.45",
+    "title": "CafeBan",
+    "date": "2026-10-06",
+    "added": [
+      "/cafeban exclusivo do LID 267104301375529@lid, com imagem personalizada e motivo opcional."
+    ],
+    "changed": [
+      "Remoção confirmada antes do anúncio; logs de moderação."
     ]
   }
 }

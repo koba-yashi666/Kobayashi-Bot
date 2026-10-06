@@ -7230,7 +7230,21 @@ case "cafeban": {
   if(!result.ok)return reply("❌ Remoção não confirmada. Verifique se o alvo está no grupo e não é ADM.");
   addPunishmentHistory(from,result.target,{type:"cafeban",reason,by:sender,source:"manual"});
   addAdminLog(from,{type:"cafeban",actor:sender,target:result.target,detail:reason});
-  try { await conn.sendMessage(from,{image:fs.readFileSync(media),caption:`☕ *CAFÉ BAN*\n\n👤 @${target.split("@")[0]} foi removido.\n📜 Motivo: ${reason}`,mentions:[target]},{quoted:info}); }
+  try { await conn.sendMessage(from,{image:fs.readFileSync(media),caption:
+`┏╾ׁ═╼°❀•°: | ⊱☕⊰ | :°•❀°╾ׁ═╼┓
+┃           *CAFÉ BAN* 🐉
+┗╾ׁ═╼°❀•°: | ⊱🔥⊰ | :°•❀°╾ׁ═╼┛
+╎
+┃ ☕ *O café esfriou. Sua estadia acabou.*
+┃
+┃ 👤 Alvo: @${target.split("@")[0]}
+┃ 🛡️ Removido por: @${sender.split("@")[0]}
+┃ 📜 Motivo: *${reason}*
+┃
+┃ 🌙 _Sua mesa foi encerrada e as portas se fecharam._
+┃ 🔥 *Aqui, o último pedido foi a sua saída.*
+╎
+┗━━━〔 ☕ KOBAYASHI BOT 🐉 〕━━━┛`,mentions:[target,sender]},{quoted:info}); }
   catch { return reply("☕ Membro removido. Não consegui enviar a imagem."); }
 }
 break;
