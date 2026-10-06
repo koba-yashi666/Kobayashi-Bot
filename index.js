@@ -1,3 +1,4 @@
+import { canUseCafeBan } from "./lib/features/moderation/cafeBan.js";
 import { DRAGON_EXPANSION_COMMANDS, runDragonExpansion } from "./lib/features/rpg/dragonExpansion.js";
 /*
  * KOBAYASHI BOT
@@ -1256,6 +1257,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "cafeban",
   ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
   "0",
   "1",
@@ -7211,6 +7213,25 @@ case "kobaban": {
     console.error("Erro no KobaBan:", e);
     return reply("❌🐉 A Kobayashi tentou executar o ban, mas o WhatsApp recusou a remoção.");
   }
+}
+break;
+
+case "cafeban": {
+  if(!isGroup)return reply(mess.onlyGroup());
+  if(!canUseCafeBan({key:info.key,rawSender,sender,participants:groupMetadata?.participants||[]}))return reply("☕ Este comando é exclusivo do LID autorizado.");
+  if(!isBotGroupAdmins)return reply(mess.onlyBotAdmin());
+  const target=resolveBanTarget(info,args);
+  if(!target||target===from)return reply(`☕ Use ${prefix}cafeban @membro ou responda à mensagem da pessoa.`);
+  if(target===botNumber||target===dono||isMainOwnerJid(target))return reply("🛡️ Esse membro está protegido.");
+  const media=path.join(process.cwd(),"media","cafeban","cafeban.jpg");
+  if(!fs.existsSync(media))return reply("❌ Imagem do CafeBan não encontrada.");
+  const reason=args.filter(x=>!x.startsWith("@")).join(" ").trim().slice(0,400)||"Remoção manual";
+  const result=await removeAntiLinkParticipant(conn,from,[target],{resolvePN:id=>getPNForJid(conn,id)});
+  if(!result.ok)return reply("❌ Remoção não confirmada. Verifique se o alvo está no grupo e não é ADM.");
+  addPunishmentHistory(from,result.target,{type:"cafeban",reason,by:sender,source:"manual"});
+  addAdminLog(from,{type:"cafeban",actor:sender,target:result.target,detail:reason});
+  try { await conn.sendMessage(from,{image:fs.readFileSync(media),caption:`☕ *CAFÉ BAN*\n\n👤 @${target.split("@")[0]} foi removido.\n📜 Motivo: ${reason}`,mentions:[target]},{quoted:info}); }
+  catch { return reply("☕ Membro removido. Não consegui enviar a imagem."); }
 }
 break;
 
