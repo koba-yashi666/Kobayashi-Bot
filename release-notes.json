@@ -1,10 +1,13 @@
 {
-  "version": "5.3.47",
-  "title": "Atividade por resposta",
-  "date": "2026-10-08",
-  "added": [],
+  "version": "5.3.48",
+  "title": "Limpeza de arquivos antigos",
+  "date": "2026-10-09",
+  "added": [
+    "Limpeza restrita de ZIPs Kobayashi-Bot-v... e README-v...txt na raiz."
+  ],
   "changed": [
-    "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
+    "Executa na publicação pelo Termux e na inicialização da hospedagem.",
+    "Preserva créditos, licença, README principal, instruções, código e pastas."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1512,6 +1515,15 @@
     "added": [],
     "changed": [
       "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
+    ]
+  },
+  "v5.3.47": {
+    "version": "5.3.47",
+    "title": "Atividade por resposta",
+    "date": "2026-10-08",
+    "added": [],
+    "changed": [
+      "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
     ]
   }
 }

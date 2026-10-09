@@ -1,3 +1,4 @@
+import { cleanupLegacyReleases } from "./lib/features/system/legacyCleanup.js";
 import { resolveActivityTarget } from "./lib/features/social/activityTarget.js";
 import { getActivityByAliases } from "./lib/features/social/activityTracker.js";
 import { canUseCafeBan } from "./lib/features/moderation/cafeBan.js";
@@ -11908,3 +11909,6 @@ const __filename = fileURLToPath(import.meta.url);
 if (process.env.NODE_OPTIONS?.includes("--watch") || process.argv.includes("--watch")) {
 console.log(colors.yellow(`Hot reload ativo para '${__filename}'`));
 }
+
+// Limpa somente pacotes e notas de versões antigas na raiz da hospedagem.
+try { cleanupLegacyReleases(); } catch (error) { console.warn("[LIMPEZA]",error.message); }
