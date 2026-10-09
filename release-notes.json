@@ -1,13 +1,13 @@
 {
-  "version": "5.3.48",
-  "title": "Limpeza de arquivos antigos",
+  "version": "5.3.49",
+  "title": "Cita multimídia",
   "date": "2026-10-09",
   "added": [
-    "Limpeza restrita de ZIPs Kobayashi-Bot-v... e README-v...txt na raiz."
+    "/cita com texto direto ou mídia na legenda."
   ],
   "changed": [
-    "Executa na publicação pelo Termux e na inicialização da hospedagem.",
-    "Preserva créditos, licença, README principal, instruções, código e pastas."
+    "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
+    "Corrige import de download de mídia; preserva restrição para ADM/dono."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1524,6 +1524,18 @@
     "added": [],
     "changed": [
       "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
+    ]
+  },
+  "v5.3.48": {
+    "version": "5.3.48",
+    "title": "Limpeza de arquivos antigos",
+    "date": "2026-10-09",
+    "added": [
+      "Limpeza restrita de ZIPs Kobayashi-Bot-v... e README-v...txt na raiz."
+    ],
+    "changed": [
+      "Executa na publicação pelo Termux e na inicialização da hospedagem.",
+      "Preserva créditos, licença, README principal, instruções, código e pastas."
     ]
   }
 }

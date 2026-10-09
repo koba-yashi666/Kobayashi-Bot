@@ -1,3 +1,4 @@
+import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
 import { cleanupLegacyReleases } from "./lib/features/system/legacyCleanup.js";
 import { resolveActivityTarget } from "./lib/features/social/activityTarget.js";
 import { getActivityByAliases } from "./lib/features/social/activityTracker.js";
@@ -10861,101 +10862,19 @@ case "cita": {
     citaLargeGroupCooldown.set(from, now);
   }
 
-  const contextInfo =
-    info?.message?.extendedTextMessage?.contextInfo ||
-    info?.message?.imageMessage?.contextInfo ||
-    info?.message?.videoMessage?.contextInfo ||
-    info?.message?.documentMessage?.contextInfo ||
-    null;
-
-  const quoted = contextInfo?.quotedMessage;
-  if (!quoted) return reply(`↩️ Responda a mensagem desejada usando *${prefix}cita*.`);
-
-  // CITA v5.2.4
-  // Baseado no comportamento observado nas bases de referência:
-  // reenvia o conteúdo marcado sem cabeçalho/texto extra e injeta mentions ocultas.
   try {
-    const unwrap = (msg) =>
-      msg?.viewOnceMessage?.message ||
-      msg?.viewOnceMessageV2?.message ||
-      msg?.viewOnceMessageV2Extension?.message ||
-      msg?.ephemeralMessage?.message ||
-      msg?.documentWithCaptionMessage?.message ||
-      msg;
-
-    const qm = unwrap(quoted);
-
-    const baixar = async (node, tipo) => {
-      const stream = await downloadContentFromMessage(node, tipo);
-      const chunks = [];
-      for await (const chunk of stream) chunks.push(chunk);
+    const { downloadContentFromMessage } = await import("@whiskeysockets/baileys");
+    const download=async(node,type)=>{
+      const stream=await downloadContentFromMessage(node,type);
+      const chunks=[];
+      for await(const chunk of stream)chunks.push(chunk);
       return Buffer.concat(chunks);
     };
-
-    if (qm?.conversation || qm?.extendedTextMessage?.text) {
-      const text = String(qm.conversation || qm.extendedTextMessage.text || "");
-      return await conn.sendMessage(from, { text, mentions: participantes });
-    }
-
-    if (qm?.imageMessage) {
-      const m = qm.imageMessage;
-      const data = await baixar(m, "image");
-      return await conn.sendMessage(from, {
-        image: data,
-        caption: m.caption || "",
-        mentions: participantes,
-        mimetype: m.mimetype || undefined
-      });
-    }
-
-    if (qm?.videoMessage) {
-      const m = qm.videoMessage;
-      const data = await baixar(m, "video");
-      return await conn.sendMessage(from, {
-        video: data,
-        caption: m.caption || "",
-        mentions: participantes,
-        mimetype: m.mimetype || undefined,
-        gifPlayback: !!m.gifPlayback
-      });
-    }
-
-    if (qm?.audioMessage) {
-      const m = qm.audioMessage;
-      const data = await baixar(m, "audio");
-      return await conn.sendMessage(from, {
-        audio: data,
-        mentions: participantes,
-        mimetype: m.mimetype || "audio/ogg; codecs=opus",
-        ptt: true
-      });
-    }
-
-    if (qm?.stickerMessage) {
-      const m = qm.stickerMessage;
-      const data = await baixar(m, "sticker");
-      return await conn.sendMessage(from, {
-        sticker: data,
-        mentions: participantes
-      });
-    }
-
-    if (qm?.documentMessage) {
-      const m = qm.documentMessage;
-      const data = await baixar(m, "document");
-      return await conn.sendMessage(from, {
-        document: data,
-        fileName: m.fileName || "arquivo",
-        mimetype: m.mimetype || "application/octet-stream",
-        caption: m.caption || "",
-        mentions: participantes
-      });
-    }
-
-    return reply("⚠️ Esse tipo de mensagem ainda não é compatível com o *cita*.");
-  } catch (e) {
-    console.error("[CITA] Erro ao reenviar conteúdo marcado:", e?.message || e);
-    return reply("❌ Erro ao reenviar a mensagem marcada. Tente novamente.");
+    const payload=await buildCitaPayload(info,q,participantes,download);
+    return await conn.sendMessage(from,payload);
+  } catch(error) {
+    console.error("[CITA]",error.message);
+    return reply(`❌ Não consegui reenviar o conteúdo.\nUse ${prefix}cita seu texto, envie uma mídia com ${prefix}cita na legenda ou responda à mensagem com ${prefix}cita.\nSe a mídia expirou, envie novamente.`);
   }
 }
 break;
