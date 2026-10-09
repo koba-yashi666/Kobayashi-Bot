@@ -1,3 +1,5 @@
+import { resolveActivityTarget } from "./lib/features/social/activityTarget.js";
+import { getActivityByAliases } from "./lib/features/social/activityTracker.js";
 import { canUseCafeBan } from "./lib/features/moderation/cafeBan.js";
 import { DRAGON_EXPANSION_COMMANDS, runDragonExpansion } from "./lib/features/rpg/dragonExpansion.js";
 /*
@@ -6164,14 +6166,10 @@ break;
 case "atividade":
 case "checkme": {
   if (!isGroup) return reply(mess.onlyGroup());
-  const contextInfo =
-    info?.message?.extendedTextMessage?.contextInfo ||
-    info?.message?.imageMessage?.contextInfo ||
-    info?.message?.videoMessage?.contextInfo || {};
-  const target = contextInfo?.mentionedJid?.[0] || contextInfo?.participant || sender;
-  const row = getUserActivity(from, target);
-  const top = getTopActivity(from, 1000);
-  const position = top.findIndex((x) => x.jid === target) + 1;
+  const {target,aliases}=await resolveActivityTarget({info,sender,participants:groupMetadata?.participants||[],resolvePN:id=>getPNForJid(conn,id)});
+  const {jid:activityJid,row}=getActivityByAliases(from,aliases);
+  const top=getTopActivity(from,1000);
+  const position=top.findIndex(x=>x.jid===activityJid)+1;
   const last = row.lastSeen > 0
     ? new Date(row.lastSeen).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
     : "sem registro";

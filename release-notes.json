@@ -1,10 +1,10 @@
 {
-  "version": "5.3.46",
-  "title": "Café Ban decorado",
-  "date": "2026-10-06",
+  "version": "5.3.47",
+  "title": "Atividade por resposta",
+  "date": "2026-10-08",
   "added": [],
   "changed": [
-    "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
+    "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1503,6 +1503,15 @@
     ],
     "changed": [
       "Remoção confirmada antes do anúncio; logs de moderação."
+    ]
+  },
+  "v5.3.46": {
+    "version": "5.3.46",
+    "title": "Café Ban decorado",
+    "date": "2026-10-06",
+    "added": [],
+    "changed": [
+      "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
     ]
   }
 }
