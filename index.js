@@ -1,3 +1,4 @@
+import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
 import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
 import { cleanupLegacyReleases } from "./lib/features/system/legacyCleanup.js";
@@ -1262,6 +1263,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "adv_adm", "advs_adm", "menuvip", "add_cmd_vip", "del_cmd_vip", "add_vip", "del_vip", "lista_vip",
   "msg-alugados", "msg-alugados-lista",
   "cafeban",
   ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
@@ -3259,6 +3261,10 @@ if (isGroup && sender && socialV5.v5SocialEnabled(from)) {
 }
 
 if (isCmd) {
+  if (!vipAllowed(command, [sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean), SoDonoPrincipal)) {
+    await reply(`🐉👑 *COMANDO VIP*\nO uso de ${prefix}${command} é exclusivo dos membros VIP.\nConsulte ${prefix}menuvip ou fale com o dono do bot.`);
+    continue;
+  }
   const modularPermissions = createPermissions({
     sender,
     isGroup,
@@ -3476,6 +3482,54 @@ if (isCmd) {
   }
 
 switch (command) {
+
+case "menuvip": {
+ const db=vipState();return reply(`╭─ 🐉👑 MENU VIP 👑🐉 ─╮\n${db.commands.map(c=>`✦ ${prefix}${c}`).join("\n")||"Nenhum comando VIP cadastrado."}\n╰─ ☕ Kobayashi Bot ─╯\n\nCadastro pelo dono: ${prefix}add_vip @membro`);
+}
+break;
+case "add_cmd_vip": case "del_cmd_vip": {
+ if(!SoDonoPrincipal)return reply("👑 Exclusivo do dono principal.");
+ const name=vipCommand(args[0]);
+ const protectedCommands=["menuvip","add_cmd_vip","del_cmd_vip","add_vip","del_vip","lista_vip"];
+ if(!name||protectedCommands.includes(name))return reply(`Use ${prefix}${command} /figurinhas. Comandos de gerenciamento VIP não podem ser bloqueados.`);
+ const known=new Set([...String(fs.readFileSync(new URL(import.meta.url),"utf8")).matchAll(/case\s+["']([^"']+)["']\s*:/g)].map(m=>vipCommand(m[1])));
+ if(!known.has(name))return reply("Comando não encontrado no registro de comandos da base.");
+ setVipCommand(name,command==="add_cmd_vip");return reply(`🐉 ${prefix}${name}: ${command==="add_cmd_vip"?"exclusivo para VIPs (incluindo atalhos)":"liberado para uso comum"}.`);
+}
+break;
+case "add_vip": case "del_vip": {
+ if(!SoDonoPrincipal)return reply("👑 Exclusivo do dono principal.");
+ const target=resolveBanTarget(info,args);if(!target)return reply(`Marque alguém ou responda à mensagem dele: ${prefix}${command} @membro`);
+ const participant=(Array.isArray(groupMembers)?groupMembers:[]).find(p=>[p.id,p.jid,p.participant,p.phoneNumber,p.lid].includes(target));
+ const ids=[target,...(participant?[participant.id,participant.jid,participant.participant,participant.phoneNumber,participant.lid]:[])].filter(Boolean);
+ try {const pn=await getPNForJid(conn,target,target);if(pn)ids.push(pn);}catch{}
+ setVipMember(ids,target,command==="add_vip");return conn.sendMessage(from,{text:`🐉👑 @${target.split("@")[0]} ${command==="add_vip"?"registrado como VIP":"removido do VIP"}.`,mentions:[target]},{quoted:info});
+}
+break;
+case "lista_vip": {
+ if(!SoDonoPrincipal)return reply("👑 Exclusivo do dono principal.");
+ const members=vipState().members;return conn.sendMessage(from,{text:`🐉👑 *MEMBROS VIP*\n${members.map(m=>`✦ @${m.ids[0].split("@")[0]}`).join("\n")||"Nenhum membro cadastrado."}`,mentions:members.map(m=>m.ids[0])},{quoted:info});
+}
+break;
+case "adv_adm": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ const target=resolveBanTarget(info,args);if(!target)return reply(`Use ${prefix}ADV_adm @adm motivo/7d`);
+ const participant=(groupMembers||[]).find(p=>[p.id,p.jid,p.participant,p.phoneNumber,p.lid].includes(target));
+ if(!participant?.admin)return reply("🐉 O alvo precisa ser administrador do grupo.");
+ if([participant.id,participant.phoneNumber,participant.lid,target].filter(Boolean).includes(botNumber))return reply("🐉 Não posso receber advertência.");
+ const input=args.filter(a=>!a.startsWith("@")).join(" ");const cut=input.lastIndexOf("/");const reason=input.slice(0,cut).trim();const duration=parseRentalDuration(input.slice(cut+1));
+ if(cut<1||!reason||!duration||!Number.isSafeInteger(duration.ms)||duration.ms>365*86400000)return reply(`Use ${prefix}ADV_adm @adm motivo/7d\nPrazos: 30m, 12h, 7d (até 365 dias).`);
+ const warning=addAdminWarning(from,target,reason,sender,duration.ms);const count=adminWarnings(from).filter(w=>w.target===target).length;
+ addAdminLog(from,{type:"adv_adm",actor:sender,target,detail:`${reason} • ${formatRentalDuration(duration.ms)}`});
+ return conn.sendMessage(from,{text:`╭─ 🐉⚠️ ADV ADM ⚠️🐉 ─╮\n👑 ADM: @${target.split("@")[0]}\n📋 Motivo: ${reason}\n⏳ Prazo: ${formatRentalDuration(duration.ms)}\n🗓️ Expira: ${new Date(warning.expiresAt).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}\n⚠️ Ativas: ${count}\n╰─ ☕ Kobayashi Bot ─╯`,mentions:[target]},{quoted:info});
+}
+break;
+case "advs_adm": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ const warnings=adminWarnings(from);return conn.sendMessage(from,{text:`🐉⚠️ *ADVERTÊNCIAS ATIVAS DOS ADMS*\n\n${warnings.map(w=>`👑 @${w.target.split("@")[0]} • ${w.reason}\n⏳ Restam ${formatRentalDuration(w.expiresAt-Date.now())}`).join("\n\n")||"Nenhuma advertência ativa."}`,mentions:[...new Set(warnings.map(w=>w.target))]},{quoted:info});
+}
+break;
+
 case "anti-msg-global": case "antimsgglobal": {
  if(!SoDonoPrincipal)return reply("👑🐉 Exclusivo do dono principal.");
  const sub=String(args?.[0]||"").toLowerCase(),ctx=info?.message?.extendedTextMessage?.contextInfo||{},qt=ctx?.quotedMessage?extractCommandText(ctx.quotedMessage):"";

@@ -1,10 +1,14 @@
 {
-  "version": "5.3.53",
-  "title": "Sticker Atelier",
+  "version": "5.3.56",
+  "title": "VIP e ADV ADM",
   "date": "2026-10-10",
-  "added": [],
+  "added": [
+    "/ADV_adm @adm motivo/7d e /advs_adm: advertências com prazo por grupo, sem rebaixamento automático.",
+    "/menuvip, /add_cmd_vip, /del_cmd_vip, /add_vip, /del_vip e /lista_vip."
+  ],
   "changed": [
-    "Molduras e títulos decorados nos detalhes de figurinhas, com autoria, grupo, dono e assinatura em linhas separadas."
+    "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
+    "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1580,6 +1584,33 @@
     "changed": [
       "Detalhes padrão de figurinha: Criada por, Grupo, Dono do bot e Feita por Kobayashi Bot.",
       "No privado, identifica o grupo como Privado."
+    ]
+  },
+  "v5.3.53": {
+    "version": "5.3.53",
+    "title": "Sticker Atelier",
+    "date": "2026-10-10",
+    "added": [],
+    "changed": [
+      "Molduras e títulos decorados nos detalhes de figurinhas, com autoria, grupo, dono e assinatura em linhas separadas."
+    ]
+  },
+  "v5.3.54": {
+    "version": "5.3.54",
+    "title": "Detalhes das figurinhas",
+    "date": "2026-10-10",
+    "added": [],
+    "changed": [
+      "Estilo conforme referência: Criada por, Nick dono, Feita por e Grupo com nomes entre 『 』 e divisor."
+    ]
+  },
+  "v5.3.55": {
+    "version": "5.3.55",
+    "title": "Figurinhas Dragon",
+    "date": "2026-10-10",
+    "added": [],
+    "changed": [
+      "Detalhes compactos em quatro linhas: autoria, dono, assinatura Kobayashi Bot e grupo, com dragão e fogo."
     ]
   }
 }
