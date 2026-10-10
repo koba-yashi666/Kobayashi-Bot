@@ -1,14 +1,13 @@
 {
-  "version": "5.3.50",
-  "title": "Avisos dos alugados",
+  "version": "5.3.51",
+  "title": "Figurinhas decoradas",
   "date": "2026-10-10",
   "added": [
-    "/msg-alugados: aviso com texto ou imagem e menção de todos nos grupos alugados.",
-    "/msg-alugados-lista: consulta dos aluguéis ativos cadastrados."
+    "Metadados de figurinha decorados com autoria, bot e créditos do dono."
   ],
   "changed": [
-    "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
-    "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
+    "Novo padrão em /s, aliases e autosticker.",
+    "Preserva os nomes de pacote e autores personalizados."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1549,6 +1548,19 @@
     "changed": [
       "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
       "Corrige import de download de mídia; preserva restrição para ADM/dono."
+    ]
+  },
+  "v5.3.50": {
+    "version": "5.3.50",
+    "title": "Avisos dos alugados",
+    "date": "2026-10-10",
+    "added": [
+      "/msg-alugados: aviso com texto ou imagem e menção de todos nos grupos alugados.",
+      "/msg-alugados-lista: consulta dos aluguéis ativos cadastrados."
+    ],
+    "changed": [
+      "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
+      "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
     ]
   }
 }
