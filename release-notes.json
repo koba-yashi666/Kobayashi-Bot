@@ -1,13 +1,10 @@
 {
-  "version": "5.3.51",
-  "title": "Figurinhas decoradas",
+  "version": "5.3.53",
+  "title": "Sticker Atelier",
   "date": "2026-10-10",
-  "added": [
-    "Metadados de figurinha decorados com autoria, bot e créditos do dono."
-  ],
+  "added": [],
   "changed": [
-    "Novo padrão em /s, aliases e autosticker.",
-    "Preserva os nomes de pacote e autores personalizados."
+    "Molduras e títulos decorados nos detalhes de figurinhas, com autoria, grupo, dono e assinatura em linhas separadas."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1561,6 +1558,28 @@
     "changed": [
       "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
       "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
+    ]
+  },
+  "v5.3.51": {
+    "version": "5.3.51",
+    "title": "Figurinhas decoradas",
+    "date": "2026-10-10",
+    "added": [
+      "Metadados de figurinha decorados com autoria, bot e créditos do dono."
+    ],
+    "changed": [
+      "Novo padrão em /s, aliases e autosticker.",
+      "Preserva os nomes de pacote e autores personalizados."
+    ]
+  },
+  "v5.3.52": {
+    "version": "5.3.52",
+    "title": "Autoria das figurinhas",
+    "date": "2026-10-10",
+    "added": [],
+    "changed": [
+      "Detalhes padrão de figurinha: Criada por, Grupo, Dono do bot e Feita por Kobayashi Bot.",
+      "No privado, identifica o grupo como Privado."
     ]
   }
 }
