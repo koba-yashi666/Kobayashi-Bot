@@ -1,3 +1,4 @@
+import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
 import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
 import { cleanupLegacyReleases } from "./lib/features/system/legacyCleanup.js";
 import { resolveActivityTarget } from "./lib/features/social/activityTarget.js";
@@ -1261,6 +1262,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "msg-alugados", "msg-alugados-lista",
   "cafeban",
   ...DRAGON_EXPANSION_COMMANDS, "rpgexpansao",
   "0",
@@ -10897,18 +10899,26 @@ case "debugdono": {
 }
 break;
 
+case "msg-alugados-lista": {
+ if(!SoDonoPrincipal)return reply("👑 Apenas o dono principal pode consultar os destinos.");
+ const items=listRentals().filter(r=>r.active);
+ return reply(`📋 *DESTINOS DO MSG-ALUGADOS*\n\n${items.map(r=>`${r.permanent?"♾️":"⏳"} ${r.groupName||r.groupJid}\n${r.groupJid}`).join("\n\n")||"Nenhum aluguel ativo cadastrado."}\n\nCadastro: ${prefix}rg_aluguel @responsavel 30D ou ${prefix}aluguel_permanente no grupo.`);
+}
+break;
+case "msg-alugados":
 case "msg": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
 
+  const rentedOnly=command==="msg-alugados";
   const aviso=getGlobalNoticeText(fullCommandText);
   const mediaTarget=getGlobalImageTarget(info);
   const isImageMsg=Boolean(mediaTarget);
 
   if(!aviso && !isImageMsg){
     return reply(
-      `📢 *AVISO GLOBAL*\n\n`+
-      `📝 Texto: *${prefix}msg texto do aviso*\n`+
-      `🖼️ Imagem: envie uma foto com *${prefix}msg legenda* ou responda uma foto com *${prefix}msg legenda*.\n\n`+
+      `📢 *AVISO ${rentedOnly?"DOS ALUGADOS":"GLOBAL"}*\n\n`+
+      `📝 Texto: *${prefix}${command} texto do aviso*\n`+
+      `🖼️ Imagem: envie uma foto com *${prefix}${command} legenda* ou responda uma foto com *${prefix}${command} legenda*.\n\n`+
       `A legenda é opcional quando houver imagem.`
     );
   }
@@ -10952,12 +10962,12 @@ case "msg": {
       `⚠️🐉 *AVISO GLOBAL NÃO INICIADO*\n\n`+
       `O WhatsApp limitou temporariamente a consulta dos grupos (429/500).\n`+
       `A Kobayashi continuou online e nenhum envio foi repetido.\n\n`+
-      `⏳ Aguarde alguns minutos antes de usar *${prefix}msg* novamente.`
+      `⏳ Aguarde alguns minutos antes de usar *${prefix}${command}* novamente.`
     );
   }
 
-  const entries=Object.entries(groups);
-  if(!entries.length)return reply("📭 A Kobayashi não está participando de nenhum grupo.");
+  const entries=rentedOnly?selectRentalBroadcastGroups(groups,listRentals()):Object.entries(groups);
+  if(!entries.length)return reply(rentedOnly?"📭 Nenhum grupo com aluguel ativo ou permanente cadastrado em que a Kobayashi participe.":"📭 A Kobayashi não está participando de nenhum grupo.");
 
   let enviados=0,falhas=0,rateLimits=0;
   await reply(
@@ -10974,6 +10984,7 @@ case "msg": {
   }
 
   for(const [groupJid,cachedMeta] of entries){
+    if(rentedOnly&&!getRental(groupJid).active)continue;
     try{
       let meta=cachedMeta;
       if(!Array.isArray(meta?.participants)){

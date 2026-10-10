@@ -1,5 +1,5 @@
 {
-  "version": "5.3.49",
-  "name": "Kobayashi Bot v5.3.49 — Cita multimídia",
-  "update": "/cita com texto ou mídia direta e respondida, marcando todos."
+  "version": "5.3.50",
+  "name": "Kobayashi Bot v5.3.50 — Avisos dos alugados",
+  "update": "/msg-alugados envia texto e imagem aos aluguéis ativos, marcando todos."
 }

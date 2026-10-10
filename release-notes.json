@@ -1,13 +1,14 @@
 {
-  "version": "5.3.49",
-  "title": "Cita multimídia",
-  "date": "2026-10-09",
+  "version": "5.3.50",
+  "title": "Avisos dos alugados",
+  "date": "2026-10-10",
   "added": [
-    "/cita com texto direto ou mídia na legenda."
+    "/msg-alugados: aviso com texto ou imagem e menção de todos nos grupos alugados.",
+    "/msg-alugados-lista: consulta dos aluguéis ativos cadastrados."
   ],
   "changed": [
-    "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
-    "Corrige import de download de mídia; preserva restrição para ADM/dono."
+    "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
+    "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1536,6 +1537,18 @@
     "changed": [
       "Executa na publicação pelo Termux e na inicialização da hospedagem.",
       "Preserva créditos, licença, README principal, instruções, código e pastas."
+    ]
+  },
+  "v5.3.49": {
+    "version": "5.3.49",
+    "title": "Cita multimídia",
+    "date": "2026-10-09",
+    "added": [
+      "/cita com texto direto ou mídia na legenda."
+    ],
+    "changed": [
+      "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
+      "Corrige import de download de mídia; preserva restrição para ADM/dono."
     ]
   }
 }
