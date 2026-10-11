@@ -1,3 +1,4 @@
+import { installX9Audit } from "./lib/features/group/x9Audit.js";
 /*
  * KOBAYASHI BOT • BETA
  * Conexão WhatsApp via código de pareamento.
@@ -581,6 +582,8 @@ async function startConnect() {
     conn.kobayashiHandleGroupParticipantsUpdate = handleGroupParticipantsUpdate;
 
     // Mesmo padrão estrutural do Nazuna: listener direto no evento do Baileys.
+    installX9Audit(conn);
+
     conn.ev.on("group-participants.update", async (inf) => {
       console.log("[WELCOME NAZUNA] Evento group-participants.update recebido");
       await handleGroupParticipantsUpdate(inf);

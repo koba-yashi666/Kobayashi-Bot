@@ -1,14 +1,14 @@
 {
-  "version": "5.3.56",
-  "title": "VIP e ADV ADM",
-  "date": "2026-10-10",
+  "version": "5.3.57",
+  "title": "X9 do grupo",
+  "date": "2026-10-11",
   "added": [
-    "/ADV_adm @adm motivo/7d e /advs_adm: advertências com prazo por grupo, sem rebaixamento automático.",
-    "/menuvip, /add_cmd_vip, /del_cmd_vip, /add_vip, /del_vip e /lista_vip."
+    "/x9: consulta exclusiva dos ADMs com filtros solicitacoes, adms e reentradas.",
+    "Registro de solicitações aceitas/recusadas, remoções, rebaixamentos e retornos observados a partir da atualização."
   ],
   "changed": [
-    "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
-    "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
+    "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
+    "Ações sem autor informado aparecem explicitamente como desconhecidas."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1611,6 +1611,19 @@
     "added": [],
     "changed": [
       "Detalhes compactos em quatro linhas: autoria, dono, assinatura Kobayashi Bot e grupo, com dragão e fogo."
+    ]
+  },
+  "v5.3.56": {
+    "version": "5.3.56",
+    "title": "VIP e ADV ADM",
+    "date": "2026-10-10",
+    "added": [
+      "/ADV_adm @adm motivo/7d e /advs_adm: advertências com prazo por grupo, sem rebaixamento automático.",
+      "/menuvip, /add_cmd_vip, /del_cmd_vip, /add_vip, /del_vip e /lista_vip."
+    ],
+    "changed": [
+      "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
+      "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
     ]
   }
 }

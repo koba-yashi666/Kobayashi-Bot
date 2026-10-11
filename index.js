@@ -1,3 +1,4 @@
+import { getX9Events, recordX9Decision } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
 import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
@@ -1263,6 +1264,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "x9",
   "adv_adm", "advs_adm", "menuvip", "add_cmd_vip", "del_cmd_vip", "add_vip", "del_vip", "lista_vip",
   "msg-alugados", "msg-alugados-lista",
   "cafeban",
@@ -3482,6 +3484,17 @@ if (isCmd) {
   }
 
 switch (command) {
+case "x9": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ const filter=String(args[0]||"todos").toLowerCase();
+ if(!["todos","solicitacoes","adms","reentradas"].includes(filter))return reply(`Use ${prefix}x9 [todos|solicitacoes|adms|reentradas]`);
+ const events=getX9Events(from,filter);const mentions=new Set();
+ const label={approved:"✅ Solicitação aceita",rejected:"❌ Solicitação recusada",removed:"🚫 Membro removido",demoted:"⬇️ ADM rebaixado",returned:"🔄 Segunda entrada ou posterior",left:"🚪 Saiu do grupo",exit_unknown:"🚪 Saída/remoção (autor não informado)"};
+ const lines=events.map(e=>{mentions.add(e.target);if(e.actor)mentions.add(e.actor);return `${label[e.type]}\n👤 @${e.target.split("@")[0]}\n🛡️ Por: ${e.actor?"@"+e.actor.split("@")[0]:"não informado pelo WhatsApp"}\n🕒 ${new Date(e.at).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}`;});
+ return conn.sendMessage(from,{text:`╭─ 🐉👁️ X9 DO GRUPO ─╮\n\n${lines.join("\n\n")||"Nenhum registro disponível."}\n\n╰─ ☕ Kobayashi Bot ─╯\nRegistros observados após a atualização. Últimos 15; retenção de 90 dias.\nFiltros: solicitacoes • adms • reentradas`,mentions:[...mentions]},{quoted:info});
+}
+break;
+
 
 case "menuvip": {
  const db=vipState();return reply(`╭─ 🐉👑 MENU VIP 👑🐉 ─╮\n${db.commands.map(c=>`✦ ${prefix}${c}`).join("\n")||"Nenhum comando VIP cadastrado."}\n╰─ ☕ Kobayashi Bot ─╯\n\nCadastro pelo dono: ${prefix}add_vip @membro`);
@@ -4800,7 +4813,9 @@ case "aceitar": {
 
     if (!targets.length) return reply("🌸 Não encontrei solicitações válidas para aceitar.");
 
-    await conn.groupRequestParticipantsUpdate(from, targets, "approve");
+    const x9Results = await conn.groupRequestParticipantsUpdate(from, targets, "approve");
+    const x9Approved = (x9Results||[]).filter(r=>String(r.status)==="200").map(r=>r.jid).filter(Boolean);
+    if(x9Approved.length)recordX9Decision(from,x9Approved,sender,"approve");
     await delay(1800);
 
     if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
