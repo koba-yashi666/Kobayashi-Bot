@@ -1,3 +1,4 @@
+import { installAntiFakeRuntime } from "./lib/features/moderation/antiFakeRuntime.js";
 import { installX9Audit } from "./lib/features/group/x9Audit.js";
 /*
  * KOBAYASHI BOT • BETA
@@ -582,6 +583,7 @@ async function startConnect() {
     conn.kobayashiHandleGroupParticipantsUpdate = handleGroupParticipantsUpdate;
 
     // Mesmo padrão estrutural do Nazuna: listener direto no evento do Baileys.
+    installAntiFakeRuntime(conn);
     installX9Audit(conn);
 
     conn.ev.on("group-participants.update", async (inf) => {

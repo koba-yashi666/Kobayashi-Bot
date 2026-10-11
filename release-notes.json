@@ -1,13 +1,14 @@
 {
-  "version": "5.3.62",
-  "title": "S2 proporção original",
+  "version": "5.3.63",
+  "title": "Antifake",
   "date": "2026-10-11",
   "added": [
-    "/s2 com imagem ou vídeo direto/respondido: preserva proporção com preenchimento transparente."
+    "/antifake on/off (também 1/0), exclusivo de ADM em grupos.",
+    "Verificação automática de novas entradas com prefixo padrão +55."
   ],
   "changed": [
-    "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
-    "/s2 respeita a mesma regra VIP de /s e aliases de criação."
+    "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
+    "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1685,6 +1686,18 @@
       "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
       "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
       "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
+    ]
+  },
+  "v5.3.62": {
+    "version": "5.3.62",
+    "title": "S2 proporção original",
+    "date": "2026-10-11",
+    "added": [
+      "/s2 com imagem ou vídeo direto/respondido: preserva proporção com preenchimento transparente."
+    ],
+    "changed": [
+      "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
+      "/s2 respeita a mesma regra VIP de /s e aliases de criação."
     ]
   }
 }

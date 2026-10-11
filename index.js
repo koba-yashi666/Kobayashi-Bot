@@ -1,3 +1,4 @@
+import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
 import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
@@ -1265,6 +1266,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "antifake",
   "s2",
   "dragon_open", "dragon_close", "drsgon_close", "dragon-msg",
   "x9",
@@ -3487,6 +3489,18 @@ if (isCmd) {
   }
 
 switch (command) {
+case "antifake": {
+ if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
+ const action=String(args[0]||"").toLowerCase();
+ if(!action){const cfg=getAntiFakeConfig(from);return reply(`🐉🛡️ *ANTIFAKE*\nStatus: ${cfg.enabled?"ON":"OFF"}\nPermitidos: ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}\nUse ${prefix}antifake on ou ${prefix}antifake off.\nVerifica novas entradas. LID sem telefone confirmado não é removido.`);}
+ if(!["on","off","1","0"].includes(action))return reply(`Use ${prefix}antifake on ou off.`);
+ const enabled=["on","1"].includes(action);
+ if(enabled){const metadata=await conn.groupMetadata(from);const myIds=[botNumber,conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean).map(id=>String(id).replace(/:\d+(?=@)/,""));const bot=(metadata.participants||[]).find(p=>[p.id,p.jid,p.phoneNumber,p.lid].some(id=>id&&myIds.includes(String(id).replace(/:\d+(?=@)/,""))));if(!bot?.admin&&!bot?.isAdmin&&!bot?.isSuperAdmin)return reply("🐉 Preciso ser ADM do grupo para ativar o antifake.");}
+ const cfg=setAntiFakeEnabled(from,enabled);
+ return reply(`🐉🛡️ Antifake ${enabled?"ativado":"desativado"}. ${enabled?`Novas entradas permitem números ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}. ADMs, dono e lista branca são preservados; telefone desconhecido não é removido.`:"A checagem automática de novas entradas foi desligada."}`);
+}
+break;
+
 case "dragon_open": case "dragon_close": case "drsgon_close": {
  if(!SoDonoPrincipal)return reply("👑🐉 Exclusivo do dono principal.");
  const open=command==="dragon_open";
