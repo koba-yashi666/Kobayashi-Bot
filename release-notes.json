@@ -1,13 +1,15 @@
 {
-  "version": "5.3.58",
-  "title": "Maid Dragon",
+  "version": "5.3.59",
+  "title": "X9 ativo",
   "date": "2026-10-11",
   "added": [
-    "/Dragon_open abre os seis grupos cadastrados da Maid Dragon.",
-    "/Dragon_close e /Drsgon_close fecham os seis grupos."
+    "/x9 on e /x9 off: ativação persistente por grupo, exclusiva dos ADMs.",
+    "Avisos automáticos de promoções, rebaixamentos, remoções, solicitações aceitas/recusadas e entradas.",
+    "/x9 entradas e contagem de entradas acompanhadas."
   ],
   "changed": [
-    "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
+    "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
+    "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1636,6 +1638,18 @@
     "changed": [
       "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
       "Ações sem autor informado aparecem explicitamente como desconhecidas."
+    ]
+  },
+  "v5.3.58": {
+    "version": "5.3.58",
+    "title": "Maid Dragon",
+    "date": "2026-10-11",
+    "added": [
+      "/Dragon_open abre os seis grupos cadastrados da Maid Dragon.",
+      "/Dragon_close e /Drsgon_close fecham os seis grupos."
+    ],
+    "changed": [
+      "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
     ]
   }
 }

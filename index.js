@@ -1,5 +1,5 @@
 import { setDragonCommunityState } from "./lib/features/group/dragonCommunity.js";
-import { getX9Events, recordX9Decision } from "./lib/features/group/x9Audit.js";
+import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
 import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
@@ -3502,11 +3502,17 @@ break;
 case "x9": {
  if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
  const filter=String(args[0]||"todos").toLowerCase();
- if(!["todos","solicitacoes","adms","reentradas"].includes(filter))return reply(`Use ${prefix}x9 [todos|solicitacoes|adms|reentradas]`);
+ if(["on","off"].includes(filter)){
+  const enabled=filter==="on";
+  const metadata=enabled?await conn.groupMetadata(from):null;
+  setX9Enabled(from,enabled,metadata?.participants||[]);
+  if(enabled){try{const pending=await conn.groupRequestParticipantsList(from);for(const p of pending||[]){const jid=p.jid||p.id||p.participant||p.lid;if(jid)recordX9Request({id:from,participant:jid,participantPn:p.phoneNumber,action:"created"});}}catch(e){console.error("[X9 pending snapshot]",e?.message||e);}}
+  return reply(`🐉👁️ X9 ${enabled?"ativado":"desativado"} neste grupo. ${enabled?"Vou registrar e avisar sobre entradas, promoções, rebaixamentos, remoções e decisões de solicitações recebidas.":"Novos registros e avisos estão desligados. O histórico anterior continua disponível."}`);
+ }
+ if(!["todos","solicitacoes","adms","reentradas","entradas"].includes(filter))return reply(`Use ${prefix}x9 [on|off|todos|solicitacoes|adms|reentradas|entradas]`);
  const events=getX9Events(from,filter);const mentions=new Set();
- const label={approved:"✅ Solicitação aceita",rejected:"❌ Solicitação recusada",removed:"🚫 Membro removido",demoted:"⬇️ ADM rebaixado",returned:"🔄 Segunda entrada ou posterior",left:"🚪 Saiu do grupo",exit_unknown:"🚪 Saída/remoção (autor não informado)"};
- const lines=events.map(e=>{mentions.add(e.target);if(e.actor)mentions.add(e.actor);return `${label[e.type]}\n👤 @${e.target.split("@")[0]}\n🛡️ Por: ${e.actor?"@"+e.actor.split("@")[0]:"não informado pelo WhatsApp"}\n🕒 ${new Date(e.at).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}`;});
- return conn.sendMessage(from,{text:`╭─ 🐉👁️ X9 DO GRUPO ─╮\n\n${lines.join("\n\n")||"Nenhum registro disponível."}\n\n╰─ ☕ Kobayashi Bot ─╯\nRegistros observados após a atualização. Últimos 15; retenção de 90 dias.\nFiltros: solicitacoes • adms • reentradas`,mentions:[...mentions]},{quoted:info});
+ const lines=events.map(e=>{mentions.add(e.target);if(e.actor)mentions.add(e.actor);return `${formatX9Entry(e)}\n🕒 ${new Date(e.at).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})}`;});
+ return conn.sendMessage(from,{text:`╭─ 🐉👁️ X9 DO GRUPO ─╮\nStatus: ${isX9Enabled(from)?"ON":"OFF"}\n\n${lines.join("\n\n")||"Nenhum registro disponível."}\n\n╰─ ☕ Kobayashi Bot ─╯\nRegistros observados após a atualização. Últimos 15; retenção de 90 dias.\nFiltros: solicitacoes • adms • reentradas`,mentions:[...mentions]},{quoted:info});
 }
 break;
 
@@ -4830,7 +4836,7 @@ case "aceitar": {
 
     const x9Results = await conn.groupRequestParticipantsUpdate(from, targets, "approve");
     const x9Approved = (x9Results||[]).filter(r=>String(r.status)==="200").map(r=>r.jid).filter(Boolean);
-    if(x9Approved.length)recordX9Decision(from,x9Approved,sender,"approve");
+    if(x9Approved.length){const notices=recordX9Decision(from,x9Approved,sender,"approve");if(conn.kobayashiX9Notify)await conn.kobayashiX9Notify(from,notices);}
     await delay(1800);
 
     if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
