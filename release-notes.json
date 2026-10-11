@@ -1,14 +1,13 @@
 {
-  "version": "5.3.57",
-  "title": "X9 do grupo",
+  "version": "5.3.58",
+  "title": "Maid Dragon",
   "date": "2026-10-11",
   "added": [
-    "/x9: consulta exclusiva dos ADMs com filtros solicitacoes, adms e reentradas.",
-    "Registro de solicitações aceitas/recusadas, remoções, rebaixamentos e retornos observados a partir da atualização."
+    "/Dragon_open abre os seis grupos cadastrados da Maid Dragon.",
+    "/Dragon_close e /Drsgon_close fecham os seis grupos."
   ],
   "changed": [
-    "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
-    "Ações sem autor informado aparecem explicitamente como desconhecidas."
+    "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1624,6 +1623,19 @@
     "changed": [
       "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
       "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
+    ]
+  },
+  "v5.3.57": {
+    "version": "5.3.57",
+    "title": "X9 do grupo",
+    "date": "2026-10-11",
+    "added": [
+      "/x9: consulta exclusiva dos ADMs com filtros solicitacoes, adms e reentradas.",
+      "Registro de solicitações aceitas/recusadas, remoções, rebaixamentos e retornos observados a partir da atualização."
+    ],
+    "changed": [
+      "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
+      "Ações sem autor informado aparecem explicitamente como desconhecidas."
     ]
   }
 }

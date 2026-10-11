@@ -1,3 +1,4 @@
+import { setDragonCommunityState } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
@@ -1264,6 +1265,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "dragon_open", "dragon_close", "drsgon_close",
   "x9",
   "adv_adm", "advs_adm", "menuvip", "add_cmd_vip", "del_cmd_vip", "add_vip", "del_vip", "lista_vip",
   "msg-alugados", "msg-alugados-lista",
@@ -3484,6 +3486,19 @@ if (isCmd) {
   }
 
 switch (command) {
+case "dragon_open": case "dragon_close": case "drsgon_close": {
+ if(!SoDonoPrincipal)return reply("👑🐉 Exclusivo do dono principal.");
+ const open=command==="dragon_open";
+ await reply(`🐉 ${open?"Abrindo":"Fechando"} os 6 grupos da Maid Dragon…`);
+ const report=await setDragonCommunityState(conn,open,[botNumber]);
+ if(report.busy)return reply("⏳ Já existe uma abertura/fechamento em andamento. Aguarde o relatório.");
+ const labels={success:open?"✅ Aberto":"✅ Fechado",already:open?"✅ Já estava aberto":"✅ Já estava fechado",absent:"❌ Bot não participa",'not-admin':"❌ Bot não é ADM",unconfirmed:"⚠️ Alteração enviada, sem confirmação",failed:"❌ Falha ao acessar/alterar"};
+ const ok=report.results.filter(r=>["success","already"].includes(r.status)).length;
+ for(const r of report.results.filter(r=>r.status==="success"))addAdminLog(r.jid,{type:open?"dragon_open":"dragon_close",actor:sender,target:r.jid,detail:"Maid Dragon • alteração global"});
+ return reply(`╭─ 🐉 MAID DRAGON 🐉 ─╮\n${report.results.map(r=>`${labels[r.status]}\n✦ ${r.name}`).join("\n\n")}\n╰─ ☕ ${ok}/6 ${open?"abertos":"fechados"} ─╯`);
+}
+break;
+
 case "x9": {
  if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
  const filter=String(args[0]||"todos").toLowerCase();
