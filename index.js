@@ -1,4 +1,4 @@
-import { setDragonCommunityState } from "./lib/features/group/dragonCommunity.js";
+import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
@@ -1265,7 +1265,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
-  "dragon_open", "dragon_close", "drsgon_close",
+  "dragon_open", "dragon_close", "drsgon_close", "dragon-msg",
   "x9",
   "adv_adm", "advs_adm", "menuvip", "add_cmd_vip", "del_cmd_vip", "add_vip", "del_vip", "lista_vip",
   "msg-alugados", "msg-alugados-lista",
@@ -10995,18 +10995,21 @@ case "msg-alugados-lista": {
  return reply(`📋 *DESTINOS DO MSG-ALUGADOS*\n\n${items.map(r=>`${r.permanent?"♾️":"⏳"} ${r.groupName||r.groupJid}\n${r.groupJid}`).join("\n\n")||"Nenhum aluguel ativo cadastrado."}\n\nCadastro: ${prefix}rg_aluguel @responsavel 30D ou ${prefix}aluguel_permanente no grupo.`);
 }
 break;
+case "dragon-msg":
 case "msg-alugados":
 case "msg": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o *dono principal* pode enviar avisos globais.");
 
   const rentedOnly=command==="msg-alugados";
+  const dragonOnly=command==="dragon-msg";
+  const scope=dragonOnly?"MAID DRAGON":rentedOnly?"DOS ALUGADOS":"GLOBAL";
   const aviso=getGlobalNoticeText(fullCommandText);
   const mediaTarget=getGlobalImageTarget(info);
   const isImageMsg=Boolean(mediaTarget);
 
   if(!aviso && !isImageMsg){
     return reply(
-      `📢 *AVISO ${rentedOnly?"DOS ALUGADOS":"GLOBAL"}*\n\n`+
+      `📢 *AVISO ${scope}*\n\n`+
       `📝 Texto: *${prefix}${command} texto do aviso*\n`+
       `🖼️ Imagem: envie uma foto com *${prefix}${command} legenda* ou responda uma foto com *${prefix}${command} legenda*.\n\n`+
       `A legenda é opcional quando houver imagem.`
@@ -11056,12 +11059,12 @@ case "msg": {
     );
   }
 
-  const entries=rentedOnly?selectRentalBroadcastGroups(groups,listRentals()):Object.entries(groups);
-  if(!entries.length)return reply(rentedOnly?"📭 Nenhum grupo com aluguel ativo ou permanente cadastrado em que a Kobayashi participe.":"📭 A Kobayashi não está participando de nenhum grupo.");
+  const entries=dragonOnly?selectDragonMessageGroups(groups):rentedOnly?selectRentalBroadcastGroups(groups,listRentals()):Object.entries(groups);
+  if(!entries.length)return reply(dragonOnly?"📭 A Kobayashi não está em nenhum dos seis grupos cadastrados da Maid Dragon.":rentedOnly?"📭 Nenhum grupo com aluguel ativo ou permanente cadastrado em que a Kobayashi participe.":"📭 A Kobayashi não está participando de nenhum grupo.");
 
   let enviados=0,falhas=0,rateLimits=0;
   await reply(
-    `📢🐉 *ENVIO GLOBAL INICIADO*\n\n`+
+    `📢🐉 *ENVIO ${scope} INICIADO*\n\n`+
     `🏘️ Grupos encontrados: *${entries.length}*\n`+
     `🖼️ Imagem: *${globalImage?"SIM":"NÃO"}*\n`+
     `🛡️ Modo seguro anti-429 ativado.`
@@ -11149,12 +11152,13 @@ case "msg": {
   }
 
   return reply(
-    `✅🐉 *AVISO GLOBAL FINALIZADO*\n\n`+
+    `✅🐉 *AVISO ${scope} FINALIZADO*\n\n`+
     `🖼️ Formato: *${globalImage?"IMAGEM"+(aviso?" + LEGENDA":""):"TEXTO"}*\n`+
     `📨 Enviados: *${enviados}*\n`+
     `❌ Grupos com falha (podem ter recebido parte do aviso): *${falhas}*\n`+
     `⚠️ Limitações 429 detectadas: *${rateLimits}*\n`+
-    `🏘️ Total: *${entries.length}*`
+    `🏘️ Total: *${entries.length}*`+
+    (dragonOnly?`\n📭 Grupos cadastrados fora da participação do bot: *${DRAGON_GROUPS.length-entries.length}*`:"")
   );
 }
 break;

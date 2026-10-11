@@ -1,15 +1,13 @@
 {
-  "version": "5.3.59",
-  "title": "X9 ativo",
+  "version": "5.3.60",
+  "title": "Dragon-msg",
   "date": "2026-10-11",
   "added": [
-    "/x9 on e /x9 off: ativação persistente por grupo, exclusiva dos ADMs.",
-    "Avisos automáticos de promoções, rebaixamentos, remoções, solicitações aceitas/recusadas e entradas.",
-    "/x9 entradas e contagem de entradas acompanhadas."
+    "/Dragon-msg com texto, imagem na legenda ou imagem respondida, marcando todos nos seis grupos da Maid Dragon."
   ],
   "changed": [
-    "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
-    "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
+    "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
+    "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1650,6 +1648,20 @@
     ],
     "changed": [
       "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
+    ]
+  },
+  "v5.3.59": {
+    "version": "5.3.59",
+    "title": "X9 ativo",
+    "date": "2026-10-11",
+    "added": [
+      "/x9 on e /x9 off: ativação persistente por grupo, exclusiva dos ADMs.",
+      "Avisos automáticos de promoções, rebaixamentos, remoções, solicitações aceitas/recusadas e entradas.",
+      "/x9 entradas e contagem de entradas acompanhadas."
+    ],
+    "changed": [
+      "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
+      "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
     ]
   }
 }
