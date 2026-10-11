@@ -1,12 +1,13 @@
 {
-  "version": "5.3.61",
-  "title": "Correção Dragon open/close",
+  "version": "5.3.62",
+  "title": "S2 proporção original",
   "date": "2026-10-11",
-  "added": [],
+  "added": [
+    "/s2 com imagem ou vídeo direto/respondido: preserva proporção com preenchimento transparente."
+  ],
   "changed": [
-    "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
-    "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
-    "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
+    "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
+    "/s2 respeita a mesma regra VIP de /s e aliases de criação."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1673,6 +1674,17 @@
     "changed": [
       "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
       "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
+    ]
+  },
+  "v5.3.61": {
+    "version": "5.3.61",
+    "title": "Correção Dragon open/close",
+    "date": "2026-10-11",
+    "added": [],
+    "changed": [
+      "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
+      "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
+      "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
     ]
   }
 }

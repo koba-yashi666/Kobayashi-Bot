@@ -1265,6 +1265,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "s2",
   "dragon_open", "dragon_close", "drsgon_close", "dragon-msg",
   "x9",
   "adv_adm", "advs_adm", "menuvip", "add_cmd_vip", "del_cmd_vip", "add_vip", "del_vip", "lista_vip",
@@ -7154,14 +7155,15 @@ case "stickers":
 case "sticker":
 case "stk":
 case "st":
+case "s2":
 case "s": {
   reagir("🎨");
 
   const mediaTarget = getCurrentOrQuotedMedia(info);
   if (!mediaTarget?.message) {
     return reply(
-      `🎨🌸 Envie uma imagem ou vídeo com *${prefix}s* na legenda\n` +
-      `ou responda à mídia com *${prefix}s*.\n\n` +
+      `🎨🌸 Envie uma imagem ou vídeo com *${prefix}${command}* na legenda\n` +
+      `ou responda à mídia com *${prefix}${command}*.\n\n` +
       `🎞️ Vídeos: máximo de *9.9 segundos*.`
     );
   }
@@ -7197,7 +7199,7 @@ case "s": {
     const buffer = await downloadMediaMessage(mediaTarget,"buffer",{});
     const sticker = await makeSticker(buffer,{
       isVideo: mediaType === "videoMessage",
-      forceSquare: true,
+      forceSquare: command !== "s2",
       metadata
     });
 

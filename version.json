@@ -1,5 +1,5 @@
 {
-  "version": "5.3.61",
-  "name": "Kobayashi Bot v5.3.61 — Correção Dragon open/close",
-  "update": "Correção de pré-validação LID/PN e confirmação de estado dos grupos Dragon."
+  "version": "5.3.62",
+  "name": "Kobayashi Bot v5.3.62 — S2 proporção original",
+  "update": "/s2 cria figurinhas preservando proporção, sem esticar ou cortar."
 }
