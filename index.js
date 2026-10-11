@@ -3492,10 +3492,10 @@ case "dragon_open": case "dragon_close": case "drsgon_close": {
  await reply(`🐉 ${open?"Abrindo":"Fechando"} os 6 grupos da Maid Dragon…`);
  const report=await setDragonCommunityState(conn,open,[botNumber]);
  if(report.busy)return reply("⏳ Já existe uma abertura/fechamento em andamento. Aguarde o relatório.");
- const labels={success:open?"✅ Aberto":"✅ Fechado",already:open?"✅ Já estava aberto":"✅ Já estava fechado",absent:"❌ Bot não participa",'not-admin':"❌ Bot não é ADM",unconfirmed:"⚠️ Alteração enviada, sem confirmação",failed:"❌ Falha ao acessar/alterar"};
+ const labels={success:open?"✅ Aberto":"✅ Fechado",already:open?"✅ Já estava aberto":"✅ Já estava fechado",absent:"❌ Grupo inacessível",'not-admin':"❌ WhatsApp negou a permissão",unconfirmed:"⚠️ Alteração enviada, sem confirmação",failed:"❌ Falha ao acessar/alterar"};
  const ok=report.results.filter(r=>["success","already"].includes(r.status)).length;
  for(const r of report.results.filter(r=>r.status==="success"))addAdminLog(r.jid,{type:open?"dragon_open":"dragon_close",actor:sender,target:r.jid,detail:"Maid Dragon • alteração global"});
- return reply(`╭─ 🐉 MAID DRAGON 🐉 ─╮\n${report.results.map(r=>`${labels[r.status]}\n✦ ${r.name}`).join("\n\n")}\n╰─ ☕ ${ok}/6 ${open?"abertos":"fechados"} ─╯`);
+ return reply(`╭─ 🐉 MAID DRAGON 🐉 ─╮\n${report.results.map(r=>`${labels[r.status]}\n✦ ${r.name}${r.reason?"\n↳ "+r.reason:""}\n🆔 ${r.jid}`).join("\n\n")}\n╰─ ☕ ${ok}/6 ${open?"abertos":"fechados"} ─╯`);
 }
 break;
 

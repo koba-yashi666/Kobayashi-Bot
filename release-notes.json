@@ -1,13 +1,12 @@
 {
-  "version": "5.3.60",
-  "title": "Dragon-msg",
+  "version": "5.3.61",
+  "title": "Correção Dragon open/close",
   "date": "2026-10-11",
-  "added": [
-    "/Dragon-msg com texto, imagem na legenda ou imagem respondida, marcando todos nos seis grupos da Maid Dragon."
-  ],
+  "added": [],
   "changed": [
-    "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
-    "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
+    "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
+    "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
+    "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1662,6 +1661,18 @@
     "changed": [
       "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
       "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
+    ]
+  },
+  "v5.3.60": {
+    "version": "5.3.60",
+    "title": "Dragon-msg",
+    "date": "2026-10-11",
+    "added": [
+      "/Dragon-msg com texto, imagem na legenda ou imagem respondida, marcando todos nos seis grupos da Maid Dragon."
+    ],
+    "changed": [
+      "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
+      "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
     ]
   }
 }
