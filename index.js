@@ -1,3 +1,4 @@
+import { protectedRemovalMessage } from "./lib/features/moderation/removalProtection.js";
 import { buildWaMeLink } from "./lib/features/social/waMe.js";
 import { purgeGroups } from "./lib/features/moderation/groupPurge.js";
 import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
@@ -3418,6 +3419,10 @@ if (isCmd) {
     continue;
   }
 
+if(["ban","b","banc","kobaban","koban","cafeban","bang","dragonban","adv"].includes(command)){
+ const protectionTarget=resolveBanTarget(info,args);
+ if(protectionTarget){const protectionMessage=await protectedRemovalMessage(conn,from,protectionTarget,{participants:Array.isArray(groupMembers)?groupMembers:undefined});if(protectionMessage)return reply(protectionMessage);}
+}
 switch (command) {
 case "wame": {
  const {target,aliases}=await resolveActivityTarget({info,sender,participants:Array.isArray(groupMembers)?groupMembers:[],resolvePN:id=>getPNForJid(conn,id)});
@@ -4208,7 +4213,8 @@ case "listanegraglobal": {
   // Primeiro SALVA todos. A remoção é feita depois, evitando perder o restante
   // da lista se alguma varredura individual falhar.
   for(const target of targets){
-    if(target===dono || isMainOwnerJid(target)){protectedOwner++;continue}
+    const protectedMessage=await protectedRemovalMessage(conn,from,target,{participants:Array.isArray(groupMembers)?groupMembers:undefined});
+    if(protectedMessage){if(targets.length===1)return reply(protectedMessage);protectedOwner++;continue}
     try{
       const existing=getGlobalBlacklistEntry(target);
       if(!existing){

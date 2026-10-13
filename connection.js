@@ -1,3 +1,4 @@
+import { installRemovalProtection } from "./lib/features/moderation/removalProtection.js";
 import { installAntiFakeRuntime } from "./lib/features/moderation/antiFakeRuntime.js";
 import { installX9Audit } from "./lib/features/group/x9Audit.js";
 /*
@@ -138,6 +139,7 @@ async function startConnect() {
       emitOwnEvents: true,
     });
 
+    installRemovalProtection(conn);
     bindGroupCache(conn);
 
     // Permite aos sistemas AntiDelete/AntiEdit consultar mensagens recentes.

@@ -1,13 +1,13 @@
 {
-  "version": "5.3.65",
-  "title": "WaMe",
+  "version": "5.3.66",
+  "title": "Proteção do mestre e dono",
   "date": "2026-10-13",
   "added": [
-    "/wame gera link do próprio número; aceita texto para mensagem pré-preenchida.",
-    "Menção ou resposta seleciona outra pessoa, com resolução de PN/LID."
+    "Proteção central das remoções para LID oficial do criador e número configurado do dono."
   ],
   "changed": [
-    "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
+    "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
+    "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1721,6 +1721,18 @@
       "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
       "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
       "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
+    ]
+  },
+  "v5.3.65": {
+    "version": "5.3.65",
+    "title": "WaMe",
+    "date": "2026-10-13",
+    "added": [
+      "/wame gera link do próprio número; aceita texto para mensagem pré-preenchida.",
+      "Menção ou resposta seleciona outra pessoa, com resolução de PN/LID."
+    ],
+    "changed": [
+      "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
     ]
   }
 }
