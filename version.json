@@ -1,5 +1,5 @@
 {
-  "version": "5.3.63",
-  "name": "Kobayashi Bot v5.3.63 — Antifake",
-  "update": "/antifake on/off com verificação de novas entradas e tratamento de LID."
+  "version": "5.3.64",
+  "name": "Kobayashi Bot v5.3.64 — Busca global de banimentos",
+  "update": "Busca ampliada e remoção confirmada em listanegrag, dragonban e bang."
 }

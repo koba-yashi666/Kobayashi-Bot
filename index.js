@@ -1,3 +1,4 @@
+import { purgeGroups } from "./lib/features/moderation/groupPurge.js";
 import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
 import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
@@ -38,7 +39,7 @@ import { checkUpdate, applyUpdate, getLocalVersion } from "./updater.js";
 
 import { moment, colors, linguagem, mess, normalizeJid, getPNForJid, getGroupAdmins, logos, baileysVersion, fetch, axios, fs as fsx, os, path, randomBytes, ffmpeg } from "./settings/imports/consts.js";
 
-import { getGroupMetadata } from "./lib/groupCache.js";
+import { getGroupMetadata, groupCache } from "./lib/groupCache.js";
 import { readGroupScheduleDb, normalizeClockTime, updateGroupSchedule } from "./lib/features/group/groupSchedule.js";
 import { getWelcomeConfig, updateWelcomeConfig, renderWelcomeText, removePartnerLink, setWelcomePhoto, removeWelcomePhoto, setByePhoto, removeByePhoto } from "./lib/features/group/welcomeConfig.js";
 import { getStickerMappedCommand, setStickerMappedCommand, removeStickerMappedCommand, listStickerMappedCommands } from "./lib/features/stickers/stickerCommands.js";
@@ -1037,92 +1038,19 @@ async function removeResolvedParticipant(conn, groupJid, participant) {
   };
 }
 
-async function purgeUserFromAdminGroups(conn, rawJid, {
-  announce = true,
-  source = "blacklist-purge"
-} = {}) {
-  let groups = {};
-  try {
-    const cached=conn?.store?.chats&&typeof conn.store.chats.all==="function"
-      ? conn.store.chats.all().filter(c=>String(c?.id||"").endsWith("@g.us")) : [];
-    for(const c of cached) if(c?.id) groups[c.id]=c;
-  } catch {}
-  try {
-    const live=await conn.groupFetchAllParticipating();
-    if(live&&typeof live==="object") groups={...groups,...live};
-  } catch(e) {
-    console.error(`[${source}] consulta global limitada; usando cache:`,e?.message||e);
-  }
-  if(!Object.keys(groups).length)
-    return {checked:0,adminGroups:0,found:0,removed:0,failures:1,details:[]};
-
-  const targetAliases = await buildBlacklistTargetAliases(conn, rawJid);
-  let checked=0, adminGroups=0, found=0, removed=0, failures=0;
-  const details=[];
-
-  for (const groupJid of Object.keys(groups || {})) {
-    checked++;
-
-    let metadata;
-    try {
-      // Sempre busca metadados atualizados em vez de depender só do cache.
-      metadata = await conn.groupMetadata(groupJid);
-    } catch (e) {
-      details.push({ groupJid, status:"metadata-error", error:e?.message || String(e) });
-      continue;
-    }
-
-    const participants = metadata?.participants || [];
-    const isAdmin = await botIsAdminInMetadata(conn, participants);
-    if (!isAdmin) {
-      details.push({ groupJid, name:metadata?.subject, status:"bot-not-admin" });
-      continue;
-    }
-
-    adminGroups++;
-
-    const participant = await resolveParticipantForBlacklist(conn, participants, targetAliases);
-    if (!participant) {
-      details.push({ groupJid, name:metadata?.subject, status:"not-in-group" });
-      continue;
-    }
-
-    found++;
-    const removal = await removeResolvedParticipant(conn, groupJid, participant);
-
-    if (removal.ok) {
-      removed++;
-      details.push({
-        groupJid,
-        name:metadata?.subject,
-        status:"removed",
-        target:removal.target
-      });
-
-      if (announce) {
-        await conn.sendMessage(groupJid, {
-          text:
-            `🖤🔨 *LISTA NEGRA • REMOÇÃO GLOBAL*\n\n` +
-            `Um usuário bloqueado foi removido automaticamente pela Kobayashi.\n` +
-            `📌 Origem: *${source}*`
-        }).catch(() => {});
-      }
-    } else {
-      failures++;
-      details.push({
-        groupJid,
-        name:metadata?.subject,
-        status:"remove-error",
-        error:removal.error
-      });
-      console.error(`[${source}] falha em ${groupJid}:`, removal.error);
-    }
-
-    // Pequeno intervalo para não disparar alterações de participantes em rajada.
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-
-  return { checked, adminGroups, found, removed, failures, details };
+async function purgeUserFromAdminGroups(conn, rawJid, {announce=true,source="blacklist-purge"}={}) {
+ const groups=new Set(DRAGON_COMMUNITY_GROUPS.map(g=>g.jid));let discoveryFailed=false;
+ try{for(const jid of groupCache.keys())if(jid.endsWith("@g.us"))groups.add(jid);}catch{}
+ try{for(const c of conn.store?.chats?.all?.()||[])if(c.id?.endsWith("@g.us"))groups.add(c.id);}catch{}
+ try{for(const r of listRentals())if(r.groupJid?.endsWith("@g.us"))groups.add(r.groupJid);}catch{}
+ for(let attempt=0;attempt<2;attempt++){
+  try{const live=await conn.groupFetchAllParticipating();if(!live||typeof live!=="object")throw Error("Consulta de grupos vazia");for(const jid of Object.keys(live))if(jid.endsWith("@g.us"))groups.add(jid);discoveryFailed=false;break;}
+  catch(e){discoveryFailed=true;console.error(`[${source}] descoberta`,e?.message||e);if(attempt===0)await new Promise(r=>setTimeout(r,5000));}
+ }
+ const rows=await purgeGroups(conn,rawJid,[...groups],{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
+ const details=rows.map(r=>({...r,groupJid:r.jid,status:r.status==="absent"?"not-in-group":r.status==="not-admin"?"bot-not-admin":r.status==="failed"?"remove-error":r.status}));
+ for(const r of rows.filter(r=>r.status==="removed"))if(announce)await conn.sendMessage(r.jid,{text:`🖤🔨 *REMOÇÃO GLOBAL CONFIRMADA*\nUm usuário bloqueado foi removido pela Kobayashi.\n📌 Origem: ${source}`}).catch(()=>{});
+ return {checked:rows.length,adminGroups:rows.filter(r=>r.isAdmin===true||r.status==="removed").length,found:rows.filter(r=>["removed","failed","not-admin","protected"].includes(r.status)).length,removed:rows.filter(r=>r.status==="removed").length,failures:rows.filter(r=>["failed","metadata-error","not-admin"].includes(r.status)).length+(discoveryFailed?1:0),discoveryFailed,details};
 }
 
 // Mantém compatibilidade com chamadas antigas.
@@ -3620,9 +3548,9 @@ case "dragonban": {
  if(!target||target===sender)return reply(`🐉 Use *${prefix}dragonban @membro motivo*\n📱 Ou: *${prefix}dragonban 5511999999999 motivo*\n↩️ Também funciona respondendo à mensagem.`);
  const reason=args.filter((a,i)=>!a.includes("@")&&!(i===0&&numberTarget)).join(" ").trim()||"Sem motivo informado";
  addDragonBan(target,sender,reason);
- const results=await purgeDragonBannedUser(conn,target);
+ const results=await purgeDragonBannedUser(conn,target,{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
  const removed=results.filter(x=>x.status==="removido"),absent=results.filter(x=>x.status==="ausente"),failed=results.filter(x=>x.status==="erro");
- return conn.sendMessage(from,{text:`🐉🚫 *DRAGON BAN APLICADO*\n\n👤 Alvo: @${target.split("@")[0]}\n📝 Motivo: ${reason}\n\n✅ Removido: *${removed.length}/${DRAGON_COMMUNITY_GROUPS.length} grupos*\n➖ Ausente: *${absent.length}*\n⚠️ Falhas: *${failed.length}*${failed.length?`\n\n${failed.map(x=>`• ${x.name}: não foi possível remover`).join("\n")}`:""}`,mentions:[target]},{quoted:info});
+ return conn.sendMessage(from,{text:`🐉🚫 *DRAGON BAN APLICADO*\n\n👤 Alvo: @${target.split("@")[0]}\n📝 Motivo: ${reason}\n\n✅ Removido: *${removed.length}/${DRAGON_COMMUNITY_GROUPS.length} grupos*\n➖ Ausente: *${absent.length}*\n⚠️ Falhas: *${failed.length}*${failed.length?`\n\n${failed.map(x=>`• ${x.name}: ${x.error||"não foi possível remover"}`).join("\n")}`:""}`,mentions:[target]},{quoted:info});
 } break;
 case "rmdragonban": {
  if(!SoDonoPrincipal)return reply(mess.onlyOwner());
@@ -4262,6 +4190,7 @@ case "listanegraglobal": {
   let newlyAdded=0, alreadySaved=0, protectedOwner=0, saveFailures=0;
   let checked=0,adminGroups=0,found=0,removed=0,removeFailures=0;
   const savedTargets=[];
+  const purgeIssues=[];
 
   // Primeiro SALVA todos. A remoção é feita depois, evitando perder o restante
   // da lista se alguma varredura individual falhar.
@@ -4291,6 +4220,8 @@ case "listanegraglobal": {
       found+=Number(purge.found||0);
       removed+=Number(purge.removed||0);
       removeFailures+=Number(purge.failures||0);
+      if(purge.discoveryFailed)purgeIssues.push("Consulta global incompleta; busca nos grupos conhecidos.");
+      for(const r of purge.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)))purgeIssues.push(`${r.name||r.groupJid}: ${r.error||"bot sem permissão de ADM"}`);
     }catch(e){
       removeFailures++;
       console.error("[LISTANEGRAG PURGE]",target,e?.message||e);
@@ -4313,7 +4244,7 @@ case "listanegraglobal": {
   const target=savedTargets[0];
   if(!target)return reply("⚠️ O número não pôde ser salvo na lista negra global.");
   return conn.sendMessage(from,{
-    text:`🖤🌐 *LISTA NEGRA GLOBAL • VARREDURA*\n\n👤 @${target.split("@")[0]} salvo na Lista Negra Global.\n🌐 Grupos verificados: *${checked}*\n🛡️ Kobayashi ADM: *${adminGroups}*\n👤 Encontrado: *${found}*\n🔨 Removido: *${removed}*\n⚠️ Falhas: *${removeFailures}*\n\n♻️ O AutoGuard continua bloqueando reentrada.`,
+    text:`🖤🌐 *LISTA NEGRA GLOBAL • VARREDURA*\n\n👤 @${target.split("@")[0]} salvo na Lista Negra Global.\n🌐 Grupos verificados: *${checked}*\n🛡️ Kobayashi ADM: *${adminGroups}*\n👤 Encontrado: *${found}*\n🔨 Removido: *${removed}*\n⚠️ Falhas: *${removeFailures}*${purgeIssues.length?"\n\n"+[...new Set(purgeIssues)].slice(0,10).map(x=>"• "+x).join("\n"):""}\n\n♻️ O AutoGuard continua bloqueando reentrada.`,
     mentions:[target]
   },{quoted:info});
 }
@@ -7365,7 +7296,7 @@ case "bang": {
  if(!target)return reply(`💥🐉 Use *${prefix}bang @membro*, *${prefix}bang número* ou responda à mensagem.\n\nA Kobayashi verificará todos os grupos e removerá o alvo onde for ADM.`);
  if(target===dono||isMainOwnerJid(target))return reply("🛡️🐉 O dono principal é protegido.");
  const p=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Bang Global 2.0"});
- return conn.sendMessage(from,{text:`💥🐉 *BANG GLOBAL 2.0*\n\n🎯 @${String(target).split("@")[0]}\n🌐 Grupos verificados: *${p.checked||0}*\n🛡️ Kobayashi ADM: *${p.adminGroups||0}*\n👤 Encontrado: *${p.found||0}*\n🚪 Removido: *${p.removed||0}*\n⚠️ Falhas: *${p.failures||0}*`,mentions:[target]},{quoted:info});
+ return conn.sendMessage(from,{text:`💥🐉 *BANG GLOBAL 2.0*\n\n🎯 @${String(target).split("@")[0]}\n🌐 Grupos verificados: *${p.checked||0}*\n🛡️ Kobayashi ADM: *${p.adminGroups||0}*\n👤 Encontrado: *${p.found||0}*\n🚪 Removido: *${p.removed||0}*\n⚠️ Falhas: *${p.failures||0}*${p.discoveryFailed?"\n⚠️ Consulta global falhou; a busca usou os grupos conhecidos.":""}${p.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)).length?"\n\n"+p.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)).slice(0,10).map(r=>`• ${r.name||r.groupJid}: ${r.error||"bot sem permissão de ADM"}`).join("\n"):""}`,mentions:[target]},{quoted:info});
 }
 break;
 

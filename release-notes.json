@@ -1,14 +1,12 @@
 {
-  "version": "5.3.63",
-  "title": "Antifake",
-  "date": "2026-10-11",
-  "added": [
-    "/antifake on/off (também 1/0), exclusivo de ADM em grupos.",
-    "Verificação automática de novas entradas com prefixo padrão +55."
-  ],
+  "version": "5.3.64",
+  "title": "Busca global de banimentos",
+  "date": "2026-10-13",
+  "added": [],
   "changed": [
-    "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
-    "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
+    "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
+    "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
+    "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1698,6 +1696,19 @@
     "changed": [
       "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
       "/s2 respeita a mesma regra VIP de /s e aliases de criação."
+    ]
+  },
+  "v5.3.63": {
+    "version": "5.3.63",
+    "title": "Antifake",
+    "date": "2026-10-11",
+    "added": [
+      "/antifake on/off (também 1/0), exclusivo de ADM em grupos.",
+      "Verificação automática de novas entradas com prefixo padrão +55."
+    ],
+    "changed": [
+      "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
+      "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
     ]
   }
 }
