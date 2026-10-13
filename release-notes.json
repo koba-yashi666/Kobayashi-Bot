@@ -1,12 +1,13 @@
 {
-  "version": "5.3.64",
-  "title": "Busca global de banimentos",
+  "version": "5.3.65",
+  "title": "WaMe",
   "date": "2026-10-13",
-  "added": [],
+  "added": [
+    "/wame gera link do próprio número; aceita texto para mensagem pré-preenchida.",
+    "Menção ou resposta seleciona outra pessoa, com resolução de PN/LID."
+  ],
   "changed": [
-    "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
-    "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
-    "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
+    "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1709,6 +1710,17 @@
     "changed": [
       "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
       "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
+    ]
+  },
+  "v5.3.64": {
+    "version": "5.3.64",
+    "title": "Busca global de banimentos",
+    "date": "2026-10-13",
+    "added": [],
+    "changed": [
+      "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
+      "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
+      "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
     ]
   }
 }

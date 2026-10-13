@@ -1,3 +1,4 @@
+import { buildWaMeLink } from "./lib/features/social/waMe.js";
 import { purgeGroups } from "./lib/features/moderation/groupPurge.js";
 import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
 import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
@@ -1194,6 +1195,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "wame",
   "antifake",
   "s2",
   "dragon_open", "dragon_close", "drsgon_close", "dragon-msg",
@@ -3417,6 +3419,17 @@ if (isCmd) {
   }
 
 switch (command) {
+case "wame": {
+ const {target,aliases}=await resolveActivityTarget({info,sender,participants:Array.isArray(groupMembers)?groupMembers:[],resolvePN:id=>getPNForJid(conn,id)});
+ const pn=aliases.find(id=>buildWaMeLink(id));
+ if(!pn)return reply("🐉 Não consegui identificar o telefone dessa pessoa. O WhatsApp enviou apenas um LID sem número disponível.");
+ let text=fullCommandText.replace(/^\S+\s*/,"");
+ for(const id of aliases){const digits=String(id).split("@")[0];if(/^\d+$/.test(digits))text=text.replace(new RegExp(`(^|\\s)@${digits}(?=\\s|$)`),"$1");}
+ const link=buildWaMeLink(pn,text);
+ return conn.sendMessage(from,{text:`🐉🔗 *LINK DO WHATSAPP*\n👤 @${pn.split("@")[0]}\n\n${link}`,mentions:[target]},{quoted:info});
+}
+break;
+
 case "antifake": {
  if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
  const action=String(args[0]||"").toLowerCase();
