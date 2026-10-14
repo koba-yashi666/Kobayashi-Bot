@@ -1,5 +1,5 @@
 {
-  "version": "5.3.66",
-  "name": "Kobayashi Bot v5.3.66 — Proteção do mestre e dono",
-  "update": "Proteção central contra remoção do criador e do dono configurado."
+  "version": "5.3.67",
+  "name": "Kobayashi Bot v5.3.67 — Varredura só ADM",
+  "update": "Verifica alvos somente nos grupos atuais com bot ADM; relatório por nome e permissão."
 }

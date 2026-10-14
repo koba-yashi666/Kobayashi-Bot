@@ -1,6 +1,6 @@
 import { protectedRemovalMessage } from "./lib/features/moderation/removalProtection.js";
 import { buildWaMeLink } from "./lib/features/social/waMe.js";
-import { purgeGroups } from "./lib/features/moderation/groupPurge.js";
+import { purgeGroups, formatPurgeIssues } from "./lib/features/moderation/groupPurge.js";
 import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
 import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
@@ -1041,18 +1041,17 @@ async function removeResolvedParticipant(conn, groupJid, participant) {
 }
 
 async function purgeUserFromAdminGroups(conn, rawJid, {announce=true,source="blacklist-purge"}={}) {
- const groups=new Set(DRAGON_COMMUNITY_GROUPS.map(g=>g.jid));let discoveryFailed=false;
- try{for(const jid of groupCache.keys())if(jid.endsWith("@g.us"))groups.add(jid);}catch{}
- try{for(const c of conn.store?.chats?.all?.()||[])if(c.id?.endsWith("@g.us"))groups.add(c.id);}catch{}
- try{for(const r of listRentals())if(r.groupJid?.endsWith("@g.us"))groups.add(r.groupJid);}catch{}
+ let groups={};let discoveryFailed=false;
  for(let attempt=0;attempt<2;attempt++){
-  try{const live=await conn.groupFetchAllParticipating();if(!live||typeof live!=="object")throw Error("Consulta de grupos vazia");for(const jid of Object.keys(live))if(jid.endsWith("@g.us"))groups.add(jid);discoveryFailed=false;break;}
+  try{const live=await conn.groupFetchAllParticipating();if(!live||typeof live!=="object")throw Error("Consulta de grupos indisponível");groups=live;discoveryFailed=false;break;}
   catch(e){discoveryFailed=true;console.error(`[${source}] descoberta`,e?.message||e);if(attempt===0)await new Promise(r=>setTimeout(r,5000));}
  }
- const rows=await purgeGroups(conn,rawJid,[...groups],{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
+ if(discoveryFailed&&!Object.keys(groups).length)return {checked:0,adminGroups:0,found:0,removed:0,failures:1,discoveryFailed:true,details:[]};
+ const candidates=Object.entries(groups).filter(([jid])=>jid.endsWith("@g.us")).map(([jid,meta])=>({jid,name:meta?.subject||jid}));
+ const rows=await purgeGroups(conn,rawJid,candidates,{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
  const details=rows.map(r=>({...r,groupJid:r.jid,status:r.status==="absent"?"not-in-group":r.status==="not-admin"?"bot-not-admin":r.status==="failed"?"remove-error":r.status}));
  for(const r of rows.filter(r=>r.status==="removed"))if(announce)await conn.sendMessage(r.jid,{text:`🖤🔨 *REMOÇÃO GLOBAL CONFIRMADA*\nUm usuário bloqueado foi removido pela Kobayashi.\n📌 Origem: ${source}`}).catch(()=>{});
- return {checked:rows.length,adminGroups:rows.filter(r=>r.isAdmin===true||r.status==="removed").length,found:rows.filter(r=>["removed","failed","not-admin","protected"].includes(r.status)).length,removed:rows.filter(r=>r.status==="removed").length,failures:rows.filter(r=>["failed","metadata-error","not-admin"].includes(r.status)).length+(discoveryFailed?1:0),discoveryFailed,details};
+ return {checked:rows.filter(r=>r.isAdmin===true).length,adminGroups:rows.filter(r=>r.isAdmin===true||r.status==="removed").length,found:rows.filter(r=>["removed","failed","protected"].includes(r.status)).length,removed:rows.filter(r=>r.status==="removed").length,failures:rows.filter(r=>["failed","metadata-error","bot-unknown"].includes(r.status)).length+(discoveryFailed?1:0),discoveryFailed,details,issues:formatPurgeIssues(rows)};
 }
 
 // Mantém compatibilidade com chamadas antigas.
@@ -3568,7 +3567,7 @@ case "dragonban": {
  addDragonBan(target,sender,reason);
  const results=await purgeDragonBannedUser(conn,target,{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
  const removed=results.filter(x=>x.status==="removido"),absent=results.filter(x=>x.status==="ausente"),failed=results.filter(x=>x.status==="erro");
- return conn.sendMessage(from,{text:`🐉🚫 *DRAGON BAN APLICADO*\n\n👤 Alvo: @${target.split("@")[0]}\n📝 Motivo: ${reason}\n\n✅ Removido: *${removed.length}/${DRAGON_COMMUNITY_GROUPS.length} grupos*\n➖ Ausente: *${absent.length}*\n⚠️ Falhas: *${failed.length}*${failed.length?`\n\n${failed.map(x=>`• ${x.name}: ${x.error||"não foi possível remover"}`).join("\n")}`:""}`,mentions:[target]},{quoted:info});
+ return conn.sendMessage(from,{text:`🐉🚫 *DRAGON BAN APLICADO*\n\n👤 Alvo: @${target.split("@")[0]}\n📝 Motivo: ${reason}\n\n✅ Removido: *${removed.length}/${results.length} grupos consultados*\n➖ Ausente: *${absent.length}*\n⚠️ Falhas: *${failed.length}*${failed.length?`\n\n${formatPurgeIssues(failed.map(x=>({...x,status:x.purgeStatus||"failed"})))}`:""}`,mentions:[target]},{quoted:info});
 } break;
 case "rmdragonban": {
  if(!SoDonoPrincipal)return reply(mess.onlyOwner());
@@ -4239,8 +4238,8 @@ case "listanegraglobal": {
       found+=Number(purge.found||0);
       removed+=Number(purge.removed||0);
       removeFailures+=Number(purge.failures||0);
-      if(purge.discoveryFailed)purgeIssues.push("Consulta global incompleta; busca nos grupos conhecidos.");
-      for(const r of purge.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)))purgeIssues.push(`${r.name||r.groupJid}: ${r.error||"bot sem permissão de ADM"}`);
+      if(purge.discoveryFailed)purgeIssues.push("Não foi possível obter a lista atual de grupos; nenhuma varredura iniciada.");
+      if(purge.issues)purgeIssues.push(purge.issues);
     }catch(e){
       removeFailures++;
       console.error("[LISTANEGRAG PURGE]",target,e?.message||e);
@@ -4256,7 +4255,7 @@ case "listanegraglobal": {
       (protectedOwner?`🛡️ Dono protegido: *${protectedOwner}*\n`:"") +
       (invalid.length?`⚠️ Entradas inválidas ignoradas: *${invalid.length}*\n`:"") +
       (saveFailures?`❌ Falhas ao salvar: *${saveFailures}*\n`:"") +
-      `🔨 Removidos agora: *${removed}*`
+      `🔨 Removidos agora: *${removed}*` + (purgeIssues.length?"\n\n"+[...new Set(purgeIssues)].join("\n\n"):"")
     );
   }
 
@@ -7315,7 +7314,7 @@ case "bang": {
  if(!target)return reply(`💥🐉 Use *${prefix}bang @membro*, *${prefix}bang número* ou responda à mensagem.\n\nA Kobayashi verificará todos os grupos e removerá o alvo onde for ADM.`);
  if(target===dono||isMainOwnerJid(target))return reply("🛡️🐉 O dono principal é protegido.");
  const p=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Bang Global 2.0"});
- return conn.sendMessage(from,{text:`💥🐉 *BANG GLOBAL 2.0*\n\n🎯 @${String(target).split("@")[0]}\n🌐 Grupos verificados: *${p.checked||0}*\n🛡️ Kobayashi ADM: *${p.adminGroups||0}*\n👤 Encontrado: *${p.found||0}*\n🚪 Removido: *${p.removed||0}*\n⚠️ Falhas: *${p.failures||0}*${p.discoveryFailed?"\n⚠️ Consulta global falhou; a busca usou os grupos conhecidos.":""}${p.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)).length?"\n\n"+p.details.filter(r=>["metadata-error","remove-error","bot-not-admin"].includes(r.status)).slice(0,10).map(r=>`• ${r.name||r.groupJid}: ${r.error||"bot sem permissão de ADM"}`).join("\n"):""}`,mentions:[target]},{quoted:info});
+ return conn.sendMessage(from,{text:`💥🐉 *BANG GLOBAL*\n\n🎯 @${String(target).split("@")[0]}\n👑 Grupos ADM verificados: *${p.checked||0}*\n👤 Encontrado: *${p.found||0}*\n🚪 Removido: *${p.removed||0}*\n⚠️ Falhas: *${p.failures||0}*${p.discoveryFailed?"\n❌ Não consegui consultar a lista atual de grupos; tente novamente.":""}${p.issues?"\n\n"+p.issues:""}`,mentions:[target]},{quoted:info});
 }
 break;
 

@@ -1,13 +1,12 @@
 {
-  "version": "5.3.66",
-  "title": "Proteção do mestre e dono",
-  "date": "2026-10-13",
-  "added": [
-    "Proteção central das remoções para LID oficial do criador e número configurado do dono."
-  ],
+  "version": "5.3.67",
+  "title": "Varredura só ADM",
+  "date": "2026-10-14",
+  "added": [],
   "changed": [
-    "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
-    "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
+    "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
+    "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
+    "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1733,6 +1732,18 @@
     ],
     "changed": [
       "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
+    ]
+  },
+  "v5.3.66": {
+    "version": "5.3.66",
+    "title": "Proteção do mestre e dono",
+    "date": "2026-10-13",
+    "added": [
+      "Proteção central das remoções para LID oficial do criador e número configurado do dono."
+    ],
+    "changed": [
+      "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
+      "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
     ]
   }
 }
