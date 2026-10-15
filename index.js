@@ -1,3 +1,6 @@
+import { readCommunity } from "./lib/features/community/store.js";
+import { COMMUNITY_COMMANDS, handleCommunityCommand } from "./lib/features/community/commands.js";
+import { isCommunityBotAdmin } from "./lib/features/community/runtime.js";
 import { protectedRemovalMessage } from "./lib/features/moderation/removalProtection.js";
 import { buildWaMeLink } from "./lib/features/social/waMe.js";
 import { purgeGroups, formatPurgeIssues } from "./lib/features/moderation/groupPurge.js";
@@ -1195,6 +1198,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  ...COMMUNITY_COMMANDS,
   "wame",
   "antifake",
   "s2",
@@ -3202,6 +3206,7 @@ if (isCmd) {
     await reply(`🐉👑 *COMANDO VIP*\nO uso de ${prefix}${command} é exclusivo dos membros VIP.\nConsulte ${prefix}menuvip ou fale com o dono do bot.`);
     continue;
   }
+  if(await handleCommunityCommand({command,q:fullCommandText.replace(/^\S+\s*/,""),from,sender,conn,info,reply,prefix,isGroup,isGroupAdmins,isOwner:SoDonoPrincipal,groupName,pushname,identities:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),download:downloadMediaMessage,confirmBotAdmin:()=>isCommunityBotAdmin(conn,from),commandExists:name=>KOBA_TRIGGER_COMMANDS.has(name)||getCommandHelpCatalog().some(item=>[item.name,...(item.aliases||[])].includes(name))||resolveCommandAlias(resolveV3Alias(name))!==name||new RegExp(`case\\s+["']${name}["']\\s*:`).test(jsCommandSource)}))continue;
   const modularPermissions = createPermissions({
     sender,
     isGroup,
@@ -3487,6 +3492,7 @@ case "add_cmd_vip": case "del_cmd_vip": {
  const protectedCommands=["menuvip","add_cmd_vip","del_cmd_vip","add_vip","del_vip","lista_vip"];
  if(!name||protectedCommands.includes(name))return reply(`Use ${prefix}${command} /figurinhas. Comandos de gerenciamento VIP não podem ser bloqueados.`);
  const known=new Set([...String(fs.readFileSync(new URL(import.meta.url),"utf8")).matchAll(/case\s+["']([^"']+)["']\s*:/g)].map(m=>vipCommand(m[1])));
+ for(const name of [...COMMUNITY_COMMANDS,...Object.keys(readCommunity().custom)])known.add(vipCommand(name));
  if(!known.has(name))return reply("Comando não encontrado no registro de comandos da base.");
  setVipCommand(name,command==="add_cmd_vip");return reply(`🐉 ${prefix}${name}: ${command==="add_cmd_vip"?"exclusivo para VIPs (incluindo atalhos)":"liberado para uso comum"}.`);
 }
@@ -10301,7 +10307,7 @@ break;
 case "menuadm":
 if (!isGroup) return reply(mess.onlyGroup());
 reagir("🛡️");
-reply(buildAdminMenu(prefix));
+reply(buildAdminMenu(prefix)+`\n🐉 *Comunidade:* ${prefix}comunidade-ajuda\n🔐 ${prefix}captcha on/off\n🎫 ${prefix}ticket on/off • ${prefix}tickets\n⏰ ${prefix}automsg`);
 break;
 
 
@@ -10498,7 +10504,7 @@ case "menuowner":
 case "menudono":
 if (!SoDono) return reply(mess.onlyOwner());
 reagir("👑");
-reply(buildOwnerMenu(prefix));
+reply(buildOwnerMenu(prefix)+`\n🧩 ${prefix}addcmd • ${prefix}addcmdmidia\n${prefix}listacmd • ${prefix}delcmd\n🐉 ${prefix}comunidade-ajuda`);
 break;
 
 case "menusticker":

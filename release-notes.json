@@ -1,12 +1,18 @@
 {
-  "version": "5.3.67",
-  "title": "Varredura só ADM",
-  "date": "2026-10-14",
-  "added": [],
+  "version": "5.4.0",
+  "title": "Comunidade Kobayashi",
+  "date": "2026-10-15",
+  "added": [
+    "Captcha por grupo com aprovação por resposta no privado, prazo de 5 minutos e revisão de falhas.",
+    "Tickets de suporte com fila, responsável e encerramento.",
+    "Comandos personalizados com texto/mídia, permissões, campos dinâmicos e compatibilidade VIP.",
+    "Mensagens diárias com mídia em horário de São Paulo e persistência contra repetição.",
+    "/comunidade-ajuda e guia COMUNIDADE-KOBAYASHI.txt."
+  ],
   "changed": [
-    "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
-    "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
-    "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
+    "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
+    "Menus ADM/dono incluem os novos controles.",
+    "Sem novas dependências npm; dados e mídias persistem em files/database/community."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1744,6 +1750,17 @@
     "changed": [
       "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
       "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
+    ]
+  },
+  "v5.3.67": {
+    "version": "5.3.67",
+    "title": "Varredura só ADM",
+    "date": "2026-10-14",
+    "added": [],
+    "changed": [
+      "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
+      "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
+      "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
     ]
   }
 }

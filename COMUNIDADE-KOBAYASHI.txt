@@ -1,0 +1,61 @@
+KOBAYASHI BOT v5.4.0 — COMUNIDADE
+
+Ajuda: /comunidade-ajuda. Os exemplos usam o prefixo /.
+
+CAPTCHA (ADM, por grupo)
+/captcha on — ativa e coloca o grupo em aprovação de entrada.
+/captcha off — desliga o desafio; mantém aprovação manual do grupo.
+/captcha — consulta o estado.
+/captcha-pendentes — mostra desafios aguardando ou que precisam de revisão.
+/captcha-reenviar — consulta as solicitações pendentes e reenvia desafios.
+A pessoa recebe no privado uma soma e responde CODIGO RESPOSTA. Prazo: 5 minutos.
+Resposta errada ou prazo vencido recusam a solicitação. Se a mensagem privada
+falhar, o ADM revisa: o usuário não é recusado por falha de entrega.
+O antifake ativo também é verificado antes de aprovar. Telefone desconhecido
+vai para revisão. Decisões aparecem no X9 quando ele está ativo.
+Falhas de permissão/API ficam para revisão; não prometem aprovação/recusa.
+
+TICKETS
+ADM: /ticket on ou /ticket off.
+Membro: /ticket Preciso de ajuda.
+ADM: /tickets e /ticketaceitar ID.
+Solicitante ou ADM: /ticketfechar ID.
+A fila é por grupo; um ticket aberto por pessoa. Atendimento acontece no grupo.
+
+COMANDOS PERSONALIZADOS (cadastro exclusivo do dono principal)
+/addcmd regras | Respeite os membros de {grupo}.
+/addcmd aviso | adm | Olá {user}: {args}
+/addcmdmidia cartaz | todos | Confira o cartaz! (respondendo uma mídia)
+Permissões: todos, adm ou dono. O padrão é todos.
+Campos: {user}, {grupo}, {prefixo}, {args}.
+/listacmd e /delcmd nome.
+Não substituem comandos existentes. Podem entrar no VIP via /add_cmd_vip.
+Mídias: foto, vídeo/GIF, áudio, documento e figurinha.
+Em áudio e figurinha, a legenda vai em mensagem separada.
+Até 100 comandos; texto de até 8000 caracteres; mídia de até 12 MB.
+
+MENSAGENS PROGRAMADAS (ADM, por grupo)
+/automsg add 08:30 | Bom dia!
+/automsg add 20:00 | Aviso da noite (respondendo à mídia)
+/automsg list
+/automsg on ID
+/automsg off ID
+/automsg del ID
+Horário de São Paulo. Envio diário; até 20 agendamentos por grupo.
+O bot precisa estar online no minuto programado. Não recupera horários perdidos.
+Reserva o envio antes de tentar: em caso de reinício/falha ambígua, não repete
+naquele dia. A lista mostra o último resultado. Grupo fechado exige bot ADM.
+Mídias e textos são salvos localmente e sobrevivem ao reinício; mantenha a pasta
+files/database/community ao sincronizar/restaurar a hospedagem.
+Limite conjunto de mídia salva: 100 MB. Excluir comando/agendamento libera o arquivo.
+
+INSTALAÇÃO
+Extraia a atualização na pasta Kobayashi-Bot do Termux e execute
+bash ENVIAR-GITHUB-v5.4.0.sh
+O script envia ao GitHub e não inicia o bot. Sincronize e reinicie na hospedagem.
+Depois ative os recursos desejados em cada grupo. Nenhum é ligado automaticamente.
+
+VALIDAÇÃO
+Testes locais: node tools/test-community.mjs
+Integração real depende das permissões e eventos recebidos do WhatsApp.
+Recursos inspirados na análise do Nazuna; implementação integrada à Kobayashi.

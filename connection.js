@@ -1,3 +1,4 @@
+import { installCommunityRuntime } from "./lib/features/community/runtime.js";
 import { installRemovalProtection } from "./lib/features/moderation/removalProtection.js";
 import { installAntiFakeRuntime } from "./lib/features/moderation/antiFakeRuntime.js";
 import { installX9Audit } from "./lib/features/group/x9Audit.js";
@@ -140,6 +141,7 @@ async function startConnect() {
     });
 
     installRemovalProtection(conn);
+    installCommunityRuntime(conn);
     bindGroupCache(conn);
 
     // Permite aos sistemas AntiDelete/AntiEdit consultar mensagens recentes.
@@ -671,7 +673,14 @@ async function startConnect() {
         }
 
         if (!botReady) return;
-        await start(upsert, conn);
+        if(upsert.type!=="append"&&conn.kobayashiCaptchaMessage){
+          const remaining=[];
+          for(const message of upsert.messages||[]){
+            try{if(await conn.kobayashiCaptchaMessage(message))continue;}catch(e){console.error("[CAPTCHA resposta]",e?.message||e);}
+            remaining.push(message);
+          }
+          if(remaining.length)await start({...upsert,messages:remaining},conn);
+        }else await start(upsert, conn);
       }
 
 
