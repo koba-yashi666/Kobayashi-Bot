@@ -1,5 +1,5 @@
 {
-  "version": "5.4.1",
-  "name": "Kobayashi Bot v5.4.1 — X9 focado",
-  "update": "X9 apenas para solicitações, promoções, rebaixamentos e reentradas."
+  "version": "5.4.2",
+  "name": "Kobayashi Bot v5.4.2 — X9 resumido",
+  "update": "X9 resume solicitações por ADM, sem listar os membros aceitos/recusados."
 }

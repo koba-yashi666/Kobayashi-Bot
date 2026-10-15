@@ -1,12 +1,12 @@
 {
-  "version": "5.4.1",
-  "title": "X9 focado",
+  "version": "5.4.2",
+  "title": "X9 resumido",
   "date": "2026-10-15",
   "added": [],
   "changed": [
-    "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
-    "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
-    "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
+    "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
+    "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
+    "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1772,6 +1772,17 @@
       "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
       "Menus ADM/dono incluem os novos controles.",
       "Sem novas dependências npm; dados e mídias persistem em files/database/community."
+    ]
+  },
+  "v5.4.1": {
+    "version": "5.4.1",
+    "title": "X9 focado",
+    "date": "2026-10-15",
+    "added": [],
+    "changed": [
+      "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
+      "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
+      "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
     ]
   }
 }
