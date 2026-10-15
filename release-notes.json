@@ -1,18 +1,12 @@
 {
-  "version": "5.4.0",
-  "title": "Comunidade Kobayashi",
+  "version": "5.4.1",
+  "title": "X9 focado",
   "date": "2026-10-15",
-  "added": [
-    "Captcha por grupo com aprovação por resposta no privado, prazo de 5 minutos e revisão de falhas.",
-    "Tickets de suporte com fila, responsável e encerramento.",
-    "Comandos personalizados com texto/mídia, permissões, campos dinâmicos e compatibilidade VIP.",
-    "Mensagens diárias com mídia em horário de São Paulo e persistência contra repetição.",
-    "/comunidade-ajuda e guia COMUNIDADE-KOBAYASHI.txt."
-  ],
+  "added": [],
   "changed": [
-    "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
-    "Menus ADM/dono incluem os novos controles.",
-    "Sem novas dependências npm; dados e mídias persistem em files/database/community."
+    "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
+    "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
+    "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1761,6 +1755,23 @@
       "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
       "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
       "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
+    ]
+  },
+  "v5.4.0": {
+    "version": "5.4.0",
+    "title": "Comunidade Kobayashi",
+    "date": "2026-10-15",
+    "added": [
+      "Captcha por grupo com aprovação por resposta no privado, prazo de 5 minutos e revisão de falhas.",
+      "Tickets de suporte com fila, responsável e encerramento.",
+      "Comandos personalizados com texto/mídia, permissões, campos dinâmicos e compatibilidade VIP.",
+      "Mensagens diárias com mídia em horário de São Paulo e persistência contra repetição.",
+      "/comunidade-ajuda e guia COMUNIDADE-KOBAYASHI.txt."
+    ],
+    "changed": [
+      "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
+      "Menus ADM/dono incluem os novos controles.",
+      "Sem novas dependências npm; dados e mídias persistem em files/database/community."
     ]
   }
 }

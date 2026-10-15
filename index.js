@@ -3472,7 +3472,7 @@ case "x9": {
   const metadata=enabled?await conn.groupMetadata(from):null;
   setX9Enabled(from,enabled,metadata?.participants||[]);
   if(enabled){try{const pending=await conn.groupRequestParticipantsList(from);for(const p of pending||[]){const jid=p.jid||p.id||p.participant||p.lid;if(jid)recordX9Request({id:from,participant:jid,participantPn:p.phoneNumber,action:"created"});}}catch(e){console.error("[X9 pending snapshot]",e?.message||e);}}
-  return reply(`🐉👁️ X9 ${enabled?"ativado":"desativado"} neste grupo. ${enabled?"Vou registrar e avisar sobre entradas, promoções, rebaixamentos, remoções e decisões de solicitações recebidas.":"Novos registros e avisos estão desligados. O histórico anterior continua disponível."}`);
+  return reply(`🐉👁️ X9 ${enabled?"ativado":"desativado"} neste grupo. ${enabled?"Vou avisar sobre solicitações aceitas/recusadas, promoções, rebaixamentos e reentradas a partir da segunda vez.":"Novos registros e avisos estão desligados. O histórico anterior continua disponível."}`);
  }
  if(!["todos","solicitacoes","adms","reentradas","entradas"].includes(filter))return reply(`Use ${prefix}x9 [on|off|todos|solicitacoes|adms|reentradas|entradas]`);
  const events=getX9Events(from,filter);const mentions=new Set();
