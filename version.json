@@ -1,5 +1,5 @@
 {
-  "version": "5.4.2",
-  "name": "Kobayashi Bot v5.4.2 — X9 resumido",
-  "update": "X9 resume solicitações por ADM, sem listar os membros aceitos/recusados."
+  "version": "5.4.3",
+  "name": "Kobayashi Bot v5.4.3 — Proteção dos comandos de dono",
+  "update": "Identidade do autor validada sem respostas/menções; comandos de dono bloqueados para membros, ADMs e líderes."
 }

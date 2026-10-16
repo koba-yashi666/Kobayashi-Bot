@@ -1,3 +1,4 @@
+import { authorIdentities, isPhoneIdentity, OWNER_COMMANDS } from "./lib/features/access/ownerAccess.js";
 import { readCommunity } from "./lib/features/community/store.js";
 import { COMMUNITY_COMMANDS, handleCommunityCommand } from "./lib/features/community/commands.js";
 import { isCommunityBotAdmin } from "./lib/features/community/runtime.js";
@@ -1982,17 +1983,7 @@ const primaryOwnerDigits =
 
 const dono = `${primaryOwnerDigits}@s.whatsapp.net`;
 
-const incomingIdentityCandidates = [
-  rawSender,
-  sender,
-  senderLid,
-  info?.key?.participant,
-  info?.key?.participantAlt,
-  info?.participant,
-  info?.participantAlt,
-  info?.message?.extendedTextMessage?.contextInfo?.participant,
-  info?.message?.extendedTextMessage?.contextInfo?.participantAlt
-].filter(Boolean);
+const incomingIdentityCandidates = authorIdentities(info.key, conn.user);
 
 const senderParticipant = isGroup
   ? (groupMetadata?.participants || []).find((p) => {
@@ -2026,7 +2017,7 @@ const jidLocalDigits = (jid) => {
 
 const ownerMatchedByNumber = ownerIdentityCandidates.some((jid) => {
   const digits = jidLocalDigits(jid);
-  if (!digits) return false;
+  if (!digits || !isPhoneIdentity(jid)) return false;
   const variants = ownerNumberVariants(digits);
   return [...variants].some((variant) => configuredOwnerVariants.has(variant));
 });
@@ -2044,7 +2035,7 @@ let resolvedOwnerPn = null;
 for (const jid of ownerIdentityCandidates) {
   try {
     const candidate = await getPNForJid(conn, jid);
-    if (candidate) {
+    if (candidate && isPhoneIdentity(candidate)) {
       resolvedOwnerPn = candidate;
       const variants = ownerNumberVariants(jidLocalDigits(candidate));
       if ([...variants].some((variant) => configuredOwnerVariants.has(variant))) break;
@@ -2068,7 +2059,7 @@ const SoLider = ownerIdentityCandidates.some((jid) => {
   }
 });
 
-const SoDono = SoDonoPrincipal || SoLider;
+const SoDono = SoDonoPrincipal;
 
 // 🛡️ ANTI-MSG GLOBAL • PASSIVO
 if(isGroup&&!SoDonoPrincipal&&body){
@@ -2089,7 +2080,7 @@ if(isGroup&&!SoDonoPrincipal&&body){
 // 🛰️ SENTINEL WA • recebe alertas assinados enviados pelo número observador.
 // É processado antes do Anti-PV para a própria proteção do PV não bloquear a ponte.
 configureSentinelBridgeRuntime(conn, {
-  ownerJids: [...new Set([dono, ...ownerIdentityCandidates].filter(Boolean))],
+  ownerJids: [...configuredOwnerVariants].map(number => `${number}@s.whatsapp.net`),
   isWhitelisted: (groupJid, userJid) => isWhitelisted(groupJid, userJid)
 });
 const sentinelWaResult = await processSentinelWhatsAppMessage({
@@ -3202,6 +3193,10 @@ if (isGroup && sender && socialV5.v5SocialEnabled(from)) {
 }
 
 if (isCmd) {
+  if (OWNER_COMMANDS.has(command) && !SoDonoPrincipal) {
+    await reply("👑🐉 Este comando é exclusivo do dono do bot.");
+    continue;
+  }
   if (!vipAllowed(command, [sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean), SoDonoPrincipal)) {
     await reply(`🐉👑 *COMANDO VIP*\nO uso de ${prefix}${command} é exclusivo dos membros VIP.\nConsulte ${prefix}menuvip ou fale com o dono do bot.`);
     continue;

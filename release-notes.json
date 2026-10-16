@@ -1,12 +1,13 @@
 {
-  "version": "5.4.2",
-  "title": "X9 resumido",
-  "date": "2026-10-15",
+  "version": "5.4.3",
+  "title": "Proteção dos comandos de dono",
+  "date": "2026-10-16",
   "added": [],
   "changed": [
-    "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
-    "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
-    "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
+    "Comandos de dono exigem dono principal, inclusive no menu e nos dispatchers antigos.",
+    "Identidade de respostas, encaminhamentos e menções não concede permissões.",
+    "LID não é comparado numericamente com telefone do dono; resolução usa PN válido.",
+    "Lista de donos do Sentinel não recebe a identidade de membros comuns."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1783,6 +1784,17 @@
       "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
       "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
       "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
+    ]
+  },
+  "v5.4.2": {
+    "version": "5.4.2",
+    "title": "X9 resumido",
+    "date": "2026-10-15",
+    "added": [],
+    "changed": [
+      "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
+      "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
+      "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
     ]
   }
 }
