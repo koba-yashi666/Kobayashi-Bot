@@ -1,5 +1,5 @@
 {
-  "version": "5.4.3",
-  "name": "Kobayashi Bot v5.4.3 — Proteção dos comandos de dono",
-  "update": "Identidade do autor validada sem respostas/menções; comandos de dono bloqueados para membros, ADMs e líderes."
+  "version": "5.4.4",
+  "name": "Kobayashi Bot v5.4.4 — Lista Negra por grupo",
+  "update": "Listanegra local e Listanegrag com registro dos grupos ADM confirmados."
 }

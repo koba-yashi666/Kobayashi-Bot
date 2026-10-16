@@ -1,13 +1,13 @@
 {
-  "version": "5.4.3",
-  "title": "Proteção dos comandos de dono",
+  "version": "5.4.4",
+  "title": "Lista Negra por grupo",
   "date": "2026-10-16",
   "added": [],
   "changed": [
-    "Comandos de dono exigem dono principal, inclusive no menu e nos dispatchers antigos.",
-    "Identidade de respostas, encaminhamentos e menções não concede permissões.",
-    "LID não é comparado numericamente com telefone do dono; resolução usa PN válido.",
-    "Lista de donos do Sentinel não recebe a identidade de membros comuns."
+    "/listanegra registra e remove somente no grupo atual, sem varredura de outros grupos.",
+    "/listanegrag registra os grupos atuais com ADM confirmado; bloqueio automático respeita os IDs registrados.",
+    "Grupos sem ADM e falhas de consulta são relatados; descoberta sem sucesso não registra bloqueios.",
+    "Registros globais antigos e regras automáticas anteriores mantêm compatibilidade. Reexecutar /listanegrag para um alvo atualiza seu alcance para grupos registrados."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1795,6 +1795,18 @@
       "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
       "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
       "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
+    ]
+  },
+  "v5.4.3": {
+    "version": "5.4.3",
+    "title": "Proteção dos comandos de dono",
+    "date": "2026-10-16",
+    "added": [],
+    "changed": [
+      "Comandos de dono exigem dono principal, inclusive no menu e nos dispatchers antigos.",
+      "Identidade de respostas, encaminhamentos e menções não concede permissões.",
+      "LID não é comparado numericamente com telefone do dono; resolução usa PN válido.",
+      "Lista de donos do Sentinel não recebe a identidade de membros comuns."
     ]
   }
 }
