@@ -1,12 +1,14 @@
 {
-  "version": "5.4.7",
-  "title": "Furry em GIF com menção",
+  "version": "5.4.8",
+  "title": "Menus atualizados",
   "date": "2026-10-17",
   "added": [],
   "changed": [
-    "/furry envia o vídeo em modo GIF do WhatsApp.",
-    "Aceita @menção, resposta ou o próprio autor como alvo.",
-    "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
+    "Menus atualizados com os comandos recentes e exemplos de uso.",
+    "Menu geral: wame, lid, entrada e tickets; ADM: X9, antifake, ADV ADM, CafeBan, captcha, tickets e automsg.",
+    "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
+    "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
+    "Removidos apêndices duplicados dos menus ADM e dono."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1841,6 +1843,17 @@
     ],
     "changed": [
       "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
+    ]
+  },
+  "v5.4.7": {
+    "version": "5.4.7",
+    "title": "Furry em GIF com menção",
+    "date": "2026-10-17",
+    "added": [],
+    "changed": [
+      "/furry envia o vídeo em modo GIF do WhatsApp.",
+      "Aceita @menção, resposta ou o próprio autor como alvo.",
+      "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
     ]
   }
 }

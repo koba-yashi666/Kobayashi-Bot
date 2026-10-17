@@ -10344,7 +10344,7 @@ break;
 case "menuadm":
 if (!isGroup) return reply(mess.onlyGroup());
 reagir("🛡️");
-reply(buildAdminMenu(prefix)+`\n🐉 *Comunidade:* ${prefix}comunidade-ajuda\n🔐 ${prefix}captcha on/off\n🎫 ${prefix}ticket on/off • ${prefix}tickets\n⏰ ${prefix}automsg`);
+reply(buildAdminMenu(prefix));
 break;
 
 
@@ -10541,7 +10541,7 @@ case "menuowner":
 case "menudono":
 if (!SoDono) return reply(mess.onlyOwner());
 reagir("👑");
-reply(buildOwnerMenu(prefix)+`\n🧩 ${prefix}addcmd • ${prefix}addcmdmidia\n${prefix}listacmd • ${prefix}delcmd\n🐉 ${prefix}comunidade-ajuda`);
+reply(buildOwnerMenu(prefix));
 break;
 
 case "menusticker":
