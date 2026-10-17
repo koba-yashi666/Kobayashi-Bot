@@ -1,14 +1,12 @@
 {
-  "version": "5.4.8",
-  "title": "Menus atualizados",
+  "version": "5.4.9",
+  "title": "Furry e Duque modulares",
   "date": "2026-10-17",
   "added": [],
   "changed": [
-    "Menus atualizados com os comandos recentes e exemplos de uso.",
-    "Menu geral: wame, lid, entrada e tickets; ADM: X9, antifake, ADV ADM, CafeBan, captcha, tickets e automsg.",
-    "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
-    "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
-    "Removidos apêndices duplicados dos menus ADM e dono."
+    "Furry e Duque separados em commands/fun/dragonFun/furry.js e duque.js.",
+    "Registrados no dispatcher Dragon Fun junto aos outros comandos do menubn.",
+    "Removida lógica duplicada no index.js; preservados mídia, GIF, porcentagens e modo brincadeiras."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1854,6 +1852,19 @@
       "/furry envia o vídeo em modo GIF do WhatsApp.",
       "Aceita @menção, resposta ou o próprio autor como alvo.",
       "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
+    ]
+  },
+  "v5.4.8": {
+    "version": "5.4.8",
+    "title": "Menus atualizados",
+    "date": "2026-10-17",
+    "added": [],
+    "changed": [
+      "Menus atualizados com os comandos recentes e exemplos de uso.",
+      "Menu geral: wame, lid, entrada e tickets; ADM: X9, antifake, ADV ADM, CafeBan, captcha, tickets e automsg.",
+      "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
+      "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
+      "Removidos apêndices duplicados dos menus ADM e dono."
     ]
   }
 }

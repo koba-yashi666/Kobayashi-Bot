@@ -8620,38 +8620,6 @@ case "menubn": {
 }
 break;
 
-case "furry": {
-  if (isGroup && !isFunModeEnabled(from)) {
-    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
-  }
-  const target = getTargetFromMessage(info, sender);
-  const percentual = Math.floor(Math.random() * 91) + 10;
-  const resultado = percentual < 40 ? "Furry em desenvolvimento"
-    : percentual < 70 ? "Se assumindo furry" : "Furry completo";
-  return conn.sendMessage(from, {
-    video: fs.readFileSync(new URL("./media/brincadeiras/furry.mp4", import.meta.url)),
-    gifPlayback: true,
-    mentions: [target],
-    caption: `🐉🐾 *MEDIDOR FURRY*\n\n@${target.split("@")[0]} é *${percentual}% furry*.\n🦊 ${resultado}\n\n☕ Kobayashi Bot • Só pela zoeira!`
-  }, { quoted: info });
-}
-break;
-
-case "duque": {
-  if (isGroup && !isFunModeEnabled(from)) {
-    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
-  }
-  const percentual = Math.floor(Math.random() * 101);
-  const humor = percentual < 30 ? "Hoje até aceita dividir o café. ☕"
-    : percentual < 70 ? "Melhor chegar com café e falar baixinho. 👀"
-    : "O dragão acordou! Não testa a paciência dele. 🐉🔥";
-  return conn.sendMessage(from, {
-    image: fs.readFileSync(new URL("./media/brincadeiras/duque.jpg", import.meta.url)),
-    caption: `🐉😤 *MEDIDOR DO DUQUE*\n\nDuque está *${percentual}% puto* hoje!\n${humor}\n\n☕ Kobayashi Bot • Só pela zoeira!`
-  }, { quoted: info });
-}
-break;
-
 case "piada":
 case "conselho":
 case "motivacional":
