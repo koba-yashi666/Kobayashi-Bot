@@ -1,13 +1,12 @@
 {
-  "version": "5.4.6",
-  "title": "Medidor Furry",
+  "version": "5.4.7",
+  "title": "Furry em GIF com menção",
   "date": "2026-10-17",
-  "added": [
-    "/furry envia o vídeo fornecido com contador aleatório de 10 em 10.",
-    "10–30%: furry em desenvolvimento; 40–60%: se assumindo furry; 70–100%: furry completo."
-  ],
+  "added": [],
   "changed": [
-    "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
+    "/furry envia o vídeo em modo GIF do WhatsApp.",
+    "Aceita @menção, resposta ou o próprio autor como alvo.",
+    "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1830,6 +1829,18 @@
     ],
     "changed": [
       "Comando listado no menu de brincadeiras; respeita o modo de brincadeiras nos grupos."
+    ]
+  },
+  "v5.4.6": {
+    "version": "5.4.6",
+    "title": "Medidor Furry",
+    "date": "2026-10-17",
+    "added": [
+      "/furry envia o vídeo fornecido com contador aleatório de 10 em 10.",
+      "10–30%: furry em desenvolvimento; 40–60%: se assumindo furry; 70–100%: furry completo."
+    ],
+    "changed": [
+      "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
     ]
   }
 }

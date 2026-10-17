@@ -8624,13 +8624,15 @@ case "furry": {
   if (isGroup && !isFunModeEnabled(from)) {
     return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
   }
-  // Sorteio de 10 em 10 para respeitar as faixas informadas sem intervalos vazios.
-  const percentual = (Math.floor(Math.random() * 10) + 1) * 10;
-  const resultado = percentual <= 30 ? "Furry em desenvolvimento"
-    : percentual <= 60 ? "Se assumindo furry" : "Furry completo";
+  const target = getTargetFromMessage(info, sender);
+  const percentual = Math.floor(Math.random() * 91) + 10;
+  const resultado = percentual < 40 ? "Furry em desenvolvimento"
+    : percentual < 70 ? "Se assumindo furry" : "Furry completo";
   return conn.sendMessage(from, {
     video: fs.readFileSync(new URL("./media/brincadeiras/furry.mp4", import.meta.url)),
-    caption: `🐉🐾 *MEDIDOR FURRY*\n\n📊 Resultado: *${percentual}%*\n🦊 ${resultado}\n\n☕ Kobayashi Bot • Só pela zoeira!`
+    gifPlayback: true,
+    mentions: [target],
+    caption: `🐉🐾 *MEDIDOR FURRY*\n\n@${target.split("@")[0]} é *${percentual}% furry*.\n🦊 ${resultado}\n\n☕ Kobayashi Bot • Só pela zoeira!`
   }, { quoted: info });
 }
 break;
