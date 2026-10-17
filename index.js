@@ -1204,6 +1204,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "furry",
   "duque",
   ...COMMUNITY_COMMANDS,
   "wame",
@@ -8616,6 +8617,21 @@ case "menubn": {
   if (!isGroup) return reply(mess.onlyGroup());
   reagir("🎮");
   return reply(buildFunMenu(prefix));
+}
+break;
+
+case "furry": {
+  if (isGroup && !isFunModeEnabled(from)) {
+    return reply(`🔒 O *Modo Brincadeira* está desativado neste grupo.\n🛡️ Um ADM pode ativar com *${prefix}modobrincadeira*.`);
+  }
+  // Sorteio de 10 em 10 para respeitar as faixas informadas sem intervalos vazios.
+  const percentual = (Math.floor(Math.random() * 10) + 1) * 10;
+  const resultado = percentual <= 30 ? "Furry em desenvolvimento"
+    : percentual <= 60 ? "Se assumindo furry" : "Furry completo";
+  return conn.sendMessage(from, {
+    video: fs.readFileSync(new URL("./media/brincadeiras/furry.mp4", import.meta.url)),
+    caption: `🐉🐾 *MEDIDOR FURRY*\n\n📊 Resultado: *${percentual}%*\n🦊 ${resultado}\n\n☕ Kobayashi Bot • Só pela zoeira!`
+  }, { quoted: info });
 }
 break;
 

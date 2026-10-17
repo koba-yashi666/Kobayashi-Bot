@@ -1,12 +1,13 @@
 {
-  "version": "5.4.5",
-  "title": "Comando Duque",
-  "date": "2026-10-16",
+  "version": "5.4.6",
+  "title": "Medidor Furry",
+  "date": "2026-10-17",
   "added": [
-    "/duque envia a imagem fornecida, porcentagem aleatória de 0 a 100 e legenda de brincadeira."
+    "/furry envia o vídeo fornecido com contador aleatório de 10 em 10.",
+    "10–30%: furry em desenvolvimento; 40–60%: se assumindo furry; 70–100%: furry completo."
   ],
   "changed": [
-    "Comando listado no menu de brincadeiras; respeita o modo de brincadeiras nos grupos."
+    "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1818,6 +1819,17 @@
       "/listanegrag registra os grupos atuais com ADM confirmado; bloqueio automático respeita os IDs registrados.",
       "Grupos sem ADM e falhas de consulta são relatados; descoberta sem sucesso não registra bloqueios.",
       "Registros globais antigos e regras automáticas anteriores mantêm compatibilidade. Reexecutar /listanegrag para um alvo atualiza seu alcance para grupos registrados."
+    ]
+  },
+  "v5.4.5": {
+    "version": "5.4.5",
+    "title": "Comando Duque",
+    "date": "2026-10-16",
+    "added": [
+      "/duque envia a imagem fornecida, porcentagem aleatória de 0 a 100 e legenda de brincadeira."
+    ],
+    "changed": [
+      "Comando listado no menu de brincadeiras; respeita o modo de brincadeiras nos grupos."
     ]
   }
 }
