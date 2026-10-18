@@ -1,5 +1,5 @@
 {
-  "version": "5.4.14",
-  "name": "Kobayashi Bot v5.4.14 — Correção de namoro e casamento",
-  "update": "Vínculos PN/LID, consentimento, término e divórcio corrigidos."
+  "version": "5.4.15",
+  "name": "Kobayashi Bot v5.4.15 — Menu interativo sem duplicação",
+  "update": "Menu convencional somente se o envio interativo falhar ou com /menu texto."
 }

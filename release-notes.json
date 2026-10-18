@@ -1,16 +1,13 @@
 {
-  "version": "5.4.14",
-  "title": "Correção de namoro e casamento",
+  "version": "5.4.15",
+  "title": "Menu interativo sem duplicação",
   "date": "2026-10-18",
-  "added": [
-    "/terminarnamoro, /recusar_namoro, /recusarcasamento e /cancelarpedido."
-  ],
+  "added": [],
   "changed": [
-    "Unifica aliases PN/LID confirmados; conflitos antigos são preservados e informados.",
-    "Impede sobrescrever pedidos e aceitar relacionamentos por terceiros. Pedidos expiram em 30 minutos.",
-    "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
-    "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
-    "Preserva as melhorias do menu da v5.4.13."
+    "/menu envia apenas o menu interativo quando o envio funciona.",
+    "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
+    "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
+    "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1905,6 +1902,21 @@
       "Menu convencional enviado antes da lista interativa.",
       "Lista sem upload de mídia e com metadados de envio interativo.",
       "Prazo de 12 segundos para envio da lista."
+    ]
+  },
+  "v5.4.14": {
+    "version": "5.4.14",
+    "title": "Correção de namoro e casamento",
+    "date": "2026-10-18",
+    "added": [
+      "/terminarnamoro, /recusar_namoro, /recusarcasamento e /cancelarpedido."
+    ],
+    "changed": [
+      "Unifica aliases PN/LID confirmados; conflitos antigos são preservados e informados.",
+      "Impede sobrescrever pedidos e aceitar relacionamentos por terceiros. Pedidos expiram em 30 minutos.",
+      "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
+      "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
+      "Preserva as melhorias do menu da v5.4.13."
     ]
   }
 }
