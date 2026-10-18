@@ -1,13 +1,14 @@
 {
-  "version": "5.4.15",
-  "title": "Menu interativo sem duplicação",
+  "version": "5.4.16",
+  "title": "Controle do menu de botões",
   "date": "2026-10-18",
-  "added": [],
+  "added": [
+    "/botão on/off (ou /botao): ativa ou desativa globalmente os botões do menu.",
+    "Sem argumento ou status consulta o estado; configuração salva após reiniciar."
+  ],
   "changed": [
-    "/menu envia apenas o menu interativo quando o envio funciona.",
-    "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
-    "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
-    "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
+    "Comando exclusivo do dono e incluído no menu de dono.",
+    "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1917,6 +1918,18 @@
       "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
       "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
       "Preserva as melhorias do menu da v5.4.13."
+    ]
+  },
+  "v5.4.15": {
+    "version": "5.4.15",
+    "title": "Menu interativo sem duplicação",
+    "date": "2026-10-18",
+    "added": [],
+    "changed": [
+      "/menu envia apenas o menu interativo quando o envio funciona.",
+      "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
+      "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
+      "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
     ]
   }
 }

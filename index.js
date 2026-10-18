@@ -1,3 +1,4 @@
+import { menuButtonsEnabled, setMenuButtonsEnabled } from "./lib/ui/menuPreferences.js";
 import { sendInteractiveMenu } from "./lib/ui/interactiveMenu.js";
 import { discoverBlacklistGroups } from "./lib/features/moderation/blacklistScope.js";
 import { authorIdentities, isPhoneIdentity, OWNER_COMMANDS } from "./lib/features/access/ownerAccess.js";
@@ -1209,6 +1210,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "botao","botão",
   "recusar_namoro","recusarnamoro","cancelarpedido","terminarnamoro","terminar_namoro","recusarcasamento",
   "furry",
   ...COMMUNITY_COMMANDS,
@@ -9795,6 +9797,16 @@ case "carinho": {
 }
 break;
 
+case "botão":
+case "botao": {
+  if (!SoDonoPrincipal) return reply("👑🐉 Este comando é exclusivo do dono do bot.");
+  const action=String(args[0]||"status").toLowerCase();
+  if (!["on","off","status"].includes(action)) return reply(`Use ${prefix}botão on ou ${prefix}botão off. Vale para o menu de todo o bot.`);
+  if(action!=="status")setMenuButtonsEnabled(action==="on",sender);
+  return reply(`🐉🔘 Menu de botões: *${menuButtonsEnabled()?"ATIVADO":"DESATIVADO"}*\nConfiguração global salva.\n${prefix}menu ${menuButtonsEnabled()?"usa botões":"usa o menu convencional"}.`);
+}
+break;
+
 case "menu": {
   if (String(args?.[0] || "").toLowerCase() === "id") {
     return reply(`🆔 *SEU ID*\n\n${sender}\n\nPara consultar o LID de um membro no grupo: ${prefix}lid`);
@@ -9811,7 +9823,7 @@ case "menu": {
     version: getLocalVersion()
   });
 
-  if (["texto", "text", "simples"].includes(String(args?.[0] || "").toLowerCase())) {
+  if (!menuButtonsEnabled() || ["texto", "text", "simples"].includes(String(args?.[0] || "").toLowerCase())) {
     await reply(menuPrincipal);
     break;
   }

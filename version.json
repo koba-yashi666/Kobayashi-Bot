@@ -1,5 +1,5 @@
 {
-  "version": "5.4.15",
-  "name": "Kobayashi Bot v5.4.15 — Menu interativo sem duplicação",
-  "update": "Menu convencional somente se o envio interativo falhar ou com /menu texto."
+  "version": "5.4.16",
+  "name": "Kobayashi Bot v5.4.16 — Controle do menu de botões",
+  "update": "/botão on/off: configuração global persistente e exclusiva do dono."
 }
