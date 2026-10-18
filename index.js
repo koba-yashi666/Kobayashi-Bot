@@ -1,3 +1,4 @@
+import { sendInteractiveMenu } from "./lib/ui/interactiveMenu.js";
 import { discoverBlacklistGroups } from "./lib/features/moderation/blacklistScope.js";
 import { authorIdentities, isPhoneIdentity, OWNER_COMMANDS } from "./lib/features/access/ownerAccess.js";
 import { readCommunity } from "./lib/features/community/store.js";
@@ -34,7 +35,7 @@ Contato para aluguel:
 WhatsApp: 5515997075304
 */
 
-import { getContentType, delay, downloadMediaMessage } from "@whiskeysockets/baileys";
+import { getContentType, delay, downloadMediaMessage, generateWAMessageFromContent, prepareWAMessageMedia } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
 import { handleAntiStatus } from "./lib/features/moderation/antiStatus.js";
@@ -1123,10 +1124,17 @@ const isGroup = from.endsWith("@g.us");
 const isStatus = from.endsWith("@broadcast");
 
 function extractCommandText(message = {}) {
+  for (let depth = 0; depth < 5; depth++) {
+    const inner = message?.ephemeralMessage?.message || message?.viewOnceMessage?.message || message?.viewOnceMessageV2?.message;
+    if (!inner) break;
+    message = inner;
+  }
+  let interactiveId = "";
   try {
-    const interactiveId = JSON.parse(
+    interactiveId = JSON.parse(
       message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson || "{}"
     )?.id;
+  } catch {}
 
     return (
       message?.conversation ||
@@ -1153,9 +1161,6 @@ function extractCommandText(message = {}) {
       interactiveId ||
       ""
     );
-  } catch {
-    return "";
-  }
 }
 
 
@@ -1204,8 +1209,8 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "recusar_namoro","recusarnamoro","cancelarpedido","terminarnamoro","terminar_namoro","recusarcasamento",
   "furry",
-  "duque",
   ...COMMUNITY_COMMANDS,
   "wame",
   "antifake",
@@ -9791,6 +9796,9 @@ case "carinho": {
 break;
 
 case "menu": {
+  if (String(args?.[0] || "").toLowerCase() === "id") {
+    return reply(`🆔 *SEU ID*\n\n${sender}\n\nPara consultar o LID de um membro no grupo: ${prefix}lid`);
+  }
   await conn.sendMessage(from, {
     react: { text: "🐉", key: info.key }
   }).catch(() => {});
@@ -9803,7 +9811,16 @@ case "menu": {
     version: getLocalVersion()
   });
 
-  await sendMenu(from, menuPrincipal, sender);
+  if (["texto", "text", "simples"].includes(String(args?.[0] || "").toLowerCase())) {
+    await reply(menuPrincipal);
+    break;
+  }
+  await sendInteractiveMenu({
+    conn, jid: from, quoted: info, sender, botName: NomeDoBot, prefix,
+    version: getLocalVersion(),
+    imagePath: path.join(process.cwd(), "settings", "LOGOS", "menu.png"),
+    fallback: menuPrincipal
+  }, { generateWAMessageFromContent, prepareWAMessageMedia });
 }
 break;
 

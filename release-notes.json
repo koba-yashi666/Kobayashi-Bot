@@ -1,12 +1,16 @@
 {
-  "version": "5.4.9",
-  "title": "Furry e Duque modulares",
-  "date": "2026-10-17",
-  "added": [],
+  "version": "5.4.14",
+  "title": "Correção de namoro e casamento",
+  "date": "2026-10-18",
+  "added": [
+    "/terminarnamoro, /recusar_namoro, /recusarcasamento e /cancelarpedido."
+  ],
   "changed": [
-    "Furry e Duque separados em commands/fun/dragonFun/furry.js e duque.js.",
-    "Registrados no dispatcher Dragon Fun junto aos outros comandos do menubn.",
-    "Removida lógica duplicada no index.js; preservados mídia, GIF, porcentagens e modo brincadeiras."
+    "Unifica aliases PN/LID confirmados; conflitos antigos são preservados e informados.",
+    "Impede sobrescrever pedidos e aceitar relacionamentos por terceiros. Pedidos expiram em 30 minutos.",
+    "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
+    "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
+    "Preserva as melhorias do menu da v5.4.13."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1865,6 +1869,42 @@
       "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
       "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
       "Removidos apêndices duplicados dos menus ADM e dono."
+    ]
+  },
+  "v5.4.9": {
+    "version": "5.4.9",
+    "title": "Furry e Duque modulares",
+    "date": "2026-10-17",
+    "added": [],
+    "changed": [
+      "Furry e Duque separados em commands/fun/dragonFun/furry.js e duque.js.",
+      "Registrados no dispatcher Dragon Fun junto aos outros comandos do menubn.",
+      "Removida lógica duplicada no index.js; preservados mídia, GIF, porcentagens e modo brincadeiras."
+    ]
+  },
+  "v5.4.10": {
+    "version": "5.4.10",
+    "title": "Reparo dos módulos Furry e Duque",
+    "date": "2026-10-17",
+    "added": [],
+    "changed": [
+      "Reenvio completo dos módulos Furry e Duque com seleção de legendas em blocos explícitos.",
+      "Validação de sintaxe de todos os arquivos JavaScript incluídos antes de gerar o ZIP.",
+      "Importação do dispatcher e envio das duas mídias verificados em execução simulada."
+    ]
+  },
+  "v5.4.13": {
+    "version": "5.4.13",
+    "title": "Correção do menu sem resposta",
+    "date": "2026-10-18",
+    "added": [
+      "Menu com imagem, lista de categorias e botão Meu ID.",
+      "/menu texto como alternativa sem botões."
+    ],
+    "changed": [
+      "Menu convencional enviado antes da lista interativa.",
+      "Lista sem upload de mídia e com metadados de envio interativo.",
+      "Prazo de 12 segundos para envio da lista."
     ]
   }
 }

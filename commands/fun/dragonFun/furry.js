@@ -9,8 +9,12 @@ export default async function run(ctx) {
   }
   const target = await displayJid(ctx, targetOf(ctx) || ctx.sender);
   const percentual = Math.floor(Math.random() * 91) + 10;
-  const resultado = percentual < 40 ? 'Furry em desenvolvimento'
-    : percentual < 70 ? 'Se assumindo furry' : 'Furry completo';
+  let resultado = 'Furry completo';
+  if (percentual < 40) {
+    resultado = 'Furry em desenvolvimento';
+  } else if (percentual < 70) {
+    resultado = 'Se assumindo furry';
+  }
   return ctx.conn.sendMessage(ctx.from, {
     video: fs.readFileSync(new URL('../../../media/brincadeiras/furry.mp4', import.meta.url)),
     gifPlayback: true,
