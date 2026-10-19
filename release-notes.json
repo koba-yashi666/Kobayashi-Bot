@@ -1,10 +1,16 @@
 {
-  "version": "5.4.18",
-  "title": "Limpeza das legendas",
-  "date": "2026-10-18",
-  "added": [],
+  "version": "5.4.19",
+  "title": "Mute automático e MuteB",
+  "date": "2026-10-19",
+  "added": [
+    "/muteb @membro ou resposta: apaga as novas mensagens e remove o membro ao falar durante o mute."
+  ],
   "changed": [
-    "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
+    "/mute reconhece PN/LID, mensagens com mídia e registros antigos booleanos.",
+    "/desmute remove todos os aliases e os modos normal e banimento.",
+    "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
+    "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
+    "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1952,6 +1958,15 @@
     "changed": [
       "Módulo separado e comando incluído no menubn.",
       "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
+    ]
+  },
+  "v5.4.18": {
+    "version": "5.4.18",
+    "title": "Limpeza das legendas",
+    "date": "2026-10-18",
+    "added": [],
+    "changed": [
+      "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
     ]
   }
 }

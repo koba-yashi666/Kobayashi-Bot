@@ -1,3 +1,4 @@
+import { handleMuteCommand, handleMutedMessage } from "./lib/features/moderation/muteSystem.js";
 import { menuButtonsEnabled, setMenuButtonsEnabled } from "./lib/ui/menuPreferences.js";
 import { sendInteractiveMenu } from "./lib/ui/interactiveMenu.js";
 import { discoverBlacklistGroups } from "./lib/features/moderation/blacklistScope.js";
@@ -1210,6 +1211,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "muteb",
   "naodeagua","naodenemagua",
   "botao","botão",
   "recusar_namoro","recusarnamoro","cancelarpedido","terminarnamoro","terminar_namoro","recusarcasamento",
@@ -2438,6 +2440,15 @@ const groupAdmins = isGroup ? await getGroupAdmins(groupMembers, conn) : "";
 const isGroupAdmins = groupAdmins.includes(sender) || SoDono || false;
 const isBotGroupAdmins = groupAdmins.includes(botNumber) || false;
 if(isGroup){
+  const mutedResult=await handleMutedMessage({conn,info,group:from,
+    identities:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),
+    protectedMember:SoDonoPrincipal,
+    isWhitelisted:id=>isWhitelisted(from,id)
+  });
+  if(mutedResult.handled)continue;
+}
+
+if(isGroup){
   const antiStatusResult=await handleAntiStatus({
     conn,info,enabled:getGroupProtection(from).antistts,
     protectedMember:isGroupAdmins || isWhitelisted(from,sender) || (senderLid && isWhitelisted(from,senderLid)),
@@ -2814,29 +2825,6 @@ const menc_os2 = menc_info?.participant || menc_info?.mentionedJid?.[0] || numDi
 // 🐉 YURI PACK 1 • RUNTIME FIX v0.1.45
 // ==========================================
 if (isGroup && sender) {
-  // MUTE persistente: apaga mensagens de membros mutados.
-  if (
-    isMuted(from, sender) &&
-    !isGroupAdmins &&
-    !info.key.fromMe
-  ) {
-    if (isBotGroupAdmins) {
-      await conn.sendMessage(from, {
-        delete: {
-          remoteJid: from,
-          fromMe: false,
-          id: info.key.id,
-          participant:
-            info.key.participant ||
-            info.key.participantAlt ||
-            sender,
-        },
-      }).catch(() => {});
-    }
-
-    continue;
-  }
-
   // AntiFlood no estilo Yuri: limita a frequência de COMANDOS.
   if (
     isCmd &&
@@ -6537,59 +6525,16 @@ case "antiedit": {
 break;
 
 case "mutar":
-case "mute": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-  if (!isBotGroupAdmins) return reply(mess.onlyBotAdmin());
-
-  const target = menc_os2;
-
-  if (!target) {
-    return reply(
-      `🌸 Use *${prefix}mutar @membro* ou responda à mensagem dele.`
-    );
-  }
-
-  if (groupAdmins.includes(target)) {
-    return reply("🛡️ Não vou mutar outro administrador.");
-  }
-
-  muteUser(from, target);
-
-  return conn.sendMessage(from, {
-    text:
-      `🔇 @${String(target).split("@")[0]} foi mutado.\n\n` +
-      `As novas mensagens desse membro serão apagadas enquanto o mute estiver ativo.`,
-    mentions: [target]
-  }, { quoted: info });
-}
-break;
-
+case "mute":
+case "muteb":
 case "desmutar":
 case "desmute":
 case "unmute": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-
-  const target = menc_os2;
-
-  if (!target) {
-    return reply(
-      `🌸 Use *${prefix}desmutar @membro* ou responda à mensagem dele.`
-    );
-  }
-
-  const existed = unmuteUser(from, target);
-
-  if (!existed) {
-    return reply("🌸 Esse membro não está mutado.");
-  }
-
-  return conn.sendMessage(from, {
-    text:
-      `🔊 @${String(target).split("@")[0]} foi desmutado e pode falar novamente.`,
-    mentions: [target]
-  }, { quoted: info });
+  await handleMuteCommand({conn,info,from,command,q,prefix,reply,isGroup,
+    isAdmin:isGroupAdmins,isOwner:SoDonoPrincipal,
+    authorIds:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),
+    isWhitelisted:id=>isWhitelisted(from,id)
+  });
 }
 break;
 
