@@ -1210,6 +1210,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "naodeagua","naodenemagua",
   "botao","botão",
   "recusar_namoro","recusarnamoro","cancelarpedido","terminarnamoro","terminar_namoro","recusarcasamento",
   "furry",

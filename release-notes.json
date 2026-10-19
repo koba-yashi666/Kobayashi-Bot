@@ -1,14 +1,14 @@
 {
-  "version": "5.4.16",
-  "title": "Controle do menu de botões",
+  "version": "5.4.17",
+  "title": "Meme Não dê nem água",
   "date": "2026-10-18",
   "added": [
-    "/botão on/off (ou /botao): ativa ou desativa globalmente os botões do menu.",
-    "Sem argumento ou status consulta o estado; configuração salva após reiniciar."
+    "/naodeagua @membro e alias /naodenemagua: meme com foto de perfil, gato e faixa vermelha.",
+    "Aceita marcação, mensagem respondida ou própria foto quando não há alvo."
   ],
   "changed": [
-    "Comando exclusivo do dono e incluído no menu de dono.",
-    "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
+    "Módulo separado e comando incluído no menubn.",
+    "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1930,6 +1930,19 @@
       "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
       "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
       "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
+    ]
+  },
+  "v5.4.16": {
+    "version": "5.4.16",
+    "title": "Controle do menu de botões",
+    "date": "2026-10-18",
+    "added": [
+      "/botão on/off (ou /botao): ativa ou desativa globalmente os botões do menu.",
+      "Sem argumento ou status consulta o estado; configuração salva após reiniciar."
+    ],
+    "changed": [
+      "Comando exclusivo do dono e incluído no menu de dono.",
+      "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
     ]
   }
 }
