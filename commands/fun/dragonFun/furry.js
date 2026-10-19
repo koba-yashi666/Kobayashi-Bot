@@ -19,6 +19,6 @@ export default async function run(ctx) {
     video: fs.readFileSync(new URL('../../../media/brincadeiras/furry.mp4', import.meta.url)),
     gifPlayback: true,
     mentions: [target],
-    caption: `🐉🐾 *MEDIDOR FURRY*\n\n${tag(target)} é *${percentual}% furry*.\n🦊 ${resultado}\n\n☕ Kobayashi Bot • Só pela zoeira!`
+    caption: `🐉🐾 *MEDIDOR FURRY*\n\n${tag(target)} é *${percentual}% furry*.\n🦊 ${resultado}`
   }, { quoted: ctx.info });
 }

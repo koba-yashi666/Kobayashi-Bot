@@ -1,14 +1,10 @@
 {
-  "version": "5.4.17",
-  "title": "Meme Não dê nem água",
+  "version": "5.4.18",
+  "title": "Limpeza das legendas",
   "date": "2026-10-18",
-  "added": [
-    "/naodeagua @membro e alias /naodenemagua: meme com foto de perfil, gato e faixa vermelha.",
-    "Aceita marcação, mensagem respondida ou própria foto quando não há alvo."
-  ],
+  "added": [],
   "changed": [
-    "Módulo separado e comando incluído no menubn.",
-    "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
+    "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1943,6 +1939,19 @@
     "changed": [
       "Comando exclusivo do dono e incluído no menu de dono.",
       "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
+    ]
+  },
+  "v5.4.17": {
+    "version": "5.4.17",
+    "title": "Meme Não dê nem água",
+    "date": "2026-10-18",
+    "added": [
+      "/naodeagua @membro e alias /naodenemagua: meme com foto de perfil, gato e faixa vermelha.",
+      "Aceita marcação, mensagem respondida ou própria foto quando não há alvo."
+    ],
+    "changed": [
+      "Módulo separado e comando incluído no menubn.",
+      "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
     ]
   }
 }

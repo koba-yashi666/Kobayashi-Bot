@@ -14,7 +14,7 @@ export default async function run(ctx){
   if(!url)return ctx.reply('🐉 Não consegui acessar a foto de perfil dessa pessoa. Ela pode estar sem foto ou com a privacidade restrita.');
   try{
     const image=await buildNoWaterMeme(await downloadProfilePhoto(url));
-    return await ctx.conn.sendMessage(ctx.from,{image,caption:`🚫💧 Não dê nem água para ${tag(target)}!\n🐉 Kobayashi Bot • Só pela zoeira.`,mentions:[target]},{quoted:ctx.info});
+    return await ctx.conn.sendMessage(ctx.from,{image,caption:`🚫💧 Não dê nem água para ${tag(target)}!`,mentions:[target]},{quoted:ctx.info});
   }catch{
     return ctx.reply('🐉 Não consegui montar o meme com essa foto. Tente novamente em instantes.');
   }
