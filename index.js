@@ -1,3 +1,5 @@
+import { handleEconomyCommand, ECONOMY_COMMANDS } from "./lib/features/social/dragonEconomyCommands.js";
+import { recordEconomyMessage, linkEconomyIdentity } from "./lib/features/social/dragonSocial.js";
 import { handleMuteCommand, handleMutedMessage } from "./lib/features/moderation/muteSystem.js";
 import { menuButtonsEnabled, setMenuButtonsEnabled } from "./lib/ui/menuPreferences.js";
 import { sendInteractiveMenu } from "./lib/ui/interactiveMenu.js";
@@ -1345,6 +1347,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "coinflip",
   "coins",
   "coletar",
+  ...ECONOMY_COMMANDS,
   "colher",
   "comandosrpg",
   "comer",
@@ -2380,11 +2383,15 @@ if (isGroup && sender && !info.key.fromMe) {
         ? "sticker"
         : "text";
 
+  linkEconomyIdentity(sender, groupMembers || []);
   const levelEvent = trackActivity(from, sender, {
     text: body,
     isCommand: isCmd,
     activityType
   });
+  const coinMessage = recordEconomyMessage(sender, {id:info.key?.id,text:body,isCommand:isCmd,isMedia:activityType !== "text"});
+  if (coinMessage.reward) await reply(`🎯 Meta de ${coinMessage.count} mensagens! +${coinMessage.reward} Dragon-coins. Saldo: ${coinMessage.coins}`).catch(()=>{});
+  if (levelEvent?.xpGained > 0 && levelEvent.level === 1) awardLevelUpCoins(sender, 1);
   if (levelEvent?.levelUp) {
     const levelReward = awardLevelUpCoins(sender, levelEvent.level);
 
@@ -2394,7 +2401,7 @@ if (isGroup && sender && !info.key.fromMe) {
         `@${String(sender).split("@")[0]} subiu para o *nível ${levelEvent.level}*! 🎉\n` +
         `🏷️ ${levelEvent.title}\n` +
         (levelReward.awarded
-          ? `🪙 Recompensa: *+${levelReward.reward} Dragon Coins*\n💰 Saldo: *${levelReward.coins}*\n\n`
+          ? `🪙 Recompensa: *+${levelReward.reward} Dragon-coins*\n💰 Saldo: *${levelReward.coins}*\n\n`
           : `\n`) +
         (levelEvent.level >= 50
           ? `👑 *NÍVEL MÁXIMO ALCANÇADO!* Você chegou ao topo do Dragon Level.`
@@ -3348,6 +3355,8 @@ if (isCmd) {
     isLeader: SoLider
   });
   if (globalManagementHandled) continue;
+
+  if (await handleEconomyCommand({command, sender, reply, args, prefix, isGroup})) continue;
 
   const v3Handled = await runV3Standalone(command, {
     conn, info, from, sender, command, args, q, prefix, reply, reagir,
@@ -6016,7 +6025,7 @@ case "zerarankgeral": {
   if(String(q||"").trim().toLowerCase()!=="confirmar"){
     return reply(`⚠️ *RESET DE RANKINGS DO GRUPO*\n\n`+
       (all?"Serão zerados: mensagens, nível/XP do grupo, Rank ADM e progressão RPG dos membros.\n":rpg?"Serão zerados nível, XP, atributos, pontos, combates, missões e despertar RPG dos membros.\n":"Será zerada a quantidade de mensagens; nível e XP serão mantidos.\n")+
-      (rpg?"Ouro, inventário e classe humana serão mantidos. Equipamentos serão desequipados; classes avançadas e linhagens deverão ser conquistadas novamente.\n⚠️ O personagem RPG é compartilhado: o reset também aparece nos outros grupos em que esses membros jogam.\n":"")+
+      (rpg?"RPG-coins, inventário e classe humana serão mantidos. Equipamentos serão desequipados; classes avançadas e linhagens deverão ser conquistadas novamente.\n⚠️ O personagem RPG é compartilhado: o reset também aparece nos outros grupos em que esses membros jogam.\n":"")+
       `\n🛡️ Backup antes do reset.\nUse *${prefix}${command} confirmar*.`);
   }
   let rpgResult=null,activityResult=null,admReset=false;
@@ -6049,7 +6058,7 @@ case "zerarankgeral": {
     return reply(`✅ *RANKINGS ZERADOS*\n\n`+
       (activityResult?`💬 Contadores: *${activityResult.users}* membros.\n`:"")+
       (all?"⭐ Nível do grupo: 1 e XP: 0.\n👑 Rank ADM zerado.\n":"")+
-      (rpgResult?`🐉 Progressão RPG reiniciada: *${rpgResult.reset}* personagens.\n🪙 Ouro e 🎒 inventário mantidos.\n`:"")+
+      (rpgResult?`🐉 Progressão RPG reiniciada: *${rpgResult.reset}* personagens.\n🪙 RPG-coins e 🎒 inventário mantidos.\n`:"")+
       "🛡️ Backups criados para os dados existentes.");
   }catch(e){
     console.error("[RESET RANK]",e?.message||e);
@@ -8323,7 +8332,7 @@ case "buy": {
   return reply(
     `🛒🐉 *COMPRA REALIZADA!*\n\n` +
     `${result.item.icon} ${result.item.name}\n` +
-    `💸 Valor: *${result.item.price} Dragon Coins*\n` +
+    `💸 Valor: *${result.item.price} Dragon-coins*\n` +
     `🪙 Saldo restante: *${result.coins}*\n` +
     `🛍️ Compras restantes hoje: *${result.shopRemaining}/${result.shopLimit}*\n` +
     `🌅 A cota reseta às *06:00*.`
@@ -8383,7 +8392,7 @@ case "opencaixa": {
   if (!result.ok) return reply(`📦 ${result.reason}\nUse *${prefix}menuloja* para comprar uma.`);
   return reply(
     `📦✨ *CAIXA DE ESCAMAS ABERTA!*\n\n` +
-    `🪙 Você encontrou *${result.reward} Dragon Coins*!\n` +
+    `🪙 Você encontrou *${result.reward} Dragon-coins*!\n` +
     `💰 Saldo atual: *${result.coins}*`
   );
 }
@@ -8439,7 +8448,7 @@ case "saldo": {
     text:
       `╭━━〔 💰 *DRAGON WALLET* 〕━━╮\n` +
       `┃ 👤 @${String(target).split("@")[0]}\n` +
-      `┃ 🪙 Dragon Coins: *${p.coins}*\n` +
+      `┃ 🪙 Dragon-coins: *${p.coins}*\n` +
       `┃ 🎮 Vitórias: *${p.games.wins}*\n` +
       `┃ 💀 Derrotas: *${p.games.losses}*\n` +
       `┃ 🤝 Interações: *${p.socialInteractions}*\n` +
@@ -8461,10 +8470,12 @@ case "daily": {
   }
   return reply(
     `🎁🐉 *DAILY COLETADO!*\n\n` +
+    `📅 Dia *${result.streak}/7*\n` +
     `🪙 Base: *${result.base}*\n` +
+    (result.weekBonus ? `🔥 Bônus do dia 7: *+${result.weekBonus}*\n` : "") +
     `⭐ Bônus Nv.${result.level}: *+${result.levelBonus}*\n` +
     (result.boostUsed ? `🎁 Boost de inventário: *+${result.boostBonus}*\n` : "") +
-    `💰 Total recebido: *${result.reward} Dragon Coins*\n` +
+    `💰 Total recebido: *${result.reward} Dragon-coins*\n` +
     `🏦 Saldo: *${result.coins}*`
   );
 }
@@ -8493,7 +8504,7 @@ case "rankcoins":
 case "topcoins": {
   if (!isGroup) return reply(mess.onlyGroup());
   const top = getCoinRank(10);
-  if (!top.length) return reply("🪙 Ainda não há Dragon Coins no ranking.");
+  if (!top.length) return reply("🪙 Ainda não há Dragon-coins no ranking.");
   const medals = ["🥇","🥈","🥉"];
   return conn.sendMessage(from, {
     text:
@@ -8541,7 +8552,7 @@ case "coinflip": {
   const side = Math.random() < .5 ? "Cara 🪙" : "Coroa 👑";
   const reward = 5;
   const g = recordGame(sender, "play", reward, from);
-  return reply(`🪙 A moeda caiu em: *${side}*\n${g.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `✨ +${g.reward} Dragon Coins • Saldo: *${g.coins}*`}`);
+  return reply(`🪙 A moeda caiu em: *${side}*\n${g.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `✨ +${g.reward} Dragon-coins • Saldo: *${g.coins}*`}`);
 }
 break;
 
@@ -8560,7 +8571,7 @@ case "amizade": {
   const [icon, phrase] = labels[command];
   const social = recordSocialInteraction(sender, target, from);
   return conn.sendMessage(from, {
-    text: `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n${social.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `🪙 +${social.reward} Dragon Coins`} • Interações: *${social.socialInteractions}*`,
+    text: `${icon} @${sender.split("@")[0]} ${phrase} @${target.split("@")[0]}!\n\n${social.antiFarm?.blocked ? "🛡️ Limite diário de farm atingido • +0 moedas" : `🪙 +${social.reward} Dragon-coins`} • Interações: *${social.socialInteractions}*`,
     mentions: [sender, target]
   }, { quoted: info });
 }
@@ -8997,7 +9008,7 @@ Isso vai apagar o progresso RPG de *todos os membros deste grupo* que possuírem
 
 Serão zerados:
 • Nível e XP RPG
-• Ouro e inventário
+• RPG-coins e inventário
 • Classe humana
 • Facção e classe dracônica
 • Atributos e pontos
@@ -9083,7 +9094,7 @@ Ele vai apagar *TODO o Dragon RPG de TODOS os grupos*, incluindo:
 • Todos os jogadores
 • O personagem do dono do bot
 • Níveis e XP RPG
-• Ouro, itens e equipamentos
+• RPG-coins, itens e equipamentos
 • Classes e facções
 • Despertar Dracônico
 • Missões
@@ -9295,7 +9306,7 @@ case "criarpersonagem": {
 ┃ 🌸 Bem-vindo ao *Dragon RPG*!
 ┃ 👤 Personagem: *${result.player.name}*
 ┃ ⭐ Nível RPG: *1*
-┃ 🪙 Ouro inicial: *100*
+┃ 🪙 RPG-coins inicial: *100*
 ┃ 🎒 Itens iniciais: *2 Poções + 1 Pão*
 ╰══════════════════════════════════╯
 
@@ -9687,14 +9698,14 @@ case "rpgmissao": {
       if (r.reason === "progress") return reply(`⏳ Missão ainda incompleta: *${r.progress}/${r.target}*.`);
       return reply(`❌ Essa missão não está pronta para resgate.`);
     }
-    return reply(`🎁 *MISSÃO CONCLUÍDA!*\n${r.quest.title}\n✨ +${r.quest.xp} XP RPG\n🪙 +${r.quest.gold} ouro${r.quest.item ? `\n📦 +${r.quest.item.qty || 1} ${r.quest.item.name}` : ""}${r.levels.length ? `\n🌟 Você subiu para o Nível RPG *${r.player.level}*!` : ""}`);
+    return reply(`🎁 *MISSÃO CONCLUÍDA!*\n${r.quest.title}\n✨ +${r.quest.xp} XP RPG\n🪙 +${r.quest.gold} RPG-coins${r.quest.item ? `\n📦 +${r.quest.item.qty || 1} ${r.quest.item.name}` : ""}${r.levels.length ? `\n🌟 Você subiu para o Nível RPG *${r.player.level}*!` : ""}`);
   }
   return reply(`📜 Ação inválida. Use *aceitar* ou *resgatar*.`);
 }
 break;
 
 case "lojarpg": case "rpgloja": { return reply(formatRpgShop(prefix)); } break;
-case "comprarrpg": case "rpgcomprar": { const id=String(args?.[0]||"").toLowerCase(),qty=Number(args?.[1]||1);if(!id)return reply(`🏪 Use: *${prefix}comprarrpg espada_ferro*`);const r=buyRpgItem(sender,id,qty);if(!r.ok){if(r.reason==="gold")return reply(`🪙 Ouro insuficiente. Custa *${r.required}*, você tem *${r.current}*.`);if(r.reason==="level")return reply(`🔒 Exige Nível RPG *${r.required}+*.`);if(r.reason==="class")return reply(`⚔️ Item incompatível com sua classe.`);if(r.reason==="dragon")return reply(`🐉 Item exclusivo para dragões despertos.`);return reply(`❌ Não foi possível comprar. Veja *${prefix}lojarpg*.`);}return reply(`${r.item.icon} *${r.qty}x ${r.item.name}* comprado!\n🪙 -${r.total} • Saldo: *${r.player.gold}*`);} break;
+case "comprarrpg": case "rpgcomprar": { const id=String(args?.[0]||"").toLowerCase(),qty=Number(args?.[1]||1);if(!id)return reply(`🏪 Use: *${prefix}comprarrpg espada_ferro*`);const r=buyRpgItem(sender,id,qty);if(!r.ok){if(r.reason==="gold")return reply(`🪙 RPG-coins insuficientes. Custa *${r.required}*, você tem *${r.current}*.`);if(r.reason==="level")return reply(`🔒 Exige Nível RPG *${r.required}+*.`);if(r.reason==="class")return reply(`⚔️ Item incompatível com sua classe.`);if(r.reason==="dragon")return reply(`🐉 Item exclusivo para dragões despertos.`);return reply(`❌ Não foi possível comprar. Veja *${prefix}lojarpg*.`);}return reply(`${r.item.icon} *${r.qty}x ${r.item.name}* comprado!\n🪙 -${r.total} • Saldo: *${r.player.gold}*`);} break;
 case "equipamentos": case "rpgequipamentos": {const p=getDragonRpgPlayer(sender);if(!p)return reply(`🌱 Crie seu personagem primeiro.`);return reply(formatRpgEquipment(p,prefix));} break;
 case "equiparrpg": case "rpgequipar": {const r=equipRpgItem(sender,String(args?.[0]||"").toLowerCase());if(!r.ok){if(r.reason==="combat")return reply(`⚔️ Não troque equipamento durante a batalha.`);if(r.reason==="inventory")return reply(`🎒 Você não possui esse equipamento.`);if(r.reason==="level")return reply(`🔒 Exige Nível RPG *${r.required}+*.`);if(r.reason==="class")return reply(`⚔️ Equipamento incompatível com sua classe.`);if(r.reason==="dragon")return reply(`🐉 Exige Despertar Dracônico.`);return reply(`❌ Não foi possível equipar.`);}return reply(`${r.item.icon} *${r.item.name} equipado!*${r.old?`\n↩️ ${r.old.name} foi substituído.`:""}`);} break;
 case "desequiparrpg": case "rpgdesequipar": {const r=unequipRpgItem(sender,String(args?.[0]||"").toLowerCase());if(!r.ok)return reply(r.reason==="combat"?`⚔️ Não troque equipamento durante a batalha.`:`📦 Não há equipamento nesse espaço.`);return reply(`↩️ ${r.item?.icon||"📦"} *${r.item?.name||"Equipamento"}* desequipado.`);} break;

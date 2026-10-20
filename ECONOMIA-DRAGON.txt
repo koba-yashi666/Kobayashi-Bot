@@ -1,0 +1,35 @@
+ECONOMIA DRAGON — v5.4.20
+
+Dragon-coins: moeda geral. RPG-coins: saldo exclusivo do Dragon RPG, usado com o modo RPG ativo.
+O ouro antigo do RPG permanece no mesmo registro, agora exibido como RPG-coins.
+Os saldos gerais antigos de jogos/banco são importados uma vez. Não há conversão entre as duas moedas.
+
+/loja ou /menuloja: itens, preços e sementes.
+/comprar ID quantidade: 1 a 20 por compra; títulos: 1. Limite de 5 compras/dia, renovação às 06h de Brasília.
+/inventario: itens comprados e colhidos. /carteira: Dragon-coins. /rpgperfil: RPG-coins.
+/plantar tomate 2: consome duas sementes de tomate. Máximo de 10 plantações ao mesmo tempo.
+/colher: recolhe todas as plantações maduras. As plantas não são perdidas se você demorar para voltar.
+/vender tomate 5: vende cinco unidades por 60% do preço da loja (arredondado por unidade).
+/consumir acai: usa uma unidade do inventário, sem conceder dinheiro ou efeitos de combate.
+
+/daily: 100, 150, 200, 250, 300, 350 e 400 moedas de base, mais bônus de nível e boost existente.
+No sétimo dia: +500 moedas. Após o sétimo, começa novo ciclo.
+Coletas com intervalo de 24h. Passando 48h sem coletar, reinicia no dia 1.
+
+Nível geral: novo nível × 10. Cada nível paga uma única vez por pessoa, mesmo mudando de grupo.
+/metas: 10 = 30; 100 = 150; 400 = 450; 1000 = 1000 Dragon-coins. Recebimento automático.
+Metas diárias globais por pessoa, renovadas às 06h de Brasília.
+Comandos não contam. Textos consecutivos repetidos e intervalos menores que 15 segundos não contam.
+Mensagens com mídia contam dentro do intervalo. Não há prêmio retroativo pelo histórico anterior à atualização.
+
+/trabalhar: 70–130 moedas, a cada 1h.
+/pescar: 60–160 moedas, a cada 2h.
+/entrega: 100–200 moedas, a cada 3h.
+/procurar: 120–240 moedas, a cada 4h.
+/economia: resumo dos comandos no WhatsApp.
+
+Todos os produtos são itens virtuais do bot. Sementes e tempos são mecânicas do jogo.
+
+ATUALIZAÇÃO
+Execute ENVIAR-GITHUB-v5.4.20.sh no Termux para enviar ao GitHub.
+Depois sincronize e reinicie na hospedagem. O script não inicia o bot no celular.

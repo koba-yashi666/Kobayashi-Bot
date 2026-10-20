@@ -1,16 +1,20 @@
 {
-  "version": "5.4.19",
-  "title": "Mute automático e MuteB",
-  "date": "2026-10-19",
+  "version": "5.4.20",
+  "title": "Loja Dragon e moedas separadas",
+  "date": "2026-10-20",
   "added": [
-    "/muteb @membro ou resposta: apaga as novas mensagens e remove o membro ao falar durante o mute."
+    "/loja com preços, alimentos, bebidas, colecionáveis virtuais e 20 tipos de sementes.",
+    "/plantar e /colher com produção, tempo real e limite de 10 plantações; /vender e /consumir.",
+    "/metas: 10/100/400/1000 mensagens válidas por dia rendem 30/150/450/1000 Dragon-coins.",
+    "/trabalhar, /pescar, /entrega e /procurar com recompensas e cooldowns próprios.",
+    "/economia explica os comandos e todas as recompensas."
   ],
   "changed": [
-    "/mute reconhece PN/LID, mensagens com mídia e registros antigos booleanos.",
-    "/desmute remove todos os aliases e os modos normal e banimento.",
-    "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
-    "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
-    "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
+    "Moedas gerais unificadas: saldo legado de jogos e banco importado uma única vez para Dragon-coins, com vínculo PN/LID confirmado.",
+    "O saldo antigo de ouro do RPG é preservado e exibido como RPG-coins, sem conversão com Dragon-coins.",
+    "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
+    "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
+    "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1967,6 +1971,21 @@
     "added": [],
     "changed": [
       "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
+    ]
+  },
+  "v5.4.19": {
+    "version": "5.4.19",
+    "title": "Mute automático e MuteB",
+    "date": "2026-10-19",
+    "added": [
+      "/muteb @membro ou resposta: apaga as novas mensagens e remove o membro ao falar durante o mute."
+    ],
+    "changed": [
+      "/mute reconhece PN/LID, mensagens com mídia e registros antigos booleanos.",
+      "/desmute remove todos os aliases e os modos normal e banimento.",
+      "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
+      "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
+      "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
     ]
   }
 }

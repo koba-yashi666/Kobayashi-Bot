@@ -1,5 +1,5 @@
 {
-  "version": "5.4.19",
-  "name": "Kobayashi Bot v5.4.19 — Mute automático e MuteB",
-  "update": "/mute apaga mensagens automaticamente; /muteb apaga e remove ao falar; /desmute libera ambos."
+  "version": "5.4.20",
+  "name": "Kobayashi Bot v5.4.20 — Loja Dragon e moedas separadas",
+  "update": "Dragon-coins no modo geral e RPG-coins exclusivas do RPG; loja, daily semanal, metas, atividades e horta."
 }
