@@ -1,4 +1,4 @@
-KOBAYASHI v5.4.21
+KOBAYASHI v5.4.22
 
 /banfake: verifica os membros atuais do grupo usando a mesma regra de prefixos do /antifake.
 Por padrão, permite +55. Números fora dos prefixos configurados são removidos.
@@ -9,10 +9,10 @@ A execução manual funciona com antifake ON ou OFF e não altera essa configura
 Há pausa de 1,2s após cada tentativa e bloqueio de execução simultânea no mesmo grupo.
 Se o autor ou bot deixar de ser ADM, a verificação é interrompida.
 
-Regra pendente concluída: TODOS os comandos usados em grupos exigem ADM real do grupo.
-Isso inclui /cafeban, comandos com LID exclusivo e comandos de dono. As restrições exclusivas continuam.
-Sem ADM, responde: Você precisa ser administrador deste grupo para usar este comando.
-O privado mantém suas permissões específicas. Sistemas automáticos de proteção continuam funcionando.
+Correção v5.4.22: comandos comuns voltam a funcionar para membros.
+A exigência adicional de ADM aplica-se apenas às ações administrativas e remoções,
+incluindo /cafeban. As restrições originais de dono, LID e VIP continuam valendo.
+Sistemas automáticos de proteção continuam funcionando.
 
-Use o Termux para executar ENVIAR-GITHUB-v5.4.21.sh e enviar ao GitHub.
+Use o Termux para executar ENVIAR-GITHUB-v5.4.22.sh e enviar ao GitHub.
 Depois sincronize e reinicie o bot na hospedagem.

@@ -1,16 +1,12 @@
 {
-  "version": "5.4.21",
-  "title": "BanFake e comandos com ADM obrigatório",
+  "version": "5.4.22",
+  "title": "Correção do bloqueio geral de comandos",
   "date": "2026-10-22",
-  "added": [
-    "/banfake: verifica e remove membros atuais fora dos prefixos permitidos do antifake; padrão +55.",
-    "Resumo por grupo com removidos, protegidos, números desconhecidos e falhas reais."
-  ],
+  "added": [],
   "changed": [
-    "Todos os comandos usados em grupos exigem cargo atual de ADM; dono e LIDs exclusivos também precisam ser ADM do grupo. Restrições adicionais de dono/LID continuam valendo.",
-    "BanFake exige autor e bot ADMs, preserva criador, dono, líderes, ADMs, lista branca e telefones não confirmados.",
-    "Verificação manual não altera o estado do antifake automático; revalida cargos e proteções durante a execução.",
-    "Menu ADM atualizado. Pacote sem bancos, configurações e sessões."
+    "Removida a exigência global de ADM introduzida na v5.4.21.",
+    "Menu, figurinhas, RPG, loja, daily e demais comandos comuns voltam a funcionar para membros.",
+    "Ações administrativas e remoções, incluindo cafeban, continuam exigindo ADM; permissões originais de dono/LID/VIP preservadas."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -2001,6 +1997,21 @@
       "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
       "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
       "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
+    ]
+  },
+  "v5.4.21": {
+    "version": "5.4.21",
+    "title": "BanFake e comandos com ADM obrigatório",
+    "date": "2026-10-22",
+    "added": [
+      "/banfake: verifica e remove membros atuais fora dos prefixos permitidos do antifake; padrão +55.",
+      "Resumo por grupo com removidos, protegidos, números desconhecidos e falhas reais."
+    ],
+    "changed": [
+      "Todos os comandos usados em grupos exigem cargo atual de ADM; dono e LIDs exclusivos também precisam ser ADM do grupo. Restrições adicionais de dono/LID continuam valendo.",
+      "BanFake exige autor e bot ADMs, preserva criador, dono, líderes, ADMs, lista branca e telefones não confirmados.",
+      "Verificação manual não altera o estado do antifake automático; revalida cargos e proteções durante a execução.",
+      "Menu ADM atualizado. Pacote sem bancos, configurações e sessões."
     ]
   }
 }

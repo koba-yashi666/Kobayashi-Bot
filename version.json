@@ -1,5 +1,5 @@
 {
-  "version": "5.4.21",
-  "name": "Kobayashi Bot v5.4.21 — BanFake e comandos com ADM obrigatório",
-  "update": "/banfake verifica os membros atuais usando os prefixos do antifake; comandos em grupos exigem ADM, inclusive dono e LIDs exclusivos."
+  "version": "5.4.22",
+  "name": "Kobayashi Bot v5.4.22 — Correção do bloqueio geral de comandos",
+  "update": "Comandos comuns liberados para membros; ADM exigido apenas nas ações administrativas, incluindo cafeban."
 }

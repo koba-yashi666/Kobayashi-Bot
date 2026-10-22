@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {requiresGroupAdmin,currentGroupAdmin} from '../lib/features/access/groupCommandAccess.js';
+for(const c of ['menu','menubn','menurpg','s','s2','figurinhas','daily','loja','comprar','plantar','colher','furry','carteira','wame','atividade','namoro','aceitar_namoro','rpgperfil','menudono'])assert.equal(requiresGroupAdmin(c),false,c);
+for(const c of ['ban','cafeban','CAFEBAN','kobaban','dragonban','bang','banfake','mute','muteb','adv','antifake','promover','rebaixar'])assert.equal(requiresGroupAdmin(c),true,c);
+const conn={signalRepository:{lidMapping:{getPNForLID:async id=>id==='1@lid'?'5511000000000@s.whatsapp.net':null}},groupMetadata:async()=>({participants:[{id:'1@lid',admin:'admin'},{id:'2@lid'}]})};
+assert(await currentGroupAdmin(conn,'g@g.us',['5511000000000@s.whatsapp.net']));assert(!await currentGroupAdmin(conn,'g@g.us',['2@lid']));
+const src=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');
+assert(src.includes('if (isGroup && isCmd && requiresGroupAdmin(command)) {'));
+assert(!src.includes('if (isGroup && isCmd && command) {\n  let authorIsAdmin'));
+console.log('✅ Comandos comuns liberados; ações administrativas/LID exigem ADM; PN/LID confirmado; bloqueio geral removido.');

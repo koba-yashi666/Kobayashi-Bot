@@ -1,5 +1,5 @@
 import { runBanFake } from "./lib/features/moderation/banFake.js";
-import { currentGroupAdmin, GROUP_ADMIN_REQUIRED } from "./lib/features/access/groupCommandAccess.js";
+import { currentGroupAdmin, GROUP_ADMIN_REQUIRED, requiresGroupAdmin } from "./lib/features/access/groupCommandAccess.js";
 import { handleEconomyCommand, ECONOMY_COMMANDS } from "./lib/features/social/dragonEconomyCommands.js";
 import { recordEconomyMessage, linkEconomyIdentity } from "./lib/features/social/dragonSocial.js";
 import { handleMuteCommand, handleMutedMessage } from "./lib/features/moderation/muteSystem.js";
@@ -2618,8 +2618,8 @@ if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoD
 // ==========================================
 // 🐉 YURI PACK 2 • CONTROLE DE COMANDOS
 // ==========================================
-// Todos os comandos em grupos exigem cargo real de ADM, inclusive dono e LIDs exclusivos.
-if (isGroup && isCmd && command) {
+// Revalidação de ADM apenas para ações administrativas, inclusive remoções por LID exclusivo.
+if (isGroup && isCmd && requiresGroupAdmin(command)) {
   let authorIsAdmin = false;
   try { authorIsAdmin = await currentGroupAdmin(conn, from, [sender, senderLid, rawSender, info.key.participant, info.key.participantAlt].filter(Boolean)); }
   catch { await reply('Não consegui confirmar seu cargo de ADM. Tente novamente.'); continue; }
