@@ -1,3 +1,5 @@
+import { runBanFake } from "./lib/features/moderation/banFake.js";
+import { currentGroupAdmin, GROUP_ADMIN_REQUIRED } from "./lib/features/access/groupCommandAccess.js";
 import { handleEconomyCommand, ECONOMY_COMMANDS } from "./lib/features/social/dragonEconomyCommands.js";
 import { recordEconomyMessage, linkEconomyIdentity } from "./lib/features/social/dragonSocial.js";
 import { handleMuteCommand, handleMutedMessage } from "./lib/features/moderation/muteSystem.js";
@@ -1221,6 +1223,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   ...COMMUNITY_COMMANDS,
   "wame",
   "antifake",
+  "banfake",
   "s2",
   "dragon_open", "dragon_close", "drsgon_close", "dragon-msg",
   "x9",
@@ -2615,6 +2618,15 @@ if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoD
 // ==========================================
 // 🐉 YURI PACK 2 • CONTROLE DE COMANDOS
 // ==========================================
+// Todos os comandos em grupos exigem cargo real de ADM, inclusive dono e LIDs exclusivos.
+if (isGroup && isCmd && command) {
+  let authorIsAdmin = false;
+  try { authorIsAdmin = await currentGroupAdmin(conn, from, [sender, senderLid, rawSender, info.key.participant, info.key.participantAlt].filter(Boolean)); }
+  catch { await reply('Não consegui confirmar seu cargo de ADM. Tente novamente.'); continue; }
+  if (!authorIsAdmin) { await reply(GROUP_ADMIN_REQUIRED); continue; }
+}
+
+
 if (isCmd && command) {
   const globalBlock = getGlobalCommandBlock(command);
 
@@ -3443,6 +3455,11 @@ case "wame": {
  for(const id of aliases){const digits=String(id).split("@")[0];if(/^\d+$/.test(digits))text=text.replace(new RegExp(`(^|\\s)@${digits}(?=\\s|$)`),"$1");}
  const link=buildWaMeLink(pn,text);
  return conn.sendMessage(from,{text:`🐉🔗 *LINK DO WHATSAPP*\n👤 @${pn.split("@")[0]}\n\n${link}`,mentions:[target]},{quoted:info});
+}
+break;
+
+case "banfake": {
+ return runBanFake({conn,from,sender,isGroup,authorIds:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),reply});
 }
 break;
 

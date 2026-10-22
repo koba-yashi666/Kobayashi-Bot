@@ -1,5 +1,5 @@
 {
-  "version": "5.4.20",
-  "name": "Kobayashi Bot v5.4.20 — Loja Dragon e moedas separadas",
-  "update": "Dragon-coins no modo geral e RPG-coins exclusivas do RPG; loja, daily semanal, metas, atividades e horta."
+  "version": "5.4.21",
+  "name": "Kobayashi Bot v5.4.21 — BanFake e comandos com ADM obrigatório",
+  "update": "/banfake verifica os membros atuais usando os prefixos do antifake; comandos em grupos exigem ADM, inclusive dono e LIDs exclusivos."
 }

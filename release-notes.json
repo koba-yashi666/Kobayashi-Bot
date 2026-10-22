@@ -1,20 +1,16 @@
 {
-  "version": "5.4.20",
-  "title": "Loja Dragon e moedas separadas",
-  "date": "2026-10-20",
+  "version": "5.4.21",
+  "title": "BanFake e comandos com ADM obrigatório",
+  "date": "2026-10-22",
   "added": [
-    "/loja com preços, alimentos, bebidas, colecionáveis virtuais e 20 tipos de sementes.",
-    "/plantar e /colher com produção, tempo real e limite de 10 plantações; /vender e /consumir.",
-    "/metas: 10/100/400/1000 mensagens válidas por dia rendem 30/150/450/1000 Dragon-coins.",
-    "/trabalhar, /pescar, /entrega e /procurar com recompensas e cooldowns próprios.",
-    "/economia explica os comandos e todas as recompensas."
+    "/banfake: verifica e remove membros atuais fora dos prefixos permitidos do antifake; padrão +55.",
+    "Resumo por grupo com removidos, protegidos, números desconhecidos e falhas reais."
   ],
   "changed": [
-    "Moedas gerais unificadas: saldo legado de jogos e banco importado uma única vez para Dragon-coins, com vínculo PN/LID confirmado.",
-    "O saldo antigo de ouro do RPG é preservado e exibido como RPG-coins, sem conversão com Dragon-coins.",
-    "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
-    "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
-    "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
+    "Todos os comandos usados em grupos exigem cargo atual de ADM; dono e LIDs exclusivos também precisam ser ADM do grupo. Restrições adicionais de dono/LID continuam valendo.",
+    "BanFake exige autor e bot ADMs, preserva criador, dono, líderes, ADMs, lista branca e telefones não confirmados.",
+    "Verificação manual não altera o estado do antifake automático; revalida cargos e proteções durante a execução.",
+    "Menu ADM atualizado. Pacote sem bancos, configurações e sessões."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -1986,6 +1982,25 @@
       "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
       "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
       "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
+    ]
+  },
+  "v5.4.20": {
+    "version": "5.4.20",
+    "title": "Loja Dragon e moedas separadas",
+    "date": "2026-10-20",
+    "added": [
+      "/loja com preços, alimentos, bebidas, colecionáveis virtuais e 20 tipos de sementes.",
+      "/plantar e /colher com produção, tempo real e limite de 10 plantações; /vender e /consumir.",
+      "/metas: 10/100/400/1000 mensagens válidas por dia rendem 30/150/450/1000 Dragon-coins.",
+      "/trabalhar, /pescar, /entrega e /procurar com recompensas e cooldowns próprios.",
+      "/economia explica os comandos e todas as recompensas."
+    ],
+    "changed": [
+      "Moedas gerais unificadas: saldo legado de jogos e banco importado uma única vez para Dragon-coins, com vínculo PN/LID confirmado.",
+      "O saldo antigo de ouro do RPG é preservado e exibido como RPG-coins, sem conversão com Dragon-coins.",
+      "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
+      "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
+      "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
     ]
   }
 }

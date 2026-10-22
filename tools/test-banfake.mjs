@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
+const old=process.cwd(),tmp=fs.mkdtempSync(path.join(os.tmpdir(),'koba-banfake-'));process.chdir(tmp);
+try {
+ const {runBanFake}=await import('../lib/features/moderation/banFake.js');
+ const {currentGroupAdmin}=await import('../lib/features/access/groupCommandAccess.js');
+ const {getAntiFakeConfig}=await import('../lib/features/moderation/antiFake.js');
+ const group='test@g.us',admin='5511000000000@s.whatsapp.net',bot='5522000000000@s.whatsapp.net';
+ const br='5533000000000@s.whatsapp.net',foreign='12025550123@s.whatsapp.net',lid='123456789@lid',unknown='987654321@lid',creator='69119714017511@lid',failed='33123456789@s.whatsapp.net';
+ const outputs=[],removed=[];let members=[{id:admin,admin:'admin'},{id:bot,admin:'admin'},{id:br},{id:foreign},{id:lid},{id:unknown},{id:creator},{id:failed},{id:'491234567890@s.whatsapp.net',admin:'admin'}];
+ const conn={user:{id:bot},signalRepository:{lidMapping:{getPNForLID:async id=>id===lid?'447123456789@s.whatsapp.net':null,getLIDForPN:async()=>null}},groupMetadata:async()=>({subject:'Teste',participants:members.map(x=>({...x}))}),groupParticipantsUpdate:async(g,ids,action)=>{assert.equal(g,group);assert.equal(action,'remove');if(ids.includes(failed))return [{jid:failed,status:'403'}];removed.push(...ids);members=members.filter(p=>!ids.includes(p.id));return ids.map(jid=>({jid,status:'200'}));}};
+ const {addWhitelist}=await import('../lib/features/moderation/whitelist.js');
+ const white='442000000000@s.whatsapp.net';addWhitelist(group,white);members.push({id:white});
+ const ctx={conn,from:group,sender:admin,authorIds:[admin],isGroup:true,reply:async t=>outputs.push(t),pause:async()=>{}};
+ assert(await currentGroupAdmin(conn,group,[admin]));assert(!await currentGroupAdmin(conn,group,[foreign]));
+ await runBanFake({...ctx,sender:foreign,authorIds:[foreign]});assert.equal(removed.length,0);assert(outputs.at(-1).includes('administrador'));
+ assert.equal(getAntiFakeConfig(group).enabled,false);
+ const r=await runBanFake(ctx);assert.equal(r.removed,2);assert.equal(r.unknown,1);assert.equal(r.failed.length,1);assert.equal(r.allowed,1);
+ assert(removed.includes(lid));assert(removed.includes(foreign));assert(!removed.includes(creator));assert(!removed.includes(br));assert.equal(getAntiFakeConfig(group).enabled,false);
+ assert(!removed.includes(white));
+ members.find(p=>p.id===bot).admin=null;const count=removed.length;await runBanFake(ctx);assert.equal(removed.length,count);assert(outputs.at(-1).includes('precisa ser ADM'));
+ members=[{id:admin,admin:'admin'},{id:bot,admin:'admin'},{id:'12125550111@s.whatsapp.net'},{id:'12125550112@s.whatsapp.net'}];
+ const stopped=await runBanFake({...ctx,pause:async()=>{members.find(p=>p.id===admin).admin=null;}});
+ assert.equal(stopped.removed,1);assert(stopped.stopped);assert(members.some(p=>p.id==='12125550112@s.whatsapp.net'));
+ fs.writeFileSync('files/database/antifake.json',JSON.stringify({[group]:{enabled:false,allowedPrefixes:['44']}}));
+ const {checkAntiFakeParticipant}=await import('../lib/features/moderation/antiFake.js');
+ assert((await checkAntiFakeParticipant(conn,group,'447123456789@s.whatsapp.net')).allowed);
+ assert(!(await checkAntiFakeParticipant(conn,group,br)).allowed);
+ const source=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');assert(source.indexOf('if (!authorIsAdmin)')<source.indexOf('if (isCmd) {\n  if (OWNER_COMMANDS'));
+ assert(source.indexOf('await handleMutedMessage')<source.indexOf('if (!authorIsAdmin)'));
+ console.log('✅ BanFake: ADM obrigatório, bot ADM, prefixo +55, PN/LID confirmado, desconhecidos, criador/ADMs protegidos, falha sem falso sucesso e antifake OFF.');
+} finally {process.chdir(old);fs.rmSync(tmp,{recursive:true,force:true});}
