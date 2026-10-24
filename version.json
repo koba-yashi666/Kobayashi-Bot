@@ -1,5 +1,5 @@
 {
-  "version": "5.4.22",
-  "name": "Kobayashi Bot v5.4.22 — Correção do bloqueio geral de comandos",
-  "update": "Comandos comuns liberados para membros; ADM exigido apenas nas ações administrativas, incluindo cafeban."
+  "version": "5.4.23",
+  "name": "Kobayashi Bot v5.4.23 — Controle de aviso de saída",
+  "update": "/saída on/off ou /saida on/off controla somente os avisos de saída por grupo."
 }

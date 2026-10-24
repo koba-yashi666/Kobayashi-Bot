@@ -1,3 +1,4 @@
+import { departureNoticeAllowed } from "./lib/features/group/departureNotice.js";
 import { installCommunityRuntime } from "./lib/features/community/runtime.js";
 import { installRemovalProtection } from "./lib/features/moderation/removalProtection.js";
 import { installAntiFakeRuntime } from "./lib/features/moderation/antiFakeRuntime.js";
@@ -552,6 +553,7 @@ async function startConnect() {
           }
 
           case "remove": {
+            if (!departureNoticeAllowed(settings)) break;
             const count = Array.isArray(groupMetadata?.participants)
               ? groupMetadata.participants.length
               : "?";

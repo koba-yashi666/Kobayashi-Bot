@@ -1,3 +1,4 @@
+import { handleDepartureCommand } from "./lib/features/group/departureNotice.js";
 import { runBanFake } from "./lib/features/moderation/banFake.js";
 import { currentGroupAdmin, GROUP_ADMIN_REQUIRED, requiresGroupAdmin } from "./lib/features/access/groupCommandAccess.js";
 import { handleEconomyCommand, ECONOMY_COMMANDS } from "./lib/features/social/dragonEconomyCommands.js";
@@ -1309,6 +1310,8 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "banghost",
   "batalhar",
   "bemvindo",
+  "saída",
+  "saida",
   "blacklist",
   "blacklistg",
   "blockcmd",
@@ -4648,12 +4651,18 @@ case "debugbv": {
 }
 break;
 
+case "saída":
+case "saida": {
+  return handleDepartureCommand({isGroup,isAdmin:isGroupAdmins,from,args,prefix,reply});
+}
+break;
+
 case "bemvindo":
 case "boasvindas": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
   const op=String(args[0]||"").toLowerCase(); const cfg=getWelcomeConfig(from);
-  if(!["on","off"].includes(op)) return reply(`🌸 *WELCOME PRO*\n\nStatus: ${cfg.enabled?"🟢 Ativado":"🔒 Desativado"}\n⏱️ Agrupamento: *${cfg.delaySeconds}s*\n\n🟢 ${prefix}bemvindo on\n🔒 ${prefix}bemvindo off\n📝 ${prefix}setbv texto\n📖 ${prefix}setregrasbv texto\n🤝 ${prefix}setparceriasbv texto\n👋 ${prefix}setbye texto\n⏱️ ${prefix}tempobv 15\n🧪 ${prefix}testebv\n\nVariáveis: {user} {group} {count} {membros} {quantidade} {adm} {rejeitados}`);
+  if(!["on","off"].includes(op)) return reply(`🌸 *WELCOME PRO*\n\nStatus: ${cfg.enabled?"🟢 Ativado":"🔒 Desativado"}\n⏱️ Agrupamento: *${cfg.delaySeconds}s*\n\n🟢 ${prefix}bemvindo on\n🔒 ${prefix}bemvindo off\n📝 ${prefix}setbv texto\n📖 ${prefix}setregrasbv texto\n🤝 ${prefix}setparceriasbv texto\n👋 ${prefix}setbye texto\n🔕 ${prefix}saída on/off\n⏱️ ${prefix}tempobv 15\n🧪 ${prefix}testebv\n\nVariáveis: {user} {group} {count} {membros} {quantidade} {adm} {rejeitados}`);
   updateWelcomeConfig(from,{enabled:op==="on"});
   return reply(op==="on"?"🌸🐉 Welcome Pro ativado!":"🔒🌸 Welcome Pro desativado.");
 }
