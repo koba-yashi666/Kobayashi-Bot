@@ -1,14 +1,12 @@
 {
-  "version": "5.4.23",
-  "title": "Controle de aviso de saída",
+  "version": "5.4.24",
+  "title": "Novo GIF e legenda do socar",
   "date": "2026-10-24",
-  "added": [
-    "/saída on/off e /saida on/off: ativar/desativar avisos de saída por grupo; uso exclusivo de ADM."
-  ],
+  "added": [],
   "changed": [
-    "Aviso desligado bloqueia texto, foto e envio alternativo de despedida.",
-    "Entradas, textos e fotos personalizados são preservados. Configuração salva no banco atual de boas-vindas.",
-    "Grupos antigos mantêm o comportamento anterior até usar /saída off. Menu ADM e ajuda atualizados."
+    "/socar e /soco passam a usar mídia local em reprodução GIF, enviada pelo criador.",
+    "Legenda personalizada: @autor espancou @alvo que deixou ele sem dentes.",
+    "Suporte a menção ou resposta, com menções reais das duas pessoas."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -2025,6 +2023,19 @@
       "Removida a exigência global de ADM introduzida na v5.4.21.",
       "Menu, figurinhas, RPG, loja, daily e demais comandos comuns voltam a funcionar para membros.",
       "Ações administrativas e remoções, incluindo cafeban, continuam exigindo ADM; permissões originais de dono/LID/VIP preservadas."
+    ]
+  },
+  "v5.4.23": {
+    "version": "5.4.23",
+    "title": "Controle de aviso de saída",
+    "date": "2026-10-24",
+    "added": [
+      "/saída on/off e /saida on/off: ativar/desativar avisos de saída por grupo; uso exclusivo de ADM."
+    ],
+    "changed": [
+      "Aviso desligado bloqueia texto, foto e envio alternativo de despedida.",
+      "Entradas, textos e fotos personalizados são preservados. Configuração salva no banco atual de boas-vindas.",
+      "Grupos antigos mantêm o comportamento anterior até usar /saída off. Menu ADM e ajuda atualizados."
     ]
   }
 }
