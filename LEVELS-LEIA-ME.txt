@@ -1,0 +1,28 @@
+KOBAYASHI v5.4.25 — LEVELS
+
+Custo para passar ao próximo nível:
+1–10: 200 XP; 11–20: 350 XP; 21–30: 500 XP; 31–40: 700 XP; 41–49: 900 XP.
+Nível máximo: 50. Ganhos e cooldowns de XP foram mantidos.
+
+MIGRAÇÃO
+O nível e a fração da barra de XP são preservados automaticamente ao carregar o histórico.
+Exemplo: metade da barra de 100 XP passa para metade da barra de 200 XP.
+A migração não paga moedas retroativas e não envia avisos de evolução.
+Um backup é criado em files/database/atividade-grupos.json.pre-level-curve-v2.json.
+Cada registro recebe a versão da curva, impedindo conversão repetida após reinício.
+Contagem de mensagens e registros existentes são preservados.
+
+RESUMOS
+A primeira evolução abre uma janela de uma hora no grupo.
+Nível e moedas são atualizados imediatamente. O aviso fica para o resumo.
+O bot verifica resumos vencidos a cada minuto enquanto conectado.
+Mostra @membro, nível inicial e final, e a soma de moedas realmente pagas.
+A mesma pessoa aparece uma vez no lote. Não há mensagem quando ninguém sobe.
+Cada grupo tem sua janela. /level off suspende o envio do resumo.
+A fila é salva em files/database/level-hourly-summary.json e é retomada após reinício.
+Falhas de envio mantêm o lote para nova tentativa. Nenhum prêmio é pago pelo envio do resumo.
+Em grupos muito grandes, cada mensagem reúne até 200 pessoas; as demais aguardam a próxima janela, evitando múltiplas mensagens em sequência.
+
+ATUALIZAÇÃO
+O script do Termux envia somente os arquivos da atualização ao GitHub.
+Depois sincronize e reinicie na hospedagem. Não inicia o bot no Termux.

@@ -1,3 +1,4 @@
+import { ensureLevelSummaryRuntime } from "./lib/features/social/levelSummary.js";
 import { departureNoticeAllowed } from "./lib/features/group/departureNotice.js";
 import { installCommunityRuntime } from "./lib/features/community/runtime.js";
 import { installRemovalProtection } from "./lib/features/moderation/removalProtection.js";
@@ -662,6 +663,7 @@ async function startConnect() {
             console.log(colors.magenta("🐉🌸 Kobayashi Bot conectado com sucesso!"));
             ensureDragonCoreRuntime(conn);
             ensureRentalRuntime(conn);
+            ensureLevelSummaryRuntime(conn);
             await conn.sendPresenceUpdate("available");
             break;
         }

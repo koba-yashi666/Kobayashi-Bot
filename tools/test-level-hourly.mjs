@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawnSync} from 'node:child_process';
+const old=process.cwd(),tmp=fs.mkdtempSync(path.join(os.tmpdir(),'koba-levels-')),realNow=Date.now;process.chdir(tmp);
+try {
+ let now=1800000000000;Date.now=()=>now;
+ const oldCost=lv=>lv<=10?100:100+(lv-10)*25,oldStart=lv=>{let n=0;for(let k=1;k<lv;k++)n+=oldCost(k);return n;};
+ const users={};for(let lv=1;lv<=50;lv++)users[`${lv}@lid`]={xp:oldStart(lv)+(lv<50?oldCost(lv)/2:0),level:lv,activityCountersV2:true,messages:123,images:5,stickers:7,lastSeen:555};
+ users['new@lid']={xp:199,level:1,messages:0,activityCountersV2:true,levelCurveVersion:2};
+ fs.mkdirSync('files/database',{recursive:true});fs.writeFileSync('files/database/atividade-grupos.json',JSON.stringify({'g@g.us':users}));
+ const t=await import('../lib/features/social/activityTracker.js');
+ for(const [lv,cost] of [[1,200],[10,200],[11,350],[20,350],[21,500],[30,500],[31,700],[40,700],[41,900],[49,900],[50,0]])assert.equal(t.xpRequiredForNextLevel(lv),cost);
+ for(let lv=1;lv<=50;lv++){const r=t.getUserActivity('g@g.us',`${lv}@lid`);assert.equal(r.level,lv);assert.equal(r.messages,123);assert.equal(r.images,5);if(lv<50)assert.equal(r.progress,50);}
+ const file='files/database/atividade-grupos.json',backup=file+'.pre-level-curve-v2.json';assert(fs.existsSync(backup));assert.equal(JSON.parse(fs.readFileSync(backup))['g@g.us']['1@lid'].xp,50);
+ const after=fs.readFileSync(file,'utf8');
+ const child=spawnSync(process.execPath,['--input-type=module','-e',`import {getUserActivity} from ${JSON.stringify(new URL('../lib/features/social/activityTracker.js',import.meta.url).href)};if(getUserActivity('g@g.us','10@lid').level!==10)process.exit(1);`],{cwd:tmp,encoding:'utf8'});assert.equal(child.status,0,child.stderr);assert.equal(fs.readFileSync(file,'utf8'),after);
+ const event=t.trackActivity('g@g.us','new@lid',{text:'Uma conversa válida'});assert(event.levelUp);assert.equal(event.oldLevel,1);assert.equal(event.level,2);t.flushActivity();
+ const {queueLevelUp,flushLevelSummaries,LEVEL_SUMMARY_HOUR:H}=await import('../lib/features/social/levelSummary.js');
+ const e=await import('../lib/features/social/dragonSocial.js');
+ const a='5511000000000@s.whatsapp.net',b='5522000000000@s.whatsapp.net',g='hour@g.us';
+ let coins=0;for(const lv of [11,12])coins+=e.awardLevelUpCoins(a,lv).reward;assert.equal(coins,230);assert.equal(e.getDragonBalance(a),230);
+ queueLevelUp({groupJid:g,userJid:'99@lid',aliases:[a],oldLevel:10,newLevel:11,coins:110,now});
+ queueLevelUp({groupJid:g,userJid:a,oldLevel:11,newLevel:12,coins:120,now:now+1000});
+ queueLevelUp({groupJid:g,userJid:b,oldLevel:7,newLevel:8,coins:80,now:now+2000});
+ const sent=[],conn={sendMessage:async(j,p)=>sent.push({j,p})};
+ assert.equal((await flushLevelSummaries(conn,{now:now+H-1})).length,0);
+ await flushLevelSummaries(conn,{now:now+H});assert.equal(sent.length,1);assert(sent[0].p.text.includes('Nível 10 → 12'));assert(sent[0].p.text.includes('230 Dragon-coins'));assert.equal(sent[0].p.mentions.length,2);assert(sent[0].p.mentions.includes(a));
+ await flushLevelSummaries(conn,{now:now+H+1000});assert.equal(sent.length,1);
+ queueLevelUp({groupJid:g,userJid:a,oldLevel:12,newLevel:13,coins:0,now:now+H+2000});
+ await flushLevelSummaries(conn,{now:now+H*2+1999});assert.equal(sent.length,1);
+ await flushLevelSummaries(conn,{now:now+H*2+2000});assert.equal(sent.length,2);assert(sent[1].p.text.includes('0 Dragon-coins'));
+ const retry='retry@g.us';queueLevelUp({groupJid:retry,userJid:a,oldLevel:1,newLevel:2,coins:20,now});
+ await flushLevelSummaries({sendMessage:async()=>{throw Error('offline');}},{now:now+H});
+ let saved=JSON.parse(fs.readFileSync('files/database/level-hourly-summary.json'));assert(saved.groups[retry].inflight);
+ queueLevelUp({groupJid:retry,userJid:b,oldLevel:2,newLevel:3,coins:30,now:now+H+1000});
+ const restart=await import('../lib/features/social/levelSummary.js?restart=1');
+ await restart.flushLevelSummaries(conn,{now:now+H+4*60000});assert.equal(sent.length,2);
+ await restart.flushLevelSummaries(conn,{now:now+H+5*60000});assert.equal(sent.length,3);
+ saved=JSON.parse(fs.readFileSync('files/database/level-hourly-summary.json'));assert(!saved.groups[retry].inflight);assert(saved.groups[retry].users[b]);
+ await flushLevelSummaries(conn,{now:now+H*3,enabled:()=>false});assert.equal(sent.length,3);
+ const cg='concurrent@g.us';queueLevelUp({groupJid:cg,userJid:a,oldLevel:2,newLevel:3,now});
+ let release;const waiting={sendMessage:async()=>new Promise(r=>{release=r;})};
+ const pending=flushLevelSummaries(waiting,{now:now+H,enabled:id=>id===cg});await new Promise(r=>setImmediate(r));assert(release);
+ assert.equal((await flushLevelSummaries(conn,{now:now+H,enabled:id=>id===cg})).length,0);release();await pending;
+ const index=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');assert(!index.includes('subiu para o *nível ${levelEvent.level}*'));assert(index.includes('queueLevelUp({groupJid:from'));
+ console.log('✅ Levels: tabela, migração dos 50 níveis/progresso/contadores, backup/reinício, XP, moedas, resumo 1h, PN/LID, persistência, falha/reenvio e concorrência.');
+} finally {Date.now=realNow;process.chdir(old);fs.rmSync(tmp,{recursive:true,force:true});}

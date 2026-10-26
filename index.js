@@ -1,3 +1,4 @@
+import { queueLevelUp } from "./lib/features/social/levelSummary.js";
 import { handleDepartureCommand } from "./lib/features/group/departureNotice.js";
 import { runBanFake } from "./lib/features/moderation/banFake.js";
 import { currentGroupAdmin, GROUP_ADMIN_REQUIRED, requiresGroupAdmin } from "./lib/features/access/groupCommandAccess.js";
@@ -2399,21 +2400,14 @@ if (isGroup && sender && !info.key.fromMe) {
   if (coinMessage.reward) await reply(`🎯 Meta de ${coinMessage.count} mensagens! +${coinMessage.reward} Dragon-coins. Saldo: ${coinMessage.coins}`).catch(()=>{});
   if (levelEvent?.xpGained > 0 && levelEvent.level === 1) awardLevelUpCoins(sender, 1);
   if (levelEvent?.levelUp) {
-    const levelReward = awardLevelUpCoins(sender, levelEvent.level);
-
-    await conn.sendMessage(from, {
-      text:
-        `🐉✨ *LEVEL UP!*\n\n` +
-        `@${String(sender).split("@")[0]} subiu para o *nível ${levelEvent.level}*! 🎉\n` +
-        `🏷️ ${levelEvent.title}\n` +
-        (levelReward.awarded
-          ? `🪙 Recompensa: *+${levelReward.reward} Dragon-coins*\n💰 Saldo: *${levelReward.coins}*\n\n`
-          : `\n`) +
-        (levelEvent.level >= 50
-          ? `👑 *NÍVEL MÁXIMO ALCANÇADO!* Você chegou ao topo do Dragon Level.`
-          : `✨ Continue conversando e usando a Kobayashi para evoluir.`),
-      mentions: [sender]
-    }, { quoted: info }).catch(() => {});
+    let coinsAwarded = 0;
+    for (let level = levelEvent.oldLevel + 1; level <= levelEvent.level; level++) {
+      const reward = awardLevelUpCoins(sender, level);
+      coinsAwarded += reward.awarded ? reward.reward : 0;
+    }
+    queueLevelUp({groupJid:from,userJid:sender,
+      aliases:[senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),
+      oldLevel:levelEvent.oldLevel,newLevel:levelEvent.level,coins:coinsAwarded});
   }
 
   // Se o próprio usuário voltou a falar, remove o AFK.
@@ -6224,7 +6218,9 @@ case "nivelinfo": {
     `╭━━〔 🐲 SISTEMA DE NÍVEIS 〕━━╮\n` +
     `┃ 🎯 O sistema possui *50 níveis*.\n` +
     `┃ 🐉 São *10 categorias* + título especial no nível 50.\n` +
-    `┃ ⭐ Do nível *1 ao 10*: 100 XP por nível.\n` +
+    `┃ ⭐ Níveis *1–10*: 200 XP • *11–20*: 350 XP.\n` +
+    `┃ ⭐ Níveis *21–30*: 500 XP • *31–40*: 700 XP • *41–49*: 900 XP.\n` +
+    `┃ 📣 Evoluções reunidas em um resumo por hora no grupo.\n` +
     `┃ 📈 Após o nível 10, a exigência aumenta gradualmente.\n` +
     `┃ 💬 Conversas válidas rendem *5–12 XP*.\n` +
     `┃ 🤖 Usar a Kobayashi rende *14–18 XP*.\n` +

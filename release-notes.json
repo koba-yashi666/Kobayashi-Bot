@@ -1,12 +1,18 @@
 {
-  "version": "5.4.24",
-  "title": "Novo GIF e legenda do socar",
-  "date": "2026-10-24",
-  "added": [],
+  "version": "5.4.25",
+  "title": "Levels equilibrados e resumo por hora",
+  "date": "2026-10-26",
+  "added": [
+    "Resumo de evoluções por grupo, agrupado durante uma hora: menção, nível inicial/final e soma de Dragon-coins realmente recebidas.",
+    "Fila persistente, recuperação após reinício, retentativa em falhas e proteção contra envios concorrentes.",
+    "Migração automática da curva antiga com backup e preservação do nível e progresso proporcional."
+  ],
   "changed": [
-    "/socar e /soco passam a usar mídia local em reprodução GIF, enviada pelo criador.",
-    "Legenda personalizada: @autor espancou @alvo que deixou ele sem dentes.",
-    "Suporte a menção ou resposta, com menções reais das duas pessoas."
+    "XP necessário para o próximo nível: 1–10=200; 11–20=350; 21–30=500; 31–40=700; 41–49=900; máximo 50.",
+    "Removido o aviso individual imediato de level-up. Níveis e moedas continuam atualizados imediatamente.",
+    "A mesma pessoa aparece uma vez por resumo; múltiplos níveis somam apenas recompensas pagas.",
+    "Sem evoluções não há mensagem. /level off também suspende os resumos do grupo. Ajuda de níveis atualizada.",
+    "Nenhuma alteração no combate ou sistema de RPG; nenhum banco, sessão ou configuração pessoal no pacote."
   ],
   "v1.0.14": {
     "version": "1.0.14",
@@ -2036,6 +2042,17 @@
       "Aviso desligado bloqueia texto, foto e envio alternativo de despedida.",
       "Entradas, textos e fotos personalizados são preservados. Configuração salva no banco atual de boas-vindas.",
       "Grupos antigos mantêm o comportamento anterior até usar /saída off. Menu ADM e ajuda atualizados."
+    ]
+  },
+  "v5.4.24": {
+    "version": "5.4.24",
+    "title": "Novo GIF e legenda do socar",
+    "date": "2026-10-24",
+    "added": [],
+    "changed": [
+      "/socar e /soco passam a usar mídia local em reprodução GIF, enviada pelo criador.",
+      "Legenda personalizada: @autor espancou @alvo que deixou ele sem dentes.",
+      "Suporte a menção ou resposta, com menções reais das duas pessoas."
     ]
   }
 }

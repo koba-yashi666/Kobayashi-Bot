@@ -1,5 +1,5 @@
 {
-  "version": "5.4.24",
-  "name": "Kobayashi Bot v5.4.24 — Novo GIF e legenda do socar",
-  "update": "/socar e /soco usam o GIF enviado e a legenda personalizada com duas menções."
+  "version": "5.4.25",
+  "name": "Kobayashi Bot v5.4.25 — Levels equilibrados e resumo por hora",
+  "update": "Nova curva de XP com migração de níveis/progresso; resumo persistente de evoluções por hora com menções e Dragon-coins recebidas."
 }
