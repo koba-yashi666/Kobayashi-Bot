@@ -1,14 +1,19 @@
 {
-  "version": "5.4.26",
-  "title": "Mini-jogos no menu da Kobayashi",
+  "version": "5.5.0",
+  "title": "Mini-jogos — versão final",
   "date": "2026-10-27",
   "added": [
     "/mini-jogos e /minijogos: acesso ao arcade no navegador.",
-    "Categoria no menu interativo e atalhos no menu principal e de brincadeiras."
+    "Categoria no menu interativo e atalhos no menu principal e de brincadeiras.",
+    "Arcade público com poções (20 fases), jogo da velha e Conecta 4 com IA ou dupla, quiz (50 perguntas) e forca (60 palavras).",
+    "Forca com resposta por palavra inteira; acentos aceitos e erro custa uma tentativa."
   ],
   "changed": [
     "Respeita /botão on/off; botão com alternativa em texto após falha.",
-    "Jogos independentes das moedas e dos dados do bot."
+    "Jogos independentes das moedas e dos dados do bot.",
+    "Poções com misturas mais difíceis e menos frascos vazios nas fases avançadas.",
+    "IA do jogo da velha calcula as respostas e sorteia entre jogadas com a mesma avaliação.",
+    "Site público: membros acessam pelo link do painel. Progresso salvo no navegador."
   ],
   "previous": {
     "version": "5.4.25",
