@@ -1,3 +1,4 @@
+import { sendMiniGamesMenu } from "./lib/ui/miniGamesMenu.js";
 import { queueLevelUp } from "./lib/features/social/levelSummary.js";
 import { handleDepartureCommand } from "./lib/features/group/departureNotice.js";
 import { runBanFake } from "./lib/features/moderation/banFake.js";
@@ -1553,6 +1554,8 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "materiais",
   "menu",
   "menuadm",
+  "mini-jogos",
+  "minijogos",
   "menubn",
   "menubrincadeiras",
   "menudiversao",
@@ -9783,6 +9786,12 @@ case "botao": {
   if (!["on","off","status"].includes(action)) return reply(`Use ${prefix}botão on ou ${prefix}botão off. Vale para o menu de todo o bot.`);
   if(action!=="status")setMenuButtonsEnabled(action==="on",sender);
   return reply(`🐉🔘 Menu de botões: *${menuButtonsEnabled()?"ATIVADO":"DESATIVADO"}*\nConfiguração global salva.\n${prefix}menu ${menuButtonsEnabled()?"usa botões":"usa o menu convencional"}.`);
+}
+break;
+
+case "mini-jogos":
+case "minijogos": {
+  await sendMiniGamesMenu({ conn, jid: from, quoted: info, buttonsEnabled: menuButtonsEnabled() }, { generateWAMessageFromContent });
 }
 break;
 

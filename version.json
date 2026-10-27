@@ -1,5 +1,5 @@
 {
-  "version": "5.4.25",
-  "name": "Kobayashi Bot v5.4.25 — Levels equilibrados e resumo por hora",
-  "update": "Nova curva de XP com migração de níveis/progresso; resumo persistente de evoluções por hora com menções e Dragon-coins recebidas."
+  "version": "5.4.26",
+  "name": "Kobayashi Bot v5.4.26 — Mini-jogos",
+  "update": "Menu de acesso aos mini-jogos com botão e alternativa em texto."
 }

@@ -1,0 +1,10 @@
+v5.4.26 — Mini-jogos
+/mini-jogos ou /minijogos abre um painel com os cinco jogos e botão Jogar.
+Disponível no menu principal, categorias com botões e /menubn.
+Membros comuns podem acessar, respeitando as demais restrições existentes do bot.
+O painel respeita /botão off e envia link em texto quando o envio do botão falha.
+Os jogos abrem no navegador: não são executados dentro de uma mensagem do WhatsApp.
+Progresso salvo no navegador; sem integração com Dragon-coins ou RPG-coins.
+IMPORTANTE: o Site do protótipo ainda é privado. Para os membros jogarem,
+o proprietário precisa autorizar sua publicação pública. Este ZIP não altera o acesso ao Site.
+Termux serve apenas para enviar a atualização ao GitHub. Sincronize e reinicie na hospedagem.
