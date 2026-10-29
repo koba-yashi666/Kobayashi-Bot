@@ -4,6 +4,7 @@ const TRAITS=[
 ];
 const RANKS=TRAITS.map(x=>`rank${x}`);
 const modules = [
+  import("./dragonFun/macetar.js"),
   import("./dragonFun/naodeagua.js"),
   import("./dragonFun/relationships.js"),
   import("./dragonFun/furry.js"),

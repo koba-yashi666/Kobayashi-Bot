@@ -1,2084 +1,2093 @@
 {
-  "version": "5.5.1",
-  "title": "Lamber com GIF personalizado",
+  "version": "5.5.2",
+  "title": "Macetar no Dragon Fun",
   "date": "2026-10-28",
-  "changed": [
-    "/lamber usa o vídeo enviado como GIF e menciona o alvo primeiro: @marcado lambeu gostosinho o @autor.",
-    "Mantido suporte a menção ou resposta à mensagem."
+  "added": [
+    "/macetar @membro ou respondendo uma mensagem.",
+    "Módulo separado e atalho no menu de brincadeiras; resposta em texto."
   ],
   "previous": {
-    "version": "5.5.0",
-    "title": "Mini-jogos — versão final",
-    "date": "2026-10-27",
-    "added": [
-      "/mini-jogos e /minijogos: acesso ao arcade no navegador.",
-      "Categoria no menu interativo e atalhos no menu principal e de brincadeiras.",
-      "Arcade público com poções (20 fases), jogo da velha e Conecta 4 com IA ou dupla, quiz (50 perguntas) e forca (60 palavras).",
-      "Forca com resposta por palavra inteira; acentos aceitos e erro custa uma tentativa."
-    ],
+    "version": "5.5.1",
+    "title": "Lamber com GIF personalizado",
+    "date": "2026-10-28",
     "changed": [
-      "Respeita /botão on/off; botão com alternativa em texto após falha.",
-      "Jogos independentes das moedas e dos dados do bot.",
-      "Poções com misturas mais difíceis e menos frascos vazios nas fases avançadas.",
-      "IA do jogo da velha calcula as respostas e sorteia entre jogadas com a mesma avaliação.",
-      "Site público: membros acessam pelo link do painel. Progresso salvo no navegador."
+      "/lamber usa o vídeo enviado como GIF e menciona o alvo primeiro: @marcado lambeu gostosinho o @autor.",
+      "Mantido suporte a menção ou resposta à mensagem."
     ],
     "previous": {
-      "version": "5.4.25",
-      "title": "Levels equilibrados e resumo por hora",
-      "date": "2026-10-26",
+      "version": "5.5.0",
+      "title": "Mini-jogos — versão final",
+      "date": "2026-10-27",
       "added": [
-        "Resumo de evoluções por grupo, agrupado durante uma hora: menção, nível inicial/final e soma de Dragon-coins realmente recebidas.",
-        "Fila persistente, recuperação após reinício, retentativa em falhas e proteção contra envios concorrentes.",
-        "Migração automática da curva antiga com backup e preservação do nível e progresso proporcional."
+        "/mini-jogos e /minijogos: acesso ao arcade no navegador.",
+        "Categoria no menu interativo e atalhos no menu principal e de brincadeiras.",
+        "Arcade público com poções (20 fases), jogo da velha e Conecta 4 com IA ou dupla, quiz (50 perguntas) e forca (60 palavras).",
+        "Forca com resposta por palavra inteira; acentos aceitos e erro custa uma tentativa."
       ],
       "changed": [
-        "XP necessário para o próximo nível: 1–10=200; 11–20=350; 21–30=500; 31–40=700; 41–49=900; máximo 50.",
-        "Removido o aviso individual imediato de level-up. Níveis e moedas continuam atualizados imediatamente.",
-        "A mesma pessoa aparece uma vez por resumo; múltiplos níveis somam apenas recompensas pagas.",
-        "Sem evoluções não há mensagem. /level off também suspende os resumos do grupo. Ajuda de níveis atualizada.",
-        "Nenhuma alteração no combate ou sistema de RPG; nenhum banco, sessão ou configuração pessoal no pacote."
+        "Respeita /botão on/off; botão com alternativa em texto após falha.",
+        "Jogos independentes das moedas e dos dados do bot.",
+        "Poções com misturas mais difíceis e menos frascos vazios nas fases avançadas.",
+        "IA do jogo da velha calcula as respostas e sorteia entre jogadas com a mesma avaliação.",
+        "Site público: membros acessam pelo link do painel. Progresso salvo no navegador."
       ],
-      "v1.0.14": {
-        "version": "1.0.14",
-        "title": "Dragon Game Menu",
-        "changes": [
-          "Novo visual do menu de jogos inspirado no modelo enviado, com identidade Kobayashi.",
-          "/menubn e aliases de jogos unificados no novo menu."
-        ]
-      },
-      "v1.0.15": {
-        "version": "1.0.15",
-        "title": "Updater HTTP 403 Fix",
-        "changes": [
-          "Updater deixa de depender da API Git Trees do GitHub, que retornava HTTP 403 em algumas hospedagens.",
-          "Atualizações passam a baixar o branch completo via codeload em tar.gz.",
-          "Fallback de version.json via jsDelivr.",
-          "Suporte opcional a GITHUB_TOKEN/KOBAYASHI_GITHUB_TOKEN."
-        ]
-      },
-      "v1.0.16": {
-        "version": "1.0.16",
-        "title": "KobaBan Personalizado",
-        "changes": [
-          "Novo /KobaBan exclusivo da Kobayashi.",
-          "Mensagem personalizada com alvo, administrador e motivo.",
-          "KobaBan registrado no histórico de punições e logs administrativos."
-        ]
-      },
-      "v1.0.17": {
-        "version": "1.0.17",
-        "title": "KobaBan GIF",
-        "changes": [
-          "Adicionada animação personalizada enviada pelo criador ao /KobaBan.",
-          "Sequência do KobaBan: animação, mensagem personalizada e remoção.",
-          "A mídia fica embutida no pacote para funcionar também na hospedagem."
-        ]
-      },
-      "v1.0.19": {
-        "version": "1.0.19",
-        "title": "Perfil + Dragon Fun Upgrade",
-        "changes": [
-          "/perfil remodelado usando referências do Kobayashi Bot, Kobayashi Bot e do pack de decoração.",
-          "Perfil agora destaca identidade, humor diário, bio, cargo, Level, atividade, Dragon Social, aura e advertências.",
-          "Comandos do /menubn receberam textos próprios em vez de respostas genéricas.",
-          "Beijo, abraço, carinho/cafuné, tapa, chute, mordida, soco e outras interações ganharam frases mais próximas das referências originais.",
-          "Medidores como lindo/linda, gado, feio, corno, otaku, rico/pobre, gostoso/gostosa e outros foram aprimorados.",
-          "/ppt ganhou instruções e resultado visual melhores.",
-          "/helpcmd recebeu explicações para mais comandos do Salão de Brincadeiras."
-        ]
-      },
-      "v2.0.0": {
-        "version": "2.0.0",
-        "title": "Dragon RPG - Fundação",
-        "changes": [
-          "Início oficial do Dragon RPG da Kobayashi.",
-          "Novo menu /dragonrpg com tutorial e manual para iniciantes.",
-          "Criação de personagem persistente com nível RPG, XP, ouro, atributos, inventário e equipamentos.",
-          "Classes humanas iniciais: Escudeiro, Guerreiro, Mago, Arqueiro e Curandeiro.",
-          "Despertar Dracônico integrado ao Level social existente, desbloqueado no nível 20.",
-          "Facções dracônicas: Caos, Harmonia, Espectadores e Independente.",
-          "Linhagens dracônicas inspiradas em Maid Dragon: Chamas/Tohru, Abissal/Fafnir, Carmesim/Ilulu, Aquático/Elma, Arcano/Lucoa e Elétrico/Kanna.",
-          "Comandos /rpgajuda, /classeinfo e /rpgcomandos para explicar o sistema sem confundir novos jogadores.",
-          "Sistema isolado em lib/features/rpg/dragonRpg.js com banco próprio files/database/dragon-rpg.json criado automaticamente."
-        ]
-      },
-      "v2.0.1": {
-        "version": "2.0.1",
-        "title": "Dragon RPG - Batalhas e Missões",
-        "changes": [
-          "Combate PvE por turnos com atacar, defender, habilidade, itens e fuga.",
-          "Cinco regiões de exploração e oito tipos de monstros escaláveis.",
-          "XP RPG, level up, pontos distribuíveis e recuperação de HP/Mana.",
-          "Drops de materiais e consumíveis integrados ao inventário.",
-          "Missões com progresso automático, recompensas e até três missões ativas.",
-          "Descanso com cooldown, derrota sem perda de personagem e rank RPG global."
-        ]
-      },
-      "v2.0.3": {
-        "version": "2.0.3",
-        "title": "Dragon RPG Reset System",
-        "changes": [
-          "Novo /zerarrpg: exclusivo do dono principal, zera o progresso RPG dos membros do grupo atual.",
-          "Novo /zerarrpgg: exclusivo do dono principal, apaga globalmente todos os personagens Dragon RPG, incluindo o dono do bot.",
-          "Os dois resets exigem confirmação explícita para evitar exclusões acidentais.",
-          "Backup automático do banco Dragon RPG é criado antes de qualquer reset que apague personagens.",
-          "O Level social normal da Kobayashi não é apagado pelos resets RPG.",
-          "Menu do dono e /helpcmd atualizados com os novos comandos."
-        ]
-      },
-      "v2.0.4": {
-        "version": "2.0.4",
-        "title": "Dragon RPG Reset Confirmation Fix",
-        "changes": [
-          "Corrigido /zerarrpg confirmar que podia repetir a tela de confirmação.",
-          "Corrigido /zerarrpgg confirmar pelo mesmo mecanismo.",
-          "A confirmação agora lê o texto completo dos argumentos e normaliza espaços/acentos.",
-          "Também aceita confirmar, confirmo, confirmado e sim."
-        ]
-      },
-      "v2.0.6": {
-        "version": "2.0.6",
-        "title": "Isolamento Dragon RPG / RPG Clássico",
-        "changes": [
-          "Dragon RPG v2 e RPG clássico agora possuem estados de ativação independentes por grupo.",
-          "Novo /mododragonrpg on/off para controlar somente o Dragon RPG.",
-          "/modorpg continua controlando somente o RPG clássico.",
-          "Sistema desativado fica silencioso e não responde a seus comandos.",
-          "Aliases iguais deixam de gerar resposta cruzada; Dragon RPG tem prioridade quando estiver ativado.",
-          "Configuração do Dragon RPG salva em files/database/dragon-rpg-mode.json."
-        ]
-      },
-      "v2.0.7": {
-        "version": "2.0.7",
-        "title": "Emergency Full Command Arguments Fix",
-        "changes": [
-          "Parser global agora reconhece a mensagem completa após o prefixo.",
-          "Argumentos são preservados para comandos switch e modulares.",
-          "Espaços múltiplos, tabs e quebras de linha são aceitos entre comando e complemento.",
-          "/dragonrpg on e /dragonrpg off agora funcionam diretamente.",
-          "/dragonrpg sem complemento continua abrindo o menu.",
-          "Dragon RPG pode ser reativado com /dragonrpg on mesmo quando estiver desligado."
-        ]
-      },
-      "v2.0.9": {
-        "version": "2.0.9",
-        "title": "Koba Trigger",
-        "changes": [
-          "Chamadas naturais iniciadas por Koba/Kobayashi.",
-          "Koba menu, Koba perfil, Koba figurinha e Koba Dragon RPG.",
-          "Koba tocar <música> executa /play <música>.",
-          "Ações administrativas reconhecidas continuam respeitando permissões.",
-          "Frases sem intenção cadastrada são ignoradas silenciosamente.",
-          "Novo /kobatrigger on/off por grupo."
-        ]
-      },
-      "v2.0.10": {
-        "version": "2.0.10",
-        "title": "Koba Trigger Universal",
-        "changes": [
-          "Koba Trigger ampliado para 564 comandos/aliases detectados no bot.",
-          "Formato universal Koba <comando> [argumentos].",
-          "Mantidos atalhos naturais como Koba tocar <música>.",
-          "Argumentos completos são preservados.",
-          "Frases sem comando real continuam silenciosas.",
-          "Permissões e bloqueios originais continuam sendo verificados."
-        ]
-      },
-      "v2.0.11": {
-        "version": "2.0.11",
-        "title": "Lista Branca Protection Fix",
-        "changes": [
-          "Corrigido módulo da Lista Branca e normalização de JIDs/números.",
-          "Anti-Trava agora ignora membros protegidos.",
-          "ADVs automáticas não punem whitelist.",
-          "Remoção automática da lista negra local não expulsa whitelist.",
-          "Comandos manuais de ADM continuam disponíveis."
-        ]
-      },
-      "v2.0.12": {
-        "version": "2.0.12",
-        "title": "Lista Branca Hard Guard",
-        "changes": [
-          "Proteção de whitelist movida para o nível do socket groupParticipantsUpdate.",
-          "Qualquer tentativa de remoção pelo bot é filtrada antes de chegar ao WhatsApp.",
-          "Aliases LID/PN/phoneNumber/JID são salvos ao adicionar à Lista Branca.",
-          "Membro protegido não pode ser removido nem por /ban enquanto estiver na Lista Branca.",
-          "Para banir, primeiro remova da Lista Branca."
-        ]
-      },
-      "2.0.16": {
-        "version": "2.0.16",
-        "title": "RankADM 2.0",
-        "changes": [
-          "Novo visual decorado para o ranking.",
-          "Filtros por texto, fotos, vídeos, figurinhas e comandos.",
-          "Líderes individuais por categoria.",
-          "Perfil detalhado de ADM por menção ou resposta.",
-          "Percentual de participação no grupo.",
-          "Reset do ranking agora exige confirmação."
-        ]
-      },
-      "2.0.19": {
-        "version": "2.0.19",
-        "title": "Créditos Luiz G. / Kobayashi",
-        "changes": [
-          "Banner antigo da base substituído.",
-          "Novo crédito: Luiz G. / Kobayashi.",
-          "Aviso contra venda sem autorização.",
-          "Contato de aluguel: 5515997075304."
-        ]
-      },
-      "2.0.21": {
-        "version": "2.0.21",
-        "title": "Lista Negra AutoRemove",
-        "changes": [
-          "/listanegra remove imediatamente e bloqueia reentrada.",
-          "/listanegrag expulsa de todos os grupos onde a Kobayashi é ADM.",
-          "Entrada de usuário em lista negra dispara remoção automática.",
-          "Lista Negra passa a ter prioridade sobre whitelist para o AutoGuard."
-        ]
-      },
-      "2.0.22": {
-        "version": "2.0.22",
-        "title": "Anti-PV 3 Modos",
-        "changes": [
-          "Novo modo aviso.",
-          "Novo modo bloquear com bloqueio automático do contato.",
-          "Novo modo aluguel com redirecionamento para o criador.",
-          "Compatibilidade com a configuração antiPv antiga."
-        ]
-      },
-      "2.0.23": {
-        "version": "2.0.23",
-        "title": "Pacotes de Figurinhas + Novidades + Menus",
-        "date": "2026-09-10",
-        "commands": [
-          {
-            "name": "pacote",
-            "category": "Ateliê de Escamas",
-            "note": "captura, registra e envia um pacote salvo"
-          },
-          {
-            "name": "figurinha",
-            "category": "Ateliê de Escamas",
-            "note": "envia as figurinhas de um pacote uma por vez"
-          }
-        ],
-        "changes": [
-          "Corrigido o sistema de pacotes de figurinhas com captura real via /pacote fig on e /pacote fig off.",
-          "/pacote add Nome registra todas as figurinhas capturadas como um pacote persistente.",
-          "/pacote Nome envia o pacote registrado completo.",
-          "/figurinha Nome envia uma figurinha por vez e continua da posição anterior.",
-          "/novidades agora escolhe automaticamente a maior versão do release-notes.json, em vez de poder ficar preso em uma versão antiga.",
-          "/novidades ganhou uma seção própria de NOVOS COMANDOS.",
-          "Menu de figurinhas atualizado com /pacote, /figurinha e /rgfigu.",
-          "Menu ADM atualizado com /rankadm, /resetrankadm e /listanegra.",
-          "Regra de atualização consolidada: comandos novos devem entrar no menu correspondente e nas novidades da versão."
-        ]
-      },
-      "2.0.24": {
-        "version": "2.0.24",
-        "title": "Dragon RPG — Progressão, Classes e Atributos",
-        "date": "2026-09-10",
-        "commands": [
-          {
-            "name": "classesavancadas",
-            "category": "Dragon RPG",
-            "note": "mostra requisitos e progresso das especializações"
-          },
-          {
-            "name": "classeavancada",
-            "category": "Dragon RPG",
-            "note": "desbloqueia uma classe avançada ao cumprir todos os requisitos"
-          }
-        ],
-        "changes": [
-          "Tutoriais do Dragon RPG reescritos com explicações detalhadas em 9 tópicos.",
-          "Cada nível RPG agora concede 3 pontos de atributo e 1 ponto de habilidade.",
-          "Adicionadas classes avançadas: Necromante, Assassino, Paladino e Feiticeiro.",
-          "Classes avançadas exigem nível, inimigos derrotados, classe base e, em alguns casos, atributos/especialidades.",
-          "Perfil RPG agora mostra classe avançada, pontos de habilidade, inimigos derrotados, Combate, Furtividade, Sobrevivência e Arcana.",
-          "Especialidades evoluem conforme nível, vitórias e estilo da classe.",
-          "Novos comandos adicionados ao menu Dragon RPG e ao /novidades."
-        ]
-      },
-      "2.0.25": {
-        "version": "2.0.25",
-        "title": "Dragon RPG — Itens Fora de Combate + Comandos Fix",
-        "date": "2026-09-10",
-        "changes": [
-          "Itens consumíveis agora podem ser usados dentro e fora de batalha.",
-          "Poção de HP recupera até 45 HP.",
-          "Poção de Mana recupera até 40 Mana.",
-          "Poção de Força aumenta em 50% o próximo /atacar.",
-          "Poção de Mana e Poção de Força adicionadas à loja RPG.",
-          "Comandos e aliases atuais do Dragon RPG sincronizados com o roteador do modo e com o Koba Trigger.",
-          "Classes avançadas e comandos recentes passam a ser reconhecidos corretamente."
-        ]
-      },
-      "2.0.26": {
-        "version": "2.0.26",
-        "title": "Perfil Kobayashi 2.0",
-        "date": "2026-09-10",
-        "changes": [
-          "/perfil atual substituído pelo Perfil Kobayashi 2.0, sem criar handler concorrente.",
-          "Perfil usa a foto de perfil do WhatsApp quando disponível.",
-          "Nova identidade visual original Kobayashi com Identidade, Hierarquia, Dragon Social, Aura Kobayashi, Atividade e Dragon RPG.",
-          "Personalidade persistente com Caos, Fofura, Aura, Coragem e Mistério.",
-          "Integração com classe, especialização, nível, HP, Mana, Combate e Furtividade do Dragon RPG.",
-          "Mantido suporte a /perfil, /perfil @membro e /perfil respondendo a uma mensagem.",
-          "Conselho da Koba muda diariamente entre frases próprias do bot."
-        ]
-      },
-      "2.0.27": {
-        "version": "2.0.27",
-        "title": "Perfil Kobayashi — Hierarquia ADM Fix",
-        "date": "2026-09-12",
-        "changes": [
-          "Corrigida a detecção de administradores no /perfil.",
-          "O perfil agora compara JID normal, LID, número telefônico e aliases resolvidos pelo Baileys.",
-          "A lista real de administradores do grupo e o metadata do participante são usados em conjunto.",
-          "Dono, líder e ADM continuam sendo estados independentes: um dono que também for ADM pode aparecer com ambos como ✅.",
-          "Mantido apenas um handler ativo do /perfil."
-        ]
-      },
-      "2.0.28": {
-        "version": "2.0.28",
-        "title": "Dono — Hierarquia Completa",
-        "date": "2026-09-12",
-        "changes": [
-          "Dono principal recebe Dono, Líder e Premium automaticamente no /perfil.",
-          "ADM continua aparecendo somente quando o dono realmente é ADM/dono do grupo atual.",
-          "Permissões dos demais membros permanecem reais."
-        ]
-      },
-      "2.0.29": {
-        "version": "2.0.29",
-        "title": "Aluguel — Responsável e Vencimento",
-        "date": "2026-09-12",
-        "commands": [
-          {
-            "name": "rg_aluguel",
-            "category": "Dono / Aluguel",
-            "note": "agora exige responsável e aceita plano ou duração"
-          },
-          {
-            "name": "renovar_aluguel",
-            "category": "Dono / Aluguel",
-            "note": "renova por plano ou duração e mantém o responsável"
-          }
-        ],
-        "changes": [
-          "/rg_aluguel @fulano plano X registra o grupo no plano escolhido.",
-          "/rg_aluguel @fulano 30D registra duração personalizada.",
-          "Responsável pelo aluguel é obrigatório.",
-          "Uma semana antes do vencimento o bot marca o responsável automaticamente.",
-          "Após o vencimento, todos os comandos ficam bloqueados para não-donos; somente o dono principal continua usando o bot.",
-          "/renovar_aluguel limpa o aviso de vencimento e preserva o responsável."
-        ]
-      },
-      "2.0.30": {
-        "version": "2.0.30",
-        "title": "Perfil — Porcentagens Corrigidas",
-        "date": "2026-09-12",
-        "changes": [
-          "Corrigida a barra visual das porcentagens da Aura Kobayashi.",
-          "As barras agora usam blocos parciais em vez de arredondar visualmente os valores.",
-          "Os valores persistentes dos usuários foram mantidos."
-        ]
-      },
-      "2.0.31": {
-        "version": "2.0.31",
-        "title": "Perfil — Porcentagens Aleatórias",
-        "date": "2026-09-12",
-        "changes": [
-          "Caos, Fofura, Aura, Coragem e Mistério agora são sorteados de 0% a 100% a cada uso do /perfil.",
-          "A barra proporcional da v2.0.30 foi mantida."
-        ]
-      },
-      "2.0.32": {
-        "version": "2.0.32",
-        "title": "Porcentagens 100% Aleatórias",
-        "date": "2026-09-12",
-        "changes": [
-          "Todas as porcentagens do /perfil são sorteadas novamente a cada uso.",
-          "Todos os medidores percentuais do /menubn agora sorteiam um novo valor em toda execução.",
-          "Traits como linda, lindo, gay, hetero, lesbica, gado, feio, corno, bebado, gostoso, gostosa, golpista, otaku e os demais deixam de usar porcentagem estável.",
-          "/shipo deixa de reutilizar compatibilidade anterior.",
-          "Rankings percentuais do /menubn sorteiam novamente participantes e valores em cada execução.",
-          "/chance, /sorte, /lucy e comandos semelhantes permanecem aleatórios."
-        ]
-      },
-      "2.0.33": {
-        "version": "2.0.33",
-        "title": "MSG Global — Avisos em todos os grupos",
-        "date": "2026-09-12",
-        "commands": [
-          {
-            "name": "msg",
-            "category": "Dono",
-            "note": "envia aviso em todos os grupos marcando todos"
-          }
-        ],
-        "changes": [
-          "Novo /msg texto, exclusivo do dono principal.",
-          "Envia o aviso para todos os grupos em que a Kobayashi participa.",
-          "Marca todos os participantes de cada grupo através de mentions.",
-          "Mostra ao dono quantos grupos receberam e quantos envios falharam.",
-          "Incluído pequeno intervalo entre grupos para reduzir disparos simultâneos."
-        ]
-      },
-      "3.0.0": {
-        "version": "3.0.0",
-        "title": "Kobayashi V3.0 — Mega Integração",
-        "date": "2026-09-12",
-        "commands": [
-          {
-            "name": "menuv3",
-            "category": "Geral",
-            "note": "central dos sistemas V3"
-          },
-          {
-            "name": "calc",
-            "category": "Ferramentas",
-            "note": "calculadora local"
-          },
-          {
-            "name": "antipalavra",
-            "category": "Admin",
-            "note": "filtro local de palavras"
-          },
-          {
-            "name": "addautoresposta",
-            "category": "Admin",
-            "note": "respostas automáticas locais"
-          },
-          {
-            "name": "listargrupos",
-            "category": "Dono",
-            "note": "lista todos os grupos do bot"
-          },
-          {
-            "name": "v3status",
-            "category": "Geral",
-            "note": "status dos módulos V3"
-          }
-        ],
-        "changes": [
-          "Grande salto para a linha v3.0.",
-          "Compatibilidade de nomes/aliases inspirada nas bases Kobayashi para os sistemas que a Kobayashi já possui.",
-          "Central V3 adicionada ao menu principal.",
-          "Novo pacote de ferramentas locais sem API: cálculo, texto, sorteios, Base64, UUID e utilidades.",
-          "Novo AntiPalavra local por grupo.",
-          "Novo sistema de respostas automáticas locais por grupo.",
-          "Sistemas já existentes da Kobayashi foram preservados: aluguel, Admin Center, logs, proteção, stickers, Level, Dragon Social, jogos, RPG clássico e Dragon RPG.",
-          "Comandos que dependem de APIs externas foram separados e não fazem parte desta versão."
-        ]
-      },
-      "3.0.1": {
-        "version": "3.0.1",
-        "title": "MSG Sem Limite + Identidade Kobayashi",
-        "date": "2026-09-13",
-        "changes": [
-          "Removido o limite artificial de caracteres do /msg.",
-          "Avisos grandes são divididos automaticamente em partes.",
-          "Removidas referências textuais externas.",
-          "Identidade da V3 padronizada exclusivamente como Kobayashi Bot."
-        ]
-      },
-      "3.0.2": {
-        "version": "3.0.2",
-        "title": "Cita — Marcar Todos",
-        "date": "2026-09-13",
-        "commands": [
-          {
-            "name": "cita",
-            "category": "Admin",
-            "note": "marca todos do grupo"
-          }
-        ],
-        "changes": [
-          "Novo /cita para marcar todos.",
-          "/cita texto marca todos junto com o aviso.",
-          "Restrito a ADM/dono.",
-          "Adicionado ao menu ADM e /helpcmd."
-        ]
-      },
-      "3.0.3": {
-        "version": "3.0.3",
-        "title": "Gestão Global + Estatísticas",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "grupos",
-            "category": "Dono"
-          },
-          {
-            "name": "grupo",
-            "category": "Dono"
-          },
-          {
-            "name": "clientes",
-            "category": "Dono"
-          },
-          {
-            "name": "alugueis",
-            "category": "Dono"
-          },
-          {
-            "name": "statusglobal",
-            "category": "Dono"
-          },
-          {
-            "name": "estatisticas",
-            "category": "Dono"
-          },
-          {
-            "name": "comandosmaisusados",
-            "category": "Dono"
-          },
-          {
-            "name": "erros",
-            "category": "Dono"
-          },
-          {
-            "name": "atividadegp",
-            "category": "Geral"
-          },
-          {
-            "name": "infogrupo",
-            "category": "Geral"
-          }
-        ],
-        "changes": [
-          "Gestão global dos grupos e clientes.",
-          "Estatísticas de uso, comandos e atividade.",
-          "Status global do processo.",
-          "Comandos distribuídos nos menus existentes; nenhum menu novo."
-        ]
-      },
-      "3.0.4": {
-        "version": "3.0.4",
-        "title": "Correção de reconhecimento do dono",
-        "date": "2026-09-14",
-        "changes": [
-          "Corrigido reconhecimento do dono principal quando o WhatsApp entrega identidade em formato LID.",
-          "A validação agora considera PN, LID, participant, participantAlt e metadados do participante.",
-          "O número configurado do dono é comparado pelos dígitos, evitando falha por formatação.",
-          "Líderes também recebem a mesma resolução robusta de identidade.",
-          "Sentinel passa a receber as identidades resolvidas do dono."
-        ]
-      },
-      "3.0.5": {
-        "version": "3.0.5",
-        "title": "Reconhecimento definitivo do dono",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "debugdono",
-            "category": "Dono",
-            "note": "diagnóstico seguro da identidade detectada"
-          }
-        ],
-        "changes": [
-          "Reconhecimento do dono agora aceita PN, LID, participant, participantAlt, phoneNumber e JID.",
-          "Adicionado tratamento da variação brasileira com ou sem o 9º dígito.",
-          "A Kobayashi tenta resolver LID para PN antes de negar permissão de dono.",
-          "O número configurado, configuração inicial, variável KOBAYASHI_OWNER e fallback do criador são aceitos.",
-          "Novo /debugdono para diagnosticar a identidade sem revelar o número completo."
-        ]
-      },
-      "3.0.6": {
-        "version": "3.0.6",
-        "title": "Permissão do dono nos comandos globais",
-        "date": "2026-09-14",
-        "changes": [
-          "Corrigida a divergência entre /debugdono e os comandos novos de gestão.",
-          "Gestão global agora usa diretamente SoDonoPrincipal, já validado pelo núcleo.",
-          "/grupos, /grupo, /clientes, /alugueis, /statusglobal, /estatisticas, /comandosmaisusados e /erros passam a reconhecer o mesmo dono que /debugdono."
-        ]
-      },
-      "3.0.7": {
-        "version": "3.0.7",
-        "title": "Moderação V3",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "protecao",
-            "category": "Admin",
-            "note": "painel e perfis de proteção baixa, media, alta e off"
-          }
-        ],
-        "changes": [
-          "O /protecao existente foi aprimorado em vez de criar um novo menu ou comando concorrente.",
-          "Novo /protecao baixa para proteção leve.",
-          "Novo /protecao media para proteção equilibrada.",
-          "Novo /protecao alta para proteção rígida.",
-          "Novo /protecao off para desligar os módulos automáticos controlados pelos perfis.",
-          "Apenas um modo de AntiLink fica ativo por perfil.",
-          "O /protecao sem argumento continua exibindo o painel.",
-          "Comando integrado ao /menuadm e /helpcmd."
-        ]
-      },
-      "3.0.8": {
-        "version": "3.0.8",
-        "title": "BAN MSG Global",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "ban_msg",
-            "category": "Dono",
-            "note": "registra textos proibidos e aplica Lista Negra Global automaticamente"
-          }
-        ],
-        "changes": [
-          "Novo /ban_msg para registrar frases proibidas globalmente.",
-          "Ao detectar uma frase registrada, o autor é adicionado automaticamente à Lista Negra Global.",
-          "A Kobayashi tenta remover o autor do grupo atual e de todos os grupos em que o encontrar e possuir permissão.",
-          "Auditoria automática é enviada ao dono com texto, nome, número, grupo e horário do ocorrido.",
-          "Suporte a /ban_msg add, /ban_msg del, /ban_msg list, /ban_msg on e /ban_msg off.",
-          "O comando foi adicionado ao menu do dono e ao /helpcmd."
-        ]
-      },
-      "3.0.9": {
-        "version": "3.0.9",
-        "title": "Blacklist Purge Global Fix",
-        "date": "2026-09-14",
-        "changes": [
-          "Corrigida a remoção do /ban_msg.",
-          "Criada varredura direta de todos os grupos em que a Kobayashi participa.",
-          "A remoção só é tentada nos grupos onde a Kobayashi é ADM.",
-          "A busca do alvo reconhece PN, LID, phoneNumber, participant e variação BR com/sem nono dígito.",
-          "A remoção tenta os identificadores reais encontrados nos metadados do grupo.",
-          "/listanegrag agora vasculha todos os grupos mesmo quando o número já estava cadastrado.",
-          "/listanegra agora também vasculha todos os grupos onde a Kobayashi é ADM e remove a pessoa.",
-          "As respostas mostram grupos verificados, grupos com ADM, onde o usuário foi encontrado, remoções e falhas.",
-          "A auditoria do /ban_msg passou a incluir o resultado completo da varredura."
-        ]
-      },
-      "4.0.0": {
-        "version": "4.0.0",
-        "title": "Licença + Atualizador Oficial",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "licenca",
-            "category": "Dono",
-            "note": "mostra licença, plano, cliente, cache e updates"
-          },
-          {
-            "name": "ativarlicenca",
-            "category": "Dono",
-            "note": "ativa a instalação usando uma chave"
-          },
-          {
-            "name": "verificarupdate",
-            "category": "Dono",
-            "note": "verifica o canal oficial sem instalar"
-          }
-        ],
-        "changes": [
-          "Fundação do sistema de venda permanente da Kobayashi.",
-          "Licenças remotas configuráveis com cache local de 7 dias.",
-          "Licença permanente continua rodando mesmo com indisponibilidade temporária do servidor; o servidor é exigido para ativação e revalidações quando necessário.",
-          "Atualizador V4 suporta manifesto oficial, canal stable, downloadUrl, SHA-256 e minimumVersion.",
-          "Atualizador preserva settings, sessão/bancos em files/database, files/license, .env, .git e node_modules.",
-          "Backup e rollback continuam ativos antes de substituir arquivos.",
-          "Adicionados comandos Termux para configurar, ativar, validar e consultar licença.",
-          "A instalação do criador mantém acesso de desenvolvimento enquanto o serviço remoto ainda não foi publicado."
-        ]
-      },
-      "4.0.1": {
-        "version": "4.0.1",
-        "title": "Distribuição Protegida + Build Cliente",
-        "date": "2026-09-14",
-        "changes": [
-          "Nova esteira npm run build:client para gerar a edição de comprador a partir da fonte oficial.",
-          "Build do comprador remove node_modules, caches NPM, backups do updater, ZIPs antigos, READMEs históricos e artefatos de desenvolvimento.",
-          "Bancos locais, sessão do WhatsApp, lista negra, RPG, aluguel, logs e estado de licença não são enviados no pacote do comprador.",
-          "settings/settings.json do comprador é gerado limpo, sem token, sessão ou números administrativos da instalação do criador.",
-          "Arquivos JavaScript sensíveis recebem ofuscação compatível com ESM baseada em codificação de literais de texto e banner de proteção.",
-          "Créditos oficiais, licença, updater, assets necessários e comandos permanecem no pacote.",
-          "O pacote protegido continua instalável em hospedagem comum, VPS ou Termux com npm install.",
-          "Build protegido inclui relatório de arquivos removidos, arquivos protegidos e SHA-256."
-        ]
-      },
-      "4.0.2": {
-        "version": "4.0.2",
-        "title": "License Server Admin + Key Management",
-        "date": "2026-09-14",
-        "commands": [
-          {
-            "name": "licencacriar",
-            "category": "Dono",
-            "note": "gera licença permanente para comprador"
-          },
-          {
-            "name": "licencas",
-            "category": "Dono",
-            "note": "lista licenças"
-          },
-          {
-            "name": "licencaver",
-            "category": "Dono",
-            "note": "detalha uma licença e instalações"
-          },
-          {
-            "name": "licencabloquear",
-            "category": "Dono",
-            "note": "bloqueia licença"
-          },
-          {
-            "name": "licencareativar",
-            "category": "Dono",
-            "note": "reativa licença"
-          },
-          {
-            "name": "licencadesvincular",
-            "category": "Dono",
-            "note": "remove vínculo de uma instalação"
-          }
-        ],
-        "changes": [
-          "Cliente administrativo para servidor de licenças.",
-          "Token administrativo separado da chave dos compradores.",
-          "Gestão de licenças pelo WhatsApp apenas para o dono principal.",
-          "Suporte a limite de instalações e desvinculação manual.",
-          "Servidor de licenças separado incluído como ZIP independente."
-        ]
-      },
-      "4.0.3": {
-        "version": "4.0.3",
-        "title": "Publicador de Updates Oficiais",
-        "date": "2026-09-14",
-        "changes": [
-          "Novo npm run release:client gera o pacote protegido do comprador e os arquivos de publicação em uma única etapa.",
-          "latest.json é gerado automaticamente com versão, canal, downloadUrl, SHA-256, minimumVersion e notas.",
-          "Changelog JSON da versão é criado automaticamente a partir de release-notes.json.",
-          "build:client agora lê a versão diretamente de version.json, eliminando versão fixa no gerador.",
-          "Arquivo PUBLICAR-vX.Y.Z.txt é criado com URLs, SHA-256 e comandos de configuração dos clientes.",
-          "Suporte a canal stable e base URL configurável por argumento ou variável KOBAYASHI_RELEASE_BASE_URL.",
-          "Modo --dry-run permite testar toda a geração antes de existir uma hospedagem pública de releases."
-        ]
-      },
-      "4.0.4": {
-        "version": "4.0.4",
-        "title": "BAN MSG Local Delete + Remove + Autoria",
-        "date": "2026-09-14",
-        "changes": [
-          "BAN MSG agora apaga a mensagem que acionou a regra no grupo de origem.",
-          "BAN MSG remove explicitamente o autor do grupo onde o texto foi enviado antes do purge global.",
-          "Lista Negra Global e remoção nos demais grupos continuam ativas.",
-          "Auditoria informa separadamente mensagem apagada e remoção do grupo atual.",
-          "Ajuda do /ban_msg atualizada com o novo comportamento.",
-          "Aviso de autoria e proibição de venda sem autorização incluído nos arquivos principais e módulos de licença."
-        ]
-      },
-      "4.0.5": {
-        "version": "4.0.5",
-        "title": "Dragon RPG 3.0 — Masmorras + Crafting",
-        "date": "2026-09-14",
-        "changes": [
-          "Novas masmorras: Floresta Ancestral, Caverna Dracônica, Ruínas Arcanas e Abismo Sombrio.",
-          "Novo sistema persistente de materiais, energia, cooldown, drops e crafting.",
-          "Receitas iniciais: poção, espada, arco, cajado, armadura e amuleto.",
-          "Novos comandos: /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon.",
-          "A venda/revenda da Kobayashi Bot sem autorização do criador permanece estritamente proibida."
-        ]
-      },
-      "4.0.6": {
-        "version": "4.0.6",
-        "title": "BAN MSG — Lista e Remoção Dedicadas",
-        "date": "2026-09-15",
-        "changes": [
-          "Novo /listaban_msg: lista os textos cadastrados e mostra o status do BAN MSG.",
-          "Novo /rmban_msg: remove uma regra pelo número exibido em /listaban_msg ou pelo texto cadastrado.",
-          "Os dois comandos são exclusivos do dono principal e foram adicionados ao /menudono.",
-          "O /ban_msg original continua responsável por cadastrar textos e ligar/desligar o sistema.",
-          "Mantida a proibição de venda/revenda da Kobayashi Bot sem autorização do criador."
-        ]
-      },
-      "4.0.7": {
-        "version": "4.0.7",
-        "title": "Menu Dragon RPG — Masmorras + Craft",
-        "date": "2026-09-15",
-        "changes": [
-          "Adicionados /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon ao menu existente do Dragon RPG.",
-          "Os novos comandos também aparecem em /rpgcomandos.",
-          "Nenhum novo menu foi criado."
-        ]
-      },
-      "4.0.8": {
-        "version": "4.0.8",
-        "title": "Dragon RPG 3.0 — Correção de Conflito de Roteamento",
-        "date": "2026-09-15",
-        "changes": [
-          "Os comandos de Masmorras e Crafting agora possuem roteamento prioritário próprio.",
-          "Aliases /masmorras, /dungeons, /masmorra, /dungeon, /materiais, /receitas, /crafts, /craft e /descansodungeon foram isolados do RPG genérico.",
-          "Os handlers do Dragon RPG 3.0 foram reposicionados antes do processamento genérico que podia interceptá-los.",
-          "Cada novo comando foi verificado para possuir somente um handler no switch principal.",
-          "Mantido o menu Dragon RPG atualizado da v4.0.7."
-        ]
-      },
-      "4.0.9": {
-        "version": "4.0.9",
-        "title": "Dragon RPG — Bosses 20%",
-        "date": "2026-09-15",
-        "changes": [
-          "Cada região de /explorar tem 20% de chance de gerar um Boss temático como combate real.",
-          "Bosses de exploração entram no sistema normal de atacar, defender, habilidade, item e fugir.",
-          "Cada masmorra tem 20% de chance de Boss; Bosses têm 55% de chance base de vitória e recompensas maiores.",
-          "Bosses adicionados: Guardião Ancestral, Sentinela Dracônico, Titã das Chamas, Devorador do Abismo e Dragão Alfa Ancestral."
-        ]
-      },
-      "4.0.10": {
-        "version": "4.0.10",
-        "title": "Dragon RPG — Reconhecimento de Comandos",
-        "date": "2026-09-15",
-        "changes": [
-          "Corrigidos os registradores DRAGON_RPG_COMMANDS e KOBA_TRIGGER_COMMANDS.",
-          "/dragonrpg, /masmorras, /masmorra, /materiais, /receitas e /craft passam pelo roteamento do Dragon RPG.",
-          "Aliases /rpg, /menurpg, /dungeons, /dungeon e /crafts também foram sincronizados.",
-          "Mantido /modorpg on/off para ativação opcional por grupo."
-        ]
-      },
-      "4.0.11": {
-        "version": "4.0.11",
-        "title": "Lista Negra — Multi-Add",
-        "date": "2026-09-15",
-        "changes": [
-          "/listanegra sem argumentos agora explica o uso e mostra a lista atual.",
-          "/listanegra não exige mais add: enviar o número adiciona imediatamente.",
-          "/listanegra aceita vários números de uma vez.",
-          "/listanegrag aceita vários números de uma vez e executa a varredura global para cada alvo.",
-          "Mantidas as proteções do dono principal e os registros de moderação."
-        ]
-      },
-      "4.0.12": {
-        "version": "4.0.12",
-        "title": "Entrada do Membro",
-        "date": "2026-09-16",
-        "changes": [
-          "Novo /entrada_membro número mostra dia/mês, hora e minuto da entrada registrada.",
-          "A entrada é registrada silenciosamente; nenhuma mensagem é enviada no momento em que o membro entra.",
-          "O comando só consulta membros atualmente presentes no grupo.",
-          "Datas anteriores à atualização não podem ser recuperadas retroativamente pelo WhatsApp/Baileys."
-        ]
-      },
-      "4.0.13": {
-        "version": "4.0.13",
-        "title": "Lista Negra Global — Lotes",
-        "date": "2026-09-16",
-        "changes": [
-          "/listanegrag reconhece listas com um telefone por linha, espaços, hífens comuns/Unicode e espaços invisíveis de textos copiados.",
-          "Aceita números internacionais, como +63, além de +55.",
-          "Remove números duplicados do mesmo lote automaticamente.",
-          "Primeiro persiste todos os números válidos na lista negra global e só depois executa a varredura de remoção.",
-          "Em lotes, retorna a quantidade de números salvos na lista negra global e mantém todos persistidos para remoção automática futura."
-        ]
-      },
-      "4.0.14": {
-        "version": "4.0.14",
-        "title": "MSG Global — Proteção Anti-429",
-        "date": "2026-09-16",
-        "changes": [
-          "/msg agora trata falhas 429 e 500 de groupFetchAllParticipating sem encerrar a Kobayashi.",
-          "Adicionado retry único com espera; em rate limit o bot não martela a API do WhatsApp.",
-          "O envio prioriza metadata já retornada pela lista de grupos, reduzindo consultas groupMetadata desnecessárias.",
-          "Envios entre grupos ganharam intervalo maior e falhas ficam isoladas por grupo.",
-          "Se a listagem de grupos falhar, /msg aborta com segurança e mantém o processo online."
-        ]
-      },
-      "5.0.0": {
-        "version": "5.0.0",
-        "title": "Core & Estabilidade V5",
-        "date": "2026-09-16",
-        "changes": [
-          "Novo Core V5 inspirado em conceitos de monitoramento/otimização estudados nas bases de referência, reimplementado para a arquitetura Kobayashi.",
-          "Monitor de RAM/heap, uptime, warnings e erros de processo.",
-          "Manutenção automática a cada 10 minutos e limpeza segura de temporários com mais de 6 horas.",
-          "Handlers para unhandledRejection e uncaughtException evitam quedas por rejeições comuns; erros críticos de recurso deixam a hospedagem reiniciar o processo.",
-          "Novos comandos de dono /statuscore e /limpartemp.",
-          "Nenhum sistema opcional de grupo é ativado automaticamente."
-        ]
-      },
-      "5.1.0": {
-        "version": "5.1.0",
-        "title": "Jogos 2.0 — Parte 1",
-        "date": "2026-09-16",
-        "changes": [
-          "Jogos 2.0 OFF por padrão; ADM ativa com /jogos on.",
-          "Forca: /forca e /letrajogo.",
-          "Jogo da Velha multiplayer: /velha e /jogada.",
-          "Connect 4 multiplayer: /connect4 e /c4.",
-          "Banco games-v5.json persistente e fora do ZIP.",
-          "Pacote cumulativo inclui v5.0.0 Core & Estabilidade."
-        ]
-      },
-      "5.2.0": {
-        "version": "5.2.0",
-        "title": "Social 2.0",
-        "date": "2026-09-16",
-        "changes": [
-          "Novo Social 2.0 OFF por padrão; ADM controla com /social on/off.",
-          "AFK persistente com motivo.",
-          "Reputação entre membros com cooldown de 12 horas e conquistas automáticas.",
-          "Sistema de presentes e conquistas sociais.",
-          "Perfil social com reputação, presentes e conquistas.",
-          "Notas de grupo gerenciadas por ADM.",
-          "Pacote cumulativo inclui Core v5.0.0 e Jogos 2.0 v5.1.0."
-        ]
-      },
-      "5.2.1": {
-        "version": "5.2.1",
-        "title": "Cita 2.0",
-        "date": "2026-09-16",
-        "changes": [
-          "/cita foi substituído pela implementação 2.0; não existe handler duplicado.",
-          "/cita texto envia o texto marcando todos de forma oculta.",
-          "/cita usado em resposta reaproveita o texto/caption da mensagem respondida quando nenhum texto adicional é informado.",
-          "Suporta texto, legenda de imagem, vídeo e documento na mensagem respondida.",
-          "Continua restrito a ADM/dono e agora contém falhas de envio sem derrubar o fluxo.",
-          "Pacote cumulativo mantém Core v5.0.0, Jogos v5.1.0 e Social v5.2.0."
-        ]
-      },
-      "5.2.2": {
-        "version": "5.2.2",
-        "title": "Hotfix AdminPro Imports",
-        "date": "2026-09-16",
-        "changes": [
-          "Corrigidos imports listNotes/addNote/removeNote do adminPro que foram renomeados acidentalmente durante a integração Social 2.0.",
-          "Mantido Social V5 isolado via namespace socialV5, evitando colisão com o AdminPro.",
-          "Mantido Cita 2.0 da v5.2.1.",
-          "Pacote cumulativo inclui v5.0.0 até v5.2.2."
-        ]
-      },
-      "5.2.3": {
-        "version": "5.2.3",
-        "title": "Cita Invisível",
-        "date": "2026-09-16",
-        "changes": [
-          "/cita agora funciona somente respondendo uma mensagem.",
-          "Reenvia apenas a mensagem marcada, sem título CITAÇÃO, moldura ou texto adicional.",
-          "Todos os membros continuam mencionados de forma oculta.",
-          "Suporte a reenvio de texto, imagem e vídeo/GIF com legenda original.",
-          "Mantém o hotfix AdminPro da v5.2.2 e todas as partes cumulativas da V5."
-        ]
-      },
-      "5.2.4": {
-        "version": "5.2.4",
-        "title": "Cita Hidetag",
-        "date": "2026-09-16",
-        "changes": [
-          "/cita refeito após inspeção das bases de referência enviadas.",
-          "Responde uma mensagem e reenvia somente o conteúdo original com menções ocultas.",
-          "Sem cabeçalho, moldura, texto de citação ou lista visível de números.",
-          "Suporta texto, imagem, vídeo/GIF, áudio/PTT, figurinha e documento.",
-          "Suporta wrappers de mensagem efêmera, visualização única e documento com legenda.",
-          "Mantém as correções cumulativas anteriores da V5."
-        ]
-      },
-      "5.2.5": {
-        "version": "5.2.5",
-        "title": "Morder com Vídeo",
-        "date": "2026-09-17",
-        "changes": [
-          "/morder agora envia o vídeo personalizado fornecido pelo criador.",
-          "O vídeo foi incorporado em media/acoes/morder.mp4.",
-          "/morder @membro marca autor e alvo na legenda.",
-          "Pacote cumulativo mantém todas as atualizações da V5 até v5.2.5."
-        ]
-      },
-      "5.2.6": {
-        "version": "5.2.6",
-        "title": "Morder — Vídeo Routing Fix",
-        "date": "2026-09-17",
-        "changes": [
-          "Corrigido /morder que estava no menu/handler, mas não no registro KOBA_TRIGGER_COMMANDS.",
-          "/morder agora alcança o handler real de vídeo.",
-          "Vídeo passa a ser lido diretamente com fs.readFileSync, seguindo o método já comprovado pelo /carinho.",
-          "/morder respeita Modo Brincadeira como as demais ações.",
-          "Mantém media/acoes/morder.mp4 dentro do pacote cumulativo."
-        ]
-      },
-      "5.2.7": {
-        "version": "5.2.7",
-        "title": "Novo /morde com GIF",
-        "date": "2026-09-17",
-        "changes": [
-          "Novo /morde separado do /morder.",
-          "/morde @membro envia o vídeo fornecido como GIF.",
-          "Funciona por marcação ou resposta.",
-          "Adicionado ao menu de diversão.",
-          "Modo Brincadeira precisa estar ativo."
-        ]
-      },
-      "5.2.9": {
-        "version": "5.2.9",
-        "title": "Correção definitiva do /comer",
-        "date": "2026-09-17",
-        "changes": [
-          "Corrigido conflito interno: /comer estava simultaneamente em ACTIONS e RPG.",
-          "Removido /comer das interações com alvo; agora ele chega ao sistema RPG correto.",
-          "/comer consome uma comida preparada no inventário.",
-          "/comer nome permite escolher a comida; sem nome consome a primeira disponível.",
-          "Se não houver comida, orienta usar /cozinhar primeiro.",
-          "/comer permanece no MenuBN."
-        ]
-      },
-      "5.2.10": {
-        "version": "5.2.10",
-        "title": "Comando /macetar",
-        "date": "2026-09-17",
-        "changes": [
-          "/comer foi substituído por /macetar.",
-          "/macetar mantém o mesmo modo de ativação e funcionamento do antigo /comer.",
-          "/macetar nome usa o item preparado selecionado; sem nome usa o primeiro disponível.",
-          "MenuBN atualizado para mostrar /macetar no lugar de /comer."
-        ]
-      },
-      "5.3.0": {
-        "version": "5.3.0",
-        "title": "Mega Melhorias — Parte 1",
-        "date": "2026-09-17",
-        "changes": [
-          "Social 2.1: AFK é removido automaticamente quando o membro volta a falar.",
-          "Social 2.1: mencionar alguém AFK mostra motivo e tempo ausente, com anti-spam de aviso.",
-          "Reputação aprimorada com ranks Novato, Boa Companhia, Conhecido, Respeitado, Famoso e Lendário.",
-          "Perfil Social agora mostra rank, reputações dadas, presentes, conquistas e estado AFK.",
-          "Notas de grupo agora exibem autor e data quando disponíveis.",
-          "Dragon Fun: validação de alvo aprimorada para ações por marcação/resposta.",
-          "Dragon Fun: falha de GIF/vídeo remoto agora usa fallback em texto em vez de deixar o comando sem resposta.",
-          "Cita/Hidetag: proteção de 30s contra disparos repetidos em grupos com 150+ participantes.",
-          "Compatibilidade preservada com bancos existentes; nenhum banco de usuário é sobrescrito.",
-          "Sistemas opcionais continuam desligados por padrão."
-        ]
-      },
-      "5.3.1": {
-        "version": "5.3.1",
-        "title": "Dragon Ban Comunidade",
-        "date": "2026-09-17",
-        "changes": [
-          "/dragonban remove o alvo dos 6 grupos cadastrados.",
-          "/rmdragonban remove o registro.",
-          "/listadragonban lista os registros.",
-          "Restrito ao dono principal."
-        ]
-      },
-      "5.3.2": {
-        "version": "5.3.2",
-        "title": "Dragon Ban por marcação ou número",
-        "date": "2026-09-17",
-        "changes": [
-          "/dragonban aceita @membro, número internacional ou resposta.",
-          "/rmdragonban aceita @membro ou número."
-        ]
-      },
-      "5.3.3": {
-        "version": "5.3.3",
-        "title": "Dragon RPG Único",
-        "date": "2026-09-17",
-        "changes": [
-          "RPG clássico/normal removido do roteamento modular.",
-          "/modorpg removido do sistema e da ajuda.",
-          "Aliases /rpg e /menurpg continuam apontando para o Dragon RPG para compatibilidade.",
-          "Economia/RPG antigo do Dragon Fun deixou de interceptar comandos.",
-          "Dragon RPG permanece como único RPG da Kobayashi.",
-          "Jogos, Social e Modo Brincadeira continuam independentes."
-        ]
-      },
-      "5.3.4": {
-        "version": "5.3.4",
-        "title": "/comer voltou",
-        "date": "2026-09-18",
-        "changes": [
-          "/comer voltou como comando do MenuBN/Dragon Fun, sem vínculo com RPG.",
-          "Usa o GIF enviado pelo criador salvo localmente.",
-          "Ativação por @marcação ou resposta à mensagem.",
-          "Fallback em texto se a mídia não puder ser enviada."
-        ]
-      },
-      "5.3.5": {
-        "version": "5.3.5",
-        "title": "/comer mídia corrigida",
-        "date": "2026-09-18",
-        "changes": [
-          "Mídia do /comer convertida de GIF para MP4 com gifPlayback para melhor compatibilidade com WhatsApp/Baileys.",
-          "Arquivo local antigo .gif removido.",
-          "Legenda do comando atualizada."
-        ]
-      },
-      "5.3.6": {
-        "version": "5.3.6",
-        "title": "Comando /julgar",
-        "date": "2026-09-18",
-        "changes": [
-          "Novo /julgar no MenuBN.",
-          "Funciona por @marcação ou resposta.",
-          "Resultados e veredito aleatórios a cada uso.",
-          "Independente do Dragon RPG."
-        ]
-      },
-      "5.3.7": {
-        "version": "5.3.7",
-        "title": "Comando /lid",
-        "date": "2026-09-18",
-        "changes": [
-          "Novo /lid por marcação, resposta ou no próprio usuário.",
-          "Consulta os campos LID do metadata atual do WhatsApp/Baileys.",
-          "Adicionado ao menu geral e /helpcmd."
-        ]
-      },
-      "5.3.8": {
-        "version": "5.3.8",
-        "title": "KobaBan exclusivo do criador",
-        "date": "2026-09-18",
-        "changes": [
-          "/kobaban agora valida exclusivamente o LID oficial configurado do criador.",
-          "Administradores comuns não podem mais executar KobaBan.",
-          "A validação procura o LID no evento e no metadata do participante para suportar grupos em modo LID.",
-          "A Kobayashi ainda precisa ser administradora para remover o alvo.",
-          "O /ban comum continua inalterado para administradores."
-        ]
-      },
-      "5.3.9": {
-        "version": "5.3.9",
-        "title": "Comando /gozar",
-        "date": "2026-09-18",
-        "changes": [
-          "Novo /gozar no MenuBN/Dragon Fun.",
-          "Vídeo local enviado pelo criador.",
-          "Funciona por @marcação ou resposta.",
-          "Independente do Dragon RPG."
-        ]
-      },
-      "5.3.10": {
-        "version": "5.3.10",
-        "title": "Dragon RPG on/off Fix",
-        "date": "2026-09-19",
-        "changes": [
-          "Corrigido /dragonrpg off para desativar o Dragon RPG do grupo.",
-          "/dragonrpg on ativa o sistema novamente.",
-          "/dragonrpg sem argumento abre o menu do Dragon RPG.",
-          "Controle continua restrito a administradores do grupo ou dono principal."
-        ]
-      },
-      "5.3.11": {
-        "version": "5.3.11",
-        "title": "Bang Global",
-        "date": "2026-09-19",
-        "changes": [
-          "Novo /bang exclusivo do dono principal.",
-          "Remove o alvo de todos os grupos em que a Kobayashi é administradora.",
-          "Aceita @marcação, número ou resposta à mensagem.",
-          "Exibe resumo com grupos verificados, encontrados, removidos e falhas.",
-          "O comando não adiciona o alvo à lista negra; realiza somente a remoção global."
-        ]
-      },
-      "5.3.12": {
-        "version": "5.3.12",
-        "title": "Comando /mamada",
-        "date": "2026-09-19",
-        "changes": [
-          "Novo /mamada no MenuBN/Dragon Fun.",
-          "Usa vídeo local.",
-          "Funciona por marcação ou resposta.",
-          "Independente do Dragon RPG."
-        ]
-      },
-      "5.3.13": {
-        "version": "5.3.13",
-        "title": "MultiPrefixo",
-        "date": "2026-09-19",
-        "changes": [
-          "Novo /multiprefixo para usar vários prefixos simultaneamente.",
-          "Adicionar, remover, listar e resetar prefixos.",
-          "Até 10 prefixos ativos, com 1 a 3 caracteres cada.",
-          "/add_prefixo continua compatível e sincroniza a lista de prefixos.",
-          "Exclusivo do dono principal."
-        ]
-      },
-      "5.3.14": {
-        "version": "5.3.14",
-        "title": "Dragon Fun Modular",
-        "date": "2026-09-19",
-        "changes": [
-          "Dragon Fun reorganizado em arquivos individuais por comando.",
-          "/comer, /gozar, /mamada, /gado e demais ações/medidores agora podem ser alterados isoladamente.",
-          "Roteador dragonFun.js reduzido e responsável apenas por encaminhar comandos.",
-          "Utilitários compartilhados movidos para dragonFun/_utils.js.",
-          "Jogos e social preservados em módulo separado para evitar regressões."
-        ]
-      },
-      "5.3.15": {
-        "version": "5.3.15",
-        "title": "Hospedagem Full Structure Fix",
-        "date": "2026-09-19",
-        "changes": [
-          "Pacote completo reconstruído sobre a árvore integral do bot.",
-          "Restaurados módulos exigidos pelo index.js que faltavam nos overlays cumulativos.",
-          "Dragon Fun modular v5.3.14 preservado.",
-          "Estrutura pronta para extrair diretamente na raiz do Pterodactyl.",
-          "Dados de sessão, autenticação, licença local e bancos de runtime não são incluídos."
-        ]
-      },
-      "5.3.16": {
-        "version": "5.3.16",
-        "title": "Dragon Fun LID Mention Fix",
-        "date": "2026-09-19",
-        "changes": [
-          "Corrige marcações dos comandos de brincadeira quando o WhatsApp entrega @lid.",
-          "Resolve LID para o JID de telefone usando metadados do grupo e getPNForJid.",
-          "Ações, medidores e /julgar passam a exibir @ do número quando disponível.",
-          "Mantém fallback para LID somente quando o WhatsApp/Baileys não fornece mapeamento PN."
-        ]
-      },
-      "5.3.17": {
-        "version": "5.3.17",
-        "title": "Mamada LID Fix",
-        "date": "2026-09-20",
-        "changes": [
-          "Corrige a exibição da menção no /mamada quando o WhatsApp entrega identificador LID.",
-          "O comando passa a usar a marcação normalizada do alvo na legenda."
-        ]
-      },
-      "5.3.18": {
-        "version": "5.3.18",
-        "title": "Dragon RPG 2.0 — Parte 1 Lite",
-        "date": "2026-09-20",
-        "changes": [
-          "Início do Dragon RPG 2.0 em formato leve e incremental.",
-          "Masmorras passam a ter chance própria de encontro com Boss.",
-          "Adicionado sistema de loot ponderado e material raro Núcleo de Boss.",
-          "Novo craft de chave de dungeon integrado ao sistema existente.",
-          "Adicionado contador de Bosses derrotados, mantendo compatibilidade com saves antigos."
-        ],
-        "commands": [
-          "craft chave",
-          "masmorras"
-        ]
-      },
-      "5.3.19": {
-        "version": "5.3.19",
-        "title": "Novidades Fix + Dragon RPG 2.0 Lite",
-        "date": "2026-09-20",
-        "changes": [
-          "Corrigido /novidades que ainda mostrava a v5.3.16.",
-          "Adicionadas ao histórico as notas das versões v5.3.17 e v5.3.18.",
-          "Mantidas as novidades da Parte 1 Lite do Dragon RPG 2.0: Bosses, loot ponderado, Núcleo de Boss e craft de chave de dungeon."
-        ]
-      },
-      "v5.3.20": {
-        "version": "5.3.20",
-        "title": "Add Dias no Aluguel",
-        "date": "2026-09-22",
+      "previous": {
+        "version": "5.4.25",
+        "title": "Levels equilibrados e resumo por hora",
+        "date": "2026-10-26",
         "added": [
-          "/add_dias DIAS — adiciona dias ao vencimento do aluguel atual",
-          "Alias /adddias"
+          "Resumo de evoluções por grupo, agrupado durante uma hora: menção, nível inicial/final e soma de Dragon-coins realmente recebidas.",
+          "Fila persistente, recuperação após reinício, retentativa em falhas e proteção contra envios concorrentes.",
+          "Migração automática da curva antiga com backup e preservação do nível e progresso proporcional."
         ],
         "changed": [
-          "Disponível apenas para o dono principal",
-          "Preserva o vencimento existente quando o aluguel ainda está ativo",
-          "Reinicia os avisos de vencimento após adicionar dias"
-        ]
-      },
-      "v5.3.21": {
-        "version": "5.3.21",
-        "title": "Fotos de Boas-vindas e Saída",
-        "date": "2026-09-24",
-        "added": [
-          "/fotobv — define foto personalizada do bem-vindo por grupo",
-          "/fotosaiu — define foto personalizada quando um membro sai",
-          "/fotobv off e /fotosaiu off — removem as imagens personalizadas"
+          "XP necessário para o próximo nível: 1–10=200; 11–20=350; 21–30=500; 31–40=700; 41–49=900; máximo 50.",
+          "Removido o aviso individual imediato de level-up. Níveis e moedas continuam atualizados imediatamente.",
+          "A mesma pessoa aparece uma vez por resumo; múltiplos níveis somam apenas recompensas pagas.",
+          "Sem evoluções não há mensagem. /level off também suspende os resumos do grupo. Ajuda de níveis atualizada.",
+          "Nenhuma alteração no combate ou sistema de RPG; nenhum banco, sessão ou configuração pessoal no pacote."
         ],
-        "changed": [
-          "Welcome e despedida passam a enviar a imagem configurada com a legenda existente",
-          "Configuração persistente e individual por grupo; somente administradores podem alterar"
-        ]
-      },
-      "v5.3.22": {
-        "version": "5.3.22",
-        "title": "Boas-vindas Agrupado",
-        "changes": [
-          "Entradas ocorridas em uma janela de 5 segundos são reunidas em uma única mensagem de boas-vindas.",
-          "A mensagem mostra [ N Membros Novos 🪪 ] sem listar cada membro individualmente.",
-          "Somente os membros recém-chegados são incluídos no array de menções.",
-          "Compatível com a foto personalizada definida por /fotobv."
-        ]
-      },
-      "v5.3.24": {
-        "version": "5.3.24",
-        "title": "Solicitações sem filtro por DDI",
-        "date": "2026-09-24",
-        "changed": [
-          "/add volta a aceitar todas as solicitações pendentes do grupo",
-          "/aceitar N aceita a quantidade escolhida, de 1 a 200, sem filtrar país ou DDI",
-          "Removidos os comandos e filtros automáticos relacionados à verificação de país"
-        ]
-      },
-      "v5.3.25": {
-        "version": "5.3.25",
-        "title": "Menubn Mention Fix",
-        "date": "2026-09-25",
-        "changed": [
-          "Comandos de interação do /menubn passam a exibir a marcação resolvida em vez de IDs @lid",
-          "Ranks de diversão priorizam o número/JID exibível e resolvem LID antes de montar texto e mentions",
-          "Corrigidas legendas que ainda usavam o alvo bruto mesmo após a resolução do JID"
-        ]
-      },
-      "v5.3.26": {
-        "version": "5.3.26",
-        "title": "Namoro + Casamento 24h Fix",
-        "changes": [
-          "Novos comandos /namoro e /aceitar_namoro.",
-          "Casamento só pode ser pedido entre o casal que está namorando.",
-          "Pedido de casamento é liberado após 24 horas completas de namoro.",
-          "/aceitarcasamento agora diferencia ausência de pedido, namoro inválido e tempo mínimo ainda não concluído.",
-          "Mantida a correção de menções LID da v5.3.25."
-        ]
-      },
-      "v5.3.28": {
-        "version": "5.3.28",
-        "title": "Dragon RPG Classes 2.0",
-        "date": "2026-09-26",
-        "changed": [
-          "Adiciona /trocarclasse <classe> e /trocarclasse avancada <classe> fora de batalha.",
-          "Adiciona Berserker, Druida, Sentinela e Cavaleiro Rúnico às classes avançadas.",
-          "Classes avançadas passam a possuir habilidades únicas.",
-          "Habilidades especiais podem consumir toda a Mana, porcentagem de HP ou combinar os dois recursos.",
-          "Trocar a classe base remove a classe avançada anterior para manter os requisitos consistentes.",
-          "Arquivos e textos do MenuBN/Fun não foram alterados."
-        ]
-      },
-      "v5.3.30": {
-        "version": "5.3.30",
-        "title": "AntiFlood + Estatísticas",
-        "changes": [
-          "AntiFlood de comandos agora detecta rajadas e reincidência.",
-          "Penalidade progressiva de espera, sem ban automático.",
-          "Novo /topcomandos [limite] para ADMs.",
-          "Novo /cmdinfo <comando> para ADMs.",
-          "Sistema existente de estatísticas foi reaproveitado e integrado aos comandos."
-        ]
-      },
-      "v5.3.31": {
-        "version": "5.3.31",
-        "title": "Bang + Ban Fix",
-        "date": "2026-10-01",
-        "changes": [
-          "/ban, /b e /banc removem sem motivo.",
-          "/bang trata falhas 429/500 sem derrubar o bot.",
-          "/bang reduz rajadas de consultas entre grupos.",
-          "Fun/MenuBN e textos personalizados não foram alterados."
-        ]
-      },
-      "v5.3.32": {
-        "version": "5.3.32",
-        "title": "Anti-Msg Global + Auditoria",
-        "date": "2026-10-01",
-        "changes": [
-          "OFF por padrão; controle exclusivo do dono.",
-          "Correspondência exata da mensagem cadastrada.",
-          "Apaga, remove e adiciona à Lista Negra Global.",
-          "Auditoria: mensagem completa, regra, grupo, horário, @, número e resultado."
-        ]
-      },
-      "v5.3.33": {
-        "version": "5.3.33",
-        "title": "Global Ban 2.0",
-        "date": "2026-10-03",
-        "changes": [
-          "/bang verifica todos os grupos e remove onde a Kobayashi é ADM.",
-          "/listanegrag salva e executa varredura global.",
-          "Fallback de cache em limitações 429.",
-          "Intervalo entre grupos aumentado para reduzir rajadas."
-        ]
-      },
-      "v5.3.35": {
-        "version": "5.3.35",
-        "title": "Dragon RPG Hardcore",
-        "date": "2026-10-04",
-        "changes": [
-          "Habilidades comuns passam a gastar Mana proporcional à Mana máxima.",
-          "Habilidades dracônicas passam a consumir 12%–18% da Mana máxima, com custo mínimo elevado.",
-          "A partir do nível 50, inimigos escalam pelos atributos reais do jogador.",
-          "Nível 100+ recebe inimigos com HP, ataque e defesa adaptativos muito maiores.",
-          "Bosses Hardcore recebem escalonamento adicional.",
-          "Inimigos Hardcore resistem melhor a dano explosivo de habilidades.",
-          "Monstros Hardcore podem acertar golpes brutais ocasionais.",
-          "Recompensas sobem moderadamente para compensar o risco sem facilitar farm."
-        ]
-      },
-      "v5.3.37": {
-        "version": "5.3.37",
-        "title": "Dragon RPG — Expansão e dificuldade",
-        "date": "2026-10-04",
-        "added": [
-          "14 itens na loja RPG.",
-          "5 regiões, 10 criaturas, 5 chefes e 5 missões."
-        ],
-        "changed": [
-          "Guardião do Despertar com mais vida e escala de poder.",
-          "Combates dracônicos mais difíceis; escala adicional a partir do nível RPG 30.",
-          "Habilidades humanas: custo base ×4 e piso de 12–18% da Mana máxima.",
-          "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
-          "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
-          "/habilidades mostra o custo realmente debitado."
-        ]
-      },
-      "v5.3.38": {
-        "version": "5.3.38",
-        "title": "Sakura Channel — Menu decorado",
-        "date": "2026-10-04",
-        "added": [
-          "Link do canal oficial no menu principal."
-        ],
-        "changed": [
-          "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
-          "Mantém comandos, prefixos, saudação e dados do bot.",
-          "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
-        ]
-      },
-      "v5.3.39": {
-        "version": "5.3.39",
-        "title": "Classes e novas temporadas",
-        "date": "2026-10-04",
-        "added": [
-          "/zerarank confirmar",
-          "/zerarankrpg confirmar",
-          "/zerarank-geral confirmar"
-        ],
-        "changed": [
-          "Trocas de classe base, avançada e dracônica compartilham intervalo de 7 dias.",
-          "/zeraranknivel confirmar reseta apenas nível/XP do grupo.",
-          "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
-          "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
-          "Backups e confirmação antes dos resets."
-        ]
-      },
-      "v5.3.40": {
-        "version": "5.3.40",
-        "title": "AntiLink antiflood",
-        "date": "2026-10-05",
-        "added": [
-          "Fechamento temporário durante a moderação de links.",
-          "Recuperação de grupos temporariamente fechados após reconexão."
-        ],
-        "changed": [
-          "Fila por grupo: links simultâneos são tratados antes da reabertura.",
-          "Grupos já fechados permanecem fechados.",
-          "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
-          "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
-          "Resultados de exclusão e remoção são registrados sem presumir sucesso."
-        ]
-      },
-      "v5.3.41": {
-        "version": "5.3.41",
-        "title": "Correção da remoção AntiLink",
-        "date": "2026-10-05",
-        "added": [],
-        "changed": [
-          "Remoção usa o identificador do membro nos metadados atuais (LID/número).",
-          "Tenta identificadores alternativos quando o primeiro falha.",
-          "Confirma status de remoção ou verifica ausência do membro.",
-          "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
-          "Mantém o fechamento e a reabertura temporários do grupo."
-        ]
-      },
-      "v5.3.42": {
-        "version": "5.3.42",
-        "title": "AntiSTTS",
-        "date": "2026-10-05",
-        "added": [
-          "/antistts on/off/status e alias /antistatus.",
-          "Detecção de menções reais do grupo em status, exclusão do aviso e remoção do autor.",
-          "/logs antistts."
-        ],
-        "changed": [
-          "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
-          "ADM, dono e lista branca preservados.",
-          "Identifica o remetente do evento e usa remoção LID/PN confirmada."
-        ]
-      },
-      "v5.3.43": {
-        "version": "5.3.43",
-        "title": "Dragon RPG — Expansão",
-        "date": "2026-10-05",
-        "added": [
-          "8 classes avançadas com habilidades próprias: Samurai, Monge, Bardo, Invocador, Caçador de Dragões, Templário, Cronomago e Xamã.",
-          "30 comandos novos de profissões, coleta, fabricação, economia, exploração, pets e conquistas.",
-          "/rpgexpansao com sintaxe e custos."
-        ],
-        "changed": [
-          "Cooldowns persistentes, ações bloqueadas durante combate e pagamentos validados.",
-          "Banco devolvido ao bolso ao zerar progressão; saldo preservado.",
-          "Atualização pequena e cumulativa; script Termux somente publica no GitHub."
-        ]
-      },
-      "v5.3.44": {
-        "version": "5.3.44",
-        "title": "Quatro trocas de classe por dia",
-        "date": "2026-10-05",
-        "added": [],
-        "changed": [
-          "Até 4 trocas por dia, compartilhadas entre humana, avançada e dracônica.",
-          "Renovação à meia-noite de São Paulo; primeira escolha não consome troca.",
-          "Remove espera antiga de 7 dias para classes; profissão mantém intervalo próprio."
-        ]
-      },
-      "v5.3.45": {
-        "version": "5.3.45",
-        "title": "CafeBan",
-        "date": "2026-10-06",
-        "added": [
-          "/cafeban exclusivo do LID 267104301375529@lid, com imagem personalizada e motivo opcional."
-        ],
-        "changed": [
-          "Remoção confirmada antes do anúncio; logs de moderação."
-        ]
-      },
-      "v5.3.46": {
-        "version": "5.3.46",
-        "title": "Café Ban decorado",
-        "date": "2026-10-06",
-        "added": [],
-        "changed": [
-          "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
-        ]
-      },
-      "v5.3.47": {
-        "version": "5.3.47",
-        "title": "Atividade por resposta",
-        "date": "2026-10-08",
-        "added": [],
-        "changed": [
-          "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
-        ]
-      },
-      "v5.3.48": {
-        "version": "5.3.48",
-        "title": "Limpeza de arquivos antigos",
-        "date": "2026-10-09",
-        "added": [
-          "Limpeza restrita de ZIPs Kobayashi-Bot-v... e README-v...txt na raiz."
-        ],
-        "changed": [
-          "Executa na publicação pelo Termux e na inicialização da hospedagem.",
-          "Preserva créditos, licença, README principal, instruções, código e pastas."
-        ]
-      },
-      "v5.3.49": {
-        "version": "5.3.49",
-        "title": "Cita multimídia",
-        "date": "2026-10-09",
-        "added": [
-          "/cita com texto direto ou mídia na legenda."
-        ],
-        "changed": [
-          "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
-          "Corrige import de download de mídia; preserva restrição para ADM/dono."
-        ]
-      },
-      "v5.3.50": {
-        "version": "5.3.50",
-        "title": "Avisos dos alugados",
-        "date": "2026-10-10",
-        "added": [
-          "/msg-alugados: aviso com texto ou imagem e menção de todos nos grupos alugados.",
-          "/msg-alugados-lista: consulta dos aluguéis ativos cadastrados."
-        ],
-        "changed": [
-          "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
-          "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
-        ]
-      },
-      "v5.3.51": {
-        "version": "5.3.51",
-        "title": "Figurinhas decoradas",
-        "date": "2026-10-10",
-        "added": [
-          "Metadados de figurinha decorados com autoria, bot e créditos do dono."
-        ],
-        "changed": [
-          "Novo padrão em /s, aliases e autosticker.",
-          "Preserva os nomes de pacote e autores personalizados."
-        ]
-      },
-      "v5.3.52": {
-        "version": "5.3.52",
-        "title": "Autoria das figurinhas",
-        "date": "2026-10-10",
-        "added": [],
-        "changed": [
-          "Detalhes padrão de figurinha: Criada por, Grupo, Dono do bot e Feita por Kobayashi Bot.",
-          "No privado, identifica o grupo como Privado."
-        ]
-      },
-      "v5.3.53": {
-        "version": "5.3.53",
-        "title": "Sticker Atelier",
-        "date": "2026-10-10",
-        "added": [],
-        "changed": [
-          "Molduras e títulos decorados nos detalhes de figurinhas, com autoria, grupo, dono e assinatura em linhas separadas."
-        ]
-      },
-      "v5.3.54": {
-        "version": "5.3.54",
-        "title": "Detalhes das figurinhas",
-        "date": "2026-10-10",
-        "added": [],
-        "changed": [
-          "Estilo conforme referência: Criada por, Nick dono, Feita por e Grupo com nomes entre 『 』 e divisor."
-        ]
-      },
-      "v5.3.55": {
-        "version": "5.3.55",
-        "title": "Figurinhas Dragon",
-        "date": "2026-10-10",
-        "added": [],
-        "changed": [
-          "Detalhes compactos em quatro linhas: autoria, dono, assinatura Kobayashi Bot e grupo, com dragão e fogo."
-        ]
-      },
-      "v5.3.56": {
-        "version": "5.3.56",
-        "title": "VIP e ADV ADM",
-        "date": "2026-10-10",
-        "added": [
-          "/ADV_adm @adm motivo/7d e /advs_adm: advertências com prazo por grupo, sem rebaixamento automático.",
-          "/menuvip, /add_cmd_vip, /del_cmd_vip, /add_vip, /del_vip e /lista_vip."
-        ],
-        "changed": [
-          "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
-          "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
-        ]
-      },
-      "v5.3.57": {
-        "version": "5.3.57",
-        "title": "X9 do grupo",
-        "date": "2026-10-11",
-        "added": [
-          "/x9: consulta exclusiva dos ADMs com filtros solicitacoes, adms e reentradas.",
-          "Registro de solicitações aceitas/recusadas, remoções, rebaixamentos e retornos observados a partir da atualização."
-        ],
-        "changed": [
-          "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
-          "Ações sem autor informado aparecem explicitamente como desconhecidas."
-        ]
-      },
-      "v5.3.58": {
-        "version": "5.3.58",
-        "title": "Maid Dragon",
-        "date": "2026-10-11",
-        "added": [
-          "/Dragon_open abre os seis grupos cadastrados da Maid Dragon.",
-          "/Dragon_close e /Drsgon_close fecham os seis grupos."
-        ],
-        "changed": [
-          "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
-        ]
-      },
-      "v5.3.59": {
-        "version": "5.3.59",
-        "title": "X9 ativo",
-        "date": "2026-10-11",
-        "added": [
-          "/x9 on e /x9 off: ativação persistente por grupo, exclusiva dos ADMs.",
-          "Avisos automáticos de promoções, rebaixamentos, remoções, solicitações aceitas/recusadas e entradas.",
-          "/x9 entradas e contagem de entradas acompanhadas."
-        ],
-        "changed": [
-          "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
-          "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
-        ]
-      },
-      "v5.3.60": {
-        "version": "5.3.60",
-        "title": "Dragon-msg",
-        "date": "2026-10-11",
-        "added": [
-          "/Dragon-msg com texto, imagem na legenda ou imagem respondida, marcando todos nos seis grupos da Maid Dragon."
-        ],
-        "changed": [
-          "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
-          "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
-        ]
-      },
-      "v5.3.61": {
-        "version": "5.3.61",
-        "title": "Correção Dragon open/close",
-        "date": "2026-10-11",
-        "added": [],
-        "changed": [
-          "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
-          "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
-          "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
-        ]
-      },
-      "v5.3.62": {
-        "version": "5.3.62",
-        "title": "S2 proporção original",
-        "date": "2026-10-11",
-        "added": [
-          "/s2 com imagem ou vídeo direto/respondido: preserva proporção com preenchimento transparente."
-        ],
-        "changed": [
-          "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
-          "/s2 respeita a mesma regra VIP de /s e aliases de criação."
-        ]
-      },
-      "v5.3.63": {
-        "version": "5.3.63",
-        "title": "Antifake",
-        "date": "2026-10-11",
-        "added": [
-          "/antifake on/off (também 1/0), exclusivo de ADM em grupos.",
-          "Verificação automática de novas entradas com prefixo padrão +55."
-        ],
-        "changed": [
-          "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
-          "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
-        ]
-      },
-      "v5.3.64": {
-        "version": "5.3.64",
-        "title": "Busca global de banimentos",
-        "date": "2026-10-13",
-        "added": [],
-        "changed": [
-          "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
-          "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
-          "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
-        ]
-      },
-      "v5.3.65": {
-        "version": "5.3.65",
-        "title": "WaMe",
-        "date": "2026-10-13",
-        "added": [
-          "/wame gera link do próprio número; aceita texto para mensagem pré-preenchida.",
-          "Menção ou resposta seleciona outra pessoa, com resolução de PN/LID."
-        ],
-        "changed": [
-          "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
-        ]
-      },
-      "v5.3.66": {
-        "version": "5.3.66",
-        "title": "Proteção do mestre e dono",
-        "date": "2026-10-13",
-        "added": [
-          "Proteção central das remoções para LID oficial do criador e número configurado do dono."
-        ],
-        "changed": [
-          "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
-          "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
-        ]
-      },
-      "v5.3.67": {
-        "version": "5.3.67",
-        "title": "Varredura só ADM",
-        "date": "2026-10-14",
-        "added": [],
-        "changed": [
-          "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
-          "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
-          "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
-        ]
-      },
-      "v5.4.0": {
-        "version": "5.4.0",
-        "title": "Comunidade Kobayashi",
-        "date": "2026-10-15",
-        "added": [
-          "Captcha por grupo com aprovação por resposta no privado, prazo de 5 minutos e revisão de falhas.",
-          "Tickets de suporte com fila, responsável e encerramento.",
-          "Comandos personalizados com texto/mídia, permissões, campos dinâmicos e compatibilidade VIP.",
-          "Mensagens diárias com mídia em horário de São Paulo e persistência contra repetição.",
-          "/comunidade-ajuda e guia COMUNIDADE-KOBAYASHI.txt."
-        ],
-        "changed": [
-          "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
-          "Menus ADM/dono incluem os novos controles.",
-          "Sem novas dependências npm; dados e mídias persistem em files/database/community."
-        ]
-      },
-      "v5.4.1": {
-        "version": "5.4.1",
-        "title": "X9 focado",
-        "date": "2026-10-15",
-        "added": [],
-        "changed": [
-          "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
-          "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
-          "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
-        ]
-      },
-      "v5.4.2": {
-        "version": "5.4.2",
-        "title": "X9 resumido",
-        "date": "2026-10-15",
-        "added": [],
-        "changed": [
-          "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
-          "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
-          "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
-        ]
-      },
-      "v5.4.3": {
-        "version": "5.4.3",
-        "title": "Proteção dos comandos de dono",
-        "date": "2026-10-16",
-        "added": [],
-        "changed": [
-          "Comandos de dono exigem dono principal, inclusive no menu e nos dispatchers antigos.",
-          "Identidade de respostas, encaminhamentos e menções não concede permissões.",
-          "LID não é comparado numericamente com telefone do dono; resolução usa PN válido.",
-          "Lista de donos do Sentinel não recebe a identidade de membros comuns."
-        ]
-      },
-      "v5.4.4": {
-        "version": "5.4.4",
-        "title": "Lista Negra por grupo",
-        "date": "2026-10-16",
-        "added": [],
-        "changed": [
-          "/listanegra registra e remove somente no grupo atual, sem varredura de outros grupos.",
-          "/listanegrag registra os grupos atuais com ADM confirmado; bloqueio automático respeita os IDs registrados.",
-          "Grupos sem ADM e falhas de consulta são relatados; descoberta sem sucesso não registra bloqueios.",
-          "Registros globais antigos e regras automáticas anteriores mantêm compatibilidade. Reexecutar /listanegrag para um alvo atualiza seu alcance para grupos registrados."
-        ]
-      },
-      "v5.4.5": {
-        "version": "5.4.5",
-        "title": "Comando Duque",
-        "date": "2026-10-16",
-        "added": [
-          "/duque envia a imagem fornecida, porcentagem aleatória de 0 a 100 e legenda de brincadeira."
-        ],
-        "changed": [
-          "Comando listado no menu de brincadeiras; respeita o modo de brincadeiras nos grupos."
-        ]
-      },
-      "v5.4.6": {
-        "version": "5.4.6",
-        "title": "Medidor Furry",
-        "date": "2026-10-17",
-        "added": [
-          "/furry envia o vídeo fornecido com contador aleatório de 10 em 10.",
-          "10–30%: furry em desenvolvimento; 40–60%: se assumindo furry; 70–100%: furry completo."
-        ],
-        "changed": [
-          "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
-        ]
-      },
-      "v5.4.7": {
-        "version": "5.4.7",
-        "title": "Furry em GIF com menção",
-        "date": "2026-10-17",
-        "added": [],
-        "changed": [
-          "/furry envia o vídeo em modo GIF do WhatsApp.",
-          "Aceita @menção, resposta ou o próprio autor como alvo.",
-          "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
-        ]
-      },
-      "v5.4.8": {
-        "version": "5.4.8",
-        "title": "Menus atualizados",
-        "date": "2026-10-17",
-        "added": [],
-        "changed": [
-          "Menus atualizados com os comandos recentes e exemplos de uso.",
-          "Menu geral: wame, lid, entrada e tickets; ADM: X9, antifake, ADV ADM, CafeBan, captcha, tickets e automsg.",
-          "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
-          "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
-          "Removidos apêndices duplicados dos menus ADM e dono."
-        ]
-      },
-      "v5.4.9": {
-        "version": "5.4.9",
-        "title": "Furry e Duque modulares",
-        "date": "2026-10-17",
-        "added": [],
-        "changed": [
-          "Furry e Duque separados em commands/fun/dragonFun/furry.js e duque.js.",
-          "Registrados no dispatcher Dragon Fun junto aos outros comandos do menubn.",
-          "Removida lógica duplicada no index.js; preservados mídia, GIF, porcentagens e modo brincadeiras."
-        ]
-      },
-      "v5.4.10": {
-        "version": "5.4.10",
-        "title": "Reparo dos módulos Furry e Duque",
-        "date": "2026-10-17",
-        "added": [],
-        "changed": [
-          "Reenvio completo dos módulos Furry e Duque com seleção de legendas em blocos explícitos.",
-          "Validação de sintaxe de todos os arquivos JavaScript incluídos antes de gerar o ZIP.",
-          "Importação do dispatcher e envio das duas mídias verificados em execução simulada."
-        ]
-      },
-      "v5.4.13": {
-        "version": "5.4.13",
-        "title": "Correção do menu sem resposta",
-        "date": "2026-10-18",
-        "added": [
-          "Menu com imagem, lista de categorias e botão Meu ID.",
-          "/menu texto como alternativa sem botões."
-        ],
-        "changed": [
-          "Menu convencional enviado antes da lista interativa.",
-          "Lista sem upload de mídia e com metadados de envio interativo.",
-          "Prazo de 12 segundos para envio da lista."
-        ]
-      },
-      "v5.4.14": {
-        "version": "5.4.14",
-        "title": "Correção de namoro e casamento",
-        "date": "2026-10-18",
-        "added": [
-          "/terminarnamoro, /recusar_namoro, /recusarcasamento e /cancelarpedido."
-        ],
-        "changed": [
-          "Unifica aliases PN/LID confirmados; conflitos antigos são preservados e informados.",
-          "Impede sobrescrever pedidos e aceitar relacionamentos por terceiros. Pedidos expiram em 30 minutos.",
-          "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
-          "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
-          "Preserva as melhorias do menu da v5.4.13."
-        ]
-      },
-      "v5.4.15": {
-        "version": "5.4.15",
-        "title": "Menu interativo sem duplicação",
-        "date": "2026-10-18",
-        "added": [],
-        "changed": [
-          "/menu envia apenas o menu interativo quando o envio funciona.",
-          "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
-          "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
-          "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
-        ]
-      },
-      "v5.4.16": {
-        "version": "5.4.16",
-        "title": "Controle do menu de botões",
-        "date": "2026-10-18",
-        "added": [
-          "/botão on/off (ou /botao): ativa ou desativa globalmente os botões do menu.",
-          "Sem argumento ou status consulta o estado; configuração salva após reiniciar."
-        ],
-        "changed": [
-          "Comando exclusivo do dono e incluído no menu de dono.",
-          "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
-        ]
-      },
-      "v5.4.17": {
-        "version": "5.4.17",
-        "title": "Meme Não dê nem água",
-        "date": "2026-10-18",
-        "added": [
-          "/naodeagua @membro e alias /naodenemagua: meme com foto de perfil, gato e faixa vermelha.",
-          "Aceita marcação, mensagem respondida ou própria foto quando não há alvo."
-        ],
-        "changed": [
-          "Módulo separado e comando incluído no menubn.",
-          "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
-        ]
-      },
-      "v5.4.18": {
-        "version": "5.4.18",
-        "title": "Limpeza das legendas",
-        "date": "2026-10-18",
-        "added": [],
-        "changed": [
-          "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
-        ]
-      },
-      "v5.4.19": {
-        "version": "5.4.19",
-        "title": "Mute automático e MuteB",
-        "date": "2026-10-19",
-        "added": [
-          "/muteb @membro ou resposta: apaga as novas mensagens e remove o membro ao falar durante o mute."
-        ],
-        "changed": [
-          "/mute reconhece PN/LID, mensagens com mídia e registros antigos booleanos.",
-          "/desmute remove todos os aliases e os modos normal e banimento.",
-          "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
-          "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
-          "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
-        ]
-      },
-      "v5.4.20": {
-        "version": "5.4.20",
-        "title": "Loja Dragon e moedas separadas",
-        "date": "2026-10-20",
-        "added": [
-          "/loja com preços, alimentos, bebidas, colecionáveis virtuais e 20 tipos de sementes.",
-          "/plantar e /colher com produção, tempo real e limite de 10 plantações; /vender e /consumir.",
-          "/metas: 10/100/400/1000 mensagens válidas por dia rendem 30/150/450/1000 Dragon-coins.",
-          "/trabalhar, /pescar, /entrega e /procurar com recompensas e cooldowns próprios.",
-          "/economia explica os comandos e todas as recompensas."
-        ],
-        "changed": [
-          "Moedas gerais unificadas: saldo legado de jogos e banco importado uma única vez para Dragon-coins, com vínculo PN/LID confirmado.",
-          "O saldo antigo de ouro do RPG é preservado e exibido como RPG-coins, sem conversão com Dragon-coins.",
-          "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
-          "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
-          "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
-        ]
-      },
-      "v5.4.21": {
-        "version": "5.4.21",
-        "title": "BanFake e comandos com ADM obrigatório",
-        "date": "2026-10-22",
-        "added": [
-          "/banfake: verifica e remove membros atuais fora dos prefixos permitidos do antifake; padrão +55.",
-          "Resumo por grupo com removidos, protegidos, números desconhecidos e falhas reais."
-        ],
-        "changed": [
-          "Todos os comandos usados em grupos exigem cargo atual de ADM; dono e LIDs exclusivos também precisam ser ADM do grupo. Restrições adicionais de dono/LID continuam valendo.",
-          "BanFake exige autor e bot ADMs, preserva criador, dono, líderes, ADMs, lista branca e telefones não confirmados.",
-          "Verificação manual não altera o estado do antifake automático; revalida cargos e proteções durante a execução.",
-          "Menu ADM atualizado. Pacote sem bancos, configurações e sessões."
-        ]
-      },
-      "v5.4.22": {
-        "version": "5.4.22",
-        "title": "Correção do bloqueio geral de comandos",
-        "date": "2026-10-22",
-        "added": [],
-        "changed": [
-          "Removida a exigência global de ADM introduzida na v5.4.21.",
-          "Menu, figurinhas, RPG, loja, daily e demais comandos comuns voltam a funcionar para membros.",
-          "Ações administrativas e remoções, incluindo cafeban, continuam exigindo ADM; permissões originais de dono/LID/VIP preservadas."
-        ]
-      },
-      "v5.4.23": {
-        "version": "5.4.23",
-        "title": "Controle de aviso de saída",
-        "date": "2026-10-24",
-        "added": [
-          "/saída on/off e /saida on/off: ativar/desativar avisos de saída por grupo; uso exclusivo de ADM."
-        ],
-        "changed": [
-          "Aviso desligado bloqueia texto, foto e envio alternativo de despedida.",
-          "Entradas, textos e fotos personalizados são preservados. Configuração salva no banco atual de boas-vindas.",
-          "Grupos antigos mantêm o comportamento anterior até usar /saída off. Menu ADM e ajuda atualizados."
-        ]
-      },
-      "v5.4.24": {
-        "version": "5.4.24",
-        "title": "Novo GIF e legenda do socar",
-        "date": "2026-10-24",
-        "added": [],
-        "changed": [
-          "/socar e /soco passam a usar mídia local em reprodução GIF, enviada pelo criador.",
-          "Legenda personalizada: @autor espancou @alvo que deixou ele sem dentes.",
-          "Suporte a menção ou resposta, com menções reais das duas pessoas."
-        ]
+        "v1.0.14": {
+          "version": "1.0.14",
+          "title": "Dragon Game Menu",
+          "changes": [
+            "Novo visual do menu de jogos inspirado no modelo enviado, com identidade Kobayashi.",
+            "/menubn e aliases de jogos unificados no novo menu."
+          ]
+        },
+        "v1.0.15": {
+          "version": "1.0.15",
+          "title": "Updater HTTP 403 Fix",
+          "changes": [
+            "Updater deixa de depender da API Git Trees do GitHub, que retornava HTTP 403 em algumas hospedagens.",
+            "Atualizações passam a baixar o branch completo via codeload em tar.gz.",
+            "Fallback de version.json via jsDelivr.",
+            "Suporte opcional a GITHUB_TOKEN/KOBAYASHI_GITHUB_TOKEN."
+          ]
+        },
+        "v1.0.16": {
+          "version": "1.0.16",
+          "title": "KobaBan Personalizado",
+          "changes": [
+            "Novo /KobaBan exclusivo da Kobayashi.",
+            "Mensagem personalizada com alvo, administrador e motivo.",
+            "KobaBan registrado no histórico de punições e logs administrativos."
+          ]
+        },
+        "v1.0.17": {
+          "version": "1.0.17",
+          "title": "KobaBan GIF",
+          "changes": [
+            "Adicionada animação personalizada enviada pelo criador ao /KobaBan.",
+            "Sequência do KobaBan: animação, mensagem personalizada e remoção.",
+            "A mídia fica embutida no pacote para funcionar também na hospedagem."
+          ]
+        },
+        "v1.0.19": {
+          "version": "1.0.19",
+          "title": "Perfil + Dragon Fun Upgrade",
+          "changes": [
+            "/perfil remodelado usando referências do Kobayashi Bot, Kobayashi Bot e do pack de decoração.",
+            "Perfil agora destaca identidade, humor diário, bio, cargo, Level, atividade, Dragon Social, aura e advertências.",
+            "Comandos do /menubn receberam textos próprios em vez de respostas genéricas.",
+            "Beijo, abraço, carinho/cafuné, tapa, chute, mordida, soco e outras interações ganharam frases mais próximas das referências originais.",
+            "Medidores como lindo/linda, gado, feio, corno, otaku, rico/pobre, gostoso/gostosa e outros foram aprimorados.",
+            "/ppt ganhou instruções e resultado visual melhores.",
+            "/helpcmd recebeu explicações para mais comandos do Salão de Brincadeiras."
+          ]
+        },
+        "v2.0.0": {
+          "version": "2.0.0",
+          "title": "Dragon RPG - Fundação",
+          "changes": [
+            "Início oficial do Dragon RPG da Kobayashi.",
+            "Novo menu /dragonrpg com tutorial e manual para iniciantes.",
+            "Criação de personagem persistente com nível RPG, XP, ouro, atributos, inventário e equipamentos.",
+            "Classes humanas iniciais: Escudeiro, Guerreiro, Mago, Arqueiro e Curandeiro.",
+            "Despertar Dracônico integrado ao Level social existente, desbloqueado no nível 20.",
+            "Facções dracônicas: Caos, Harmonia, Espectadores e Independente.",
+            "Linhagens dracônicas inspiradas em Maid Dragon: Chamas/Tohru, Abissal/Fafnir, Carmesim/Ilulu, Aquático/Elma, Arcano/Lucoa e Elétrico/Kanna.",
+            "Comandos /rpgajuda, /classeinfo e /rpgcomandos para explicar o sistema sem confundir novos jogadores.",
+            "Sistema isolado em lib/features/rpg/dragonRpg.js com banco próprio files/database/dragon-rpg.json criado automaticamente."
+          ]
+        },
+        "v2.0.1": {
+          "version": "2.0.1",
+          "title": "Dragon RPG - Batalhas e Missões",
+          "changes": [
+            "Combate PvE por turnos com atacar, defender, habilidade, itens e fuga.",
+            "Cinco regiões de exploração e oito tipos de monstros escaláveis.",
+            "XP RPG, level up, pontos distribuíveis e recuperação de HP/Mana.",
+            "Drops de materiais e consumíveis integrados ao inventário.",
+            "Missões com progresso automático, recompensas e até três missões ativas.",
+            "Descanso com cooldown, derrota sem perda de personagem e rank RPG global."
+          ]
+        },
+        "v2.0.3": {
+          "version": "2.0.3",
+          "title": "Dragon RPG Reset System",
+          "changes": [
+            "Novo /zerarrpg: exclusivo do dono principal, zera o progresso RPG dos membros do grupo atual.",
+            "Novo /zerarrpgg: exclusivo do dono principal, apaga globalmente todos os personagens Dragon RPG, incluindo o dono do bot.",
+            "Os dois resets exigem confirmação explícita para evitar exclusões acidentais.",
+            "Backup automático do banco Dragon RPG é criado antes de qualquer reset que apague personagens.",
+            "O Level social normal da Kobayashi não é apagado pelos resets RPG.",
+            "Menu do dono e /helpcmd atualizados com os novos comandos."
+          ]
+        },
+        "v2.0.4": {
+          "version": "2.0.4",
+          "title": "Dragon RPG Reset Confirmation Fix",
+          "changes": [
+            "Corrigido /zerarrpg confirmar que podia repetir a tela de confirmação.",
+            "Corrigido /zerarrpgg confirmar pelo mesmo mecanismo.",
+            "A confirmação agora lê o texto completo dos argumentos e normaliza espaços/acentos.",
+            "Também aceita confirmar, confirmo, confirmado e sim."
+          ]
+        },
+        "v2.0.6": {
+          "version": "2.0.6",
+          "title": "Isolamento Dragon RPG / RPG Clássico",
+          "changes": [
+            "Dragon RPG v2 e RPG clássico agora possuem estados de ativação independentes por grupo.",
+            "Novo /mododragonrpg on/off para controlar somente o Dragon RPG.",
+            "/modorpg continua controlando somente o RPG clássico.",
+            "Sistema desativado fica silencioso e não responde a seus comandos.",
+            "Aliases iguais deixam de gerar resposta cruzada; Dragon RPG tem prioridade quando estiver ativado.",
+            "Configuração do Dragon RPG salva em files/database/dragon-rpg-mode.json."
+          ]
+        },
+        "v2.0.7": {
+          "version": "2.0.7",
+          "title": "Emergency Full Command Arguments Fix",
+          "changes": [
+            "Parser global agora reconhece a mensagem completa após o prefixo.",
+            "Argumentos são preservados para comandos switch e modulares.",
+            "Espaços múltiplos, tabs e quebras de linha são aceitos entre comando e complemento.",
+            "/dragonrpg on e /dragonrpg off agora funcionam diretamente.",
+            "/dragonrpg sem complemento continua abrindo o menu.",
+            "Dragon RPG pode ser reativado com /dragonrpg on mesmo quando estiver desligado."
+          ]
+        },
+        "v2.0.9": {
+          "version": "2.0.9",
+          "title": "Koba Trigger",
+          "changes": [
+            "Chamadas naturais iniciadas por Koba/Kobayashi.",
+            "Koba menu, Koba perfil, Koba figurinha e Koba Dragon RPG.",
+            "Koba tocar <música> executa /play <música>.",
+            "Ações administrativas reconhecidas continuam respeitando permissões.",
+            "Frases sem intenção cadastrada são ignoradas silenciosamente.",
+            "Novo /kobatrigger on/off por grupo."
+          ]
+        },
+        "v2.0.10": {
+          "version": "2.0.10",
+          "title": "Koba Trigger Universal",
+          "changes": [
+            "Koba Trigger ampliado para 564 comandos/aliases detectados no bot.",
+            "Formato universal Koba <comando> [argumentos].",
+            "Mantidos atalhos naturais como Koba tocar <música>.",
+            "Argumentos completos são preservados.",
+            "Frases sem comando real continuam silenciosas.",
+            "Permissões e bloqueios originais continuam sendo verificados."
+          ]
+        },
+        "v2.0.11": {
+          "version": "2.0.11",
+          "title": "Lista Branca Protection Fix",
+          "changes": [
+            "Corrigido módulo da Lista Branca e normalização de JIDs/números.",
+            "Anti-Trava agora ignora membros protegidos.",
+            "ADVs automáticas não punem whitelist.",
+            "Remoção automática da lista negra local não expulsa whitelist.",
+            "Comandos manuais de ADM continuam disponíveis."
+          ]
+        },
+        "v2.0.12": {
+          "version": "2.0.12",
+          "title": "Lista Branca Hard Guard",
+          "changes": [
+            "Proteção de whitelist movida para o nível do socket groupParticipantsUpdate.",
+            "Qualquer tentativa de remoção pelo bot é filtrada antes de chegar ao WhatsApp.",
+            "Aliases LID/PN/phoneNumber/JID são salvos ao adicionar à Lista Branca.",
+            "Membro protegido não pode ser removido nem por /ban enquanto estiver na Lista Branca.",
+            "Para banir, primeiro remova da Lista Branca."
+          ]
+        },
+        "2.0.16": {
+          "version": "2.0.16",
+          "title": "RankADM 2.0",
+          "changes": [
+            "Novo visual decorado para o ranking.",
+            "Filtros por texto, fotos, vídeos, figurinhas e comandos.",
+            "Líderes individuais por categoria.",
+            "Perfil detalhado de ADM por menção ou resposta.",
+            "Percentual de participação no grupo.",
+            "Reset do ranking agora exige confirmação."
+          ]
+        },
+        "2.0.19": {
+          "version": "2.0.19",
+          "title": "Créditos Luiz G. / Kobayashi",
+          "changes": [
+            "Banner antigo da base substituído.",
+            "Novo crédito: Luiz G. / Kobayashi.",
+            "Aviso contra venda sem autorização.",
+            "Contato de aluguel: 5515997075304."
+          ]
+        },
+        "2.0.21": {
+          "version": "2.0.21",
+          "title": "Lista Negra AutoRemove",
+          "changes": [
+            "/listanegra remove imediatamente e bloqueia reentrada.",
+            "/listanegrag expulsa de todos os grupos onde a Kobayashi é ADM.",
+            "Entrada de usuário em lista negra dispara remoção automática.",
+            "Lista Negra passa a ter prioridade sobre whitelist para o AutoGuard."
+          ]
+        },
+        "2.0.22": {
+          "version": "2.0.22",
+          "title": "Anti-PV 3 Modos",
+          "changes": [
+            "Novo modo aviso.",
+            "Novo modo bloquear com bloqueio automático do contato.",
+            "Novo modo aluguel com redirecionamento para o criador.",
+            "Compatibilidade com a configuração antiPv antiga."
+          ]
+        },
+        "2.0.23": {
+          "version": "2.0.23",
+          "title": "Pacotes de Figurinhas + Novidades + Menus",
+          "date": "2026-09-10",
+          "commands": [
+            {
+              "name": "pacote",
+              "category": "Ateliê de Escamas",
+              "note": "captura, registra e envia um pacote salvo"
+            },
+            {
+              "name": "figurinha",
+              "category": "Ateliê de Escamas",
+              "note": "envia as figurinhas de um pacote uma por vez"
+            }
+          ],
+          "changes": [
+            "Corrigido o sistema de pacotes de figurinhas com captura real via /pacote fig on e /pacote fig off.",
+            "/pacote add Nome registra todas as figurinhas capturadas como um pacote persistente.",
+            "/pacote Nome envia o pacote registrado completo.",
+            "/figurinha Nome envia uma figurinha por vez e continua da posição anterior.",
+            "/novidades agora escolhe automaticamente a maior versão do release-notes.json, em vez de poder ficar preso em uma versão antiga.",
+            "/novidades ganhou uma seção própria de NOVOS COMANDOS.",
+            "Menu de figurinhas atualizado com /pacote, /figurinha e /rgfigu.",
+            "Menu ADM atualizado com /rankadm, /resetrankadm e /listanegra.",
+            "Regra de atualização consolidada: comandos novos devem entrar no menu correspondente e nas novidades da versão."
+          ]
+        },
+        "2.0.24": {
+          "version": "2.0.24",
+          "title": "Dragon RPG — Progressão, Classes e Atributos",
+          "date": "2026-09-10",
+          "commands": [
+            {
+              "name": "classesavancadas",
+              "category": "Dragon RPG",
+              "note": "mostra requisitos e progresso das especializações"
+            },
+            {
+              "name": "classeavancada",
+              "category": "Dragon RPG",
+              "note": "desbloqueia uma classe avançada ao cumprir todos os requisitos"
+            }
+          ],
+          "changes": [
+            "Tutoriais do Dragon RPG reescritos com explicações detalhadas em 9 tópicos.",
+            "Cada nível RPG agora concede 3 pontos de atributo e 1 ponto de habilidade.",
+            "Adicionadas classes avançadas: Necromante, Assassino, Paladino e Feiticeiro.",
+            "Classes avançadas exigem nível, inimigos derrotados, classe base e, em alguns casos, atributos/especialidades.",
+            "Perfil RPG agora mostra classe avançada, pontos de habilidade, inimigos derrotados, Combate, Furtividade, Sobrevivência e Arcana.",
+            "Especialidades evoluem conforme nível, vitórias e estilo da classe.",
+            "Novos comandos adicionados ao menu Dragon RPG e ao /novidades."
+          ]
+        },
+        "2.0.25": {
+          "version": "2.0.25",
+          "title": "Dragon RPG — Itens Fora de Combate + Comandos Fix",
+          "date": "2026-09-10",
+          "changes": [
+            "Itens consumíveis agora podem ser usados dentro e fora de batalha.",
+            "Poção de HP recupera até 45 HP.",
+            "Poção de Mana recupera até 40 Mana.",
+            "Poção de Força aumenta em 50% o próximo /atacar.",
+            "Poção de Mana e Poção de Força adicionadas à loja RPG.",
+            "Comandos e aliases atuais do Dragon RPG sincronizados com o roteador do modo e com o Koba Trigger.",
+            "Classes avançadas e comandos recentes passam a ser reconhecidos corretamente."
+          ]
+        },
+        "2.0.26": {
+          "version": "2.0.26",
+          "title": "Perfil Kobayashi 2.0",
+          "date": "2026-09-10",
+          "changes": [
+            "/perfil atual substituído pelo Perfil Kobayashi 2.0, sem criar handler concorrente.",
+            "Perfil usa a foto de perfil do WhatsApp quando disponível.",
+            "Nova identidade visual original Kobayashi com Identidade, Hierarquia, Dragon Social, Aura Kobayashi, Atividade e Dragon RPG.",
+            "Personalidade persistente com Caos, Fofura, Aura, Coragem e Mistério.",
+            "Integração com classe, especialização, nível, HP, Mana, Combate e Furtividade do Dragon RPG.",
+            "Mantido suporte a /perfil, /perfil @membro e /perfil respondendo a uma mensagem.",
+            "Conselho da Koba muda diariamente entre frases próprias do bot."
+          ]
+        },
+        "2.0.27": {
+          "version": "2.0.27",
+          "title": "Perfil Kobayashi — Hierarquia ADM Fix",
+          "date": "2026-09-12",
+          "changes": [
+            "Corrigida a detecção de administradores no /perfil.",
+            "O perfil agora compara JID normal, LID, número telefônico e aliases resolvidos pelo Baileys.",
+            "A lista real de administradores do grupo e o metadata do participante são usados em conjunto.",
+            "Dono, líder e ADM continuam sendo estados independentes: um dono que também for ADM pode aparecer com ambos como ✅.",
+            "Mantido apenas um handler ativo do /perfil."
+          ]
+        },
+        "2.0.28": {
+          "version": "2.0.28",
+          "title": "Dono — Hierarquia Completa",
+          "date": "2026-09-12",
+          "changes": [
+            "Dono principal recebe Dono, Líder e Premium automaticamente no /perfil.",
+            "ADM continua aparecendo somente quando o dono realmente é ADM/dono do grupo atual.",
+            "Permissões dos demais membros permanecem reais."
+          ]
+        },
+        "2.0.29": {
+          "version": "2.0.29",
+          "title": "Aluguel — Responsável e Vencimento",
+          "date": "2026-09-12",
+          "commands": [
+            {
+              "name": "rg_aluguel",
+              "category": "Dono / Aluguel",
+              "note": "agora exige responsável e aceita plano ou duração"
+            },
+            {
+              "name": "renovar_aluguel",
+              "category": "Dono / Aluguel",
+              "note": "renova por plano ou duração e mantém o responsável"
+            }
+          ],
+          "changes": [
+            "/rg_aluguel @fulano plano X registra o grupo no plano escolhido.",
+            "/rg_aluguel @fulano 30D registra duração personalizada.",
+            "Responsável pelo aluguel é obrigatório.",
+            "Uma semana antes do vencimento o bot marca o responsável automaticamente.",
+            "Após o vencimento, todos os comandos ficam bloqueados para não-donos; somente o dono principal continua usando o bot.",
+            "/renovar_aluguel limpa o aviso de vencimento e preserva o responsável."
+          ]
+        },
+        "2.0.30": {
+          "version": "2.0.30",
+          "title": "Perfil — Porcentagens Corrigidas",
+          "date": "2026-09-12",
+          "changes": [
+            "Corrigida a barra visual das porcentagens da Aura Kobayashi.",
+            "As barras agora usam blocos parciais em vez de arredondar visualmente os valores.",
+            "Os valores persistentes dos usuários foram mantidos."
+          ]
+        },
+        "2.0.31": {
+          "version": "2.0.31",
+          "title": "Perfil — Porcentagens Aleatórias",
+          "date": "2026-09-12",
+          "changes": [
+            "Caos, Fofura, Aura, Coragem e Mistério agora são sorteados de 0% a 100% a cada uso do /perfil.",
+            "A barra proporcional da v2.0.30 foi mantida."
+          ]
+        },
+        "2.0.32": {
+          "version": "2.0.32",
+          "title": "Porcentagens 100% Aleatórias",
+          "date": "2026-09-12",
+          "changes": [
+            "Todas as porcentagens do /perfil são sorteadas novamente a cada uso.",
+            "Todos os medidores percentuais do /menubn agora sorteiam um novo valor em toda execução.",
+            "Traits como linda, lindo, gay, hetero, lesbica, gado, feio, corno, bebado, gostoso, gostosa, golpista, otaku e os demais deixam de usar porcentagem estável.",
+            "/shipo deixa de reutilizar compatibilidade anterior.",
+            "Rankings percentuais do /menubn sorteiam novamente participantes e valores em cada execução.",
+            "/chance, /sorte, /lucy e comandos semelhantes permanecem aleatórios."
+          ]
+        },
+        "2.0.33": {
+          "version": "2.0.33",
+          "title": "MSG Global — Avisos em todos os grupos",
+          "date": "2026-09-12",
+          "commands": [
+            {
+              "name": "msg",
+              "category": "Dono",
+              "note": "envia aviso em todos os grupos marcando todos"
+            }
+          ],
+          "changes": [
+            "Novo /msg texto, exclusivo do dono principal.",
+            "Envia o aviso para todos os grupos em que a Kobayashi participa.",
+            "Marca todos os participantes de cada grupo através de mentions.",
+            "Mostra ao dono quantos grupos receberam e quantos envios falharam.",
+            "Incluído pequeno intervalo entre grupos para reduzir disparos simultâneos."
+          ]
+        },
+        "3.0.0": {
+          "version": "3.0.0",
+          "title": "Kobayashi V3.0 — Mega Integração",
+          "date": "2026-09-12",
+          "commands": [
+            {
+              "name": "menuv3",
+              "category": "Geral",
+              "note": "central dos sistemas V3"
+            },
+            {
+              "name": "calc",
+              "category": "Ferramentas",
+              "note": "calculadora local"
+            },
+            {
+              "name": "antipalavra",
+              "category": "Admin",
+              "note": "filtro local de palavras"
+            },
+            {
+              "name": "addautoresposta",
+              "category": "Admin",
+              "note": "respostas automáticas locais"
+            },
+            {
+              "name": "listargrupos",
+              "category": "Dono",
+              "note": "lista todos os grupos do bot"
+            },
+            {
+              "name": "v3status",
+              "category": "Geral",
+              "note": "status dos módulos V3"
+            }
+          ],
+          "changes": [
+            "Grande salto para a linha v3.0.",
+            "Compatibilidade de nomes/aliases inspirada nas bases Kobayashi para os sistemas que a Kobayashi já possui.",
+            "Central V3 adicionada ao menu principal.",
+            "Novo pacote de ferramentas locais sem API: cálculo, texto, sorteios, Base64, UUID e utilidades.",
+            "Novo AntiPalavra local por grupo.",
+            "Novo sistema de respostas automáticas locais por grupo.",
+            "Sistemas já existentes da Kobayashi foram preservados: aluguel, Admin Center, logs, proteção, stickers, Level, Dragon Social, jogos, RPG clássico e Dragon RPG.",
+            "Comandos que dependem de APIs externas foram separados e não fazem parte desta versão."
+          ]
+        },
+        "3.0.1": {
+          "version": "3.0.1",
+          "title": "MSG Sem Limite + Identidade Kobayashi",
+          "date": "2026-09-13",
+          "changes": [
+            "Removido o limite artificial de caracteres do /msg.",
+            "Avisos grandes são divididos automaticamente em partes.",
+            "Removidas referências textuais externas.",
+            "Identidade da V3 padronizada exclusivamente como Kobayashi Bot."
+          ]
+        },
+        "3.0.2": {
+          "version": "3.0.2",
+          "title": "Cita — Marcar Todos",
+          "date": "2026-09-13",
+          "commands": [
+            {
+              "name": "cita",
+              "category": "Admin",
+              "note": "marca todos do grupo"
+            }
+          ],
+          "changes": [
+            "Novo /cita para marcar todos.",
+            "/cita texto marca todos junto com o aviso.",
+            "Restrito a ADM/dono.",
+            "Adicionado ao menu ADM e /helpcmd."
+          ]
+        },
+        "3.0.3": {
+          "version": "3.0.3",
+          "title": "Gestão Global + Estatísticas",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "grupos",
+              "category": "Dono"
+            },
+            {
+              "name": "grupo",
+              "category": "Dono"
+            },
+            {
+              "name": "clientes",
+              "category": "Dono"
+            },
+            {
+              "name": "alugueis",
+              "category": "Dono"
+            },
+            {
+              "name": "statusglobal",
+              "category": "Dono"
+            },
+            {
+              "name": "estatisticas",
+              "category": "Dono"
+            },
+            {
+              "name": "comandosmaisusados",
+              "category": "Dono"
+            },
+            {
+              "name": "erros",
+              "category": "Dono"
+            },
+            {
+              "name": "atividadegp",
+              "category": "Geral"
+            },
+            {
+              "name": "infogrupo",
+              "category": "Geral"
+            }
+          ],
+          "changes": [
+            "Gestão global dos grupos e clientes.",
+            "Estatísticas de uso, comandos e atividade.",
+            "Status global do processo.",
+            "Comandos distribuídos nos menus existentes; nenhum menu novo."
+          ]
+        },
+        "3.0.4": {
+          "version": "3.0.4",
+          "title": "Correção de reconhecimento do dono",
+          "date": "2026-09-14",
+          "changes": [
+            "Corrigido reconhecimento do dono principal quando o WhatsApp entrega identidade em formato LID.",
+            "A validação agora considera PN, LID, participant, participantAlt e metadados do participante.",
+            "O número configurado do dono é comparado pelos dígitos, evitando falha por formatação.",
+            "Líderes também recebem a mesma resolução robusta de identidade.",
+            "Sentinel passa a receber as identidades resolvidas do dono."
+          ]
+        },
+        "3.0.5": {
+          "version": "3.0.5",
+          "title": "Reconhecimento definitivo do dono",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "debugdono",
+              "category": "Dono",
+              "note": "diagnóstico seguro da identidade detectada"
+            }
+          ],
+          "changes": [
+            "Reconhecimento do dono agora aceita PN, LID, participant, participantAlt, phoneNumber e JID.",
+            "Adicionado tratamento da variação brasileira com ou sem o 9º dígito.",
+            "A Kobayashi tenta resolver LID para PN antes de negar permissão de dono.",
+            "O número configurado, configuração inicial, variável KOBAYASHI_OWNER e fallback do criador são aceitos.",
+            "Novo /debugdono para diagnosticar a identidade sem revelar o número completo."
+          ]
+        },
+        "3.0.6": {
+          "version": "3.0.6",
+          "title": "Permissão do dono nos comandos globais",
+          "date": "2026-09-14",
+          "changes": [
+            "Corrigida a divergência entre /debugdono e os comandos novos de gestão.",
+            "Gestão global agora usa diretamente SoDonoPrincipal, já validado pelo núcleo.",
+            "/grupos, /grupo, /clientes, /alugueis, /statusglobal, /estatisticas, /comandosmaisusados e /erros passam a reconhecer o mesmo dono que /debugdono."
+          ]
+        },
+        "3.0.7": {
+          "version": "3.0.7",
+          "title": "Moderação V3",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "protecao",
+              "category": "Admin",
+              "note": "painel e perfis de proteção baixa, media, alta e off"
+            }
+          ],
+          "changes": [
+            "O /protecao existente foi aprimorado em vez de criar um novo menu ou comando concorrente.",
+            "Novo /protecao baixa para proteção leve.",
+            "Novo /protecao media para proteção equilibrada.",
+            "Novo /protecao alta para proteção rígida.",
+            "Novo /protecao off para desligar os módulos automáticos controlados pelos perfis.",
+            "Apenas um modo de AntiLink fica ativo por perfil.",
+            "O /protecao sem argumento continua exibindo o painel.",
+            "Comando integrado ao /menuadm e /helpcmd."
+          ]
+        },
+        "3.0.8": {
+          "version": "3.0.8",
+          "title": "BAN MSG Global",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "ban_msg",
+              "category": "Dono",
+              "note": "registra textos proibidos e aplica Lista Negra Global automaticamente"
+            }
+          ],
+          "changes": [
+            "Novo /ban_msg para registrar frases proibidas globalmente.",
+            "Ao detectar uma frase registrada, o autor é adicionado automaticamente à Lista Negra Global.",
+            "A Kobayashi tenta remover o autor do grupo atual e de todos os grupos em que o encontrar e possuir permissão.",
+            "Auditoria automática é enviada ao dono com texto, nome, número, grupo e horário do ocorrido.",
+            "Suporte a /ban_msg add, /ban_msg del, /ban_msg list, /ban_msg on e /ban_msg off.",
+            "O comando foi adicionado ao menu do dono e ao /helpcmd."
+          ]
+        },
+        "3.0.9": {
+          "version": "3.0.9",
+          "title": "Blacklist Purge Global Fix",
+          "date": "2026-09-14",
+          "changes": [
+            "Corrigida a remoção do /ban_msg.",
+            "Criada varredura direta de todos os grupos em que a Kobayashi participa.",
+            "A remoção só é tentada nos grupos onde a Kobayashi é ADM.",
+            "A busca do alvo reconhece PN, LID, phoneNumber, participant e variação BR com/sem nono dígito.",
+            "A remoção tenta os identificadores reais encontrados nos metadados do grupo.",
+            "/listanegrag agora vasculha todos os grupos mesmo quando o número já estava cadastrado.",
+            "/listanegra agora também vasculha todos os grupos onde a Kobayashi é ADM e remove a pessoa.",
+            "As respostas mostram grupos verificados, grupos com ADM, onde o usuário foi encontrado, remoções e falhas.",
+            "A auditoria do /ban_msg passou a incluir o resultado completo da varredura."
+          ]
+        },
+        "4.0.0": {
+          "version": "4.0.0",
+          "title": "Licença + Atualizador Oficial",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "licenca",
+              "category": "Dono",
+              "note": "mostra licença, plano, cliente, cache e updates"
+            },
+            {
+              "name": "ativarlicenca",
+              "category": "Dono",
+              "note": "ativa a instalação usando uma chave"
+            },
+            {
+              "name": "verificarupdate",
+              "category": "Dono",
+              "note": "verifica o canal oficial sem instalar"
+            }
+          ],
+          "changes": [
+            "Fundação do sistema de venda permanente da Kobayashi.",
+            "Licenças remotas configuráveis com cache local de 7 dias.",
+            "Licença permanente continua rodando mesmo com indisponibilidade temporária do servidor; o servidor é exigido para ativação e revalidações quando necessário.",
+            "Atualizador V4 suporta manifesto oficial, canal stable, downloadUrl, SHA-256 e minimumVersion.",
+            "Atualizador preserva settings, sessão/bancos em files/database, files/license, .env, .git e node_modules.",
+            "Backup e rollback continuam ativos antes de substituir arquivos.",
+            "Adicionados comandos Termux para configurar, ativar, validar e consultar licença.",
+            "A instalação do criador mantém acesso de desenvolvimento enquanto o serviço remoto ainda não foi publicado."
+          ]
+        },
+        "4.0.1": {
+          "version": "4.0.1",
+          "title": "Distribuição Protegida + Build Cliente",
+          "date": "2026-09-14",
+          "changes": [
+            "Nova esteira npm run build:client para gerar a edição de comprador a partir da fonte oficial.",
+            "Build do comprador remove node_modules, caches NPM, backups do updater, ZIPs antigos, READMEs históricos e artefatos de desenvolvimento.",
+            "Bancos locais, sessão do WhatsApp, lista negra, RPG, aluguel, logs e estado de licença não são enviados no pacote do comprador.",
+            "settings/settings.json do comprador é gerado limpo, sem token, sessão ou números administrativos da instalação do criador.",
+            "Arquivos JavaScript sensíveis recebem ofuscação compatível com ESM baseada em codificação de literais de texto e banner de proteção.",
+            "Créditos oficiais, licença, updater, assets necessários e comandos permanecem no pacote.",
+            "O pacote protegido continua instalável em hospedagem comum, VPS ou Termux com npm install.",
+            "Build protegido inclui relatório de arquivos removidos, arquivos protegidos e SHA-256."
+          ]
+        },
+        "4.0.2": {
+          "version": "4.0.2",
+          "title": "License Server Admin + Key Management",
+          "date": "2026-09-14",
+          "commands": [
+            {
+              "name": "licencacriar",
+              "category": "Dono",
+              "note": "gera licença permanente para comprador"
+            },
+            {
+              "name": "licencas",
+              "category": "Dono",
+              "note": "lista licenças"
+            },
+            {
+              "name": "licencaver",
+              "category": "Dono",
+              "note": "detalha uma licença e instalações"
+            },
+            {
+              "name": "licencabloquear",
+              "category": "Dono",
+              "note": "bloqueia licença"
+            },
+            {
+              "name": "licencareativar",
+              "category": "Dono",
+              "note": "reativa licença"
+            },
+            {
+              "name": "licencadesvincular",
+              "category": "Dono",
+              "note": "remove vínculo de uma instalação"
+            }
+          ],
+          "changes": [
+            "Cliente administrativo para servidor de licenças.",
+            "Token administrativo separado da chave dos compradores.",
+            "Gestão de licenças pelo WhatsApp apenas para o dono principal.",
+            "Suporte a limite de instalações e desvinculação manual.",
+            "Servidor de licenças separado incluído como ZIP independente."
+          ]
+        },
+        "4.0.3": {
+          "version": "4.0.3",
+          "title": "Publicador de Updates Oficiais",
+          "date": "2026-09-14",
+          "changes": [
+            "Novo npm run release:client gera o pacote protegido do comprador e os arquivos de publicação em uma única etapa.",
+            "latest.json é gerado automaticamente com versão, canal, downloadUrl, SHA-256, minimumVersion e notas.",
+            "Changelog JSON da versão é criado automaticamente a partir de release-notes.json.",
+            "build:client agora lê a versão diretamente de version.json, eliminando versão fixa no gerador.",
+            "Arquivo PUBLICAR-vX.Y.Z.txt é criado com URLs, SHA-256 e comandos de configuração dos clientes.",
+            "Suporte a canal stable e base URL configurável por argumento ou variável KOBAYASHI_RELEASE_BASE_URL.",
+            "Modo --dry-run permite testar toda a geração antes de existir uma hospedagem pública de releases."
+          ]
+        },
+        "4.0.4": {
+          "version": "4.0.4",
+          "title": "BAN MSG Local Delete + Remove + Autoria",
+          "date": "2026-09-14",
+          "changes": [
+            "BAN MSG agora apaga a mensagem que acionou a regra no grupo de origem.",
+            "BAN MSG remove explicitamente o autor do grupo onde o texto foi enviado antes do purge global.",
+            "Lista Negra Global e remoção nos demais grupos continuam ativas.",
+            "Auditoria informa separadamente mensagem apagada e remoção do grupo atual.",
+            "Ajuda do /ban_msg atualizada com o novo comportamento.",
+            "Aviso de autoria e proibição de venda sem autorização incluído nos arquivos principais e módulos de licença."
+          ]
+        },
+        "4.0.5": {
+          "version": "4.0.5",
+          "title": "Dragon RPG 3.0 — Masmorras + Crafting",
+          "date": "2026-09-14",
+          "changes": [
+            "Novas masmorras: Floresta Ancestral, Caverna Dracônica, Ruínas Arcanas e Abismo Sombrio.",
+            "Novo sistema persistente de materiais, energia, cooldown, drops e crafting.",
+            "Receitas iniciais: poção, espada, arco, cajado, armadura e amuleto.",
+            "Novos comandos: /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon.",
+            "A venda/revenda da Kobayashi Bot sem autorização do criador permanece estritamente proibida."
+          ]
+        },
+        "4.0.6": {
+          "version": "4.0.6",
+          "title": "BAN MSG — Lista e Remoção Dedicadas",
+          "date": "2026-09-15",
+          "changes": [
+            "Novo /listaban_msg: lista os textos cadastrados e mostra o status do BAN MSG.",
+            "Novo /rmban_msg: remove uma regra pelo número exibido em /listaban_msg ou pelo texto cadastrado.",
+            "Os dois comandos são exclusivos do dono principal e foram adicionados ao /menudono.",
+            "O /ban_msg original continua responsável por cadastrar textos e ligar/desligar o sistema.",
+            "Mantida a proibição de venda/revenda da Kobayashi Bot sem autorização do criador."
+          ]
+        },
+        "4.0.7": {
+          "version": "4.0.7",
+          "title": "Menu Dragon RPG — Masmorras + Craft",
+          "date": "2026-09-15",
+          "changes": [
+            "Adicionados /masmorras, /masmorra, /materiais, /receitas, /craft e /descansodungeon ao menu existente do Dragon RPG.",
+            "Os novos comandos também aparecem em /rpgcomandos.",
+            "Nenhum novo menu foi criado."
+          ]
+        },
+        "4.0.8": {
+          "version": "4.0.8",
+          "title": "Dragon RPG 3.0 — Correção de Conflito de Roteamento",
+          "date": "2026-09-15",
+          "changes": [
+            "Os comandos de Masmorras e Crafting agora possuem roteamento prioritário próprio.",
+            "Aliases /masmorras, /dungeons, /masmorra, /dungeon, /materiais, /receitas, /crafts, /craft e /descansodungeon foram isolados do RPG genérico.",
+            "Os handlers do Dragon RPG 3.0 foram reposicionados antes do processamento genérico que podia interceptá-los.",
+            "Cada novo comando foi verificado para possuir somente um handler no switch principal.",
+            "Mantido o menu Dragon RPG atualizado da v4.0.7."
+          ]
+        },
+        "4.0.9": {
+          "version": "4.0.9",
+          "title": "Dragon RPG — Bosses 20%",
+          "date": "2026-09-15",
+          "changes": [
+            "Cada região de /explorar tem 20% de chance de gerar um Boss temático como combate real.",
+            "Bosses de exploração entram no sistema normal de atacar, defender, habilidade, item e fugir.",
+            "Cada masmorra tem 20% de chance de Boss; Bosses têm 55% de chance base de vitória e recompensas maiores.",
+            "Bosses adicionados: Guardião Ancestral, Sentinela Dracônico, Titã das Chamas, Devorador do Abismo e Dragão Alfa Ancestral."
+          ]
+        },
+        "4.0.10": {
+          "version": "4.0.10",
+          "title": "Dragon RPG — Reconhecimento de Comandos",
+          "date": "2026-09-15",
+          "changes": [
+            "Corrigidos os registradores DRAGON_RPG_COMMANDS e KOBA_TRIGGER_COMMANDS.",
+            "/dragonrpg, /masmorras, /masmorra, /materiais, /receitas e /craft passam pelo roteamento do Dragon RPG.",
+            "Aliases /rpg, /menurpg, /dungeons, /dungeon e /crafts também foram sincronizados.",
+            "Mantido /modorpg on/off para ativação opcional por grupo."
+          ]
+        },
+        "4.0.11": {
+          "version": "4.0.11",
+          "title": "Lista Negra — Multi-Add",
+          "date": "2026-09-15",
+          "changes": [
+            "/listanegra sem argumentos agora explica o uso e mostra a lista atual.",
+            "/listanegra não exige mais add: enviar o número adiciona imediatamente.",
+            "/listanegra aceita vários números de uma vez.",
+            "/listanegrag aceita vários números de uma vez e executa a varredura global para cada alvo.",
+            "Mantidas as proteções do dono principal e os registros de moderação."
+          ]
+        },
+        "4.0.12": {
+          "version": "4.0.12",
+          "title": "Entrada do Membro",
+          "date": "2026-09-16",
+          "changes": [
+            "Novo /entrada_membro número mostra dia/mês, hora e minuto da entrada registrada.",
+            "A entrada é registrada silenciosamente; nenhuma mensagem é enviada no momento em que o membro entra.",
+            "O comando só consulta membros atualmente presentes no grupo.",
+            "Datas anteriores à atualização não podem ser recuperadas retroativamente pelo WhatsApp/Baileys."
+          ]
+        },
+        "4.0.13": {
+          "version": "4.0.13",
+          "title": "Lista Negra Global — Lotes",
+          "date": "2026-09-16",
+          "changes": [
+            "/listanegrag reconhece listas com um telefone por linha, espaços, hífens comuns/Unicode e espaços invisíveis de textos copiados.",
+            "Aceita números internacionais, como +63, além de +55.",
+            "Remove números duplicados do mesmo lote automaticamente.",
+            "Primeiro persiste todos os números válidos na lista negra global e só depois executa a varredura de remoção.",
+            "Em lotes, retorna a quantidade de números salvos na lista negra global e mantém todos persistidos para remoção automática futura."
+          ]
+        },
+        "4.0.14": {
+          "version": "4.0.14",
+          "title": "MSG Global — Proteção Anti-429",
+          "date": "2026-09-16",
+          "changes": [
+            "/msg agora trata falhas 429 e 500 de groupFetchAllParticipating sem encerrar a Kobayashi.",
+            "Adicionado retry único com espera; em rate limit o bot não martela a API do WhatsApp.",
+            "O envio prioriza metadata já retornada pela lista de grupos, reduzindo consultas groupMetadata desnecessárias.",
+            "Envios entre grupos ganharam intervalo maior e falhas ficam isoladas por grupo.",
+            "Se a listagem de grupos falhar, /msg aborta com segurança e mantém o processo online."
+          ]
+        },
+        "5.0.0": {
+          "version": "5.0.0",
+          "title": "Core & Estabilidade V5",
+          "date": "2026-09-16",
+          "changes": [
+            "Novo Core V5 inspirado em conceitos de monitoramento/otimização estudados nas bases de referência, reimplementado para a arquitetura Kobayashi.",
+            "Monitor de RAM/heap, uptime, warnings e erros de processo.",
+            "Manutenção automática a cada 10 minutos e limpeza segura de temporários com mais de 6 horas.",
+            "Handlers para unhandledRejection e uncaughtException evitam quedas por rejeições comuns; erros críticos de recurso deixam a hospedagem reiniciar o processo.",
+            "Novos comandos de dono /statuscore e /limpartemp.",
+            "Nenhum sistema opcional de grupo é ativado automaticamente."
+          ]
+        },
+        "5.1.0": {
+          "version": "5.1.0",
+          "title": "Jogos 2.0 — Parte 1",
+          "date": "2026-09-16",
+          "changes": [
+            "Jogos 2.0 OFF por padrão; ADM ativa com /jogos on.",
+            "Forca: /forca e /letrajogo.",
+            "Jogo da Velha multiplayer: /velha e /jogada.",
+            "Connect 4 multiplayer: /connect4 e /c4.",
+            "Banco games-v5.json persistente e fora do ZIP.",
+            "Pacote cumulativo inclui v5.0.0 Core & Estabilidade."
+          ]
+        },
+        "5.2.0": {
+          "version": "5.2.0",
+          "title": "Social 2.0",
+          "date": "2026-09-16",
+          "changes": [
+            "Novo Social 2.0 OFF por padrão; ADM controla com /social on/off.",
+            "AFK persistente com motivo.",
+            "Reputação entre membros com cooldown de 12 horas e conquistas automáticas.",
+            "Sistema de presentes e conquistas sociais.",
+            "Perfil social com reputação, presentes e conquistas.",
+            "Notas de grupo gerenciadas por ADM.",
+            "Pacote cumulativo inclui Core v5.0.0 e Jogos 2.0 v5.1.0."
+          ]
+        },
+        "5.2.1": {
+          "version": "5.2.1",
+          "title": "Cita 2.0",
+          "date": "2026-09-16",
+          "changes": [
+            "/cita foi substituído pela implementação 2.0; não existe handler duplicado.",
+            "/cita texto envia o texto marcando todos de forma oculta.",
+            "/cita usado em resposta reaproveita o texto/caption da mensagem respondida quando nenhum texto adicional é informado.",
+            "Suporta texto, legenda de imagem, vídeo e documento na mensagem respondida.",
+            "Continua restrito a ADM/dono e agora contém falhas de envio sem derrubar o fluxo.",
+            "Pacote cumulativo mantém Core v5.0.0, Jogos v5.1.0 e Social v5.2.0."
+          ]
+        },
+        "5.2.2": {
+          "version": "5.2.2",
+          "title": "Hotfix AdminPro Imports",
+          "date": "2026-09-16",
+          "changes": [
+            "Corrigidos imports listNotes/addNote/removeNote do adminPro que foram renomeados acidentalmente durante a integração Social 2.0.",
+            "Mantido Social V5 isolado via namespace socialV5, evitando colisão com o AdminPro.",
+            "Mantido Cita 2.0 da v5.2.1.",
+            "Pacote cumulativo inclui v5.0.0 até v5.2.2."
+          ]
+        },
+        "5.2.3": {
+          "version": "5.2.3",
+          "title": "Cita Invisível",
+          "date": "2026-09-16",
+          "changes": [
+            "/cita agora funciona somente respondendo uma mensagem.",
+            "Reenvia apenas a mensagem marcada, sem título CITAÇÃO, moldura ou texto adicional.",
+            "Todos os membros continuam mencionados de forma oculta.",
+            "Suporte a reenvio de texto, imagem e vídeo/GIF com legenda original.",
+            "Mantém o hotfix AdminPro da v5.2.2 e todas as partes cumulativas da V5."
+          ]
+        },
+        "5.2.4": {
+          "version": "5.2.4",
+          "title": "Cita Hidetag",
+          "date": "2026-09-16",
+          "changes": [
+            "/cita refeito após inspeção das bases de referência enviadas.",
+            "Responde uma mensagem e reenvia somente o conteúdo original com menções ocultas.",
+            "Sem cabeçalho, moldura, texto de citação ou lista visível de números.",
+            "Suporta texto, imagem, vídeo/GIF, áudio/PTT, figurinha e documento.",
+            "Suporta wrappers de mensagem efêmera, visualização única e documento com legenda.",
+            "Mantém as correções cumulativas anteriores da V5."
+          ]
+        },
+        "5.2.5": {
+          "version": "5.2.5",
+          "title": "Morder com Vídeo",
+          "date": "2026-09-17",
+          "changes": [
+            "/morder agora envia o vídeo personalizado fornecido pelo criador.",
+            "O vídeo foi incorporado em media/acoes/morder.mp4.",
+            "/morder @membro marca autor e alvo na legenda.",
+            "Pacote cumulativo mantém todas as atualizações da V5 até v5.2.5."
+          ]
+        },
+        "5.2.6": {
+          "version": "5.2.6",
+          "title": "Morder — Vídeo Routing Fix",
+          "date": "2026-09-17",
+          "changes": [
+            "Corrigido /morder que estava no menu/handler, mas não no registro KOBA_TRIGGER_COMMANDS.",
+            "/morder agora alcança o handler real de vídeo.",
+            "Vídeo passa a ser lido diretamente com fs.readFileSync, seguindo o método já comprovado pelo /carinho.",
+            "/morder respeita Modo Brincadeira como as demais ações.",
+            "Mantém media/acoes/morder.mp4 dentro do pacote cumulativo."
+          ]
+        },
+        "5.2.7": {
+          "version": "5.2.7",
+          "title": "Novo /morde com GIF",
+          "date": "2026-09-17",
+          "changes": [
+            "Novo /morde separado do /morder.",
+            "/morde @membro envia o vídeo fornecido como GIF.",
+            "Funciona por marcação ou resposta.",
+            "Adicionado ao menu de diversão.",
+            "Modo Brincadeira precisa estar ativo."
+          ]
+        },
+        "5.2.9": {
+          "version": "5.2.9",
+          "title": "Correção definitiva do /comer",
+          "date": "2026-09-17",
+          "changes": [
+            "Corrigido conflito interno: /comer estava simultaneamente em ACTIONS e RPG.",
+            "Removido /comer das interações com alvo; agora ele chega ao sistema RPG correto.",
+            "/comer consome uma comida preparada no inventário.",
+            "/comer nome permite escolher a comida; sem nome consome a primeira disponível.",
+            "Se não houver comida, orienta usar /cozinhar primeiro.",
+            "/comer permanece no MenuBN."
+          ]
+        },
+        "5.2.10": {
+          "version": "5.2.10",
+          "title": "Comando /macetar",
+          "date": "2026-09-17",
+          "changes": [
+            "/comer foi substituído por /macetar.",
+            "/macetar mantém o mesmo modo de ativação e funcionamento do antigo /comer.",
+            "/macetar nome usa o item preparado selecionado; sem nome usa o primeiro disponível.",
+            "MenuBN atualizado para mostrar /macetar no lugar de /comer."
+          ]
+        },
+        "5.3.0": {
+          "version": "5.3.0",
+          "title": "Mega Melhorias — Parte 1",
+          "date": "2026-09-17",
+          "changes": [
+            "Social 2.1: AFK é removido automaticamente quando o membro volta a falar.",
+            "Social 2.1: mencionar alguém AFK mostra motivo e tempo ausente, com anti-spam de aviso.",
+            "Reputação aprimorada com ranks Novato, Boa Companhia, Conhecido, Respeitado, Famoso e Lendário.",
+            "Perfil Social agora mostra rank, reputações dadas, presentes, conquistas e estado AFK.",
+            "Notas de grupo agora exibem autor e data quando disponíveis.",
+            "Dragon Fun: validação de alvo aprimorada para ações por marcação/resposta.",
+            "Dragon Fun: falha de GIF/vídeo remoto agora usa fallback em texto em vez de deixar o comando sem resposta.",
+            "Cita/Hidetag: proteção de 30s contra disparos repetidos em grupos com 150+ participantes.",
+            "Compatibilidade preservada com bancos existentes; nenhum banco de usuário é sobrescrito.",
+            "Sistemas opcionais continuam desligados por padrão."
+          ]
+        },
+        "5.3.1": {
+          "version": "5.3.1",
+          "title": "Dragon Ban Comunidade",
+          "date": "2026-09-17",
+          "changes": [
+            "/dragonban remove o alvo dos 6 grupos cadastrados.",
+            "/rmdragonban remove o registro.",
+            "/listadragonban lista os registros.",
+            "Restrito ao dono principal."
+          ]
+        },
+        "5.3.2": {
+          "version": "5.3.2",
+          "title": "Dragon Ban por marcação ou número",
+          "date": "2026-09-17",
+          "changes": [
+            "/dragonban aceita @membro, número internacional ou resposta.",
+            "/rmdragonban aceita @membro ou número."
+          ]
+        },
+        "5.3.3": {
+          "version": "5.3.3",
+          "title": "Dragon RPG Único",
+          "date": "2026-09-17",
+          "changes": [
+            "RPG clássico/normal removido do roteamento modular.",
+            "/modorpg removido do sistema e da ajuda.",
+            "Aliases /rpg e /menurpg continuam apontando para o Dragon RPG para compatibilidade.",
+            "Economia/RPG antigo do Dragon Fun deixou de interceptar comandos.",
+            "Dragon RPG permanece como único RPG da Kobayashi.",
+            "Jogos, Social e Modo Brincadeira continuam independentes."
+          ]
+        },
+        "5.3.4": {
+          "version": "5.3.4",
+          "title": "/comer voltou",
+          "date": "2026-09-18",
+          "changes": [
+            "/comer voltou como comando do MenuBN/Dragon Fun, sem vínculo com RPG.",
+            "Usa o GIF enviado pelo criador salvo localmente.",
+            "Ativação por @marcação ou resposta à mensagem.",
+            "Fallback em texto se a mídia não puder ser enviada."
+          ]
+        },
+        "5.3.5": {
+          "version": "5.3.5",
+          "title": "/comer mídia corrigida",
+          "date": "2026-09-18",
+          "changes": [
+            "Mídia do /comer convertida de GIF para MP4 com gifPlayback para melhor compatibilidade com WhatsApp/Baileys.",
+            "Arquivo local antigo .gif removido.",
+            "Legenda do comando atualizada."
+          ]
+        },
+        "5.3.6": {
+          "version": "5.3.6",
+          "title": "Comando /julgar",
+          "date": "2026-09-18",
+          "changes": [
+            "Novo /julgar no MenuBN.",
+            "Funciona por @marcação ou resposta.",
+            "Resultados e veredito aleatórios a cada uso.",
+            "Independente do Dragon RPG."
+          ]
+        },
+        "5.3.7": {
+          "version": "5.3.7",
+          "title": "Comando /lid",
+          "date": "2026-09-18",
+          "changes": [
+            "Novo /lid por marcação, resposta ou no próprio usuário.",
+            "Consulta os campos LID do metadata atual do WhatsApp/Baileys.",
+            "Adicionado ao menu geral e /helpcmd."
+          ]
+        },
+        "5.3.8": {
+          "version": "5.3.8",
+          "title": "KobaBan exclusivo do criador",
+          "date": "2026-09-18",
+          "changes": [
+            "/kobaban agora valida exclusivamente o LID oficial configurado do criador.",
+            "Administradores comuns não podem mais executar KobaBan.",
+            "A validação procura o LID no evento e no metadata do participante para suportar grupos em modo LID.",
+            "A Kobayashi ainda precisa ser administradora para remover o alvo.",
+            "O /ban comum continua inalterado para administradores."
+          ]
+        },
+        "5.3.9": {
+          "version": "5.3.9",
+          "title": "Comando /gozar",
+          "date": "2026-09-18",
+          "changes": [
+            "Novo /gozar no MenuBN/Dragon Fun.",
+            "Vídeo local enviado pelo criador.",
+            "Funciona por @marcação ou resposta.",
+            "Independente do Dragon RPG."
+          ]
+        },
+        "5.3.10": {
+          "version": "5.3.10",
+          "title": "Dragon RPG on/off Fix",
+          "date": "2026-09-19",
+          "changes": [
+            "Corrigido /dragonrpg off para desativar o Dragon RPG do grupo.",
+            "/dragonrpg on ativa o sistema novamente.",
+            "/dragonrpg sem argumento abre o menu do Dragon RPG.",
+            "Controle continua restrito a administradores do grupo ou dono principal."
+          ]
+        },
+        "5.3.11": {
+          "version": "5.3.11",
+          "title": "Bang Global",
+          "date": "2026-09-19",
+          "changes": [
+            "Novo /bang exclusivo do dono principal.",
+            "Remove o alvo de todos os grupos em que a Kobayashi é administradora.",
+            "Aceita @marcação, número ou resposta à mensagem.",
+            "Exibe resumo com grupos verificados, encontrados, removidos e falhas.",
+            "O comando não adiciona o alvo à lista negra; realiza somente a remoção global."
+          ]
+        },
+        "5.3.12": {
+          "version": "5.3.12",
+          "title": "Comando /mamada",
+          "date": "2026-09-19",
+          "changes": [
+            "Novo /mamada no MenuBN/Dragon Fun.",
+            "Usa vídeo local.",
+            "Funciona por marcação ou resposta.",
+            "Independente do Dragon RPG."
+          ]
+        },
+        "5.3.13": {
+          "version": "5.3.13",
+          "title": "MultiPrefixo",
+          "date": "2026-09-19",
+          "changes": [
+            "Novo /multiprefixo para usar vários prefixos simultaneamente.",
+            "Adicionar, remover, listar e resetar prefixos.",
+            "Até 10 prefixos ativos, com 1 a 3 caracteres cada.",
+            "/add_prefixo continua compatível e sincroniza a lista de prefixos.",
+            "Exclusivo do dono principal."
+          ]
+        },
+        "5.3.14": {
+          "version": "5.3.14",
+          "title": "Dragon Fun Modular",
+          "date": "2026-09-19",
+          "changes": [
+            "Dragon Fun reorganizado em arquivos individuais por comando.",
+            "/comer, /gozar, /mamada, /gado e demais ações/medidores agora podem ser alterados isoladamente.",
+            "Roteador dragonFun.js reduzido e responsável apenas por encaminhar comandos.",
+            "Utilitários compartilhados movidos para dragonFun/_utils.js.",
+            "Jogos e social preservados em módulo separado para evitar regressões."
+          ]
+        },
+        "5.3.15": {
+          "version": "5.3.15",
+          "title": "Hospedagem Full Structure Fix",
+          "date": "2026-09-19",
+          "changes": [
+            "Pacote completo reconstruído sobre a árvore integral do bot.",
+            "Restaurados módulos exigidos pelo index.js que faltavam nos overlays cumulativos.",
+            "Dragon Fun modular v5.3.14 preservado.",
+            "Estrutura pronta para extrair diretamente na raiz do Pterodactyl.",
+            "Dados de sessão, autenticação, licença local e bancos de runtime não são incluídos."
+          ]
+        },
+        "5.3.16": {
+          "version": "5.3.16",
+          "title": "Dragon Fun LID Mention Fix",
+          "date": "2026-09-19",
+          "changes": [
+            "Corrige marcações dos comandos de brincadeira quando o WhatsApp entrega @lid.",
+            "Resolve LID para o JID de telefone usando metadados do grupo e getPNForJid.",
+            "Ações, medidores e /julgar passam a exibir @ do número quando disponível.",
+            "Mantém fallback para LID somente quando o WhatsApp/Baileys não fornece mapeamento PN."
+          ]
+        },
+        "5.3.17": {
+          "version": "5.3.17",
+          "title": "Mamada LID Fix",
+          "date": "2026-09-20",
+          "changes": [
+            "Corrige a exibição da menção no /mamada quando o WhatsApp entrega identificador LID.",
+            "O comando passa a usar a marcação normalizada do alvo na legenda."
+          ]
+        },
+        "5.3.18": {
+          "version": "5.3.18",
+          "title": "Dragon RPG 2.0 — Parte 1 Lite",
+          "date": "2026-09-20",
+          "changes": [
+            "Início do Dragon RPG 2.0 em formato leve e incremental.",
+            "Masmorras passam a ter chance própria de encontro com Boss.",
+            "Adicionado sistema de loot ponderado e material raro Núcleo de Boss.",
+            "Novo craft de chave de dungeon integrado ao sistema existente.",
+            "Adicionado contador de Bosses derrotados, mantendo compatibilidade com saves antigos."
+          ],
+          "commands": [
+            "craft chave",
+            "masmorras"
+          ]
+        },
+        "5.3.19": {
+          "version": "5.3.19",
+          "title": "Novidades Fix + Dragon RPG 2.0 Lite",
+          "date": "2026-09-20",
+          "changes": [
+            "Corrigido /novidades que ainda mostrava a v5.3.16.",
+            "Adicionadas ao histórico as notas das versões v5.3.17 e v5.3.18.",
+            "Mantidas as novidades da Parte 1 Lite do Dragon RPG 2.0: Bosses, loot ponderado, Núcleo de Boss e craft de chave de dungeon."
+          ]
+        },
+        "v5.3.20": {
+          "version": "5.3.20",
+          "title": "Add Dias no Aluguel",
+          "date": "2026-09-22",
+          "added": [
+            "/add_dias DIAS — adiciona dias ao vencimento do aluguel atual",
+            "Alias /adddias"
+          ],
+          "changed": [
+            "Disponível apenas para o dono principal",
+            "Preserva o vencimento existente quando o aluguel ainda está ativo",
+            "Reinicia os avisos de vencimento após adicionar dias"
+          ]
+        },
+        "v5.3.21": {
+          "version": "5.3.21",
+          "title": "Fotos de Boas-vindas e Saída",
+          "date": "2026-09-24",
+          "added": [
+            "/fotobv — define foto personalizada do bem-vindo por grupo",
+            "/fotosaiu — define foto personalizada quando um membro sai",
+            "/fotobv off e /fotosaiu off — removem as imagens personalizadas"
+          ],
+          "changed": [
+            "Welcome e despedida passam a enviar a imagem configurada com a legenda existente",
+            "Configuração persistente e individual por grupo; somente administradores podem alterar"
+          ]
+        },
+        "v5.3.22": {
+          "version": "5.3.22",
+          "title": "Boas-vindas Agrupado",
+          "changes": [
+            "Entradas ocorridas em uma janela de 5 segundos são reunidas em uma única mensagem de boas-vindas.",
+            "A mensagem mostra [ N Membros Novos 🪪 ] sem listar cada membro individualmente.",
+            "Somente os membros recém-chegados são incluídos no array de menções.",
+            "Compatível com a foto personalizada definida por /fotobv."
+          ]
+        },
+        "v5.3.24": {
+          "version": "5.3.24",
+          "title": "Solicitações sem filtro por DDI",
+          "date": "2026-09-24",
+          "changed": [
+            "/add volta a aceitar todas as solicitações pendentes do grupo",
+            "/aceitar N aceita a quantidade escolhida, de 1 a 200, sem filtrar país ou DDI",
+            "Removidos os comandos e filtros automáticos relacionados à verificação de país"
+          ]
+        },
+        "v5.3.25": {
+          "version": "5.3.25",
+          "title": "Menubn Mention Fix",
+          "date": "2026-09-25",
+          "changed": [
+            "Comandos de interação do /menubn passam a exibir a marcação resolvida em vez de IDs @lid",
+            "Ranks de diversão priorizam o número/JID exibível e resolvem LID antes de montar texto e mentions",
+            "Corrigidas legendas que ainda usavam o alvo bruto mesmo após a resolução do JID"
+          ]
+        },
+        "v5.3.26": {
+          "version": "5.3.26",
+          "title": "Namoro + Casamento 24h Fix",
+          "changes": [
+            "Novos comandos /namoro e /aceitar_namoro.",
+            "Casamento só pode ser pedido entre o casal que está namorando.",
+            "Pedido de casamento é liberado após 24 horas completas de namoro.",
+            "/aceitarcasamento agora diferencia ausência de pedido, namoro inválido e tempo mínimo ainda não concluído.",
+            "Mantida a correção de menções LID da v5.3.25."
+          ]
+        },
+        "v5.3.28": {
+          "version": "5.3.28",
+          "title": "Dragon RPG Classes 2.0",
+          "date": "2026-09-26",
+          "changed": [
+            "Adiciona /trocarclasse <classe> e /trocarclasse avancada <classe> fora de batalha.",
+            "Adiciona Berserker, Druida, Sentinela e Cavaleiro Rúnico às classes avançadas.",
+            "Classes avançadas passam a possuir habilidades únicas.",
+            "Habilidades especiais podem consumir toda a Mana, porcentagem de HP ou combinar os dois recursos.",
+            "Trocar a classe base remove a classe avançada anterior para manter os requisitos consistentes.",
+            "Arquivos e textos do MenuBN/Fun não foram alterados."
+          ]
+        },
+        "v5.3.30": {
+          "version": "5.3.30",
+          "title": "AntiFlood + Estatísticas",
+          "changes": [
+            "AntiFlood de comandos agora detecta rajadas e reincidência.",
+            "Penalidade progressiva de espera, sem ban automático.",
+            "Novo /topcomandos [limite] para ADMs.",
+            "Novo /cmdinfo <comando> para ADMs.",
+            "Sistema existente de estatísticas foi reaproveitado e integrado aos comandos."
+          ]
+        },
+        "v5.3.31": {
+          "version": "5.3.31",
+          "title": "Bang + Ban Fix",
+          "date": "2026-10-01",
+          "changes": [
+            "/ban, /b e /banc removem sem motivo.",
+            "/bang trata falhas 429/500 sem derrubar o bot.",
+            "/bang reduz rajadas de consultas entre grupos.",
+            "Fun/MenuBN e textos personalizados não foram alterados."
+          ]
+        },
+        "v5.3.32": {
+          "version": "5.3.32",
+          "title": "Anti-Msg Global + Auditoria",
+          "date": "2026-10-01",
+          "changes": [
+            "OFF por padrão; controle exclusivo do dono.",
+            "Correspondência exata da mensagem cadastrada.",
+            "Apaga, remove e adiciona à Lista Negra Global.",
+            "Auditoria: mensagem completa, regra, grupo, horário, @, número e resultado."
+          ]
+        },
+        "v5.3.33": {
+          "version": "5.3.33",
+          "title": "Global Ban 2.0",
+          "date": "2026-10-03",
+          "changes": [
+            "/bang verifica todos os grupos e remove onde a Kobayashi é ADM.",
+            "/listanegrag salva e executa varredura global.",
+            "Fallback de cache em limitações 429.",
+            "Intervalo entre grupos aumentado para reduzir rajadas."
+          ]
+        },
+        "v5.3.35": {
+          "version": "5.3.35",
+          "title": "Dragon RPG Hardcore",
+          "date": "2026-10-04",
+          "changes": [
+            "Habilidades comuns passam a gastar Mana proporcional à Mana máxima.",
+            "Habilidades dracônicas passam a consumir 12%–18% da Mana máxima, com custo mínimo elevado.",
+            "A partir do nível 50, inimigos escalam pelos atributos reais do jogador.",
+            "Nível 100+ recebe inimigos com HP, ataque e defesa adaptativos muito maiores.",
+            "Bosses Hardcore recebem escalonamento adicional.",
+            "Inimigos Hardcore resistem melhor a dano explosivo de habilidades.",
+            "Monstros Hardcore podem acertar golpes brutais ocasionais.",
+            "Recompensas sobem moderadamente para compensar o risco sem facilitar farm."
+          ]
+        },
+        "v5.3.37": {
+          "version": "5.3.37",
+          "title": "Dragon RPG — Expansão e dificuldade",
+          "date": "2026-10-04",
+          "added": [
+            "14 itens na loja RPG.",
+            "5 regiões, 10 criaturas, 5 chefes e 5 missões."
+          ],
+          "changed": [
+            "Guardião do Despertar com mais vida e escala de poder.",
+            "Combates dracônicos mais difíceis; escala adicional a partir do nível RPG 30.",
+            "Habilidades humanas: custo base ×4 e piso de 12–18% da Mana máxima.",
+            "Habilidades dracônicas: custo base ×7 e piso de 20–30% da Mana máxima.",
+            "Habilidades que consomem toda a Mana exigem ao menos 35% da reserva máxima.",
+            "/habilidades mostra o custo realmente debitado."
+          ]
+        },
+        "v5.3.38": {
+          "version": "5.3.38",
+          "title": "Sakura Channel — Menu decorado",
+          "date": "2026-10-04",
+          "added": [
+            "Link do canal oficial no menu principal."
+          ],
+          "changed": [
+            "Molduras, separadores e marcadores adaptados dos packs de decoração enviados.",
+            "Mantém comandos, prefixos, saudação e dados do bot.",
+            "Inclui /msg da v5.3.36 e expansão RPG da v5.3.37."
+          ]
+        },
+        "v5.3.39": {
+          "version": "5.3.39",
+          "title": "Classes e novas temporadas",
+          "date": "2026-10-04",
+          "added": [
+            "/zerarank confirmar",
+            "/zerarankrpg confirmar",
+            "/zerarank-geral confirmar"
+          ],
+          "changed": [
+            "Trocas de classe base, avançada e dracônica compartilham intervalo de 7 dias.",
+            "/zeraranknivel confirmar reseta apenas nível/XP do grupo.",
+            "Reset RPG reinicia progressão, mantendo ouro, inventário e classe humana.",
+            "Reset geral inclui mensagens, nível, Rank ADM e progressão RPG dos membros.",
+            "Backups e confirmação antes dos resets."
+          ]
+        },
+        "v5.3.40": {
+          "version": "5.3.40",
+          "title": "AntiLink antiflood",
+          "date": "2026-10-05",
+          "added": [
+            "Fechamento temporário durante a moderação de links.",
+            "Recuperação de grupos temporariamente fechados após reconexão."
+          ],
+          "changed": [
+            "Fila por grupo: links simultâneos são tratados antes da reabertura.",
+            "Grupos já fechados permanecem fechados.",
+            "AntiLink Light mantém advertências; AntiLink estrito remove o membro.",
+            "Sentinela interno e ponte externa usam a mesma fila de fechamento.",
+            "Resultados de exclusão e remoção são registrados sem presumir sucesso."
+          ]
+        },
+        "v5.3.41": {
+          "version": "5.3.41",
+          "title": "Correção da remoção AntiLink",
+          "date": "2026-10-05",
+          "added": [],
+          "changed": [
+            "Remoção usa o identificador do membro nos metadados atuais (LID/número).",
+            "Tenta identificadores alternativos quando o primeiro falha.",
+            "Confirma status de remoção ou verifica ausência do membro.",
+            "Aplica a correção ao AntiLink estrito, ADV automática e Sentinela.",
+            "Mantém o fechamento e a reabertura temporários do grupo."
+          ]
+        },
+        "v5.3.42": {
+          "version": "5.3.42",
+          "title": "AntiSTTS",
+          "date": "2026-10-05",
+          "added": [
+            "/antistts on/off/status e alias /antistatus.",
+            "Detecção de menções reais do grupo em status, exclusão do aviso e remoção do autor.",
+            "/logs antistts."
+          ],
+          "changed": [
+            "Não pune mensagens normais, menções comuns, citações ou status privados sem evento no grupo.",
+            "ADM, dono e lista branca preservados.",
+            "Identifica o remetente do evento e usa remoção LID/PN confirmada."
+          ]
+        },
+        "v5.3.43": {
+          "version": "5.3.43",
+          "title": "Dragon RPG — Expansão",
+          "date": "2026-10-05",
+          "added": [
+            "8 classes avançadas com habilidades próprias: Samurai, Monge, Bardo, Invocador, Caçador de Dragões, Templário, Cronomago e Xamã.",
+            "30 comandos novos de profissões, coleta, fabricação, economia, exploração, pets e conquistas.",
+            "/rpgexpansao com sintaxe e custos."
+          ],
+          "changed": [
+            "Cooldowns persistentes, ações bloqueadas durante combate e pagamentos validados.",
+            "Banco devolvido ao bolso ao zerar progressão; saldo preservado.",
+            "Atualização pequena e cumulativa; script Termux somente publica no GitHub."
+          ]
+        },
+        "v5.3.44": {
+          "version": "5.3.44",
+          "title": "Quatro trocas de classe por dia",
+          "date": "2026-10-05",
+          "added": [],
+          "changed": [
+            "Até 4 trocas por dia, compartilhadas entre humana, avançada e dracônica.",
+            "Renovação à meia-noite de São Paulo; primeira escolha não consome troca.",
+            "Remove espera antiga de 7 dias para classes; profissão mantém intervalo próprio."
+          ]
+        },
+        "v5.3.45": {
+          "version": "5.3.45",
+          "title": "CafeBan",
+          "date": "2026-10-06",
+          "added": [
+            "/cafeban exclusivo do LID 267104301375529@lid, com imagem personalizada e motivo opcional."
+          ],
+          "changed": [
+            "Remoção confirmada antes do anúncio; logs de moderação."
+          ]
+        },
+        "v5.3.46": {
+          "version": "5.3.46",
+          "title": "Café Ban decorado",
+          "date": "2026-10-06",
+          "added": [],
+          "changed": [
+            "Legenda do /cafeban no estilo do /kobaban, com alvo, responsável e motivo."
+          ]
+        },
+        "v5.3.47": {
+          "version": "5.3.47",
+          "title": "Atividade por resposta",
+          "date": "2026-10-08",
+          "added": [],
+          "changed": [
+            "/atividade e /checkme resolvem LID e número ao responder ou mencionar; posição usa o registro encontrado."
+          ]
+        },
+        "v5.3.48": {
+          "version": "5.3.48",
+          "title": "Limpeza de arquivos antigos",
+          "date": "2026-10-09",
+          "added": [
+            "Limpeza restrita de ZIPs Kobayashi-Bot-v... e README-v...txt na raiz."
+          ],
+          "changed": [
+            "Executa na publicação pelo Termux e na inicialização da hospedagem.",
+            "Preserva créditos, licença, README principal, instruções, código e pastas."
+          ]
+        },
+        "v5.3.49": {
+          "version": "5.3.49",
+          "title": "Cita multimídia",
+          "date": "2026-10-09",
+          "added": [
+            "/cita com texto direto ou mídia na legenda."
+          ],
+          "changed": [
+            "Reenvia texto, foto, vídeo, GIF, figurinha, áudio ou documento respondido, com mentions de todos.",
+            "Corrige import de download de mídia; preserva restrição para ADM/dono."
+          ]
+        },
+        "v5.3.50": {
+          "version": "5.3.50",
+          "title": "Avisos dos alugados",
+          "date": "2026-10-10",
+          "added": [
+            "/msg-alugados: aviso com texto ou imagem e menção de todos nos grupos alugados.",
+            "/msg-alugados-lista: consulta dos aluguéis ativos cadastrados."
+          ],
+          "changed": [
+            "Reutiliza o cadastro existente de aluguéis temporários e permanentes.",
+            "Exclui aluguéis vencidos e grupos em que o bot não participa; mantém uso exclusivo do dono principal."
+          ]
+        },
+        "v5.3.51": {
+          "version": "5.3.51",
+          "title": "Figurinhas decoradas",
+          "date": "2026-10-10",
+          "added": [
+            "Metadados de figurinha decorados com autoria, bot e créditos do dono."
+          ],
+          "changed": [
+            "Novo padrão em /s, aliases e autosticker.",
+            "Preserva os nomes de pacote e autores personalizados."
+          ]
+        },
+        "v5.3.52": {
+          "version": "5.3.52",
+          "title": "Autoria das figurinhas",
+          "date": "2026-10-10",
+          "added": [],
+          "changed": [
+            "Detalhes padrão de figurinha: Criada por, Grupo, Dono do bot e Feita por Kobayashi Bot.",
+            "No privado, identifica o grupo como Privado."
+          ]
+        },
+        "v5.3.53": {
+          "version": "5.3.53",
+          "title": "Sticker Atelier",
+          "date": "2026-10-10",
+          "added": [],
+          "changed": [
+            "Molduras e títulos decorados nos detalhes de figurinhas, com autoria, grupo, dono e assinatura em linhas separadas."
+          ]
+        },
+        "v5.3.54": {
+          "version": "5.3.54",
+          "title": "Detalhes das figurinhas",
+          "date": "2026-10-10",
+          "added": [],
+          "changed": [
+            "Estilo conforme referência: Criada por, Nick dono, Feita por e Grupo com nomes entre 『 』 e divisor."
+          ]
+        },
+        "v5.3.55": {
+          "version": "5.3.55",
+          "title": "Figurinhas Dragon",
+          "date": "2026-10-10",
+          "added": [],
+          "changed": [
+            "Detalhes compactos em quatro linhas: autoria, dono, assinatura Kobayashi Bot e grupo, com dragão e fogo."
+          ]
+        },
+        "v5.3.56": {
+          "version": "5.3.56",
+          "title": "VIP e ADV ADM",
+          "date": "2026-10-10",
+          "added": [
+            "/ADV_adm @adm motivo/7d e /advs_adm: advertências com prazo por grupo, sem rebaixamento automático.",
+            "/menuvip, /add_cmd_vip, /del_cmd_vip, /add_vip, /del_vip e /lista_vip."
+          ],
+          "changed": [
+            "Dono principal gerencia VIP; cadastro global persistente com identificação PN/LID.",
+            "Comandos VIP e seus atalhos exigem cadastro VIP, exceto para o dono principal."
+          ]
+        },
+        "v5.3.57": {
+          "version": "5.3.57",
+          "title": "X9 do grupo",
+          "date": "2026-10-11",
+          "added": [
+            "/x9: consulta exclusiva dos ADMs com filtros solicitacoes, adms e reentradas.",
+            "Registro de solicitações aceitas/recusadas, remoções, rebaixamentos e retornos observados a partir da atualização."
+          ],
+          "changed": [
+            "Histórico persistente por grupo, últimos 15 registros exibidos e retenção de 90 dias.",
+            "Ações sem autor informado aparecem explicitamente como desconhecidas."
+          ]
+        },
+        "v5.3.58": {
+          "version": "5.3.58",
+          "title": "Maid Dragon",
+          "date": "2026-10-11",
+          "added": [
+            "/Dragon_open abre os seis grupos cadastrados da Maid Dragon.",
+            "/Dragon_close e /Drsgon_close fecham os seis grupos."
+          ],
+          "changed": [
+            "Uso exclusivo do dono principal, verificação de ADM, relatório por destino e proteção contra execução simultânea."
+          ]
+        },
+        "v5.3.59": {
+          "version": "5.3.59",
+          "title": "X9 ativo",
+          "date": "2026-10-11",
+          "added": [
+            "/x9 on e /x9 off: ativação persistente por grupo, exclusiva dos ADMs.",
+            "Avisos automáticos de promoções, rebaixamentos, remoções, solicitações aceitas/recusadas e entradas.",
+            "/x9 entradas e contagem de entradas acompanhadas."
+          ],
+          "changed": [
+            "X9 começa desligado; OFF interrompe novos registros/avisos e mantém o histórico anterior.",
+            "Contagem considera o acompanhamento do bot; eventos antigos ou ocorridos enquanto desligado não são recuperados."
+          ]
+        },
+        "v5.3.60": {
+          "version": "5.3.60",
+          "title": "Dragon-msg",
+          "date": "2026-10-11",
+          "added": [
+            "/Dragon-msg com texto, imagem na legenda ou imagem respondida, marcando todos nos seis grupos da Maid Dragon."
+          ],
+          "changed": [
+            "Reutiliza o fluxo existente de /msg e restringe destinos à lista Dragon em que o bot participa.",
+            "Envio exclusivo do dono principal, relatório de enviados, falhas e destinos indisponíveis."
+          ]
+        },
+        "v5.3.61": {
+          "version": "5.3.61",
+          "title": "Correção Dragon open/close",
+          "date": "2026-10-11",
+          "added": [],
+          "changed": [
+            "A API valida a permissão do bot; identificação incompleta por LID/PN não impede a tentativa.",
+            "Aplica o estado solicitado mesmo se a metadata inicial estiver indisponível ou desatualizada.",
+            "Confirmação com espera e novas consultas; retry em falhas temporárias; relatório inclui ID e motivo por grupo."
+          ]
+        },
+        "v5.3.62": {
+          "version": "5.3.62",
+          "title": "S2 proporção original",
+          "date": "2026-10-11",
+          "added": [
+            "/s2 com imagem ou vídeo direto/respondido: preserva proporção com preenchimento transparente."
+          ],
+          "changed": [
+            "Reutiliza criação e metadados atuais; /s mantém comportamento anterior.",
+            "/s2 respeita a mesma regra VIP de /s e aliases de criação."
+          ]
+        },
+        "v5.3.63": {
+          "version": "5.3.63",
+          "title": "Antifake",
+          "date": "2026-10-11",
+          "added": [
+            "/antifake on/off (também 1/0), exclusivo de ADM em grupos.",
+            "Verificação automática de novas entradas com prefixo padrão +55."
+          ],
+          "changed": [
+            "Preserva ADMs, dono, líderes e lista branca; não remove telefone desconhecido.",
+            "Resolução de LID exige telefone válido; remoção confirmada e registro administrativo."
+          ]
+        },
+        "v5.3.64": {
+          "version": "5.3.64",
+          "title": "Busca global de banimentos",
+          "date": "2026-10-13",
+          "added": [],
+          "changed": [
+            "Busca compartilhada PN/LID em listanegrag, Dragon Ban e Bang, com confirmação por metadados após remover.",
+            "Descoberta global reúne consulta WhatsApp, cache, aluguéis e grupos Dragon; repete falhas temporárias e consultas sem alvo.",
+            "Dragon Ban continua limitado aos seis grupos cadastrados; relatórios mostram falhas sem contar resposta não confirmada como remoção."
+          ]
+        },
+        "v5.3.65": {
+          "version": "5.3.65",
+          "title": "WaMe",
+          "date": "2026-10-13",
+          "added": [
+            "/wame gera link do próprio número; aceita texto para mensagem pré-preenchida.",
+            "Menção ou resposta seleciona outra pessoa, com resolução de PN/LID."
+          ],
+          "changed": [
+            "Telefone desconhecido não gera link com dígitos de LID; texto codificado para URL."
+          ]
+        },
+        "v5.3.66": {
+          "version": "5.3.66",
+          "title": "Proteção do mestre e dono",
+          "date": "2026-10-13",
+          "added": [
+            "Proteção central das remoções para LID oficial do criador e número configurado do dono."
+          ],
+          "changed": [
+            "Criador: Não posso remover meu mestre do grupo. Dono diferente: Não posso remover meu dono.",
+            "Resolve PN/LID por mapeamento e participantes; bloqueia remoções manuais, globais, automáticas e em lote."
+          ]
+        },
+        "v5.3.67": {
+          "version": "5.3.67",
+          "title": "Varredura só ADM",
+          "date": "2026-10-14",
+          "added": [],
+          "changed": [
+            "Busca de alvo só inicia após confirmar a Kobayashi como ADM na lista de participantes.",
+            "Varredura utiliza somente grupos da consulta atual do WhatsApp, sem grupos antigos do cache ou aluguéis.",
+            "Relatórios listam nome, estado ADM/não ADM/não confirmado e motivo das falhas ou grupos ignorados."
+          ]
+        },
+        "v5.4.0": {
+          "version": "5.4.0",
+          "title": "Comunidade Kobayashi",
+          "date": "2026-10-15",
+          "added": [
+            "Captcha por grupo com aprovação por resposta no privado, prazo de 5 minutos e revisão de falhas.",
+            "Tickets de suporte com fila, responsável e encerramento.",
+            "Comandos personalizados com texto/mídia, permissões, campos dinâmicos e compatibilidade VIP.",
+            "Mensagens diárias com mídia em horário de São Paulo e persistência contra repetição.",
+            "/comunidade-ajuda e guia COMUNIDADE-KOBAYASHI.txt."
+          ],
+          "changed": [
+            "Captcha integrado ao antifake e registro X9; respostas interceptadas antes do antiPV.",
+            "Menus ADM/dono incluem os novos controles.",
+            "Sem novas dependências npm; dados e mídias persistem em files/database/community."
+          ]
+        },
+        "v5.4.1": {
+          "version": "5.4.1",
+          "title": "X9 focado",
+          "date": "2026-10-15",
+          "added": [],
+          "changed": [
+            "X9 mostra apenas solicitações aceitas/recusadas, promoções/rebaixamentos e reentradas da segunda vez em diante.",
+            "Primeiras entradas, saídas e remoções ficam fora dos avisos e consultas, inclusive registros antigos.",
+            "Saídas continuam atualizando a presença internamente para contar retornos; mantém ON/OFF por grupo."
+          ]
+        },
+        "v5.4.2": {
+          "version": "5.4.2",
+          "title": "X9 resumido",
+          "date": "2026-10-15",
+          "added": [],
+          "changed": [
+            "Avisos de solicitações agrupados por ADM: ADM @fulano aceitou/recusou N membros.",
+            "Agrupa eventos próximos e remove moldura e lista individual de membros dos avisos.",
+            "Decisão explícita dos comandos tem prioridade sobre autoria do evento do bot, com deduplicação PN/LID."
+          ]
+        },
+        "v5.4.3": {
+          "version": "5.4.3",
+          "title": "Proteção dos comandos de dono",
+          "date": "2026-10-16",
+          "added": [],
+          "changed": [
+            "Comandos de dono exigem dono principal, inclusive no menu e nos dispatchers antigos.",
+            "Identidade de respostas, encaminhamentos e menções não concede permissões.",
+            "LID não é comparado numericamente com telefone do dono; resolução usa PN válido.",
+            "Lista de donos do Sentinel não recebe a identidade de membros comuns."
+          ]
+        },
+        "v5.4.4": {
+          "version": "5.4.4",
+          "title": "Lista Negra por grupo",
+          "date": "2026-10-16",
+          "added": [],
+          "changed": [
+            "/listanegra registra e remove somente no grupo atual, sem varredura de outros grupos.",
+            "/listanegrag registra os grupos atuais com ADM confirmado; bloqueio automático respeita os IDs registrados.",
+            "Grupos sem ADM e falhas de consulta são relatados; descoberta sem sucesso não registra bloqueios.",
+            "Registros globais antigos e regras automáticas anteriores mantêm compatibilidade. Reexecutar /listanegrag para um alvo atualiza seu alcance para grupos registrados."
+          ]
+        },
+        "v5.4.5": {
+          "version": "5.4.5",
+          "title": "Comando Duque",
+          "date": "2026-10-16",
+          "added": [
+            "/duque envia a imagem fornecida, porcentagem aleatória de 0 a 100 e legenda de brincadeira."
+          ],
+          "changed": [
+            "Comando listado no menu de brincadeiras; respeita o modo de brincadeiras nos grupos."
+          ]
+        },
+        "v5.4.6": {
+          "version": "5.4.6",
+          "title": "Medidor Furry",
+          "date": "2026-10-17",
+          "added": [
+            "/furry envia o vídeo fornecido com contador aleatório de 10 em 10.",
+            "10–30%: furry em desenvolvimento; 40–60%: se assumindo furry; 70–100%: furry completo."
+          ],
+          "changed": [
+            "Novo comando no menu de brincadeiras, respeitando o modo de brincadeiras dos grupos."
+          ]
+        },
+        "v5.4.7": {
+          "version": "5.4.7",
+          "title": "Furry em GIF com menção",
+          "date": "2026-10-17",
+          "added": [],
+          "changed": [
+            "/furry envia o vídeo em modo GIF do WhatsApp.",
+            "Aceita @menção, resposta ou o próprio autor como alvo.",
+            "Porcentagem aleatória inteira de 10 a 100; abaixo de 40 desenvolvimento, abaixo de 70 se assumindo, 70 ou mais completo."
+          ]
+        },
+        "v5.4.8": {
+          "version": "5.4.8",
+          "title": "Menus atualizados",
+          "date": "2026-10-17",
+          "added": [],
+          "changed": [
+            "Menus atualizados com os comandos recentes e exemplos de uso.",
+            "Menu geral: wame, lid, entrada e tickets; ADM: X9, antifake, ADV ADM, CafeBan, captcha, tickets e automsg.",
+            "Dono: comunidade Dragon, avisos de alugados, VIP e comandos personalizados; figurinhas: s2.",
+            "Furry e Duque no menu de brincadeiras; menu VIP acessível pelo menu principal.",
+            "Removidos apêndices duplicados dos menus ADM e dono."
+          ]
+        },
+        "v5.4.9": {
+          "version": "5.4.9",
+          "title": "Furry e Duque modulares",
+          "date": "2026-10-17",
+          "added": [],
+          "changed": [
+            "Furry e Duque separados em commands/fun/dragonFun/furry.js e duque.js.",
+            "Registrados no dispatcher Dragon Fun junto aos outros comandos do menubn.",
+            "Removida lógica duplicada no index.js; preservados mídia, GIF, porcentagens e modo brincadeiras."
+          ]
+        },
+        "v5.4.10": {
+          "version": "5.4.10",
+          "title": "Reparo dos módulos Furry e Duque",
+          "date": "2026-10-17",
+          "added": [],
+          "changed": [
+            "Reenvio completo dos módulos Furry e Duque com seleção de legendas em blocos explícitos.",
+            "Validação de sintaxe de todos os arquivos JavaScript incluídos antes de gerar o ZIP.",
+            "Importação do dispatcher e envio das duas mídias verificados em execução simulada."
+          ]
+        },
+        "v5.4.13": {
+          "version": "5.4.13",
+          "title": "Correção do menu sem resposta",
+          "date": "2026-10-18",
+          "added": [
+            "Menu com imagem, lista de categorias e botão Meu ID.",
+            "/menu texto como alternativa sem botões."
+          ],
+          "changed": [
+            "Menu convencional enviado antes da lista interativa.",
+            "Lista sem upload de mídia e com metadados de envio interativo.",
+            "Prazo de 12 segundos para envio da lista."
+          ]
+        },
+        "v5.4.14": {
+          "version": "5.4.14",
+          "title": "Correção de namoro e casamento",
+          "date": "2026-10-18",
+          "added": [
+            "/terminarnamoro, /recusar_namoro, /recusarcasamento e /cancelarpedido."
+          ],
+          "changed": [
+            "Unifica aliases PN/LID confirmados; conflitos antigos são preservados e informados.",
+            "Impede sobrescrever pedidos e aceitar relacionamentos por terceiros. Pedidos expiram em 30 minutos.",
+            "Mantém 24 horas de namoro antes do casamento e verifica disponibilidade novamente ao aceitar.",
+            "Término/divórcio removem vínculos recíprocos e pedidos relacionados; consulta mostra namoro ou casamento.",
+            "Preserva as melhorias do menu da v5.4.13."
+          ]
+        },
+        "v5.4.15": {
+          "version": "5.4.15",
+          "title": "Menu interativo sem duplicação",
+          "date": "2026-10-18",
+          "added": [],
+          "changed": [
+            "/menu envia apenas o menu interativo quando o envio funciona.",
+            "Menu convencional reservado para erro de envio ou pedido explícito /menu texto.",
+            "Retirada a corrida de timeout local que poderia disparar alternativa enquanto o relay ainda estava pendente.",
+            "Envio pelo Termux verifica Git e Node.js antes de clonar; não inicia o bot."
+          ]
+        },
+        "v5.4.16": {
+          "version": "5.4.16",
+          "title": "Controle do menu de botões",
+          "date": "2026-10-18",
+          "added": [
+            "/botão on/off (ou /botao): ativa ou desativa globalmente os botões do menu.",
+            "Sem argumento ou status consulta o estado; configuração salva após reiniciar."
+          ],
+          "changed": [
+            "Comando exclusivo do dono e incluído no menu de dono.",
+            "Desligado, /menu envia somente o convencional; ligado, interativo com alternativa em erro de envio."
+          ]
+        },
+        "v5.4.17": {
+          "version": "5.4.17",
+          "title": "Meme Não dê nem água",
+          "date": "2026-10-18",
+          "added": [
+            "/naodeagua @membro e alias /naodenemagua: meme com foto de perfil, gato e faixa vermelha.",
+            "Aceita marcação, mensagem respondida ou própria foto quando não há alvo."
+          ],
+          "changed": [
+            "Módulo separado e comando incluído no menubn.",
+            "Aviso quando foto privada/indisponível; montagem local sem token de API de memes."
+          ]
+        },
+        "v5.4.18": {
+          "version": "5.4.18",
+          "title": "Limpeza das legendas",
+          "date": "2026-10-18",
+          "added": [],
+          "changed": [
+            "Removida a assinatura Kobayashi Bot • Só pela zoeira de todas as respostas de comandos em que aparecia: Furry e Não dê água."
+          ]
+        },
+        "v5.4.19": {
+          "version": "5.4.19",
+          "title": "Mute automático e MuteB",
+          "date": "2026-10-19",
+          "added": [
+            "/muteb @membro ou resposta: apaga as novas mensagens e remove o membro ao falar durante o mute."
+          ],
+          "changed": [
+            "/mute reconhece PN/LID, mensagens com mídia e registros antigos booleanos.",
+            "/desmute remove todos os aliases e os modos normal e banimento.",
+            "Runtime de mute passa a atuar antes dos bloqueios de comando/aluguel, usando a chave original da mensagem.",
+            "Metadados atuais verificam ADM do bot e do alvo; dono, criador, ADMs, bot e lista branca são preservados.",
+            "Comandos atualizados no menu ADM; nenhuma sessão ou banco incluído no pacote."
+          ]
+        },
+        "v5.4.20": {
+          "version": "5.4.20",
+          "title": "Loja Dragon e moedas separadas",
+          "date": "2026-10-20",
+          "added": [
+            "/loja com preços, alimentos, bebidas, colecionáveis virtuais e 20 tipos de sementes.",
+            "/plantar e /colher com produção, tempo real e limite de 10 plantações; /vender e /consumir.",
+            "/metas: 10/100/400/1000 mensagens válidas por dia rendem 30/150/450/1000 Dragon-coins.",
+            "/trabalhar, /pescar, /entrega e /procurar com recompensas e cooldowns próprios.",
+            "/economia explica os comandos e todas as recompensas."
+          ],
+          "changed": [
+            "Moedas gerais unificadas: saldo legado de jogos e banco importado uma única vez para Dragon-coins, com vínculo PN/LID confirmado.",
+            "O saldo antigo de ouro do RPG é preservado e exibido como RPG-coins, sem conversão com Dragon-coins.",
+            "Daily com ciclo de 7 dias, base de 100 a 400 e bônus de 500 no dia 7; intervalo de 24h e reinício após 48h sem coleta.",
+            "Recompensa por nível geral: nível × 10 Dragon-coins, sem repetir pagamento do mesmo nível.",
+            "Menus social e loja atualizados. Nenhuma sessão, configuração ou banco é incluído."
+          ]
+        },
+        "v5.4.21": {
+          "version": "5.4.21",
+          "title": "BanFake e comandos com ADM obrigatório",
+          "date": "2026-10-22",
+          "added": [
+            "/banfake: verifica e remove membros atuais fora dos prefixos permitidos do antifake; padrão +55.",
+            "Resumo por grupo com removidos, protegidos, números desconhecidos e falhas reais."
+          ],
+          "changed": [
+            "Todos os comandos usados em grupos exigem cargo atual de ADM; dono e LIDs exclusivos também precisam ser ADM do grupo. Restrições adicionais de dono/LID continuam valendo.",
+            "BanFake exige autor e bot ADMs, preserva criador, dono, líderes, ADMs, lista branca e telefones não confirmados.",
+            "Verificação manual não altera o estado do antifake automático; revalida cargos e proteções durante a execução.",
+            "Menu ADM atualizado. Pacote sem bancos, configurações e sessões."
+          ]
+        },
+        "v5.4.22": {
+          "version": "5.4.22",
+          "title": "Correção do bloqueio geral de comandos",
+          "date": "2026-10-22",
+          "added": [],
+          "changed": [
+            "Removida a exigência global de ADM introduzida na v5.4.21.",
+            "Menu, figurinhas, RPG, loja, daily e demais comandos comuns voltam a funcionar para membros.",
+            "Ações administrativas e remoções, incluindo cafeban, continuam exigindo ADM; permissões originais de dono/LID/VIP preservadas."
+          ]
+        },
+        "v5.4.23": {
+          "version": "5.4.23",
+          "title": "Controle de aviso de saída",
+          "date": "2026-10-24",
+          "added": [
+            "/saída on/off e /saida on/off: ativar/desativar avisos de saída por grupo; uso exclusivo de ADM."
+          ],
+          "changed": [
+            "Aviso desligado bloqueia texto, foto e envio alternativo de despedida.",
+            "Entradas, textos e fotos personalizados são preservados. Configuração salva no banco atual de boas-vindas.",
+            "Grupos antigos mantêm o comportamento anterior até usar /saída off. Menu ADM e ajuda atualizados."
+          ]
+        },
+        "v5.4.24": {
+          "version": "5.4.24",
+          "title": "Novo GIF e legenda do socar",
+          "date": "2026-10-24",
+          "added": [],
+          "changed": [
+            "/socar e /soco passam a usar mídia local em reprodução GIF, enviada pelo criador.",
+            "Legenda personalizada: @autor espancou @alvo que deixou ele sem dentes.",
+            "Suporte a menção ou resposta, com menções reais das duas pessoas."
+          ]
+        }
       }
     }
   }
