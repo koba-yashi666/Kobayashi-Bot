@@ -1,5 +1,5 @@
 {
-  "version": "5.5.3",
-  "name": "Kobayashi Bot v5.5.3 — Antifake nas solicitações",
-  "update": "Analisa solicitações antes da aprovação; recusa estrangeiros com antifake ligado e mantém LIDs sem telefone pendentes."
+  "version": "5.5.4",
+  "name": "Kobayashi Bot v5.5.4 — Correção de solicitações BR",
+  "update": "Lê phone_number e participant_pn das solicitações e verifica campos alternativos antes de manter o LID pendente."
 }

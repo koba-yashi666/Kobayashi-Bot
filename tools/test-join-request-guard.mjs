@@ -11,6 +11,10 @@ try {
  const conn={user:{id:br},signalRepository:{lidMapping:{getPNForLID:async id=>id===lid?foreign:null}},groupMetadata:async()=>({participants:[{id:br,admin:admin?'admin':null}]}),groupRequestParticipantsList:async()=>pending,groupRequestParticipantsUpdate:async(g,jids,action)=>{calls.push({action,jids});if(fail)throw Error('simulated');if(status==='200')pending=pending.filter(p=>!jids.includes(p.jid));return jids.map(jid=>({jid,status}));},sendMessage:async()=>{sent++;}};
  const reset=()=>{pending=[];calls=[];admin=true;status='200';fail=false;};
  setAntiFakeEnabled(group,true);pending=[{jid:br},{jid:foreign},{jid:lid},{jid:unknown}];let r=await processJoinRequests(conn,group);assert.deepEqual(r.approved,[br]);assert.deepEqual(r.rejected,[foreign,lid]);assert.deepEqual(r.unknown,[unknown]);assert.equal(r.remaining,1);assert.equal(calls[0].action,'reject');
+ // Formato real do Baileys: atributos brutos em snake_case, sem mapeamento.
+ reset();pending=[{jid:'brazil@lid',phone_number:br},{jid:'foreign@lid',phone_number:foreign},{jid:'other@lid',participant_pn:br}];r=await processJoinRequests(conn,group);assert.deepEqual(r.approved,['brazil@lid','other@lid']);assert.deepEqual(r.rejected,['foreign@lid']);assert.equal(r.unknown.length,0);
+ reset();pending=[{jid:br,phoneNumber:'invalid@lid'},{jid:'format@lid',phone_number:'+55 (11) 99999-9999'},{jid:'device:3@lid',phone_number:'invalid',participant_pn:br}];r=await processJoinRequests(conn,group);assert.equal(r.approved.length,3);assert.equal(r.unknown.length,0);
+ reset();pending=[{jid:unknown,phone_number:unknown}];r=await processJoinRequests(conn,group);assert.equal(r.unknown.length,1);assert.equal(calls.length,0);
  reset();pending=[{jid:unknown},{jid:foreign}];r=await processJoinRequests(conn,group,{limit:1});assert.equal(calls.length,0);assert.equal(r.remaining,2);
  reset();pending=[{jid:unknown,phoneNumber:br}];r=await processJoinRequests(conn,group);assert.deepEqual(r.approved,[unknown]);
  reset();pending=[{jid:foreign}];await handleAntiFakeRequest(conn,{id:group,participant:foreign,action:'created'});assert.equal(calls[0].action,'reject');assert.equal(sent,0);

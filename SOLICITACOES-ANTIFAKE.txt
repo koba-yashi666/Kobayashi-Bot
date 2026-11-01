@@ -1,4 +1,4 @@
-v5.5.3 — Antifake nas solicitações
+v5.5.4 — Antifake nas solicitações
 Ative no grupo: /antifake on
 Usa os mesmos prefixos do antifake (Brasil +55 por padrão).
 /add analisa as solicitações pendentes; /aceitar 5 analisa até 5 solicitações.
@@ -11,3 +11,6 @@ A Kobayashi precisa ser ADM. Não altera decisões feitas diretamente por um ADM
 Falhas/sem confirmação não contam como aprovação ou recusa. Não há boas-vindas para quem foi recusado.
 O grupo precisa usar aprovação de entrada para haver solicitações. Entradas diretas continuam sob o antifake de entrada existente.
 Termux só envia a versão ao GitHub; sincronize e reinicie na hospedagem.
+
+Correção v5.5.4: consulta também os campos phone_number e participant_pn. Campos inválidos não bloqueiam a leitura de outros telefones válidos.
+Depois de atualizar, use novamente /add ou /aceitar 7 para reanalisar os pedidos já pendentes.
