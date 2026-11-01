@@ -1,3 +1,4 @@
+import { processJoinRequests } from "./lib/features/moderation/joinRequestGuard.js";
 import { sendMiniGamesMenu } from "./lib/ui/miniGamesMenu.js";
 import { queueLevelUp } from "./lib/features/social/levelSummary.js";
 import { handleDepartureCommand } from "./lib/features/group/departureNotice.js";
@@ -3466,12 +3467,12 @@ break;
 case "antifake": {
  if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
  const action=String(args[0]||"").toLowerCase();
- if(!action){const cfg=getAntiFakeConfig(from);return reply(`🐉🛡️ *ANTIFAKE*\nStatus: ${cfg.enabled?"ON":"OFF"}\nPermitidos: ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}\nUse ${prefix}antifake on ou ${prefix}antifake off.\nVerifica novas entradas. LID sem telefone confirmado não é removido.`);}
+ if(!action){const cfg=getAntiFakeConfig(from);return reply(`🐉🛡️ *ANTIFAKE*\nStatus: ${cfg.enabled?"ON":"OFF"}\nPermitidos: ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}\nUse ${prefix}antifake on ou ${prefix}antifake off.\nVerifica entradas e solicitações. /add e /aceitar recusam números de fora dos prefixos antes de aceitar. LID sem telefone confirmado fica pendente.`);}
  if(!["on","off","1","0"].includes(action))return reply(`Use ${prefix}antifake on ou off.`);
  const enabled=["on","1"].includes(action);
  if(enabled){const metadata=await conn.groupMetadata(from);const myIds=[botNumber,conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean).map(id=>String(id).replace(/:\d+(?=@)/,""));const bot=(metadata.participants||[]).find(p=>[p.id,p.jid,p.phoneNumber,p.lid].some(id=>id&&myIds.includes(String(id).replace(/:\d+(?=@)/,""))));if(!bot?.admin&&!bot?.isAdmin&&!bot?.isSuperAdmin)return reply("🐉 Preciso ser ADM do grupo para ativar o antifake.");}
  const cfg=setAntiFakeEnabled(from,enabled);
- return reply(`🐉🛡️ Antifake ${enabled?"ativado":"desativado"}. ${enabled?`Novas entradas permitem números ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}. ADMs, dono e lista branca são preservados; telefone desconhecido não é removido.`:"A checagem automática de novas entradas foi desligada."}`);
+ return reply(`🐉🛡️ Antifake ${enabled?"ativado":"desativado"}. ${enabled?`Entradas e solicitações são verificadas pelos prefixos ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}. Solicitações de fora são recusadas antes de aprovar. Telefone não identificado fica pendente. Na remoção de quem já entrou, ADMs, dono e lista branca continuam protegidos.`:"A checagem de entradas e solicitações foi desligada."}`);
 }
 break;
 
@@ -4830,36 +4831,22 @@ case "aceitar": {
       }
     }
 
-    const targets = pending
-      .slice(0, limit)
-      .map((item) => item?.jid || item?.id || item?.participant || item?.lid)
-      .filter(Boolean);
-
-    if (!targets.length) return reply("🌸 Não encontrei solicitações válidas para aceitar.");
-
-    const x9Results = await conn.groupRequestParticipantsUpdate(from, targets, "approve");
-    const x9Approved = (x9Results||[]).filter(r=>String(r.status)==="200").map(r=>r.jid).filter(Boolean);
-    if(x9Approved.length){const notices=recordX9Decision(from,x9Approved,sender,"approve");if(conn.kobayashiX9Notify)await conn.kobayashiX9Notify(from,notices);}
-    await delay(1800);
-
-    if (typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
+    const report = await processJoinRequests(conn, from, { limit, actor: sender });
+    if (report.approved.length && typeof conn.kobayashiHandleGroupParticipantsUpdate === "function") {
+      await delay(1800);
       await conn.kobayashiHandleGroupParticipantsUpdate({
-        id: from, action: "add", participants: targets, author: sender,
+        id: from, action: "add", participants: report.approved, author: sender,
         source: command === "aceitar" ? "command-aceitar" : "command-add"
       });
     }
-
-    addAdminLog(from, {
-      type: "add", actor: sender,
-      detail: `${targets.length} solicitação(ões) aprovada(s)`,
-    });
-
-    const remaining = Math.max(0, pending.length - targets.length);
     return reply(
-      `🐉 *SOLICITAÇÕES ACEITAS*\n\n` +
-      `✅ Aceitas: *${targets.length}*` +
-      (remaining ? `\n⏳ Ainda pendentes: *${remaining}*` : "") +
-      `\n\nO sistema de boas-vindas foi acionado para os novos membros.`
+      `🐉 *SOLICITAÇÕES ANALISADAS*\n\n` +
+      `✅ Aceitas: *${report.approved.length}*\n` +
+      `🚫 Recusadas pelo antifake: *${report.rejected.length}*\n` +
+      `🔎 Telefone não identificado: *${report.unknown.length}*\n` +
+      `⚠️ Falhas/sem confirmação: *${report.failed.length}*\n` +
+      `⏳ Ainda pendentes: *${report.remaining}*` +
+      (report.unknown.length ? `\n\nLIDs sem telefone confirmado ficaram para revisão do ADM.` : "")
     );
   } catch (error) {
     console.error("[ADD/ACEITAR REQUESTS]", error?.stack || error?.message || error);

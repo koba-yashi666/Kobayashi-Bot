@@ -1,5 +1,5 @@
 {
-  "version": "5.5.2",
-  "name": "Kobayashi Bot v5.5.2 — Dragon Fun",
-  "update": "/macetar em módulo separado, com menção ou resposta e legenda de brincadeira em texto."
+  "version": "5.5.3",
+  "name": "Kobayashi Bot v5.5.3 — Antifake nas solicitações",
+  "update": "Analisa solicitações antes da aprovação; recusa estrangeiros com antifake ligado e mantém LIDs sem telefone pendentes."
 }
