@@ -1,5 +1,5 @@
 {
-  "version": "5.5.4",
-  "name": "Kobayashi Bot v5.5.4 — Correção de solicitações BR",
-  "update": "Lê phone_number e participant_pn das solicitações e verifica campos alternativos antes de manter o LID pendente."
+  "version": "5.5.5",
+  "name": "Kobayashi Bot v5.5.5 — AntiSTTS ampliado",
+  "update": "Bloqueia status publicados no grupo (V1/V2) e menções ao grupo em status; checa cargos PN/LID."
 }

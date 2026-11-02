@@ -1,0 +1,9 @@
+v5.5.5 — AntiSTTS
+/antistts on: ativa. /antistts off: desativa. /antistts status: consulta.
+Alias: /antistatus. Apenas ADM do grupo configura; bot precisa ser ADM.
+Detecta status publicados no grupo (V1/V2) e avisos que mencionam o grupo em status.
+Apaga a mensagem recebida no grupo e tenta remover o autor.
+Preserva donos, ADMs e lista branca. Não pune texto comum ou status citado numa resposta.
+Não apaga o status privado original nem atua em eventos que não chegam à conta do bot.
+Configuração atual de cada grupo é preservada. Se já estiver ON, continua ON.
+Termux só envia a atualização ao GitHub; sincronize e reinicie na hospedagem.

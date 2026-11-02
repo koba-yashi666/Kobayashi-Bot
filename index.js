@@ -48,7 +48,7 @@ WhatsApp: 5515997075304
 import { getContentType, delay, downloadMediaMessage, generateWAMessageFromContent, prepareWAMessageMedia } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
-import { handleAntiStatus } from "./lib/features/moderation/antiStatus.js";
+import { handleAntiStatus, groupStatusKind } from "./lib/features/moderation/antiStatus.js";
 import { removeAntiLinkParticipant } from "./lib/features/moderation/antiLinkRemoval.js";
 import { withAntiLinkGroupLock } from "./lib/features/moderation/antiLinkGroupLock.js";
 import fs from "fs";
@@ -2459,11 +2459,14 @@ if(isGroup){
   if(mutedResult.handled)continue;
 }
 
-if(isGroup){
+if(isGroup && getGroupProtection(from).antistts && groupStatusKind(info)){
+  const statusIdentities=[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean);
+  const statusAuthorAdmin=await currentGroupAdmin(conn,from,statusIdentities);
+  const statusBotAdmin=await currentGroupAdmin(conn,from,[conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean));
   const antiStatusResult=await handleAntiStatus({
     conn,info,enabled:getGroupProtection(from).antistts,
-    protectedMember:isGroupAdmins || isWhitelisted(from,sender) || (senderLid && isWhitelisted(from,senderLid)),
-    botIsAdmin:isBotGroupAdmins,
+    protectedMember:SoDonoPrincipal || statusAuthorAdmin || statusIdentities.some(id=>isWhitelisted(from,id)),
+    botIsAdmin:statusBotAdmin,
     identities:[sender,senderLid,rawSender,info.key.participant,info.key.participantAlt].filter(Boolean),
     removeParticipant:ids=>removeAntiLinkParticipant(conn,from,ids,{resolvePN:id=>getPNForJid(conn,id,id)}),
     log:entry=>addAdminLog(from,{...entry,actor:botNumber})
@@ -4481,14 +4484,14 @@ break;
 case "antistts":
 case "antistatus": {
   if(!isGroup)return reply(mess.onlyGroup());
-  if(!isGroupAdmins)return reply(mess.onlyAdmins());
+  if(!await currentGroupAdmin(conn,from,[sender,senderLid,rawSender].filter(Boolean)))return reply(mess.onlyAdmins());
   const mode=String(args[0]||"").toLowerCase();
   if(mode && !["on","off","status"].includes(mode))return reply(`📵 Use *${prefix}antistts on*, *${prefix}antistts off* ou *${prefix}antistts status*.`);
   if(mode==="status")return reply(`📵 *ANTISTTS:* ${getGroupProtection(from).antistts?"🟢 ATIVADO":"🔴 DESATIVADO"}`);
-  if((mode==="on"||(!mode&&!getGroupProtection(from).antistts))&&!isBotGroupAdmins)return reply("🛡️ O bot precisa ser administrador para ativar o AntiSTTS.");
+  if((mode==="on"||(!mode&&!getGroupProtection(from).antistts))&&!await currentGroupAdmin(conn,from,[conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean)))return reply("🛡️ O bot precisa ser administrador para ativar o AntiSTTS.");
   const enabled=mode?setGroupProtection(from,"antistts",mode==="on"):toggleGroupProtection(from,"antistts");
   addAdminLog(from,{type:"antistts",actor:sender,detail:enabled?"Proteção ativada":"Proteção desativada"});
-  return reply(`📵🐉 *ANTISTTS ${enabled?"ATIVADO":"DESATIVADO"}*\n\nApaga a menção recebida no grupo e remove o autor que marcou o grupo em status.\n🛡️ Administradores, donos e lista branca são preservados.\nO status privado original continua na conta do autor.\n\n${prefix}antistts on | off | status`);
+  return reply(`📵🐉 *ANTISTTS ${enabled?"ATIVADO":"DESATIVADO"}*\n\nApaga status publicados no grupo e avisos de quem menciona o grupo em status; também tenta remover o autor.\n🛡️ Administradores, donos e lista branca são preservados.\nO status privado original continua na conta do autor.\n\n${prefix}antistts on | off | status`);
 }
 break;
 
