@@ -3470,12 +3470,12 @@ break;
 case "antifake": {
  if(!isGroup)return reply(mess.onlyGroup());if(!isGroupAdmins)return reply(mess.onlyAdmins());
  const action=String(args[0]||"").toLowerCase();
- if(!action){const cfg=getAntiFakeConfig(from);return reply(`🐉🛡️ *ANTIFAKE*\nStatus: ${cfg.enabled?"ON":"OFF"}\nPermitidos: ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}\nUse ${prefix}antifake on ou ${prefix}antifake off.\nVerifica entradas e solicitações. /add e /aceitar recusam números de fora dos prefixos antes de aceitar. LID sem telefone confirmado fica pendente.`);}
+ if(!action){const cfg=getAntiFakeConfig(from);return reply(`🐉🛡️ *ANTIFAKE*\nStatus: ${cfg.enabled?"ON":"OFF"}\nPermitidos: ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}\nUse ${prefix}antifake on ou ${prefix}antifake off.\n/add e /aceitar aprovam normalmente. O antifake verifica quem entrou e remove números de fora dos prefixos permitidos. Telefone desconhecido não é removido.`);}
  if(!["on","off","1","0"].includes(action))return reply(`Use ${prefix}antifake on ou off.`);
  const enabled=["on","1"].includes(action);
  if(enabled){const metadata=await conn.groupMetadata(from);const myIds=[botNumber,conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean).map(id=>String(id).replace(/:\d+(?=@)/,""));const bot=(metadata.participants||[]).find(p=>[p.id,p.jid,p.phoneNumber,p.lid].some(id=>id&&myIds.includes(String(id).replace(/:\d+(?=@)/,""))));if(!bot?.admin&&!bot?.isAdmin&&!bot?.isSuperAdmin)return reply("🐉 Preciso ser ADM do grupo para ativar o antifake.");}
  const cfg=setAntiFakeEnabled(from,enabled);
- return reply(`🐉🛡️ Antifake ${enabled?"ativado":"desativado"}. ${enabled?`Entradas e solicitações são verificadas pelos prefixos ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}. Solicitações de fora são recusadas antes de aprovar. Telefone não identificado fica pendente. Na remoção de quem já entrou, ADMs, dono e lista branca continuam protegidos.`:"A checagem de entradas e solicitações foi desligada."}`);
+ return reply(`🐉🛡️ Antifake ${enabled?"ativado":"desativado"}. ${enabled?`Após a entrada, verifica os prefixos ${cfg.allowedPrefixes.map(x=>"+"+x).join(", ")}. Solicitações são aceitas normalmente. ADMs, dono e lista branca continuam protegidos; telefone desconhecido não é removido.`:"A checagem automática de novas entradas foi desligada."}`);
 }
 break;
 
@@ -4843,13 +4843,11 @@ case "aceitar": {
       });
     }
     return reply(
-      `🐉 *SOLICITAÇÕES ANALISADAS*\n\n` +
+      `🐉 *SOLICITAÇÕES ACEITAS*\n\n` +
       `✅ Aceitas: *${report.approved.length}*\n` +
-      `🚫 Recusadas pelo antifake: *${report.rejected.length}*\n` +
-      `🔎 Telefone não identificado: *${report.unknown.length}*\n` +
       `⚠️ Falhas/sem confirmação: *${report.failed.length}*\n` +
       `⏳ Ainda pendentes: *${report.remaining}*` +
-      (report.unknown.length ? `\n\nLIDs sem telefone confirmado ficaram para revisão do ADM.` : "")
+      `\n\nCom antifake ligado, números estrangeiros são verificados e removidos após entrar.`
     );
   } catch (error) {
     console.error("[ADD/ACEITAR REQUESTS]", error?.stack || error?.message || error);

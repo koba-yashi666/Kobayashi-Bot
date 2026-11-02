@@ -1,16 +1,10 @@
-v5.5.4 — Antifake nas solicitações
-Ative no grupo: /antifake on
-Usa os mesmos prefixos do antifake (Brasil +55 por padrão).
-/add analisa as solicitações pendentes; /aceitar 5 analisa até 5 solicitações.
-Números permitidos: aprova. Números estrangeiros identificados: recusa antes de entrar.
-LID sem telefone confirmado: mantém pendente para revisão manual.
-Novas solicitações são analisadas automaticamente com antifake ON: apenas estrangeiros são recusados; brasileiros aguardam aprovação normal/captcha.
-O captcha passa pela mesma checagem. Erro ou prazo vencido do desafio continua recusando a solicitação.
-A Kobayashi precisa ser ADM. Não altera decisões feitas diretamente por um ADM no aplicativo.
-/antifake off desliga o filtro; as regras próprias do captcha continuam.
-Falhas/sem confirmação não contam como aprovação ou recusa. Não há boas-vindas para quem foi recusado.
-O grupo precisa usar aprovação de entrada para haver solicitações. Entradas diretas continuam sob o antifake de entrada existente.
-Termux só envia a versão ao GitHub; sincronize e reinicie na hospedagem.
-
-Correção v5.5.4: consulta também os campos phone_number e participant_pn. Campos inválidos não bloqueiam a leitura de outros telefones válidos.
-Depois de atualizar, use novamente /add ou /aceitar 7 para reanalisar os pedidos já pendentes.
+v5.5.6 — Fluxo antigo restaurado
+/add e /aceitar N aprovam normalmente, sem filtro de país antes da aprovação.
+Solicitações com LID sem telefone identificado também podem ser aprovadas.
+Não há recusa automática de novas solicitações pelo antifake.
+Com /antifake on, números de fora dos prefixos permitidos são removidos APÓS entrar.
+O padrão permitido é +55 (Brasil). ADMs, dono e lista branca continuam protegidos.
+Telefone não identificado não é tratado como estrangeiro e não é removido por suposição.
+Captcha mantém acerto/erro/expiração, sem filtro por país antes da decisão.
+AntiSTTS da v5.5.5 preservado.
+Sincronize e reinicie na hospedagem, depois use /add para aprovar os pedidos pendentes.
