@@ -1,5 +1,5 @@
 {
-  "version": "5.5.6",
-  "name": "Kobayashi Bot v5.5.6 — Aprovação no fluxo antigo",
-  "update": "/add e /aceitar aprovam normalmente; antifake atua após a entrada, sem recusar solicitações por país."
+  "version": "5.5.7",
+  "name": "Kobayashi Bot v5.5.7 — Convites e parcerias",
+  "update": "/linkgp em cartão de convite e /link-parceria on/off com horário diário e menção a todos."
 }
