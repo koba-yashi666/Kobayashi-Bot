@@ -1,5 +1,5 @@
-v5.5.7 — Convites e parcerias
-/linkgp: cartão nativo com nome, foto disponível e botão do convite. Autor e bot devem ser ADMs.
+v5.5.8 — Convites e parcerias
+/linkgp: link normal em mensagem de texto. Autor e bot devem ser ADMs.
 /link-parceria on https://chat.whatsapp.com/CODIGO 20:00
 Configura uma parceria por grupo e envia diariamente às 20:00 (São Paulo), mencionando todos os participantes atuais.
 O destino é o grupo onde o comando foi usado; o bot não entra no grupo do link.
@@ -11,5 +11,5 @@ Se configurado depois do horário, o primeiro envio fica para o dia seguinte.
 Persistência em files/database/partnership-links.json, não incluído no ZIP.
 O bot precisa estar conectado. Ao reconectar depois do horário, envia uma vez no dia; não repõe dias anteriores.
 Reserva antes do envio evita duplicação por reinício/falha ambígua. Falha não é repetida naquele dia; consulte status.
-Foto depende da privacidade e acesso da conta; visual e notificações dependem do WhatsApp.
+Parceria envia nome e link em texto, com menções. Notificações e prévia automática dependem do WhatsApp.
 Termux somente envia a atualização ao GitHub; sincronize e reinicie na hospedagem.

@@ -1,5 +1,5 @@
 {
-  "version": "5.5.7",
-  "name": "Kobayashi Bot v5.5.7 — Convites e parcerias",
-  "update": "/linkgp em cartão de convite e /link-parceria on/off com horário diário e menção a todos."
+  "version": "5.5.8",
+  "name": "Kobayashi Bot v5.5.8 — Links em texto",
+  "update": "/linkgp e parceria diária enviam links normais em texto; agendamento e menções preservados."
 }

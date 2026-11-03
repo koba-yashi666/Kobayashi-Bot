@@ -1,4 +1,4 @@
-import { sendInviteCard, configurePartnership } from "./lib/features/group/partnershipLinks.js";
+import { sendInviteLink, configurePartnership } from "./lib/features/group/partnershipLinks.js";
 import { processJoinRequests } from "./lib/features/moderation/joinRequestGuard.js";
 import { sendMiniGamesMenu } from "./lib/ui/miniGamesMenu.js";
 import { queueLevelUp } from "./lib/features/social/levelSummary.js";
@@ -5039,7 +5039,7 @@ case "linkgrupo": {
   if(!await currentGroupAdmin(conn,from,[conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean)))return reply("Preciso ser ADM para gerar o convite.");
   try{
     const code=await conn.groupInviteCode(from),metadata=await conn.groupMetadata(from);
-    await sendInviteCard(conn,from,{code,metadata,link:`https://chat.whatsapp.com/${code}`},{quoted:info,caption:"🐉 Convite do grupo",api:{generateWAMessageFromContent}});
+    await sendInviteLink(conn,from,{code,metadata,link:`https://chat.whatsapp.com/${code}`},{quoted:info,caption:"🐉 Convite do grupo"});
   }catch(error){console.error("[LINKGP]",error?.message);await reply("❌ Não consegui enviar o convite do grupo.");}
 }
 break;

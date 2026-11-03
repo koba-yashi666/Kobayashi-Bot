@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 const old=process.cwd(),temp=fs.mkdtempSync(path.join(os.tmpdir(),'partnerships-'));process.chdir(temp);
 try{
- const {inviteCode,configurePartnership,tickPartnerships,sendInviteCard}=await import('../lib/features/group/partnershipLinks.js');
+ const {inviteCode,configurePartnership,tickPartnerships,sendInviteLink}=await import('../lib/features/group/partnershipLinks.js');
  const group='g@g.us',owner='5511000000000@s.whatsapp.net',bot='5522000000000@s.whatsapp.net',link='https://chat.whatsapp.com/ABCDEFGHIJKLMNOPQRSTUV';
  let metaCalls=0,outputs=[],relayed,sent=[],allow=true;
  const conn={user:{id:bot},groupMetadata:async()=>({id:group,subject:'Destino',participants:[{id:owner,admin:allow?'admin':null},{id:bot,admin:'admin'},{id:'member@lid'}]}),groupGetInviteInfo:async()=>{metaCalls++;return {id:'partner@g.us',subject:'Parceiro'};},profilePictureUrl:async()=>{throw Error('private')},relayMessage:async(...a)=>{relayed=a}};
@@ -17,6 +17,6 @@ try{
  await tickPartnerships(conn,now+86400000+3600000,{send});assert.equal(sent.length,2);
  await configurePartnership({...ctx,q:'off'},now+86400000+3601000);await tickPartnerships(conn,now+2*86400000+3600000,{send});assert.equal(sent.length,2);
  await configurePartnership({...ctx,q:'on'},now+2*86400000);const fail=async()=>{throw Error('simulated')};let r=await tickPartnerships(conn,now+2*86400000+3600000,{send:fail});assert.equal(r[0].status,'failed');await tickPartnerships(conn,now+2*86400000+3601000,{send});assert.equal(sent.length,2);
- let payload;await sendInviteCard(conn,group,{code:'ABCDEFGHIJKLMNOPQRSTUV',metadata:{id:'partner@g.us',subject:'Parceiro'}},{mentions:['member@lid','member@lid'],api:{generateWAMessageFromContent:(jid,p)=>{payload=p;return {key:{id:'card'},message:p}}}});assert.equal(payload.groupInviteMessage.groupName,'Parceiro');assert.deepEqual(payload.groupInviteMessage.contextInfo.mentionedJid,['member@lid']);assert.equal(relayed[2].messageId,'card');
- console.log('✅ Parcerias: link/horário, ADM, São Paulo, diário, OFF/ON, persistência, falha sem repetição, cartão e menções.');
+ let message;conn.sendMessage=async(...args)=>{message=args};await sendInviteLink(conn,group,{code:'ABCDEFGHIJKLMNOPQRSTUV',metadata:{id:'partner@g.us',subject:'Parceiro'}},{quoted:{key:{id:'quoted'}},mentions:['member@lid','member@lid']});assert(message[1].text.includes(link));assert.deepEqual(message[1].mentions,['member@lid']);assert.equal(message[2].quoted.key.id,'quoted');assert.equal(message[1].groupInviteMessage,undefined);
+ console.log('✅ Parcerias: link/horário, ADM, São Paulo, diário, OFF/ON, persistência, falha sem repetição, link em texto e menções.');
 }finally{process.chdir(old);fs.rmSync(temp,{recursive:true,force:true});}
