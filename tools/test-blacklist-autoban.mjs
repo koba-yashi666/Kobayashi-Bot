@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {EventEmitter} from 'node:events';
+const cwd=process.cwd(),temp=fs.mkdtempSync(path.join(os.tmpdir(),'koba-autoban-'));process.chdir(temp);
+try{
+ const local=await import('../lib/features/moderation/adminPro.js');
+ const global=await import('../lib/features/moderation/globalBlacklist.js');
+ const {parseBlacklistTargets,registerBlacklistTargets}=await import('../lib/features/moderation/blacklistRegistry.js');
+ const {installBlacklistRuntime,enforceBlacklist}=await import('../lib/features/moderation/blacklistRuntime.js');
+ const bot='5511999999999@s.whatsapp.net',pn='5511888888888@s.whatsapp.net',lid='876543210@lid',group='123@g.us';
+ assert.deepEqual(parseBlacklistTargets('+55 (11) 88888-8888\n5511777777777').targets,[pn,'5511777777777@s.whatsapp.net']);
+ let members=[{id:bot,admin:'admin'},{id:lid,phoneNumber:pn}],calls=0;
+ const conn={ev:new EventEmitter(),user:{id:bot},signalRepository:{lidMapping:{getPNForLID:async id=>id===lid?pn:null,getLIDForPN:async id=>id===pn?lid:null}},groupMetadata:async()=>({subject:'Teste',participants:members}),groupParticipantsUpdate:async(g,targets,action)=>{assert.equal(action,'remove');assert(local.isBlacklisted(group,pn)||global.isGloballyBlacklisted(pn,group));calls++;members=members.filter(m=>!targets.includes(m.id));return targets.map(jid=>({jid,status:'200'}));},sendMessage:async()=>({})};
+ await registerBlacklistTargets(conn,{group,targets:[pn],by:bot,participants:members});
+ assert(local.isBlacklisted(group,lid));assert(!local.isBlacklisted('outro@g.us',lid));assert.equal(calls,0);
+ const result=await enforceBlacklist(conn,group,{id:lid,phoneNumber:pn});assert(result.removed);assert.equal(calls,1);
+ installBlacklistRuntime(conn);installBlacklistRuntime(conn);assert.equal(conn.ev.listenerCount('group-participants.update'),1);
+ members=[{id:bot,admin:'admin'},{id:lid,phoneNumber:pn}];conn.ev.emit('group-participants.update',{id:group,action:'add',participants:[{id:lid,phoneNumber:pn}]});
+ for(let i=0;i<100&&calls<2;i++)await new Promise(r=>setTimeout(r,5));assert.equal(calls,2);
+ local.removeBlacklist(group,lid);assert(!local.isBlacklisted(group,pn));
+ await registerBlacklistTargets(conn,{group,targets:[pn],scope:[{jid:group}],by:bot});assert(global.isGloballyBlacklisted(lid,group));assert(!global.isGloballyBlacklisted(lid,'outro@g.us'));
+ const persisted=JSON.parse(fs.readFileSync('files/database/lista-negra-global.json'));assert(persisted.users[pn].aliases.includes(lid));
+ members=[{id:bot,admin:'admin'},{id:lid,phoneNumber:pn}];assert((await enforceBlacklist(conn,group,lid)).removed);
+ members=[{id:bot,admin:'admin'},{id:lid,phoneNumber:pn}];
+ const {purgeGroups}=await import('../lib/features/moderation/groupPurge.js');
+ const denied=await purgeGroups({...conn,groupParticipantsUpdate:async()=>[{jid:lid,status:'403'}]},pn,[{jid:group}],{pause:async()=>{}});assert.equal(denied[0].status,'failed');
+ const noAdmin=await purgeGroups({...conn,groupMetadata:async()=>({participants:[{id:bot},{id:lid,phoneNumber:pn}]}),groupParticipantsUpdate:async()=>{throw Error('Não deve remover sem ADM');}},pn,[{jid:group}]);assert.equal(noAdmin[0].status,'not-admin');
+ fs.writeFileSync('files/database/lista-negra-global.json','{corrompido');assert.throws(()=>global.addGlobalBlacklist(pn));assert.equal(fs.readFileSync('files/database/lista-negra-global.json','utf8'),'{corrompido');
+ fs.writeFileSync('files/database/admin-pro.json','{corrompido');assert.throws(()=>local.addBlacklist(group,pn));assert.equal(fs.readFileSync('files/database/admin-pro.json','utf8'),'{corrompido');
+ console.log('✅ Autoban: gravação antes da remoção, lote PN/LID, reentrada por objeto, instalação única e preservação em erro de leitura.');
+}finally{process.chdir(cwd);fs.rmSync(temp,{recursive:true,force:true});}

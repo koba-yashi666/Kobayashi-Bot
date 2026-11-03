@@ -1,3 +1,5 @@
+import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
+import {blacklistState, enforceBlacklist, installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { sendInviteLink, configurePartnership } from "./lib/features/group/partnershipLinks.js";
 import { processJoinRequests } from "./lib/features/moderation/joinRequestGuard.js";
 import { sendMiniGamesMenu } from "./lib/ui/miniGamesMenu.js";
@@ -23,7 +25,7 @@ import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } fro
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
 import { vipCommand, vipState, vipAllowed, setVipCommand, setVipMember, adminWarnings, addAdminWarning } from "./lib/features/access/vipAdmin.js";
 import { selectRentalBroadcastGroups } from "./lib/features/rental/rentalBroadcast.js";
-import { buildCitaPayload } from "./lib/features/group/citaMessage.js";
+import { buildCitaPayload, sendCitaPayload } from "./lib/features/group/citaMessage.js";
 import { cleanupLegacyReleases } from "./lib/features/system/legacyCleanup.js";
 import { resolveActivityTarget } from "./lib/features/social/activityTarget.js";
 import { getActivityByAliases } from "./lib/features/social/activityTracker.js";
@@ -814,112 +816,8 @@ async function notifyOwnerAntiPv(conn, ownerJid, { sender, messageId, messageTex
 }
 
 
-async function getBlacklistAliases(conn, groupJid, rawJid) {
-  const aliases = new Set([rawJid].filter(Boolean));
-
-  try {
-    const pn = await getPNForJid(conn, rawJid, rawJid);
-    if (pn) aliases.add(pn);
-  } catch {}
-
-  try {
-    const metadata = await conn.groupMetadata(groupJid);
-    for (const p of metadata?.participants || []) {
-      const ids = [p?.id, p?.jid, p?.participant, p?.phoneNumber, p?.lid].filter(Boolean);
-      const rawNorm = (() => { try { return normalizeJid(rawJid); } catch { return rawJid; } })();
-      const match = ids.some((id) => {
-        if (id === rawJid) return true;
-        try { return normalizeJid(id) === rawNorm; } catch { return false; }
-      });
-      if (!match) continue;
-
-      for (const id of ids) aliases.add(id);
-      for (const id of ids) {
-        try {
-          const pn = await getPNForJid(conn, id, id);
-          if (pn) aliases.add(pn);
-        } catch {}
-      }
-    }
-  } catch {}
-
-  return [...aliases].filter(Boolean);
-}
-
-async function getBlacklistState(conn, groupJid, rawJid) {
-  const aliases = await getBlacklistAliases(conn, groupJid, rawJid);
-  const global = aliases.some((jid) => {
-    try { return isGloballyBlacklisted(jid, groupJid); } catch { return false; }
-  });
-  const local = aliases.some((jid) => {
-    try { return isBlacklisted(groupJid, jid); } catch { return false; }
-  });
-  return { aliases, global, local, blocked: global || local };
-}
-
-async function removeBlacklistedFromGroup(conn, groupJid, rawJid, { announce=false, source="auto" }={}) {
-  const state = await getBlacklistState(conn, groupJid, rawJid);
-  if (!state.blocked) return { removed:false, reason:"not-blacklisted", ...state };
-
-  let metadata;
-  try {
-    metadata = await conn.groupMetadata(groupJid);
-  } catch {
-    return { removed:false, reason:"metadata-error", ...state };
-  }
-
-  const participants = metadata?.participants || [];
-  const botRaw = conn?.user?.id;
-  const botPN = await getPNForJid(conn, botRaw, conn?.user?.lid || conn?.user?.phoneNumber).catch(() => null);
-  const botIds = new Set([botRaw, botPN, conn?.user?.lid, conn?.user?.phoneNumber].filter(Boolean));
-
-  const botParticipant = participants.find((p) =>
-    [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).some((id) => {
-      if (botIds.has(id)) return true;
-      try {
-        return [...botIds].some((b) => normalizeJid(id) === normalizeJid(b));
-      } catch { return false; }
-    })
-  );
-
-  const botIsAdmin = Boolean(botParticipant?.admin);
-  if (!botIsAdmin) return { removed:false, reason:"bot-not-admin", ...state };
-
-  const targetParticipant = participants.find((p) =>
-    [p?.id,p?.jid,p?.participant,p?.phoneNumber,p?.lid].filter(Boolean).some((id) =>
-      state.aliases.some((a) => {
-        if (id === a) return true;
-        try { return normalizeJid(id) === normalizeJid(a); } catch { return false; }
-      })
-    )
-  );
-
-  if (!targetParticipant) return { removed:false, reason:"not-in-group", ...state };
-
-  const target =
-    targetParticipant?.id ||
-    targetParticipant?.jid ||
-    targetParticipant?.participant ||
-    rawJid;
-
-  try {
-    await conn.groupParticipantsUpdate(groupJid, [target], "remove");
-    if (announce) {
-      await conn.sendMessage(groupJid, {
-        text:
-          `🖤🔨 *LISTA NEGRA • REMOÇÃO AUTOMÁTICA*\n\n` +
-          `@${String(target).split("@")[0]} foi removido automaticamente.\n` +
-          `📌 Origem: *${state.global ? "Lista Negra Global" : "Lista Negra do Grupo"}*`,
-        mentions:[target]
-      }).catch(() => {});
-    }
-    console.log(`[LISTA NEGRA ${source}] removido ${target} de ${groupJid}`);
-    return { removed:true, reason:"removed", target, ...state };
-  } catch (e) {
-    console.error(`[LISTA NEGRA ${source}]`, e?.message || e);
-    return { removed:false, reason:"remove-error", error:e?.message || String(e), ...state };
-  }
-}
+async function getBlacklistState(conn,groupJid,rawJid){return blacklistState(conn,groupJid,rawJid);}
+async function removeBlacklistedFromGroup(conn,groupJid,rawJid,options={}){return enforceBlacklist(conn,groupJid,rawJid,options);}
 
 function blacklistDigits(value = "") {
   return String(value || "")
@@ -952,6 +850,7 @@ function blacklistJidMatches(a, b) {
     if (normalizeJid(a) === normalizeJid(b)) return true;
   } catch {}
 
+  if(String(a).endsWith("@lid")||String(b).endsWith("@lid"))return false;
   const av = blacklistNumberVariants(a);
   const bv = blacklistNumberVariants(b);
   return [...av].some((v) => bv.has(v));
@@ -1083,38 +982,7 @@ async function purgeGlobalBlacklistedUser(conn, rawJid) {
   });
 }
 
-function ensureBlacklistJoinGuard(conn) {
-  if (conn.__kobayashiBlacklistJoinGuard) return;
-  conn.__kobayashiBlacklistJoinGuard = true;
-
-  conn.ev.on("group-participants.update", async (event) => {try{if(event?.action==="add")for(const __p of (event?.participants||[]))recordMemberEntry(event.id,__p,Date.now());}catch(__e){console.error("[ENTRADA_MEMBRO]",__e?.message||__e);}
-
-    try {
-      if (String(event?.action || "").toLowerCase() !== "add") return;
-      const groupJid = event?.id;
-      const participants = Array.isArray(event?.participants) ? event.participants : [];
-      if (!groupJid || !participants.length) return;
-
-      for (const target of participants) {
-        const result = await removeBlacklistedFromGroup(conn, groupJid, target, {
-          announce:true,
-          source:"join-guard"
-        });
-
-        if (result.removed) {
-          addAdminLog(groupJid, {
-            type:"blacklist_auto_remove",
-            actor:"Kobayashi AutoGuard",
-            target:result.target || target,
-            detail:result.global ? "Lista Negra Global • reentrada bloqueada" : "Lista Negra Local • reentrada bloqueada"
-          });
-        }
-      }
-    } catch (e) {
-      console.error("[LISTA NEGRA JOIN GUARD]", e?.stack || e?.message || e);
-    }
-  });
-}
+function ensureBlacklistJoinGuard(conn){installBlacklistRuntime(conn);}
 
 export default async function start(upsert, conn) {
 ensureBlacklistJoinGuard(conn);
@@ -2611,13 +2479,7 @@ ensureSentinelBridgeServer();
 // 🛡️ ADMIN PRO • LISTA NEGRA v0.2.0
 // ==========================================
 if (isGroup && sender && !info.key.fromMe && isBlacklisted(from, sender) && !SoDono && !isWhitelisted(from, sender)) {
-  if (isBotGroupAdmins) {
-    await conn.groupParticipantsUpdate(from, [sender], "remove").catch(() => {});
-  }
-  await conn.sendMessage(from, {
-    text: `⛔🐉 *LISTA NEGRA*\n\n@${sender.split("@")[0]} está bloqueado neste grupo.${isBotGroupAdmins ? "\n🔨 Remoção automática executada." : "\n⚠️ Preciso ser ADM para remover automaticamente."}`,
-    mentions: [sender]
-  }).catch(() => {});
+  await enforceBlacklist(conn,from,{id:rawSender||sender,phoneNumber:sender,lid:senderLid},{announce:true,source:'message-guard'}).catch(error=>console.error('[Autoban]',error.message));
   continue;
 }
 
@@ -4202,108 +4064,20 @@ break;
 case "listanegrag":
 case "blacklistg":
 case "listanegraglobal": {
-  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode gerenciar a lista negra global.");
-
-  if (!args.length) {
-    const entries=listGlobalBlacklist();
-    return reply(
-      `🖤🌐 *LISTA NEGRA GLOBAL*\n\n` +
-      `📦 Salvos: *${entries.length}*\n🏯 Registra somente os grupos atuais em que a Kobayashi é ADM.\n\n` +
-      `Cole um ou vários números, inclusive um por linha:\n\n` +
-      `${prefix}listanegrag +55 21 98093-7319\n+55 11 95941-7992\n+63 975 062 4668`
-    );
-  }
-
-  // v4.0.13: parser tolerante para listas copiadas/coladas.
-  // Normaliza NBSP, hífens Unicode, marcas invisíveis e aceita um número por linha.
-  const raw=args.join(" ")
-    .replace(/[\u00A0\u2007\u202F]/g," ")
-    .replace(/[\u200B-\u200D\u2060\uFEFF\u202C\u202D\u202E]/g,"")
-    .replace(/[‐‑‒–—―−]/g,"-");
-
-  // Cada "+" inicia um novo telefone. Assim espaços/hífens dentro do telefone
-  // não confundem a separação entre números.
-  const pieces=raw.split(/(?=\+\s*\d)/g).map(x=>x.trim()).filter(Boolean);
-  const targets=[];
-  const invalid=[];
-
-  for(const piece of pieces){
-    const digits=piece.replace(/\D/g,"");
-    // E.164: 8 a 15 dígitos; mantém números internacionais como +63...
-    if(digits.length<8 || digits.length>15){ invalid.push(piece); continue; }
-    const jid=normalizeBlacklistJid("+"+digits);
-    if(jid && !targets.includes(jid)) targets.push(jid);
-    else if(!jid) invalid.push(piece);
-  }
-
-  if(!targets.length){
-    return reply(`❌ Nenhum número válido encontrado.\n\nExemplo:\n*${prefix}listanegrag +55 21 98093-7319*\n*+55 11 95941-7992*`);
-  }
-
-  let scope;
-  try { scope=await discoverBlacklistGroups(conn); }
-  catch(e) { return reply(`❌ Não registrei nenhum bloqueio: ${e.message}`); }
-  if(!scope.groups.length)return reply("⚠️ Nenhum grupo com a Kobayashi ADM foi confirmado. Nada foi registrado."+(scope.issues.length?"\n\n"+scope.issues.join("\n"):""));
-  const registeredGroupJids=scope.groups.map(g=>g.jid);
-  let newlyAdded=0, alreadySaved=0, protectedOwner=0, saveFailures=0;
-  let checked=0,adminGroups=0,found=0,removed=0,removeFailures=0;
-  const savedTargets=[];
-  const purgeIssues=[...scope.issues];
-
-  // Primeiro SALVA todos. A remoção é feita depois, evitando perder o restante
-  // da lista se alguma varredura individual falhar.
-  for(const target of targets){
-    const protectedMessage=await protectedRemovalMessage(conn,from,target,{participants:Array.isArray(groupMembers)?groupMembers:undefined});
-    if(protectedMessage){if(targets.length===1)return reply(protectedMessage);protectedOwner++;continue}
-    try{
-      const existing=getGlobalBlacklistEntry(target);
-      addGlobalBlacklist(target,{reason:"Lista Negra — grupos ADM registrados",by:sender,groupJids:[...new Set([...(existing?.groupJids||[]),...registeredGroupJids])]});
-      if(existing) alreadySaved++; else newlyAdded++;
-      // Confirma persistência antes da fase de remoção.
-      if(getGlobalBlacklistEntry(target)) savedTargets.push(target);
-      else saveFailures++;
-    }catch(e){
-      saveFailures++;
-      console.error("[LISTANEGRAG SAVE]",target,e?.message||e);
-    }
-  }
-
-  // Depois varre/remover cada alvo já persistido.
-  for(const target of savedTargets){
-    try{
-      const purge=await purgeUserFromAdminGroups(conn,target,{announce:true,source:"Lista Negra Global",registeredGroups:scope.groups});
-      checked+=Number(purge.checked||0);
-      adminGroups+=Number(purge.adminGroups||0);
-      found+=Number(purge.found||0);
-      removed+=Number(purge.removed||0);
-      removeFailures+=Number(purge.failures||0);
-      if(purge.discoveryFailed)purgeIssues.push("Não foi possível obter a lista atual de grupos; nenhuma varredura iniciada.");
-      if(purge.issues)purgeIssues.push(purge.issues);
-    }catch(e){
-      removeFailures++;
-      console.error("[LISTANEGRAG PURGE]",target,e?.message||e);
-    }
-  }
-
-  // Para lote, resposta curta como solicitado.
-  if(targets.length>1){
-    return reply(
-      `🖤🌐 *${savedTargets.length} números adicionados na lista negra global*\n\n` +
-      `💾 Salvos para remoção automática: *${savedTargets.length}*\n🏯 Grupos ADM registrados nesta execução: *${scope.groups.length}*\n` +
-      (alreadySaved?`ℹ️ Já estavam salvos: *${alreadySaved}*\n`:"") +
-      (protectedOwner?`🛡️ Dono protegido: *${protectedOwner}*\n`:"") +
-      (invalid.length?`⚠️ Entradas inválidas ignoradas: *${invalid.length}*\n`:"") +
-      (saveFailures?`❌ Falhas ao salvar: *${saveFailures}*\n`:"") +
-      `🔨 Removidos agora: *${removed}*` + (purgeIssues.length?"\n\n"+[...new Set(purgeIssues)].join("\n\n"):"")
-    );
-  }
-
-  const target=savedTargets[0];
-  if(!target)return reply("⚠️ O número não pôde ser salvo na lista negra global.");
-  return conn.sendMessage(from,{
-    text:`🖤🌐 *LISTA NEGRA GLOBAL • VARREDURA*\n\n👤 @${target.split("@")[0]} salvo na Lista Negra Global.\n🏯 Grupos ADM registrados nesta execução: *${scope.groups.length}*\n🌐 Grupos verificados: *${checked}*\n🛡️ Kobayashi ADM: *${adminGroups}*\n👤 Encontrado: *${found}*\n🔨 Removido: *${removed}*\n⚠️ Falhas: *${removeFailures}*${purgeIssues.length?"\n\n"+[...new Set(purgeIssues)].slice(0,10).map(x=>"• "+x).join("\n"):""}\n\n♻️ Reentrada bloqueada nos grupos registrados. Novos grupos exigem executar o comando novamente.`,
-    mentions:[target]
-  },{quoted:info});
+ if(!SoDonoPrincipal)return reply("👑 Apenas o dono principal pode gerenciar a lista negra global.");
+ const mentioned=getTargetFromMessage(info,null);
+ const input=fullCommandText.replace(/^\S+\s*/,"");
+ const {targets,invalid}=parseBlacklistTargets(input,mentioned);
+ if(!targets.length)return reply(`🖤 Lista negra global: ${listGlobalBlacklist().length} registros.\nUse ${prefix}listanegrag +5511999999999\nPode colar números por linha, separados por vírgulas ou com +DDI. Também aceita menção/resposta.\nAlcance: grupos atuais em que a Kobayashi é ADM.`);
+ try{
+  const scope=await discoverBlacklistGroups(conn);
+  if(!scope.groups.length)return reply("Nenhum grupo com ADM confirmado. Nada foi salvo.\n"+scope.issues.join("\n"));
+  const saved=await registerBlacklistTargets(conn,{group:from,targets,scope:scope.groups,by:sender,participants:Array.isArray(groupMembers)?groupMembers:[]});
+  await reply(`💾 ${saved.saved.length} número(s) salvos no autoban global. Iniciando remoção em ${scope.groups.length} grupo(s) ADM…`);
+  const rows=saved.saved.length?await purgeBlacklistTargets(conn,saved.saved,scope.groups,{protectedIdentity:isMainOwnerJid}):[];
+  const issues=[...scope.issues,formatPurgeIssues(rows)].filter(Boolean);
+  return reply(`🖤 *LISTA NEGRA GLOBAL*\n\n💾 Salvos: ${saved.saved.length}\n🛡️ Protegidos: ${saved.protectedTargets.length}\n🏯 Grupos ADM registrados: ${scope.groups.length}\n🔨 Removidos: ${rows.filter(r=>r.status==="removed").length}\n⚠️ Entradas inválidas: ${invalid.length}\n\nReentrada bloqueada nos grupos registrados. Novos grupos exigem executar novamente.`+(issues.length?"\n\n"+issues.join("\n\n"):""));
+ }catch(error){console.error("[LISTANEGRAG]",error.message);return reply("❌ Não consegui concluir: "+error.message+"\nSe o cadastro foi confirmado antes da falha, ele permanece salvo.");}
 }
 break;
 
@@ -10926,7 +10700,7 @@ case "cita": {
       return Buffer.concat(chunks);
     };
     const payload=await buildCitaPayload(info,q,participantes,download);
-    return await conn.sendMessage(from,payload);
+    return await sendCitaPayload(conn,from,payload);
   } catch(error) {
     console.error("[CITA]",error.message);
     return reply(`❌ Não consegui reenviar o conteúdo.\nUse ${prefix}cita seu texto, envie uma mídia com ${prefix}cita na legenda ou responda à mensagem com ${prefix}cita.\nSe a mídia expirou, envie novamente.`);
@@ -11590,87 +11364,16 @@ break;
 
 case "listanegra":
 case "blacklist": {
-  if (!isGroup) return reply(mess.onlyGroup());
-  if (!isGroupAdmins) return reply(mess.onlyAdmins());
-
-  // Sem argumentos: explica o novo modo direto.
-  if (!args.length && !getTargetFromMessage(info, null)) {
-    const list = getBlacklist(from);
-    const preview = list.length
-      ? `\n📋 *Atualmente bloqueados (${list.length}):*\n${list.slice(0,30).map((jid,i)=>`${i+1}. @${jid.split("@")[0]}`).join("\n")}`
-      : "\n📋 Nenhum número bloqueado neste grupo.";
-
-    return conn.sendMessage(from, {
-      text:
-        `╭━━〔 ⛔ *LISTA NEGRA* 〕━━╮\n` +
-        `╰━━━━━━━━━━━━━━━━━━╯\n\n` +
-        `📌 *Como usar:*\n` +
-        `• ${prefix}listanegra +5511999999999\n` +
-        `• ${prefix}listanegra +5511999999999 +5521988888888 +5531977777777\n\n` +
-        `✅ Não precisa mais usar *add*.\n` +
-        `🐉 Ao enviar um ou vários números, eles são adicionados imediatamente.\n` +
-        `🏯 O bloqueio vale somente para este grupo.\n💡 Também funciona marcando/respondendo um membro.` +
-        preview,
-      mentions:list.slice(0,30)
-    }, {quoted:info});
-  }
-
-  const mentioned = getTargetFromMessage(info, null);
-  const raw = args.join(" ");
-  const numbers = (raw.match(/\+?\d[\d().\-\s]{8,}\d/g) || [])
-    .flatMap(chunk => {
-      // Permite vários números separados por vírgula, quebra de linha ou espaço antes de novo +55.
-      return chunk.split(/(?=\+\d{10,})/g);
-    })
-    .map(n => n.replace(/\D/g,""))
-    .filter((n,i,a)=>n.length>=10 && a.indexOf(n)===i);
-
-  const targets = [];
-  if (mentioned) targets.push(mentioned);
-  for (const n of numbers) {
-    const jid=inputToJid(n);
-    if (jid && !targets.includes(jid)) targets.push(jid);
-  }
-
-  if (!targets.length) {
-    return reply(
-      `❌ Não encontrei nenhum número válido.\n\n` +
-      `Exemplo:\n*${prefix}listanegra +5511999999999 +5521988888888*`
-    );
-  }
-
-  const added=[], skipped=[], failed=[];
-  const removalIssues=[];
-  let removedCount=0;
-  for (const target of targets) {
-    if (await protectedRemovalMessage(conn,from,target,{participants:Array.isArray(groupMembers)?groupMembers:undefined})) { skipped.push(target); continue; }
-    try {
-      if (!getBlacklist(from).includes(target)) {
-        addBlacklist(from,target,sender,"Adicionado manualmente");
-        addPunishmentHistory(from,target,{type:"blacklist_add",reason:"Adicionado manualmente",by:sender,source:"manual"});
-        addAdminLog(from,{type:"blacklist_add",actor:sender,target,detail:"Adicionado manualmente"});
-        added.push(target);
-      } else skipped.push(target);
-
-      const rows=await purgeGroups(conn,target,[{jid:from,name:groupName}],{resolvePN:id=>getPNForJid(conn,id,id),protectedIdentity:isMainOwnerJid});
-      removedCount+=rows.filter(r=>r.status==="removed").length;
-      const issue=formatPurgeIssues(rows);if(issue)removalIssues.push(issue);
-    } catch(e) {
-      console.error("[LISTANEGRA MULTI]",target,e?.message||e);
-      failed.push(target);
-    }
-  }
-
-  const mentions=[...added,...skipped,...failed];
-  return conn.sendMessage(from,{
-    text:
-      `⛔🐉 *LISTA NEGRA ATUALIZADA*\n\n` +
-      `✅ Adicionados: *${added.length}*\n` +
-      `ℹ️ Já cadastrados/protegidos: *${skipped.length}*\n` +
-      `❌ Falhas ao registrar: *${failed.length}*\n🏯 Grupo: *${groupName}*\n🔨 Removidos neste grupo: *${removedCount}*\n\n` +
-      (added.length ? `👤 ${added.map(j=>`@${j.split("@")[0]}`).join("\n👤 ")}` : "") + (removalIssues.length?"\n\n"+[...new Set(removalIssues)].join("\n"):""),
-    mentions
-  },{quoted:info});
+ if(!isGroup)return reply(mess.onlyGroup());
+ if(!await currentGroupAdmin(conn,from,[sender,senderLid,rawSender].filter(Boolean)))return reply(mess.onlyAdmins());
+ const {targets,invalid}=parseBlacklistTargets(fullCommandText.replace(/^\S+\s*/,""),getTargetFromMessage(info,null));
+ if(!targets.length)return reply(`🖤 Lista negra deste grupo: ${getBlacklist(from).length} registros.\nUse ${prefix}listanegra +5511999999999 ou mencione/responda o membro. Pode colar números por linha.`);
+ try{
+  const saved=await registerBlacklistTargets(conn,{group:from,targets,by:sender,participants:Array.isArray(groupMembers)?groupMembers:[]});
+  await reply(`💾 ${saved.saved.length} número(s) salvos no autoban deste grupo. Iniciando remoção…`);
+  const rows=saved.saved.length?await purgeBlacklistTargets(conn,saved.saved,[{jid:from,name:groupName}],{protectedIdentity:isMainOwnerJid}):[];
+  return reply(`🖤 *LISTA NEGRA DO GRUPO*\n💾 Salvos: ${saved.saved.length}\n🛡️ Protegidos: ${saved.protectedTargets.length}\n⚠️ Entradas inválidas: ${invalid.length}\n🔨 Removidos: ${rows.filter(r=>r.status==="removed").length}\nReentrada bloqueada neste grupo.`+(formatPurgeIssues(rows)?"\n\n"+formatPurgeIssues(rows):""));
+ }catch(error){console.error("[LISTANEGRA]",error.message);return reply("❌ Não consegui concluir: "+error.message+"\nSe o cadastro foi confirmado antes da falha, ele permanece salvo.");}
 }
 break;
 

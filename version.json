@@ -1,5 +1,5 @@
 {
-  "version": "5.5.8",
-  "name": "Kobayashi Bot v5.5.8 — Links em texto",
-  "update": "/linkgp e parceria diária enviam links normais em texto; agendamento e menções preservados."
+  "version": "5.6.0",
+  "name": "Kobayashi Bot v5.6.0 — Autoban e Cita",
+  "update": "Listas negras com gravação em lote e autoban PN/LID; /cita sem texto visível e cópia de enquetes com menção a todos."
 }

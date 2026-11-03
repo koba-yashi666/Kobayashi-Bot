@@ -1,0 +1,15 @@
+KOBAYASHI BOT v5.6.0
+
+/listanegra: salva e aplica somente no grupo atual.
+/listanegrag: salva para os grupos atuais em que a Kobayashi é ADM e aplica nesses grupos.
+Números podem ser enviados em linhas separadas; também aceita menção ou resposta.
+Os cadastros são salvos antes da varredura e usados no autoban em reentradas.
+Falhas de consulta/remoção mostram o nome do grupo e a condição de ADM.
+
+/cita: marca todos sem texto visível.
+/cita texto: envia texto marcando todos.
+Respondendo a uma mídia: reenvia com menções.
+Respondendo a uma enquete: cria uma nova com pergunta e opções, marcando todos. Votos anteriores não são transferidos.
+
+Envie pelo Termux usando ENVIAR-GITHUB-v5.6.0.sh; depois sincronize e reinicie na hospedagem.
+Sessão, banco de dados e configurações não são incluídos no pacote.

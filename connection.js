@@ -1,3 +1,4 @@
+import {installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { ensureLevelSummaryRuntime } from "./lib/features/social/levelSummary.js";
 import { departureNoticeAllowed } from "./lib/features/group/departureNotice.js";
 import { installCommunityRuntime } from "./lib/features/community/runtime.js";
@@ -143,6 +144,7 @@ async function startConnect() {
     });
 
     installRemovalProtection(conn);
+    installBlacklistRuntime(conn);
     installCommunityRuntime(conn);
     bindGroupCache(conn);
 

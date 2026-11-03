@@ -42,7 +42,7 @@ try {
   const localCase=source.slice(source.indexOf('case "listanegra":'),source.indexOf('case "entrada_membro":'));
   assert(!localCase.includes('purgeUserFromAdminGroups'));
   assert(localCase.includes('[{jid:from,name:groupName}]'));
-  assert(source.includes('isGloballyBlacklisted(jid, groupJid)'));
-  assert(source.includes('registeredGroups:scope.groups'));
+  assert(source.includes('installBlacklistRuntime(conn)'));
+  assert(source.includes('scope:scope.groups'));
   console.log('✅ Lista Negra: alcance local, registro somente em grupos ADM, reentrada por grupo e falha de consulta sem ampliação.');
 } finally {process.chdir(old);fs.rmSync(temp,{recursive:true,force:true});}
