@@ -3082,6 +3082,14 @@ if (isGroup && sender && socialV5.v5SocialEnabled(from)) {
   }
 }
 
+// Consulta pública do prefixo, sem transformar a conversa em comando de dono.
+const prefixQueryText = info.message?.conversation ?? info.message?.extendedTextMessage?.text ?? '';
+if (!isCmd && !info.key.fromMe && /^prefixo[!?]?$/.test(String(prefixQueryText).trim().toLowerCase())) {
+  const currentPrefix = String(readSettingsFile().prefix || prefix);
+  await reply(`🐉 Meu prefixo é: *${currentPrefix}*\nUse *${currentPrefix}menu* para ver os comandos.`);
+  continue;
+}
+
 if (isCmd) {
   if (OWNER_COMMANDS.has(command) && !SoDonoPrincipal) {
     await reply("👑🐉 Este comando é exclusivo do dono do bot.");

@@ -1,5 +1,5 @@
 {
-  "version": "5.6.0",
-  "name": "Kobayashi Bot v5.6.0 — Autoban e Cita",
-  "update": "Listas negras com gravação em lote e autoban PN/LID; /cita sem texto visível e cópia de enquetes com menção a todos."
+  "version": "5.6.1",
+  "name": "Kobayashi Bot v5.6.1 — Consulta de prefixo",
+  "update": "Responde com o prefixo atual quando alguém escreve prefixo no grupo ou privado."
 }
