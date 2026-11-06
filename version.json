@@ -1,5 +1,5 @@
 {
-  "version": "5.6.6",
-  "name": "Kobayashi Bot v5.6.6 — Modelos Gemini",
-  "update": "/ia modelos consulta nomes listados pelo Google; modelo configurável em settings/gemini.json sem terminal."
+  "version": "5.6.7",
+  "name": "Kobayashi Bot v5.6.7 — IA sem cota diária local",
+  "update": "Removidas cotas diárias locais da IA, mantendo intervalos, permissões e tratamento das cotas do Google."
 }

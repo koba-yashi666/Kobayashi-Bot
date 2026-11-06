@@ -21,7 +21,7 @@ try{
  const before=calls;await bot.handle(ctx);assert.equal(calls,before);admin=true;await bot.handle(ctx);assert.equal(calls,before+1);assert(!bot.status(ctx.from));assert(replies.at(-1).includes('HTTP 403'));
  await bot.handle(ctx);assert.equal(calls,before+1);
  for(let i=0;i<4;i++){now+=61000;await bot.handle(ctx);}assert.equal(calls,before+5);
- now+=61000;await createGeminiChat(settings).handle(ctx);assert.equal(calls,before+5);assert(replies.at(-1).includes('diário'));
- assert(!replies.join('\n').includes(secret));assert.equal(JSON.parse(fs.readFileSync(database)).usage.tests,5);
- console.log('✅ Diagnóstico: erros sem segredo, sucesso, rede, JSON, ADM obrigatório, teste com IA OFF, intervalo e cota persistente.');
+ now+=61000;await createGeminiChat(settings).handle(ctx);assert.equal(calls,before+6);assert(replies.at(-1).includes('HTTP 403'));
+ assert(!replies.join('\n').includes(secret));assert.equal(JSON.parse(fs.readFileSync(database)).usage.tests,6);
+ console.log('✅ Diagnóstico: erros sem segredo, sucesso, rede, JSON, ADM obrigatório, teste com IA OFF, intervalo e ausência de cota diária.');
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
