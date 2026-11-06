@@ -1,3 +1,4 @@
+import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
 import {blacklistState, enforceBlacklist, installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { sendInviteLink, configurePartnership } from "./lib/features/group/partnershipLinks.js";
@@ -2668,7 +2669,7 @@ ensureRentalResponsibleRuntime(conn);
 
 // 🐉 KOBAYASHI RENTAL SYSTEM • v2.0.29
 // ==========================================
-if (isCmd && command && !SoDonoPrincipal) {
+if (((isCmd && command) || kobaQuestion(info.message?.conversation ?? info.message?.extendedTextMessage?.text)) && !SoDonoPrincipal) {
   const rentalSettings = getRentalSettings();
   const rentalSafeCommands = new Set([
     "planos", "plans", "plano", "ver_aluguel", "ver_alugel", "aluguel_info",
@@ -3081,6 +3082,9 @@ if (isGroup && sender && socialV5.v5SocialEnabled(from)) {
     }, { quoted: info }).catch(() => {});
   }
 }
+
+// IA por chamada explícita: não envia o restante das mensagens do grupo.
+if (await geminiChat.handle({conn,from,sender:senderLid||sender,text:info.message?.conversation ?? info.message?.extendedTextMessage?.text ?? '',command,args:q,isGroup,fromMe:info.key.fromMe,reply,confirmAdmin:()=>currentGroupAdmin(conn,from,[sender,senderLid,rawSender].filter(Boolean))})) continue;
 
 // Consulta pública do prefixo, sem transformar a conversa em comando de dono.
 const prefixQueryText = info.message?.conversation ?? info.message?.extendedTextMessage?.text ?? '';
@@ -9544,6 +9548,11 @@ break;
 case "mini-jogos":
 case "minijogos": {
   await sendMiniGamesMenu({ conn, jid: from, quoted: info, buttonsEnabled: menuButtonsEnabled() }, { generateWAMessageFromContent });
+}
+break;
+
+case "ia": {
+  return reply("🐉 Use /ia on, /ia off ou /ia status dentro do grupo.");
 }
 break;
 

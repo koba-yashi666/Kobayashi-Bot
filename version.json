@@ -1,5 +1,5 @@
 {
-  "version": "5.6.2",
-  "name": "Kobayashi Bot v5.6.2 — Foto do Safada",
-  "update": "Nova imagem local no comando /safada, preservando porcentagem e menções."
+  "version": "5.6.3",
+  "name": "Kobayashi Bot v5.6.3 — Gemini",
+  "update": "Conversa com Gemini ao chamar Koba, com /ia on/off por grupo, memória curta e limites de uso."
 }
