@@ -1,5 +1,5 @@
 {
-  "version": "5.6.1",
-  "name": "Kobayashi Bot v5.6.1 — Consulta de prefixo",
-  "update": "Responde com o prefixo atual quando alguém escreve prefixo no grupo ou privado."
+  "version": "5.6.2",
+  "name": "Kobayashi Bot v5.6.2 — Foto do Safada",
+  "update": "Nova imagem local no comando /safada, preservando porcentagem e menções."
 }
