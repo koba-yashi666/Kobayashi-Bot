@@ -1,44 +1,30 @@
-KOBAYASHI BOT v5.6.3 — GEMINI
+KOBAYASHI BOT v5.6.4 — CAMINHO DA CHAVE GEMINI
 
-1. Crie uma chave no Google AI Studio: https://aistudio.google.com/apikey
-2. Na HOSPEDAGEM onde o bot roda, adicione uma variável de ambiente:
-   GEMINI_API_KEY = sua chave
-   Não coloque a chave em mensagens de WhatsApp, no GitHub ou neste ZIP.
-3. Modelo padrão: gemini-2.5-flash-lite.
-   Opcional: GEMINI_MODEL = identificador de outro modelo Gemini disponível no seu projeto.
-4. Reinicie o bot na hospedagem.
-5. Dentro do grupo, um ADM usa /ia on. Para desligar: /ia off.
-   /ia status consulta o estado (somente ADM).
-6. Membros podem escrever: Koba, como você está?
-   Também aceita: koba me conta uma piada
+Na HOSPEDAGEM, dentro da pasta principal do bot:
+settings/gemini.json
 
-Começa DESATIVADA em todos os grupos. Nesta versão é exclusiva de grupos.
-Só chamadas começando com Koba são enviadas ao Gemini. Comandos conhecidos
-como Koba menu continuam sendo comandos normais; respostas sem chamar Koba
-não iniciam conversa com a IA. Não envia fotos, áudios ou o restante do chat.
-Memória em RAM: últimas 2 trocas, separadas por grupo e pessoa, expira em
-10 minutos e desaparece ao reiniciar ou desligar a IA no grupo.
+O bot cria esse arquivo automaticamente na primeira inicialização,
+sem substituir um arquivo já existente. Abra-o no gerenciador da hospedagem:
 
-Limites do bot: 100 tentativas/dia no total, 30 por grupo e 10 por pessoa
-em cada grupo; dia de Brasília. Intervalo de 15s por grupo e até 2 chamadas
-simultâneas no bot. Tentativas com falha também contam. As cotas do Google
-podem ser menores; em HTTP 429 pausa 1 minuto, sem repetir a chamada.
-Nenhuma resposta automática é enviada só porque alguém falou bom dia:
-é necessário chamar Koba. /ia off também descarta respostas em andamento.
-A IA apenas conversa: não ganha acesso a comandos administrativos.
+{
+  "apiKey": "COLE_SUA_CHAVE_AQUI"
+}
 
-GRATUIDADE E DADOS
-Use um modelo com faixa gratuita disponível no seu projeto do AI Studio.
-Este código não ativa faturamento, não compra créditos e não muda de modelo
-sozinho. Se o projeto já tiver faturamento ativo, chamadas podem ser cobradas
-conforme o Google. Os limites locais não garantem gratuidade do provedor.
-https://ai.google.dev/gemini-api/docs/pricing
-As perguntas e o histórico curto enviado são processados pelo Google.
-Na faixa gratuita, os termos do Google podem permitir uso dos dados para
-melhorar produtos; informe os membros e evite enviar informações privadas.
+Substitua apenas COLE_SUA_CHAVE_AQUI pela sua chave, mantendo aspas e chaves.
+Salve, reinicie o bot e use /ia on dentro do grupo (somente ADM).
+Teste: Koba, como você está?
+Para desligar: /ia off.
 
-ATUALIZAÇÃO
-Use ENVIAR-GITHUB-v5.6.3.sh no Termux apenas para enviar os arquivos ao GitHub.
-Depois sincronize e reinicie na hospedagem. Não é necessário instalar SDK novo.
-Configuração/cotas ficam em files/database/gemini-chat.json, criado pelo bot.
-O banco e sua chave não estão incluídos na atualização.
+Crie a chave em https://aistudio.google.com/apikey
+Não envie o arquivo preenchido ao GitHub, WhatsApp ou para outras pessoas.
+O envio desta atualização não inclui settings/gemini.json e acrescenta
+esse caminho ao .gitignore do repositório. A chave existente é preservada.
+Se GEMINI_API_KEY estiver definida nas variáveis da hospedagem, tem prioridade
+sobre o arquivo. Edite na HOSPEDAGEM, onde o bot roda, e não no Termux.
+
+O modelo padrão continua gemini-2.5-flash-lite (GEMINI_MODEL pode alterar).
+A disponibilidade e a gratuidade dependem do projeto e das cotas do Google.
+A pergunta e até 2 trocas recentes da pessoa no grupo são enviadas ao Google.
+Memória expira após 10 minutos, /ia off ou reinício.
+Limites locais: 100 tentativas/dia no bot, 30/grupo e 10/pessoa por grupo,
+intervalo de 15 segundos por grupo. Falhas também contam como tentativas.

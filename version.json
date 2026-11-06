@@ -1,5 +1,5 @@
 {
-  "version": "5.6.3",
-  "name": "Kobayashi Bot v5.6.3 — Gemini",
-  "update": "Conversa com Gemini ao chamar Koba, com /ia on/off por grupo, memória curta e limites de uso."
+  "version": "5.6.4",
+  "name": "Kobayashi Bot v5.6.4 — Chave Gemini em arquivo",
+  "update": "Configure apiKey em settings/gemini.json na hospedagem. Arquivo privado criado sem sobrescrever chaves existentes."
 }
