@@ -1,5 +1,5 @@
 {
-  "version": "5.6.4",
-  "name": "Kobayashi Bot v5.6.4 — Chave Gemini em arquivo",
-  "update": "Configure apiKey em settings/gemini.json na hospedagem. Arquivo privado criado sem sobrescrever chaves existentes."
+  "version": "5.6.5",
+  "name": "Kobayashi Bot v5.6.5 — Diagnóstico Gemini",
+  "update": "/ia teste verifica acesso ao Gemini pelo WhatsApp, com código HTTP e orientações sem expor a chave."
 }

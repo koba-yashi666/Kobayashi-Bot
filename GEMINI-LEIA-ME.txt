@@ -28,3 +28,10 @@ A pergunta e até 2 trocas recentes da pessoa no grupo são enviadas ao Google.
 Memória expira após 10 minutos, /ia off ou reinício.
 Limites locais: 100 tentativas/dia no bot, 30/grupo e 10/pessoa por grupo,
 intervalo de 15 segundos por grupo. Falhas também contam como tentativas.
+
+DIAGNÓSTICO SEM TERMINAL (v5.6.5)
+Dentro do grupo, um ADM usa /ia teste. Funciona mesmo com /ia off.
+Mostra a origem da chave, código HTTP e orientação de correção, sem exibir
+a chave nem a mensagem bruta do Google. Usa uma chamada curta de teste.
+Limite: 5 testes por dia no bot, intervalo global de 1 minuto.
+As tentativas também contam no limite diário de 100 chamadas do bot.
