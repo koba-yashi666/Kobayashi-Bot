@@ -35,3 +35,20 @@ Mostra a origem da chave, código HTTP e orientação de correção, sem exibir
 a chave nem a mensagem bruta do Google. Usa uma chamada curta de teste.
 Limite: 5 testes por dia no bot, intervalo global de 1 minuto.
 As tentativas também contam no limite diário de 100 chamadas do bot.
+
+MODELO CONFIGURÁVEL — v5.6.6
+Se o diagnóstico retornar HTTP 404, use /ia modelos dentro do grupo.
+Um ADM recebe nomes listados pelo Google com sua chave (sem expor a chave).
+É uma consulta, não altera seu modelo nem ativa faturamento.
+No gerenciador de arquivos da hospedagem, edite settings/gemini.json:
+{
+  "apiKey": "SUA_CHAVE",
+  "model": "NOME_EXATO_DA_LISTA"
+}
+O modelo é lido nas próximas chamadas, sem exigir terminal ou reinício.
+Depois de 1 minuto, use /ia teste. A listagem compartilha o limite de 5 testes
+por dia e intervalo de 1 minuto. Lista até 20 modelos de conversa.
+GEMINI_MODEL nas variáveis continua tendo prioridade sobre o campo model.
+Modelos listados podem ter restrições de acesso, cota ou cobrança; consulte
+o AI Studio. A lista não confirma faixa gratuita ou geração bem-sucedida.
+Não substitua sua chave ao acrescentar o campo model.

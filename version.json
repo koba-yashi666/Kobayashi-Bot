@@ -1,5 +1,5 @@
 {
-  "version": "5.6.5",
-  "name": "Kobayashi Bot v5.6.5 — Diagnóstico Gemini",
-  "update": "/ia teste verifica acesso ao Gemini pelo WhatsApp, com código HTTP e orientações sem expor a chave."
+  "version": "5.6.6",
+  "name": "Kobayashi Bot v5.6.6 — Modelos Gemini",
+  "update": "/ia modelos consulta nomes listados pelo Google; modelo configurável em settings/gemini.json sem terminal."
 }
