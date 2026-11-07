@@ -1,0 +1,18 @@
+KOBAYASHI BOT v5.6.8 — X9: RECUSAS AGRUPADAS
+
+Com /x9 on, a primeira recusa abre uma janela fixa de 15 segundos por
+ADM e grupo. Todas as recusas recebidas nessa janela saem num único aviso:
+
+ADM @fulano recusou a solicitação de @membro.
+ADM @fulano recusou 3 solicitações de @membro1, @membro2, @membro3.
+
+Todos os alvos são incluídos, sem limitar a 3 ou 5. Duplicatas do mesmo
+membro são contadas uma vez. ADMs diferentes têm avisos separados.
+Novas recusas após os 15 segundos iniciam outra janela. Não é necessário
+executar /x9 on novamente se já está ligado. /x9 off cancela avisos pendentes.
+As aceitações continuam resumidas por quantidade; demais eventos preservados.
+A identificação de quem recusou depende de o WhatsApp fornecer o autor.
+Se ausente, o aviso informa ADM não informado, sem inventar responsável.
+
+Envie pelo Termux com ENVIAR-GITHUB-v5.6.8.sh; sincronize e reinicie na
+hospedagem. Bancos, sessão e chave Gemini não são incluídos no pacote.

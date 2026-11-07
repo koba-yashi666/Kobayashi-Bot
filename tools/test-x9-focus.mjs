@@ -21,6 +21,6 @@ try{
  const notices=[];
  for(let i=0;i<6;i++){x.recordX9Request({id:group,participant:`batch${i}@lid`,participantPn:`551199999000${i}@s.whatsapp.net`,action:'created'});const rows=x.recordX9Participants({id:group,participants:[{id:`batch${i}@lid`,phoneNumber:`551199999000${i}@s.whatsapp.net`}],author:'bot@lid',action:'add'});notices.push(conn.kobayashiX9Notify(group,rows));x.recordX9Decision(group,[`551199999000${i}@s.whatsapp.net`],'realadm@lid','approve');}
  await Promise.all(notices);assert.equal(sent.at(-1).text,'✅ ADM @realadm aceitou 6 membros.');assert.deepEqual(sent.at(-1).mentions,['realadm@lid']);assert(!sent.at(-1).text.includes('batch'));
- const summary=x.summarizeX9Entries([{type:'rejected',target:'a@lid',actor:'adm@lid'},{type:'rejected',target:'b@lid',actor:'adm@lid'}]);assert.equal(summary.text,'❌ ADM @adm recusou 2 membros.');
+ const summary=x.summarizeX9Entries([{type:'rejected',target:'a@lid',actor:'adm@lid'},{type:'rejected',target:'b@lid',actor:'adm@lid'}]);assert.equal(summary.text,'❌ ADM @adm recusou 2 solicitações de @a, @b.');assert.deepEqual(summary.mentions,['adm@lid','a@lid','b@lid']);
  console.log('✅ X9: primeira entrada e saída silenciosas; reentrada, ações ADM e filtragem de histórico/avisos antigos passaram.');
 }finally{process.chdir(old);fs.rmSync(dir,{recursive:true,force:true});}

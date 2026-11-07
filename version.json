@@ -1,5 +1,5 @@
 {
-  "version": "5.6.7",
-  "name": "Kobayashi Bot v5.6.7 — IA sem cota diária local",
-  "update": "Removidas cotas diárias locais da IA, mantendo intervalos, permissões e tratamento das cotas do Google."
+  "version": "5.6.8",
+  "name": "Kobayashi Bot v5.6.8 — X9 recusas agrupadas",
+  "update": "X9 agrupa recusas por ADM e grupo em 15 segundos, incluindo quantidade e menções de todos os alvos."
 }
