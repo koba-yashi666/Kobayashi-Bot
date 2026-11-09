@@ -1,0 +1,51 @@
+KOBAYASHI BOT v5.6.9 — DOWNLOADS COM A YUTA
+
+/pinterest tema — busca e envia uma imagem (primeiro resultado compatível).
+/pinterest video LINK — usa a rota de download do pin.
+/pinterest LINK — também usa a rota de download do pin.
+/youtube LINK — baixa vídeo público do YouTube, inclusive Shorts.
+/tiktok LINK — baixa vídeo público do TikTok.
+/instagram LINK — baixa vídeo/Reel público do Instagram.
+/menubaixar — mostra os comandos.
+
+Usam o token yutaToken já configurado no /play. Nenhum token pessoal está
+incluído neste ZIP. O /play continua usando sua implementação de áudio atual.
+
+Rotas GET informadas nos prints da documentação:
+/api/downloads/pinterest — query
+/api/downloads/pinterest-video — url
+/api/downloads/ytvideo — url
+/api/downloads/tiktok-video — url
+/api/downloads/instagram-video — url
+
+O cliente aceita mídia binária direta ou JSON com links em campos de mídia
+como url, video, image, download, result ou data. Usa o token somente nas
+chamadas à Yuta; links externos de mídia são baixados sem esse cabeçalho.
+Respostas de erro da API não são expostas com credenciais.
+
+Limites: 32 MB por arquivo, 2 downloads simultâneos no bot e intervalo de
+15 segundos por pessoa em cada conversa. Não tem limite diário local.
+Redirecionamentos externos da requisição autenticada e URLs de rede local
+são recusados. Arquivos retornados precisam ter formato de mídia reconhecido.
+
+Pinterest: imagens por tema dependem do resultado da API. GIFs retornados
+pela API são convertidos em MP4 com gifPlayback para animar no WhatsApp.
+Vídeos WEBM também são convertidos em MP4; essas conversões exigem FFmpeg
+na hospedagem. O comando não garante achar GIF por busca de texto nem
+transforma uma imagem estática em animação. Download por link depende de
+a rota Pinterest Vídeo aceitar o tipo de pin enviado.
+
+Links precisam ser HTTPS, das plataformas indicadas. Conteúdo privado,
+removido, indisponível ou protegido por login pode falhar. Instagram nesta
+versão é para vídeos/Reels, não implementa carrossel de fotos ou Stories.
+
+Validação: rotas e parâmetros dos prints, respostas simuladas binárias/JSON,
+permissões, limites, URLs/redirects e conversão real de GIF via FFmpeg.
+Não foi realizada uma chamada real de download à Yuta com o token do usuário.
+Se a API retornar um JSON diferente, o comando informa que não houve mídia
+compatível; não anuncia download como concluído sem enviar o arquivo.
+
+ATUALIZAR
+Use ENVIAR-GITHUB-v5.6.9.sh no Termux apenas para enviar ao GitHub.
+Depois sincronize e reinicie na hospedagem. Configurações, sessão, bancos
+locais e chave Gemini não são incluídos e não são substituídos.

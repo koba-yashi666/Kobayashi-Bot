@@ -1,3 +1,4 @@
+import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
 import {blacklistState, enforceBlacklist, installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
@@ -5556,6 +5557,19 @@ case "play": {
 }
 break;
 
+
+case "pinterest":
+case "youtube":
+case "tiktok":
+case "instagram": {
+  return handleDownloadCommand({command,q,prefix,sender,from,conn,info,reply,token:String(readSettingsFile().yutaToken||'').trim(),clientKey:YUTA_CLIENT_KEY});
+}
+break;
+
+case "menubaixar": {
+  return reply(`╭─ 🐉🎬 DOWNLOADS ─╮\n\n📌 ${prefix}pinterest tema\n🎞️ ${prefix}pinterest video LINK\n▶️ ${prefix}youtube LINK\n🎵 ${prefix}tiktok LINK\n📷 ${prefix}instagram LINK\n🎧 ${prefix}play música ou link\n\n📦 Até 32 MB por arquivo.\n╰─ ☕ Kobayashi Bot ─╯`);
+}
+break;
 
 case "statusbot":
 case "diagnostico":
