@@ -1,0 +1,48 @@
+KOBAYASHI BOT v5.6.10 — CHAVE LOCAL DE ATIVAÇÃO
+
+COMANDOS NO PRIVADO DO BOT
+/gerarlicenca Meu bot
+/ativarlicenca CODIGO_RECEBIDO
+/licenca
+/update
+
+Geração e revogação são exclusivas do criador, incluindo a identidade
+alternativa informada nesta conversa. O autor deve também ser reconhecido
+como dono principal. Menção, resposta e encaminhamento não concedem acesso.
+Para revogar uma chave local desta instalação: /revogarlicenca CODIGO.
+
+A chave é aleatória (192 bits), exibida no privado, e só seu hash fica no
+registro local. Guarde a chave recebida: não é possível recuperá-la pelo hash.
+Vale para a instalação que a gerou e seu dono configurado. Outra instalação
+precisa emitir sua própria chave autorizada; não é uma licença portátil.
+A licença local é permanente até revogação ou mudança do dono/instalação.
+Não usa servidor externo; não oferece controle central de todas as cópias.
+Arquivos em files/license devem ser preservados e não enviados ao GitHub.
+Licenças antigas pelo servidor continuam com o fluxo existente.
+
+PRIMEIRA CORREÇÃO — SE /update ESTÁ BLOQUEADO NA v5.6.8
+1. Envie a v5.6.10 ao GitHub usando o comando do Termux informado.
+2. No ZIP desta atualização há RESGATE-HOSPEDAGEM.zip.
+3. Pelo gerenciador da hospedagem, faça backup dos arquivos abaixo e desligue
+   o bot. Envie SOMENTE RESGATE-HOSPEDAGEM.zip à pasta principal do bot e
+   extraia, permitindo substituir os 5 arquivos de código.
+4. O resgate contém:
+   index.js (compatível com v5.6.8, com os comandos de licença)
+   updater.js
+   lib/features/license/licenseManager.js
+   lib/features/license/localLicense.js
+   lib/features/access/ownerAccess.js
+5. Não substitui version.json: a versão antiga continua correta até a
+   atualização completa. Não substitui configurações, chaves, sessão ou banco.
+6. Ligue o bot. No PRIVADO, usando sua conta autorizada:
+   /gerarlicenca Meu bot
+   /ativarlicenca CODIGO_RECEBIDO
+   /licenca
+   /update
+7. O /update agora pode baixar a versão completa do GitHub. Ao concluir,
+   reinicie pelo painel e confira a versão instalada.
+
+Se o dono configurado em settings/settings.json for alterado depois,
+a licença local precisará ser reemitida/ativada pelo criador.
+O atualizador também passa a proteger settings/gemini.json de sobrescrita.
+Os comandos de dono permanecem com suas verificações de acesso.

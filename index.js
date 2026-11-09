@@ -1,3 +1,4 @@
+import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
@@ -115,7 +116,7 @@ import { resolveV3Alias, runV3Standalone, processV3PassiveMessage, getV3Help } f
 
 import { getGlobalManagementHelp, runGlobalManagementCommand, trackGlobalUsage } from "./lib/features/owner/globalManagement.js";
 import { getBanMessageConfig, setBanMessageEnabled, listBanMessages, addBanMessage, removeBanMessage, matchBanMessage } from "./lib/features/moderation/banMessage.js";
-import { activateLicense, validateLicense, getEffectiveLicense, getLicenseConfig, maskLicenseKey } from "./lib/features/license/licenseManager.js";
+import { activateLicense, validateLicense, getEffectiveLicense, getLicenseConfig, maskLicenseKey, getInstallationId } from "./lib/features/license/licenseManager.js";
 import { createLicense, listLicenses, getLicense, blockLicense, reactivateLicense, revokeInstallation } from "./lib/features/license/licenseAdmin.js";
 import { DUNGEONS, RECIPES, MATERIALS, profile as dungeonProfile, dungeon as runDungeon, craft as craftDungeon, rest as restDungeon, fmt as fmtMaterials, needs as fmtNeeds } from "./lib/features/rpg/dungeonCraft.js";
 
@@ -10373,7 +10374,7 @@ case "license": {
   }
 
   const cfg = getLicenseConfig();
-  const cacheText = license.mode === "creator"
+  const cacheText = ["creator","local"].includes(license.mode)
     ? "não necessário"
     : (license.cached ? "válido ✅" : "pendente/expirado ⚠️");
 
@@ -10392,10 +10393,28 @@ case "license": {
 }
 break;
 
+case "gerarlicenca":
+case "licencagerar": {
+  if(!SoDonoPrincipal||!await canIssueLocalLicense(conn,ownerIdentityCandidates))return reply("👑 Somente o criador pode gerar chaves de ativação.");
+  if(isGroup)return reply("🔐 Use este comando no privado do bot para não expor a chave.");
+  if(!q)return reply(`Use ${prefix}gerarlicenca Nome. A chave vale somente para esta instalação e o dono configurado.`);
+  try{const result=await issueLocalLicense({conn,identities:ownerIdentityCandidates,installationId:getInstallationId(),customer:q});return reply(`🔑 *CHAVE DE ATIVAÇÃO GERADA*\n\n${result.key}\n\nVálida somente para esta instalação e o dono configurado.\nAtive no privado: ${prefix}ativarlicenca ${result.key}\nGuarde a chave: ela não fica salva em texto no registro.`);}catch{return reply("❌ Não consegui gerar a chave local. Confira o dono configurado e o registro de licenças na hospedagem.");}
+}
+break;
+
+case "revogarlicenca": {
+  if(!SoDonoPrincipal||!await canIssueLocalLicense(conn,ownerIdentityCandidates))return reply("👑 Somente o criador pode revogar chaves locais.");
+  if(isGroup)return reply("🔐 Use a revogação no privado do bot.");
+  if(!isLocalLicenseKey(q))return reply(`Use ${prefix}revogarlicenca CHAVE-LOCAL.`);
+  try{await revokeLocalLicense({conn,identities:ownerIdentityCandidates,key:q});return reply("✅ Chave local revogada. Se estava ativa, as atualizações desta licença foram bloqueadas.");}catch{return reply("❌ Não consegui revogar esta chave local.");}
+}
+break;
+
 case "ativarlicenca":
 case "activatelicense": {
   if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode ativar a licença.");
 
+  if(isGroup)return reply("🔐 Ative sua licença no privado do bot para não expor a chave.");
   const key = String(q || args.join(" ") || "").trim();
   if (!key) {
     return reply(
