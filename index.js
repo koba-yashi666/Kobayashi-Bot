@@ -3027,11 +3027,11 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
   }
 }
 
-// Autosticker: em grupos ativados, qualquer foto sem comando vira figurinha automaticamente.
+// Autosticker: fotos, GIFs e vídeos sem comando; animações usam os primeiros 9.9 segundos.
 if (
   isGroup &&
   !info.key.fromMe &&
-  type === "imageMessage" &&
+  ["imageMessage", "videoMessage"].includes(type) &&
   !isCmd &&
   isAutoStickerEnabled(from)
 ) {
@@ -3039,7 +3039,7 @@ if (
     const mediaBuffer = await downloadMediaMessage(info, "buffer", {});
     const cfg = readSettingsFile();
     const stickerBuffer = await makeSticker(mediaBuffer, {
-      isVideo: false,
+      isVideo: type === "videoMessage" || /^GIF8[79]a$/.test(mediaBuffer.subarray(0, 6).toString("ascii")),
       forceSquare: true,
       metadata: {
         userNick: pushname || sender.split("@")[0],
@@ -5010,13 +5010,13 @@ case "autostk": {
         `      *AUTOSTICKER*\n` +
         `╰──────────────────╯\n\n` +
         `🟢 *Ativado neste grupo.*\n\n` +
-        `🌸 A partir de agora, toda foto enviada sem comando será transformada automaticamente em figurinha.\n\n` +
+        `🌸 Fotos, GIFs e vídeos enviados sem comando viram figurinhas automaticamente. Animações usam até os primeiros 9.9 segundos.\n\n` +
         `🎐 Use *${prefix}autosticker* novamente para desativar.`
       : `╭──────「 🎨 」──────╮\n` +
         `      *AUTOSTICKER*\n` +
         `╰──────────────────╯\n\n` +
         `🔒 *Desativado neste grupo.*\n\n` +
-        `As fotos não serão mais convertidas automaticamente.`
+        `Fotos, GIFs e vídeos não serão mais convertidos automaticamente.`
   );
 }
 break;
