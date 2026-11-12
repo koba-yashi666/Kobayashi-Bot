@@ -53,7 +53,7 @@ WhatsApp: 5515997075304
 
 import { getContentType, delay, downloadMediaMessage, generateWAMessageFromContent, prepareWAMessageMedia } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
-import { getGlobalImageTarget, getGlobalNoticeText } from "./lib/features/system/globalMessage.js";
+import { getGlobalMediaTarget, getGlobalMediaText } from "./lib/features/system/globalMessage.js";
 import { handleAntiStatus, groupStatusKind } from "./lib/features/moderation/antiStatus.js";
 import { removeAntiLinkParticipant } from "./lib/features/moderation/antiLinkRemoval.js";
 import { withAntiLinkGroupLock } from "./lib/features/moderation/antiLinkGroupLock.js";
@@ -10790,21 +10790,22 @@ case "msg": {
   const rentedOnly=command==="msg-alugados";
   const dragonOnly=command==="dragon-msg";
   const scope=dragonOnly?"MAID DRAGON":rentedOnly?"DOS ALUGADOS":"GLOBAL";
-  const aviso=getGlobalNoticeText(fullCommandText);
-  const mediaTarget=getGlobalImageTarget(info);
-  const isImageMsg=Boolean(mediaTarget);
+  const aviso=getGlobalMediaText(info, fullCommandText);
+  const mediaTarget=getGlobalMediaTarget(info);
+  const isStickerMsg=Boolean(mediaTarget?.message?.stickerMessage);
+  const isImageMsg=Boolean(mediaTarget?.message?.imageMessage);
 
-  if(!aviso && !isImageMsg){
+  if(!aviso && !mediaTarget){
     return reply(
       `📢 *AVISO ${scope}*\n\n`+
       `📝 Texto: *${prefix}${command} texto do aviso*\n`+
       `🖼️ Imagem: envie uma foto com *${prefix}${command} legenda* ou responda uma foto com *${prefix}${command} legenda*.\n\n`+
-      `A legenda é opcional quando houver imagem.`
+      `Figurinha: responda uma figurinha com ${prefix}${command}. A legenda é opcional nas fotos.`
     );
   }
 
   let globalImage=null;
-  if(isImageMsg){
+  if(mediaTarget){
     try{
       globalImage=await downloadMediaMessage(mediaTarget,"buffer",{}, {
         logger: console,
@@ -10812,11 +10813,11 @@ case "msg": {
           ? { reuploadRequest: conn.updateMediaMessage.bind(conn) } : {})
       });
       if (!Buffer.isBuffer(globalImage) || !globalImage.length) {
-        throw new Error("Imagem vazia ou inválida");
+        throw new Error("Mídia vazia ou inválida");
       }
     }catch(e){
-      console.error("[MSG GLOBAL] Falha ao baixar imagem:",e?.message||e);
-      return reply("❌ Não consegui baixar a imagem do aviso global. Tente enviá-la novamente.");
+      console.error("[MSG GLOBAL] Falha ao baixar mídia:",e?.message||e);
+      return reply("❌ Não consegui baixar a mídia do aviso global. Tente enviá-la novamente.");
     }
   }
 
@@ -10853,7 +10854,7 @@ case "msg": {
   await reply(
     `📢🐉 *ENVIO ${scope} INICIADO*\n\n`+
     `🏘️ Grupos encontrados: *${entries.length}*\n`+
-    `🖼️ Imagem: *${globalImage?"SIM":"NÃO"}*\n`+
+    `🖼️ Imagem: *${isStickerMsg?"FIGURINHA":globalImage?"SIM":"NÃO"}*\n`+
     `🛡️ Modo seguro anti-429 ativado.`
   );
 
@@ -10880,8 +10881,14 @@ case "msg": {
       const mentions=[...new Set((meta?.participants||[]).map(p=>p?.id||p?.jid).filter(Boolean))];
 
       // Legendas longas seguem em partes para respeitar o limite da imagem.
-      if(globalImage){
-        const imageText=aviso.slice(0,900);
+      if(isStickerMsg){
+        await conn.sendMessage(groupJid,{sticker:globalImage,mentions});
+        for(const text of partes){
+          await sleep(1000);
+          await conn.sendMessage(groupJid,{text,mentions});
+        }
+      }else if(globalImage){
+        const imageText=aviso.slice(0,MAX_MSG_CHUNK);
         const caption=imageText
           ? `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n${imageText}\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`
           : `╭━━〔 📢🐉 *AVISO KOBAYASHI* 〕━━╮\n\n╰━━〔 🌸 *KOBAYASHI BOT* 〕━━╯`;
@@ -10901,7 +10908,7 @@ case "msg": {
           }
           throw e;
         }
-        const remaining=aviso.slice(900);
+        const remaining=aviso.slice(MAX_MSG_CHUNK);
         for(let i=0;i<remaining.length;i+=MAX_MSG_CHUNK){
           await sleep(1000);
           await conn.sendMessage(groupJid, {
@@ -10940,7 +10947,7 @@ case "msg": {
 
   return reply(
     `✅🐉 *AVISO ${scope} FINALIZADO*\n\n`+
-    `🖼️ Formato: *${globalImage?"IMAGEM"+(aviso?" + LEGENDA":""):"TEXTO"}*\n`+
+    `🖼️ Formato: *${isStickerMsg?"FIGURINHA"+(aviso?" + TEXTO":""):globalImage?"IMAGEM"+(aviso?" + LEGENDA":""):"TEXTO"}*\n`+
     `📨 Enviados: *${enviados}*\n`+
     `❌ Grupos com falha (podem ter recebido parte do aviso): *${falhas}*\n`+
     `⚠️ Limitações 429 detectadas: *${rateLimits}*\n`+
