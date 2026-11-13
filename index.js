@@ -3126,11 +3126,7 @@ if (isCmd) {
     )?.version || modularVersion;
   } catch {}
 
-  let modularGroupsCount = "?";
-  try {
-    const groups = await conn.groupFetchAllParticipating();
-    modularGroupsCount = Object.keys(groups || {}).length;
-  } catch {}
+  // A lista global é consultada somente pelo painel que usa essa informação.
 
   const switchCommandNames = new Set(
     [...jsCommandSource.matchAll(/case\s+"([^"]+)":/g)]
@@ -3289,7 +3285,7 @@ if (isCmd) {
     permissions: modularPermissions,
     permissionName: permissionName(modularPermissions.level),
     version: modularVersion,
-    groupsCount: modularGroupsCount,
+    getGroupsCount: async () => Object.keys(await conn.groupFetchAllParticipating()).length,
     commandCount: new Set([...switchCommandNames, ...modularCommandNames]).size,
     getGroupProtection,
     isFunModeEnabled,

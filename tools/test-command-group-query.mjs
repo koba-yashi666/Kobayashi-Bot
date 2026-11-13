@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const index=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');
+const setup=index.split('  let modularVersion =')[1].split('  const switchCommandNames')[0];
+assert.ok(setup);assert.ok(!setup.includes('groupFetchAllParticipating'),'Preparação de comandos não deve consultar todos os grupos');
+const expression=index.match(/getGroupsCount: (async \(\) => Object\.keys\(await conn\.groupFetchAllParticipating\(\)\)\.length),/)[1];
+let requests=0,finish;
+const getGroupsCount=vm.runInNewContext('('+expression+')',{conn:{groupFetchAllParticipating(){requests++;return new Promise(r=>finish=r)}}});
+assert.equal(requests,0,'Criar contexto /ping e demais comandos não dispara consulta');
+const source=fs.readFileSync(new URL('../commands/owner/configBot.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace('export default','this.command =');
+const ctx={readSettingsFile:()=>({}),getConfiguredLeaders:()=>[]};vm.createContext(ctx);vm.runInContext(source,ctx);
+let answer='';
+await ctx.command.execute({permissions:{isOwner:false},getGroupsCount,reply:t=>answer=t});assert.equal(requests,0);assert.ok(answer.includes('dono'));
+const owner=ctx.command.execute({permissions:{isOwner:true},getGroupsCount,version:'test',commandCount:1,reply:t=>answer=t});assert.equal(requests,1);finish({'1@g.us':{},'2@g.us':{}});await owner;assert.ok(answer.includes('*Grupos:* 2'));
+await ctx.command.execute({permissions:{isOwner:true},getGroupsCount:async()=>{throw Error('rate-overlimit')},reply:t=>answer=t});assert.ok(answer.includes('*Grupos:* ?'));
+console.log('Comandos: zero consulta global na preparação; painel não autorizado não consulta; dono consulta sob demanda e tolera falha OK');

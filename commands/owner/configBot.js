@@ -14,12 +14,17 @@ export default {
       reply,
       version,
       commandCount,
-      groupsCount,
+      getGroupsCount,
     } = ctx;
 
     if (!permissions.isOwner) {
       return reply("👑 Apenas o dono principal pode abrir este painel.");
     }
+
+    let groupsCount = "?";
+    try {
+      if (typeof getGroupsCount === "function") groupsCount = await getGroupsCount();
+    } catch {}
 
     const cfg = readSettingsFile();
     const leaders = getConfiguredLeaders();

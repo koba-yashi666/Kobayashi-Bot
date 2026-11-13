@@ -1,0 +1,10 @@
+v5.6.16 — ESPERA ANTES DOS COMANDOS
+A análise encontrou groupFetchAllParticipating aguardado na preparação de TODO comando.
+Essa consulta servia somente à contagem do painel /configbot, mas atrasava /ping e demais comandos se o WhatsApp demorasse.
+O trecho existia também na base 5.6.12. A restauração da base não removia essa espera.
+Não é possível atribuir os 45705 ms inteiramente a essa chamada sem medição na hospedagem.
+Agora o contexto recebe uma função; somente /configbot ou /painelbot a executam após verificar o dono.
+Consultas realmente necessárias a /msg, banimentos e diagnósticos específicos continuam nos respectivos comandos.
+Mantém Sentinela pausado após reiniciar, com sessão preservada e início manual.
+Envie pelo Termux ao GitHub, atualize e reinicie na hospedagem. Compare /ping antes de conectar o Sentinela.
+Testes simulados e imports passaram; confirmar o ganho real na hospedagem.

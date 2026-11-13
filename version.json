@@ -1,5 +1,5 @@
 {
-  "version": "5.6.15",
-  "name": "Kobayashi Bot v5.6.15 — Recuperação baseada na v5.6.12",
-  "update": "Base v5.6.12 com Sentinela manual, cancelamento de tarefas e diagnóstico do atraso."
+  "version": "5.6.16",
+  "name": "Kobayashi Bot v5.6.16 — Consulta de grupos sob demanda",
+  "update": "Remove a consulta global de grupos da preparação de todos os comandos."
 }
