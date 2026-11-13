@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {getStickerMediaTarget} from '../lib/features/stickers/stickerMediaTarget.js';
+import {getStickerMediaTarget,rememberStickerMediaMessage} from '../lib/features/stickers/stickerMediaTarget.js';
 const source=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');
 const block=source.split('case "s": {')[1].split('\n}\nbreak;')[0];
 const wrap=(kind,message)=>kind==='plain'?message:{[kind]:{message}};
@@ -25,3 +25,15 @@ for(const wrapper of ['plain','viewOnceMessage','viewOnceMessageV2','viewOnceMes
 }
 assert.equal(getStickerMediaTarget({message:{extendedTextMessage:{text:'/s',contextInfo:{quotedMessage:{conversation:'oi'}}}}}),null);
 console.log('Figurinhas: /s e /s2, foto/vídeo atual ou citado, envelopes visualização única V1/V2/Extension e efêmero OK');
+
+const original={key:{remoteJid:'original@g.us',id:'unique',participant:'author@lid'},message:{viewOnceMessageV2:{message:{imageMessage:{viewOnce:true,mediaKey:Buffer.from('key'),directPath:'/original'}}}}};
+const reply=(chat,id)=>({key:{remoteJid:chat},message:{extendedTextMessage:{text:'/s',contextInfo:{stanzaId:id,participant:'author@lid',quotedMessage:{imageMessage:{viewOnce:true}}}}}});
+rememberStickerMediaMessage(original,1000);
+const cached=getStickerMediaTarget(reply('original@g.us','unique'),1001);
+assert.equal(cached.message.imageMessage.directPath,'/original');assert.equal(cached.key.participant,'author@lid');assert.equal(cached.key.id,'unique');
+assert.equal(getStickerMediaTarget(reply('other@g.us','unique'),1001).message.imageMessage.directPath,undefined);
+assert.equal(getStickerMediaTarget(reply('original@g.us','unique'),301001).message.imageMessage.directPath,undefined);
+for(let i=0;i<201;i++)rememberStickerMediaMessage({...original,key:{...original.key,id:'item'+i}},400000);
+assert.equal(getStickerMediaTarget(reply('original@g.us','item0'),400001).message.imageMessage.directPath,undefined);
+assert.equal(getStickerMediaTarget(reply('original@g.us','item200'),400001).message.imageMessage.directPath,'/original');
+console.log('Originais: resposta incompleta usa mídia recebida; separação por grupo, expiração em 5 minutos e limite de 200 OK');

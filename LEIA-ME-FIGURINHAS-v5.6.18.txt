@@ -1,0 +1,7 @@
+v5.6.18
+Atualize e reinicie a hospedagem. Envie uma NOVA foto/vídeo de visualização única e responda com /s ou /s2.
+Dados originais de mídias recebidas são mantidos somente em memória, limitados a 200 itens e 5 minutos.
+O bot precisa ter recebido a mensagem original; arquivos anteriores ao reinício não estão nesse cache.
+Citações incompletas passam a usar o original do mesmo chat e ID. Não recupera mídia expirada/inacessível no WhatsApp.
+Se falhar, envie a mensagem exata: agora o aviso diferencia download, conversão e envio.
+Testes simulados passaram. Validar no WhatsApp após instalar.

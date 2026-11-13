@@ -1,5 +1,5 @@
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
-import { getStickerMediaTarget } from "./lib/features/stickers/stickerMediaTarget.js";
+import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
@@ -998,6 +998,7 @@ const commandProcessingStartedAt = Date.now();
 // Isso permite comparar o que a conta ADM recebeu com o que a conta membro recebeu.
 markPrincipalSeen(info);
 if (!info.message) continue;
+rememberStickerMediaMessage(info);
 if (upsert.type === "append") continue;
 
 const type = getContentType(info.message);
@@ -6903,6 +6904,7 @@ case "s": {
     );
   }
 
+  let stickerStage = "download";
   try {
     const mediaType = getContentType(mediaTarget.message);
 
@@ -6935,18 +6937,23 @@ case "s": {
       logger: console,
       ...(typeof conn.updateMediaMessage === "function" ? {reuploadRequest: conn.updateMediaMessage.bind(conn)} : {})
     });
+    stickerStage = "conversion";
     const sticker = await makeSticker(buffer,{
       isVideo: mediaType === "videoMessage",
       forceSquare: command !== "s2",
       metadata
     });
 
-    return conn.sendMessage(from,{sticker},{quoted:info});
+    stickerStage = "send";
+    return await conn.sendMessage(from,{sticker},{quoted:info});
   } catch (e) {
-    console.error("Erro na criação de sticker:",e);
+    console.error("[Figurinha]", stickerStage, e?.output?.statusCode || e?.statusCode || e?.code || "falha");
     return reply(
-      "❌🌸 Não consegui criar essa figurinha.\n\n" +
-      "Envie novamente a mídia. Se for de visualização única, ela precisa ainda estar disponível para o bot."
+      stickerStage === "download"
+        ? "❌🌸 Não consegui baixar essa mídia. Envie novamente e responda com /s enquanto ela estiver disponível para o bot."
+        : stickerStage === "conversion"
+          ? "❌🌸 A mídia foi baixada, mas falhou ao converter em figurinha. Tente outra foto ou um vídeo de até 9.9 segundos."
+          : "❌🌸 A figurinha foi criada, mas não consegui enviá-la. Tente novamente."
     );
   }
 }
