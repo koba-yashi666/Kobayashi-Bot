@@ -1,4 +1,5 @@
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
+import { getStickerMediaTarget } from "./lib/features/stickers/stickerMediaTarget.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
@@ -1008,7 +1009,7 @@ const isStatus = from.endsWith("@broadcast");
 
 function extractCommandText(message = {}) {
   for (let depth = 0; depth < 5; depth++) {
-    const inner = message?.ephemeralMessage?.message || message?.viewOnceMessage?.message || message?.viewOnceMessageV2?.message;
+    const inner = message?.ephemeralMessage?.message || message?.viewOnceMessage?.message || message?.viewOnceMessageV2?.message || message?.viewOnceMessageV2Extension?.message;
     if (!inner) break;
     message = inner;
   }
@@ -3029,18 +3030,23 @@ if (isGroup && !info.key.fromMe && !isGroupAdmins && !isWhitelisted(from, sender
 }
 
 // Autosticker: fotos, GIFs e vídeos sem comando; animações usam os primeiros 9.9 segundos.
+const autoStickerTarget = getStickerMediaTarget(info);
+const autoStickerType = autoStickerTarget?.source === "current" ? getContentType(autoStickerTarget.message) : null;
 if (
   isGroup &&
   !info.key.fromMe &&
-  ["imageMessage", "videoMessage"].includes(type) &&
+  ["imageMessage", "videoMessage"].includes(autoStickerType) &&
   !isCmd &&
   isAutoStickerEnabled(from)
 ) {
   try {
-    const mediaBuffer = await downloadMediaMessage(info, "buffer", {});
+    const mediaBuffer = await downloadMediaMessage(autoStickerTarget, "buffer", {}, {
+      logger: console,
+      ...(typeof conn.updateMediaMessage === "function" ? {reuploadRequest: conn.updateMediaMessage.bind(conn)} : {})
+    });
     const cfg = readSettingsFile();
     const stickerBuffer = await makeSticker(mediaBuffer, {
-      isVideo: type === "videoMessage" || /^GIF8[79]a$/.test(mediaBuffer.subarray(0, 6).toString("ascii")),
+      isVideo: autoStickerType === "videoMessage" || /^GIF8[79]a$/.test(mediaBuffer.subarray(0, 6).toString("ascii")),
       forceSquare: true,
       metadata: {
         userNick: pushname || sender.split("@")[0],
@@ -6888,7 +6894,7 @@ case "s2":
 case "s": {
   reagir("🎨");
 
-  const mediaTarget = getCurrentOrQuotedMedia(info);
+  const mediaTarget = getStickerMediaTarget(info);
   if (!mediaTarget?.message) {
     return reply(
       `🎨🌸 Envie uma imagem ou vídeo com *${prefix}${command}* na legenda\n` +
@@ -6925,7 +6931,10 @@ case "s": {
       }
     }
 
-    const buffer = await downloadMediaMessage(mediaTarget,"buffer",{});
+    const buffer = await downloadMediaMessage(mediaTarget,"buffer",{},{
+      logger: console,
+      ...(typeof conn.updateMediaMessage === "function" ? {reuploadRequest: conn.updateMediaMessage.bind(conn)} : {})
+    });
     const sticker = await makeSticker(buffer,{
       isVideo: mediaType === "videoMessage",
       forceSquare: command !== "s2",
@@ -6937,7 +6946,7 @@ case "s": {
     console.error("Erro na criação de sticker:",e);
     return reply(
       "❌🌸 Não consegui criar essa figurinha.\n\n" +
-      "Tente novamente com outra imagem ou um vídeo mais curto."
+      "Envie novamente a mídia. Se for de visualização única, ela precisa ainda estar disponível para o bot."
     );
   }
 }

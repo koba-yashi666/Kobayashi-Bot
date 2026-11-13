@@ -1,0 +1,8 @@
+v5.6.17 — FIGURINHAS
+Envie foto ou vídeo com /s ou /s2 na legenda, ou responda à mídia com o comando.
+Reconhece visualização única V1, V2, Extension e mensagens efêmeras.
+O arquivo ainda precisa estar disponível para download; não recupera mídia expirada ou ausente da mensagem citada.
+Vídeos manuais continuam limitados a 9.9 segundos. Autosticker converte até os primeiros 9.9 segundos.
+Atualização mantém a correção de desempenho da v5.6.16 e o Sentinela pausado ao iniciar.
+Envie pelo Termux ao GitHub e depois atualize/reinicie a hospedagem.
+Testes simulados passaram; confirmar no WhatsApp após instalar.
