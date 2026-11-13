@@ -1,5 +1,5 @@
 {
-  "version": "5.6.20",
-  "name": "Kobayashi Bot v5.6.20 — Download de mídia por directPath",
-  "update": "Figurinhas aceitam mídia com directPath e chave, mesmo sem URL no envelope."
+  "version": "5.6.21",
+  "name": "Kobayashi Bot v5.6.21 — Texto para arquivo",
+  "update": "/txt gera documento UTF-8 com texto enviado ou respondido, preservando linhas."
 }

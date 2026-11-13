@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {textForFile,sendTextFile} from '../lib/features/system/textFile.js';
+const quoted=message=>({message:{extendedTextMessage:{contextInfo:{quotedMessage:message}}}});
+assert.equal(textForFile({},'txt Olá\n\n🐉 café\n  recuo\n'),'Olá\n\n🐉 café\n  recuo\n');
+assert.equal(textForFile({},'TXT\nlinha 1\nlinha 2'),'linha 1\nlinha 2');
+assert.equal(textForFile(quoted({conversation:'  texto original\n'}),'txt'),'  texto original\n');
+assert.equal(textForFile(quoted({ephemeralMessage:{message:{extendedTextMessage:{text:'Texto\ncom linhas'}}}}),'txt'),'Texto\ncom linhas');
+assert.equal(textForFile(quoted({imageMessage:{caption:'Legenda'}}),'txt'),'Legenda');
+assert.equal(textForFile(quoted({conversation:'antigo'}),'txt novo'),'novo');
+let sent=0,replies=[];
+const conn={sendMessage:async(j,p,o)=>{sent++;assert.equal(j,'grupo');assert.equal(p.document.toString('utf8'),'Olá\n🐉');assert.equal(p.fileName,'texto.txt');assert.equal(p.mimetype,'text/plain');assert.ok(o.quoted)}};
+await sendTextFile({info:{},rawCommandText:'txt Olá\n🐉',conn,from:'grupo',reply:t=>replies.push(t)});assert.equal(sent,1);
+await sendTextFile({info:{},rawCommandText:'txt',conn,reply:t=>replies.push(t)});assert.equal(sent,1);assert.ok(replies.at(-1).includes('responda'));
+await sendTextFile({info:{},rawCommandText:'txt '+ 'á'.repeat(524289),conn,reply:t=>replies.push(t)});assert.equal(sent,1);assert.ok(replies.at(-1).includes('1 MB'));
+console.log('TXT: texto direto/citado/legenda, acentos, emoji, linhas/recuos, documento UTF-8, vazio e limite por bytes OK');

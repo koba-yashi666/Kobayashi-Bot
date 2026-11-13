@@ -1,6 +1,7 @@
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
 import { downloadStickerMedia } from "./lib/features/stickers/stickerMediaDownload.js";
+import { sendTextFile } from "./lib/features/system/textFile.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
@@ -1095,6 +1096,7 @@ function normalizeKobaIntentText(value=""){
 const citaLargeGroupCooldown = new Map();
 
 const KOBA_TRIGGER_COMMANDS = new Set([
+  "txt",
   "muteb",
   "naodeagua","naodenemagua",
   "botao","botão",
@@ -5026,6 +5028,11 @@ break;
 
 
 // ferramentas de figurinhas • v0.1.22
+case "txt": {
+  return sendTextFile({info, rawCommandText:body.slice(usedPrefix.length).trimStart(), conn, from, reply, prefix});
+}
+break;
+
 case "toimg":
 case "toimage": {
   const quoted = getQuotedMessage(info);

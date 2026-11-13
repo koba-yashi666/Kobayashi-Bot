@@ -1,0 +1,9 @@
+/TXT
+Use /txt seu texto ou responda uma mensagem com /txt.
+Envia documento texto.txt em UTF-8, sem texto adicional dentro do arquivo.
+Preserva linhas, acentos e emojis; pode usar legenda de mídia respondida.
+O texto escrito junto ao comando tem prioridade sobre a resposta.
+Limite: 1 MB por texto (bytes UTF-8). Não precisa de API.
+Disponível aos membros, respeitando bloqueios/VIP/moderação já configurados.
+Envie pelo Termux ao GitHub, depois atualize e reinicie a hospedagem.
+Esta versão adiciona /txt; não contém nova correção para o download de visualização única ainda em investigação.
