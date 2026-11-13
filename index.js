@@ -1,5 +1,6 @@
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
+import { downloadStickerMedia } from "./lib/features/stickers/stickerMediaDownload.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
 import {parseBlacklistTargets, registerBlacklistTargets, purgeBlacklistTargets} from "./lib/features/moderation/blacklistRegistry.js";
@@ -52,7 +53,7 @@ Contato para aluguel:
 WhatsApp: 5515997075304
 */
 
-import { getContentType, delay, downloadMediaMessage, generateWAMessageFromContent, prepareWAMessageMedia } from "@whiskeysockets/baileys";
+import { getContentType, delay, downloadMediaMessage, downloadContentFromMessage, generateWAMessageFromContent, prepareWAMessageMedia } from "@whiskeysockets/baileys";
 import { makeSticker, applyStickerMetadata } from "./lib/stickerEngine.js";
 import { getGlobalMediaTarget, getGlobalMediaText } from "./lib/features/system/globalMessage.js";
 import { handleAntiStatus, groupStatusKind } from "./lib/features/moderation/antiStatus.js";
@@ -3041,10 +3042,7 @@ if (
   isAutoStickerEnabled(from)
 ) {
   try {
-    const mediaBuffer = await downloadMediaMessage(autoStickerTarget, "buffer", {}, {
-      logger: console,
-      ...(typeof conn.updateMediaMessage === "function" ? {reuploadRequest: conn.updateMediaMessage.bind(conn)} : {})
-    });
+    const mediaBuffer = await downloadStickerMedia(autoStickerTarget, {downloadMediaMessage, downloadContentFromMessage, conn});
     const cfg = readSettingsFile();
     const stickerBuffer = await makeSticker(mediaBuffer, {
       isVideo: autoStickerType === "videoMessage" || /^GIF8[79]a$/.test(mediaBuffer.subarray(0, 6).toString("ascii")),
@@ -6932,10 +6930,7 @@ case "s": {
       }
     }
 
-    const buffer = await downloadMediaMessage(mediaTarget,"buffer",{},{
-      logger: console,
-      ...(typeof conn.updateMediaMessage === "function" ? {reuploadRequest: conn.updateMediaMessage.bind(conn)} : {})
-    });
+    const buffer = await downloadStickerMedia(mediaTarget, {downloadMediaMessage, downloadContentFromMessage, conn});
     stickerStage = "conversion";
     const sticker = await makeSticker(buffer,{
       isVideo: mediaType === "videoMessage",

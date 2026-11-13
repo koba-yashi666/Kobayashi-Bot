@@ -1,5 +1,5 @@
 {
-  "version": "5.6.19",
-  "name": "Kobayashi Bot v5.6.19 — Rename sem decoração",
-  "update": "/rename Pacote/Autor usa somente o texto informado; /roubar usa apenas o nick no autor."
+  "version": "5.6.20",
+  "name": "Kobayashi Bot v5.6.20 — Download de mídia por directPath",
+  "update": "Figurinhas aceitam mídia com directPath e chave, mesmo sem URL no envelope."
 }

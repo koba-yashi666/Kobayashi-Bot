@@ -1,0 +1,9 @@
+v5.6.20 — DOWNLOAD 400
+O console mostrou erro 400 na etapa de download, antes de converter.
+A API downloadMediaMessage do Baileys pode rejeitar mídia sem URL mesmo quando directPath e chave existem.
+O novo fluxo usa downloadContentFromMessage nesses casos, com limite de 32 MB. Não recupera arquivos expirados ou sem chave/caminho.
+Fonte consultada: https://github.com/WhiskeySockets/Baileys/blob/master/src/Utils/messages.ts e messages-media.ts.
+Atualize pelo Termux ao GitHub e depois atualize/reinicie a hospedagem.
+Envie uma NOVA mídia de visualização única e responda com /s ou /s2 em até 5 minutos.
+Testes simulados passaram; é necessário confirmar o download real no WhatsApp.
+Mantém /rename e /roubar da 5.6.19 e correção de desempenho 5.6.16.
