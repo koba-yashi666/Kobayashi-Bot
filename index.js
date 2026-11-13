@@ -992,6 +992,7 @@ ensureBlacklistJoinGuard(conn);
 try {
 ensureDragonCoreRuntime(conn);
 for (const info of upsert?.messages || []) {
+const commandProcessingStartedAt = Date.now();
 // 🛰️ Kobayashi Sentinel: registra até eventos sem conteúdo.
 // Isso permite comparar o que a conta ADM recebeu com o que a conta membro recebeu.
 markPrincipalSeen(info);
@@ -10199,7 +10200,7 @@ case "sentinel": {
     const s = getSentinelStatus(from);
     return reply(
       `╭━━〔 🛰️ KOBAYASHI SENTINEL 〕━━╮\n` +
-      `┃ 🤖 Sessão: *${s.connected ? "ONLINE ✅" : s.registered ? "OFFLINE ⚠️" : "NÃO PAREADA"}*\n` +
+      `┃ 🤖 Sessão: *${s.paused ? "PAUSADA ⏸️" : s.connected ? "ONLINE ✅" : s.registered ? "CONECTANDO ⚠️" : "NÃO PAREADA"}*\n` +
       `┃ 👁️ Neste grupo: *${s.groupEnabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
       `┃ 🛡️ Modo: *links invisíveis*\n` +
       `┃ ⏱️ Confirmação: *${s.delayMs} ms*\n` +
@@ -10238,7 +10239,7 @@ case "sentinel": {
         `🔑 Código: *${result.code}*\n\n` +
         `No WhatsApp do segundo número:\n` +
         `*Aparelhos conectados → Conectar um aparelho → Conectar com número de telefone*.\n\n` +
-        `✅ Aguarde a confirmação de conexão antes de ativar o Sentinela no grupo.\n` +
+        `✅ Use este comando também para reconectar uma sessão já pareada.\n` +
         `⚠️ Essa conta deve permanecer como *membro comum*, sem ADM.`
       );
     } catch (e) {
@@ -10289,8 +10290,8 @@ case "sentinel": {
     const stopped = await stopSentinel();
     return reply(
       stopped
-        ? "🛰️ Sentinela desconectado. A sessão foi preservada para reconectar depois."
-        : "🛰️ O Sentinela já estava desconectado."
+        ? "🛰️ Sentinela desconectado. A sessão foi preservada. Para reconectar, use /sentinel parear NUMERO."
+        : "🛰️ Sentinela pausado. Ele não será iniciado automaticamente."
     );
   }
 
@@ -10689,7 +10690,7 @@ const cpuDecorrido = Date.now() - cpuInicioTempo;
 const cpuUsoBruto = process.cpuUsage(cpuInicio);
 const cpuUso = `${(((cpuUsoBruto.user + cpuUsoBruto.system) / 1000 / cpuDecorrido) * 100).toFixed(2)}%`;
 const nodeVersion = process.version;
-reply(linguagem.ping(atraso, uptime, so, ramUsada, cpuUso, nodeVersion, baileysVersion));
+return reply(linguagem.ping(atraso, uptime, so, ramUsada, cpuUso, nodeVersion, baileysVersion).replace("Conexão", "Atraso") + `\n⏱️ Processamento desta mensagem: ${Date.now() - commandProcessingStartedAt}ms\n📦 Versão: ${getLocalVersion()}`);
 }
 break;
 //

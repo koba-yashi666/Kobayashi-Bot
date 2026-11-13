@@ -1,0 +1,42 @@
+KOBAYASHI v5.6.15 — ANÁLISE E CORREÇÃO
+Base verificada: commit v5.6.12 506b1e3833e05a1a550aa90a2b28b385f550491b.
+Comparação até v5.6.14 75108594f02ed3b699e82cb2b4f3c3c44afcc884, dois commits.
+
+O QUE MUDOU
+5.6.13: pedido de pareamento por evento QR, proteção parcial de sockets antigos e parada.
+5.6.14: cache da configuração, limpeza periódica dos IDs e deduplicação parcial.
+Fora do Sentinela, o index.js mudou apenas uma frase do pareamento; dependências não mudaram.
+
+PROBLEMAS CONFIRMADOS NO CÓDIGO
+O desligamento não impedia início após reiniciar com sessão registrada.
+A consulta automática de autenticação tinha uma janela de corrida com a parada.
+Verificações que já aguardavam o temporizador podiam continuar após desconectar.
+Inspeção recursiva montava texto completo antes de truncar, inclusive dados binários não excluídos.
+O campo Conexão do /ping era idade da mensagem até o comando, não teste da latência de rede.
+Esses problemas não provam isoladamente a origem dos 26218 ms; não houve acesso ao processo da hospedagem.
+
+CORREÇÃO
+Núcleo index.js e dependências partem da v5.6.12. Só mudam controles/status do Sentinela e diagnóstico /ping.
+O módulo Sentinela foi retomado do commit 5.6.12 e recebeu controle de geração/parada/cancelamento.
+Não há início automático do Sentinela por mensagens nem após reiniciar.
+/ sentinela on/off (comando real: /sentinel on/off) controla apenas a proteção do grupo.
+/sentinel parear 55DDDNUMERO conecta ou reutiliza sessão; /sentinel desconectar pausa a conexão toda.
+Pareamento QR-ready da 5.6.13 mantido somente na solicitação explícita.
+Desconectar cancela timers, invalida callbacks antigos, encerra socket e esvazia caches.
+Reconexões limitadas a três tentativas com espera crescente; falha definitiva pausa.
+Não há necessidade de apagar ou renomear a sessão. ZIP não inclui configurações privadas nem bancos.
+
+APLICAÇÃO
+Envie pelo Termux ao GitHub, atualize na hospedagem e reinicie UMA VEZ para encerrar os sockets do processo antigo.
+Após iniciar, o Sentinela permanece PAUSADO. Primeiro compare /ping sem conectar a segunda conta.
+Somente depois, se desejar, conecte o Sentinela manualmente.
+Atraso mede idade da mensagem; processamento mede a etapa local após recebê-la (inclui esperas internas).
+A CPU do /ping é amostra curta do processo, não a porcentagem contratada no painel.
+
+TESTES
+1000 mensagens/atualizações em pausa: zero leitura de autenticação e zero sockets criados.
+Parada com tarefa pendente: zero consulta de metadata e zero envio posterior.
+Parada durante leitura da autenticação: socket não é criado.
+Eventos de socket antigo: zero reconexão; reinício permanece pausado.
+Reconexão limitada, inspeção com buffer de 2 MB, pedidos de código e /msg validados com simulações.
+Import Guard e sintaxe passaram. Teste real de desempenho ainda precisa ser feito na hospedagem.
