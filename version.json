@@ -1,5 +1,5 @@
 {
-  "version": "5.6.12",
-  "name": "Kobayashi Bot v5.6.12 — Avisos com mídia",
-  "update": "/msg envia fotos com legenda e figurinhas estáticas ou animadas."
+  "version": "5.6.13",
+  "name": "Kobayashi Bot v5.6.13 — Pareamento Sentinela",
+  "update": "Pedido de código após prontidão da autenticação, com timeout e proteção contra reconexões antigas."
 }

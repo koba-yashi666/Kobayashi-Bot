@@ -10238,7 +10238,7 @@ case "sentinel": {
         `🔑 Código: *${result.code}*\n\n` +
         `No WhatsApp do segundo número:\n` +
         `*Aparelhos conectados → Conectar um aparelho → Conectar com número de telefone*.\n\n` +
-        `✅ O pareamento agora usa o *mesmo método da conexão principal da Kobayashi*.\n` +
+        `✅ Aguarde a confirmação de conexão antes de ativar o Sentinela no grupo.\n` +
         `⚠️ Essa conta deve permanecer como *membro comum*, sem ADM.`
       );
     } catch (e) {
