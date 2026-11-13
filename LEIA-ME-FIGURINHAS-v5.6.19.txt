@@ -1,0 +1,5 @@
+Responda uma figurinha com /rename Kobayashi/bot.
+Pacote: Kobayashi. Autor: bot. Sem emojis ou assinatura extra.
+/roubar: autor recebe apenas o nick de quem executou; pacote fica vazio.
+Formato antigo /rename Autor | Pacote preservado por compatibilidade.
+Atualize pelo Termux ao GitHub, depois atualize e reinicie a hospedagem.

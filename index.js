@@ -5138,35 +5138,34 @@ case "togif": {
 break;
 
 case "rename": {
-  const quoted = getQuotedMessage(info);
-  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+  const quoted = getStickerMediaTarget(info);
+  const target = quoted;
 
   if (!target?.message || getContentType(target.message) !== "stickerMessage") {
     return reply(
       `🎴 Responda a uma figurinha com:\n\n` +
-      `*${prefix}rename Seu nome | Nome do pacote*\n\n` +
-      `Ex.: *${prefix}rename ${pushname || "Oni-chan"} | Minha coleção*`
+      `*${prefix}rename Pacote/Autor*\n\n` +
+      `Ex.: *${prefix}rename Kobayashi/bot*`
     );
   }
 
-  const parts = String(q || "").split("|").map((x) => x.trim()).filter(Boolean);
-  if (parts.length < 2) {
-    return reply(
-      `🌸 Use assim:\n*${prefix}rename Seu nome | Nome do pacote*\n\n` +
-      `O primeiro campo vira o autor e o segundo vira o pacote.`
-    );
-  }
+  const input = String(q || "").trim();
+  const separator = input.includes("/") ? "/" : "|";
+  const position = input.indexOf(separator);
+  const first = position >= 0 ? input.slice(0, position).trim() : "";
+  const second = position >= 0 ? input.slice(position + 1).trim() : "";
+  if (!first || !second) return reply(`🎴 Use: *${prefix}rename Pacote/Autor*\nEx.: *${prefix}rename Kobayashi/bot*`);
+  const packName = separator === "/" ? first : second;
+  const authorName = separator === "/" ? second : first;
 
   try {
     const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
-    const authorName = parts[0].slice(0, 60);
-    const packName = parts.slice(1).join(" | ").slice(0, 80);
     const result = await applyStickerMetadata(stickerBuffer, {
       userNick: authorName,
-      packName: `🐉 ${packName}`,
-      publisher: `🌸 ${authorName} • Kobayashi Bot`,
+      packName,
+      publisher: authorName,
       packId: "kobayashi-rename",
-      emojis: ["🐉", "🌸", "✨"]
+      emojis: []
     });
     return conn.sendMessage(from, { sticker: result }, { quoted: info });
   } catch (e) {
@@ -5178,8 +5177,8 @@ break;
 
 case "roubar":
 case "steal": {
-  const quoted = getQuotedMessage(info);
-  const target = quoted?.message ? quoted : (type === "stickerMessage" ? info : null);
+  const quoted = getStickerMediaTarget(info);
+  const target = quoted;
 
   if (!target?.message || getContentType(target.message) !== "stickerMessage") {
     return reply(`🎴 Responda a uma figurinha com *${prefix}roubar*.`);
@@ -5187,13 +5186,13 @@ case "steal": {
 
   try {
     const stickerBuffer = await downloadMediaMessage(target, "buffer", {});
-    const authorName = String(pushname || sender.split("@")[0]).trim().slice(0, 60);
+    const authorName = String(pushname || "Usuário").trim() || "Usuário";
     const result = await applyStickerMetadata(stickerBuffer, {
       userNick: authorName,
-      packName: "🐉 Kobayashi • Minha Coleção",
-      publisher: `🌸 ${authorName}`,
+      packName: "",
+      publisher: authorName,
       packId: "kobayashi-roubar",
-      emojis: ["🐉", "🌸", "💜"]
+      emojis: []
     });
     return conn.sendMessage(from, { sticker: result }, { quoted: info });
   } catch (e) {
