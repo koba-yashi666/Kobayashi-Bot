@@ -1,3 +1,4 @@
+import { rememberStickerOriginal } from "./commands/stickers/sticker.js";
 import {installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { ensureLevelSummaryRuntime } from "./lib/features/social/levelSummary.js";
 import { departureNoticeAllowed } from "./lib/features/group/departureNotice.js";
@@ -675,6 +676,7 @@ async function startConnect() {
         const upsert = events["messages.upsert"];
 
         for (const m of upsert.messages || []) {
+          rememberStickerOriginal(m);
           if (m.message) msgStore.set(m.key.id, m.message);
         }
 

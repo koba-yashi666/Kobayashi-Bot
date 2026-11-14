@@ -1,3 +1,4 @@
+import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
 import { downloadStickerMedia, formatStickerDownloadDiagnostic } from "./lib/features/stickers/stickerMediaDownload.js";
@@ -1011,6 +1012,8 @@ const isGroup = from.endsWith("@g.us");
 const isStatus = from.endsWith("@broadcast");
 
 function extractCommandText(message = {}) {
+  const receivedCaption = stickerCaption(message);
+  if (receivedCaption) return receivedCaption;
   for (let depth = 0; depth < 5; depth++) {
     const inner = message?.ephemeralMessage?.message || message?.viewOnceMessage?.message || message?.viewOnceMessageV2?.message || message?.viewOnceMessageV2Extension?.message;
     if (!inner) break;
@@ -6897,67 +6900,15 @@ case "stk":
 case "st":
 case "s2":
 case "s": {
-  reagir("🎨");
-
-  const mediaTarget = getStickerMediaTarget(info);
-  if (!mediaTarget?.message) {
-    return reply(
-      `🎨🌸 Envie uma imagem ou vídeo com *${prefix}${command}* na legenda\n` +
-      `ou responda à mídia com *${prefix}${command}*.\n\n` +
-      `🎞️ Vídeos: máximo de *9.9 segundos*.`
-    );
-  }
-
-  let stickerStage = "download";
-  try {
-    const mediaType = getContentType(mediaTarget.message);
-
-    if (!["imageMessage","videoMessage","stickerMessage"].includes(mediaType)) {
-      return reply("🎨🌸 Essa mídia não pode ser convertida em figurinha.");
-    }
-
-    const cfg = readSettingsFile();
-    const metadata = {
+  const cfg = readSettingsFile();
+  return runStickerCommand({info, conn, from, reply, command, prefix,
+    metadata: {
       userNick: pushname || sender.split("@")[0],
       groupName: isGroup ? groupName : "Privado",
       botName: cfg.NomeDoBot || NomeDoBot,
-      creatorName: cfg.creatorName || cfg.ownerName || ownerName,
-    };
-
-    if (mediaType === "stickerMessage") {
-      const original = await downloadMediaMessage(mediaTarget,"buffer",{});
-      const renamed = await applyStickerMetadata(original,metadata);
-      return conn.sendMessage(from,{sticker:renamed},{quoted:info});
+      creatorName: cfg.creatorName || cfg.ownerName || ownerName
     }
-
-    if (mediaType === "videoMessage") {
-      const seconds = Number(mediaTarget.message?.videoMessage?.seconds || 0);
-      if (seconds > 9.9) {
-        return reply("🎞️🌸 O vídeo precisa ter no máximo *9.9 segundos* para virar figurinha.");
-      }
-    }
-
-    const buffer = await downloadStickerMedia(mediaTarget, {downloadMediaMessage, downloadContentFromMessage, conn});
-    stickerStage = "conversion";
-    const sticker = await makeSticker(buffer,{
-      isVideo: mediaType === "videoMessage",
-      forceSquare: command !== "s2",
-      metadata
-    });
-
-    stickerStage = "send";
-    return await conn.sendMessage(from,{sticker},{quoted:info});
-  } catch (e) {
-    console.error("[Figurinha]", stickerStage, e?.output?.statusCode || e?.statusCode || e?.code || "falha");
-    return reply(
-      stickerStage === "download"
-        ? "❌🌸 Falha no download da mídia.\n\n" + formatStickerDownloadDiagnostic(mediaTarget, e) +
-          "\n\nEnvie este resumo ao dono para investigar. Ele não contém a foto, a chave ou o endereço do arquivo."
-        : stickerStage === "conversion"
-          ? "❌🌸 A mídia foi baixada, mas falhou ao converter em figurinha. Tente outra foto ou um vídeo de até 9.9 segundos."
-          : "❌🌸 A figurinha foi criada, mas não consegui enviá-la. Tente novamente."
-    );
-  }
+  }, {downloadMediaMessage, downloadContentFromMessage, makeSticker, applyStickerMetadata});
 }
 break;
 

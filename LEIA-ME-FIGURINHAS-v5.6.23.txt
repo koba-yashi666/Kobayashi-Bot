@@ -1,0 +1,13 @@
+v5.6.23 — NOVO /S E /S2
+Implementação separada: commands/stickers/sticker.js.
+Use /s ou /s2 na legenda, ou respondendo uma foto/vídeo/figurinha.
+/s converte em quadrado; /s2 mantém proporção conforme o motor existente.
+Vídeos até 9.9 segundos. Download limitado a 32 MB.
+Dados de até 200 mídias originais, por 5 minutos, somente em memória e separados por chat.
+Captura na entrada da conexão e leitura unificada das legendas.
+Referência incompleta posterior não sobrescreve um original completo.
+Não recupera mídias expiradas e não inventa chave/endereço ausentes.
+TESTE: atualize e reinicie a hospedagem. Envie uma NOVA foto normal com /s e depois uma NOVA foto de visualização única com /s.
+Se a legenda continuar sem resposta, responda essa mesma mídia com /s e envie o diagnóstico completo.
+Os testes são simulados; não há confirmação real de visualização única funcionando nesta versão.
+Mantém correções de desempenho, Sentinela pausado e comandos TXT/rename.
