@@ -1,5 +1,5 @@
 {
-  "version": "5.6.23",
-  "name": "Kobayashi Bot v5.6.23 — Novo comando de figurinhas",
-  "update": "/s e /s2 reescritos em módulo separado, com leitura original na entrada da conexão."
+  "version": "5.6.24",
+  "name": "Kobayashi Bot v5.6.24 — Parcerias do bem-vindo",
+  "update": "Corrige remoção e persistência de parcerias do bem-vindo e adiciona aliases de remoção."
 }

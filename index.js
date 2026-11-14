@@ -1587,6 +1587,8 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "rmlistanegrag",
   "rmopengp",
   "rmparceriabv",
+  "rmparceriasbv",
+  "rmparcerias",
   "rmregras",
   "roubar",
   "rpg",
@@ -4483,7 +4485,8 @@ break;
 
 
 case "rmparceriabv":
-case "rmparceriabv":
+case "rmparceriasbv":
+case "rmparcerias":
 case "removerparceriabv": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
@@ -4519,7 +4522,7 @@ case "parceriasbv": {
   if (!isGroup) return reply(mess.onlyGroup());
   if (!isGroupAdmins) return reply(mess.onlyAdmins());
 
-  const novaParceria = String(q || "").trim();
+  const novaParceria = String(q || "").replace(/\\n/g, "\n").trim();
 
   if (!novaParceria) {
     return reply(

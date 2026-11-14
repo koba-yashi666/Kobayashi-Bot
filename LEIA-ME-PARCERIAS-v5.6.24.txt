@@ -1,0 +1,18 @@
+KOBAYASHI v5.6.24 — PARCERIAS DO BEM-VINDO
+
+Corrige o erro writeWelcomeDb não definida que impedia salvar a remoção.
+
+Adicionar:
+/setparceriasbv Nome do grupo\nhttps://chat.whatsapp.com/CONVITE
+
+Remover:
+/rmparceriasbv https://chat.whatsapp.com/CONVITE
+Também aceita /rmparcerias, /rmparceriabv e /removerparceriabv.
+Os comandos exigem ADM do grupo.
+/testebv permite conferir a mensagem após a remoção.
+
+Blocos criados pelo cadastro têm o nome e o link removidos juntos. Em dados antigos com vários links sem separação, remove somente a linha do link para preservar as outras parcerias.
+Não altera parcerias escritas manualmente dentro de /setbv, /setregrasbv ou outra seção: a correção trata a lista de /setparceriasbv.
+
+O patch preserva as configurações e o banco existente. Não inclui sessões, dados privados nem o teste experimental Zapo. A inicialização normal continua no Baileys.
+Testes locais passaram; não foi conectado a uma conta WhatsApp real.

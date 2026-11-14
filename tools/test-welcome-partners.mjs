@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+const moduleUrl=new URL('../lib/features/group/welcomeConfig.js',import.meta.url);
+const oldCwd=process.cwd(), temp=fs.mkdtempSync(path.join(os.tmpdir(),'koba-partners-'));
+process.chdir(temp);
+try {
+  const {updateWelcomeConfig,getWelcomeConfig,removePartnerLink}=await import(moduleUrl);
+  updateWelcomeConfig('a',{enabled:true,rules:'regras',partners:'Grupo A\nhttps://chat.whatsapp.com/ABC\n\nGrupo B\nhttps://chat.whatsapp.com/ABCD'});
+  updateWelcomeConfig('b',{partners:'Outro grupo\nhttps://chat.whatsapp.com/ABC'});
+  assert.equal(removePartnerLink('a','https://chat.whatsapp.com/AB').removed,false);
+  assert.equal(removePartnerLink('a','https://chat.whatsapp.com/ABC').removed,true);
+  assert.equal(getWelcomeConfig('a').partners,'Grupo B\nhttps://chat.whatsapp.com/ABCD');
+  assert.equal(getWelcomeConfig('a').rules,'regras');
+  assert.match(getWelcomeConfig('b').partners,/Outro grupo/);
+  const fresh=spawnSync(process.execPath,['--input-type=module','-e',`import {getWelcomeConfig} from ${JSON.stringify(moduleUrl.href)}; console.log(getWelcomeConfig('a').partners);`],{cwd:temp,encoding:'utf8'});
+  assert.equal(fresh.status,0);assert.equal(fresh.stdout.trim(),'Grupo B\nhttps://chat.whatsapp.com/ABCD');
+  assert.equal(removePartnerLink('a','https://chat.whatsapp.com/ABCD/').removed,true);
+  assert.equal(getWelcomeConfig('a').partners,'🌸 Nenhuma parceria configurada.');
+  updateWelcomeConfig('a',{partners:'A\\nhttps://example.com/a\n\nB\nhttps://example.com/b'});
+  removePartnerLink('a','https://example.com/a');
+  assert.equal(getWelcomeConfig('a').partners,'B\nhttps://example.com/b');
+  updateWelcomeConfig('a',{partners:'https://example.com/a\nhttps://example.com/b'});
+  removePartnerLink('a','https://example.com/a');
+  assert.equal(getWelcomeConfig('a').partners,'https://example.com/b');
+  assert.equal(removePartnerLink('a','').removed,false);
+  console.log('Parcerias: remoção persistida/reinício, nome+link, última parceria, URLs parecidas, banco legado e isolamento passaram.');
+} finally {process.chdir(oldCwd);fs.rmSync(temp,{recursive:true,force:true});}
