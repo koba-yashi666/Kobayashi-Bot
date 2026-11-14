@@ -1,4 +1,5 @@
 import { rememberStickerOriginal } from "./commands/stickers/sticker.js";
+import { markPrincipalSeen } from "./lib/features/moderation/sentinelSystem.js";
 import {installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { ensureLevelSummaryRuntime } from "./lib/features/social/levelSummary.js";
 import { departureNoticeAllowed } from "./lib/features/group/departureNotice.js";
@@ -607,6 +608,10 @@ async function startConnect() {
     }
 
     conn.ev.process(async (events) => {
+      // Confirma o recebimento antes de qualquer evento/ação lenta do lote.
+      for (const m of events["messages.upsert"]?.messages || []) {
+        markPrincipalSeen(m);
+      }
       if (events["connection.update"]) {
         const update = events["connection.update"];
         const { connection, lastDisconnect } = update;

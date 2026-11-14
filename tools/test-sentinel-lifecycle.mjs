@@ -46,5 +46,34 @@ for (let i=0;i<3;i++) {
 }
 sockets.at(-1).ev.emit('connection.update',{connection:'close',lastDisconnect:{error:{statusCode:428}}});
 assert.equal(timers.size,0);assert.equal(a.getSentinelStatus().paused,true);
+// Recebimento durante a janela de comparação: nenhuma consulta/ação.
+await a.startSentinelPairing('5511999999999');
+a.setSentinelGroupEnabled('g@g.us',true);
+let check=a.processInvisibleCandidate({...message,key:{...message.key,id:'seen-during-delay'}});
+a.markPrincipalSeen({key:{remoteJid:'g@g.us',id:'seen-during-delay'}});
+let [taskId,task]=[...timers.entries()][0];timers.delete(taskId);task.fn();await check;
+assert.equal(metadataCalls,0);assert.equal(sends,0);
+// Recebimento enquanto metadata está lenta: aborta antes de apagar/remover.
+let releaseMetadata;
+conn.groupMetadata=async()=>{metadataCalls++;return await new Promise(resolve=>releaseMetadata=resolve)};
+check=a.processInvisibleCandidate({...message,key:{...message.key,id:'seen-during-metadata'}});
+[taskId,task]=[...timers.entries()][0];timers.delete(taskId);task.fn();
+for(let i=0;i<10;i++)await Promise.resolve();
+assert.equal(metadataCalls,1);
+a.markPrincipalSeen({key:{remoteJid:'g@g.us',id:'seen-during-metadata'}});
+releaseMetadata({participants:[]});await check;assert.equal(sends,0);
+// Carga com mensagens já recebidas na principal não agenda verificações.
+const loadStarted=performance.now();
+for(let i=0;i<10000;i++){
+ const info={...message,key:{...message.key,id:'load-'+i}};
+ a.markPrincipalSeen(info);await a.processInvisibleCandidate(info);
+}
+assert.equal(timers.size,0);assert.equal(metadataCalls,1);assert.equal(sends,0);
+console.log(`Sentinela carga simulada: 10000 mensagens recebidas na principal em ${(performance.now()-loadStarted).toFixed(1)}ms; zero consultas extras/envios/timers.`);
+await a.stopSentinel();
+// A conexão registra todo o lote antes da fila de comandos e do botReady.
+const connectionSource=fs.readFileSync(new URL('../connection.js',import.meta.url),'utf8');
+const capture=connectionSource.indexOf('markPrincipalSeen(m);');
+assert.ok(capture>0 && capture<connectionSource.indexOf('if (!botReady) return;',capture));
 console.log('Sentinela: zero autostart; desligamento cancela tarefas; sessão preservada; sem reconexão antiga; cancelamento durante auth; reinício pausado; leitura binária limitada OK');
 }finally{fs.rmSync(dir,{recursive:true,force:true})}

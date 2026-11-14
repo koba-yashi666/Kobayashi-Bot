@@ -1,5 +1,5 @@
 {
-  "version": "5.6.24",
-  "name": "Kobayashi Bot v5.6.24 — Parcerias do bem-vindo",
-  "update": "Corrige remoção e persistência de parcerias do bem-vindo e adiciona aliases de remoção."
+  "version": "5.6.25",
+  "name": "Kobayashi Bot v5.6.25 — Testes e comparação do Sentinela",
+  "update": "Recebimento principal registrado antes da fila e verificações adicionais contra detecções falsas durante consultas lentas."
 }

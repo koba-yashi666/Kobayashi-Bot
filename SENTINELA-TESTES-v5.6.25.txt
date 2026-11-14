@@ -1,0 +1,34 @@
+KOBAYASHI v5.6.25 — AUDITORIA E ROTEIRO SENTINELA
+
+RESULTADO LOCAL
+Passaram: pareamento após prontidão, pedido único, erro HTTP/timeout, limpeza de listeners, desligamento cancelando pendências, sessão preservada, ausência de autostart, cancelamento durante auth, reconexões limitadas e leitura binária limitada.
+Passaram: mensagens que chegam na principal durante delay ou consulta de metadata não geram ações.
+Carga simulada: 10 mil mensagens já vistas pela principal ~49ms, zero consultas extras/envios/timers. Isto testa a comparação em memória, NÃO rede, conversão, CPU real da hospedagem nem latência de comandos completos.
+Teste de consultas de grupos confirma ausência de groupFetchAllParticipating na preparação universal de comandos.
+
+CORREÇÃO
+Antes, o registro principal era feito dentro da fila do index.js. Uma mensagem anterior lenta podia atrasar o reconhecimento de outra mensagem do mesmo lote. Agora todo o lote é marcado antes de processar eventos ou comandos. Revalidações após consultas lentas e antes das ações evitam agir se a principal recebeu nesse intervalo. Isso reduz uma corrida, mas não prova invisibilidade de mensagens nem elimina todo falso positivo: a chegada da conta principal pode atrasar mais que a janela de confirmação.
+
+PONTOS QUE PODEM ATRASAR COMANDOS (LEITURA DO CÓDIGO)
+1. index.js aguarda getGroupMetadata antes de qualquer comando de grupo. groupCache tem TTL de 5 minutos; cache vazio/expirado implica consulta de rede.
+2. Resolução de autor, bot e ADMs por LID contém awaits. participantAlt com telefone evita lookup; o tempo real do mapeamento não foi medido.
+3. Cada lote de mensagens percorre um for com awaits. Captura ativa /pacote fig pode aguardar download de sticker; ações de moderação e respostas a metas podem aguardar rede antes da próxima mensagem do lote. Isto não prova serialização de todos os lotes do socket.
+4. Persistência de configurações, atividade/economia e logs usa operações de arquivo. Bancos grandes/disco lento podem bloquear o event loop. Nenhuma base privada de produção foi medida.
+5. Sentinela conectado agenda uma verificação por candidato. Picos de mensagens não vistas podem gerar várias consultas/ações/logs. O teste de 10 mil não simula esse cenário de rede.
+6. /ping contém espera intencional de ~100ms para amostrar CPU. Atraso inclui idade da mensagem; processamento mede a entrada do loop até a composição da resposta, sem incluir a entrega final.
+7. 60s de timeout nas conexões é um teto de espera de consultas, não prova de espera fixa.
+
+INICIAR TESTES NA HOSPEDAGEM
+- Atualize/reinicie com este patch. A sessão principal continua Baileys; o teste Zapo não é iniciado.
+- Faça primeiro /sentinel desconectar. Em um grupo de teste, execute /ping cinco vezes com alguns segundos de intervalo e guarde as respostas.
+- Mantenha a conta Sentinela no mesmo grupo como membro comum; o bot principal deve ser ADM.
+- Use /sentinel parear 55DDDNUMERO (também reconecta sessão já registrada).
+- Confira /sentinel status até ONLINE, então /sentinel on no grupo de teste.
+- Repita os cinco /ping e algumas mensagens comuns. Mensagens recebidas pelas duas contas não devem gerar punições nem detecções de invisibilidade.
+- Confira /sentinel log. Não é preciso criar mensagens de ataque para este teste.
+- Use /sentinel off e depois /sentinel desconectar. Repita /ping para comparar.
+- Ao reiniciar a hospedagem, confirme PAUSADA. Reconecte manualmente se quiser continuar.
+
+Se aparecer remoção indevida, pare o Sentinela e envie o log e horários; use grupo de teste com contas próprias. Não envie sessão/chaves. A janela temporal sozinha não comprova que uma mensagem é invisível.
+
+Para localizar latência real, envie /ping com Sentinela pausado e online, horários e logs correspondentes. Ainda não existe medição por etapa nesta versão; os pontos acima são candidatos de código, não causas confirmadas no servidor.
