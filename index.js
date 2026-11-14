@@ -1,6 +1,6 @@
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
-import { downloadStickerMedia } from "./lib/features/stickers/stickerMediaDownload.js";
+import { downloadStickerMedia, formatStickerDownloadDiagnostic } from "./lib/features/stickers/stickerMediaDownload.js";
 import { sendTextFile } from "./lib/features/system/textFile.js";
 import {handleDownloadCommand,YUTA_CLIENT_KEY} from "./lib/features/downloads/yutaDownloads.js";
 import {geminiChat, kobaQuestion} from "./lib/features/ai/geminiChat.js";
@@ -6951,7 +6951,8 @@ case "s": {
     console.error("[Figurinha]", stickerStage, e?.output?.statusCode || e?.statusCode || e?.code || "falha");
     return reply(
       stickerStage === "download"
-        ? "❌🌸 Não consegui baixar essa mídia. Envie novamente e responda com /s enquanto ela estiver disponível para o bot."
+        ? "❌🌸 Falha no download da mídia.\n\n" + formatStickerDownloadDiagnostic(mediaTarget, e) +
+          "\n\nEnvie este resumo ao dono para investigar. Ele não contém a foto, a chave ou o endereço do arquivo."
         : stickerStage === "conversion"
           ? "❌🌸 A mídia foi baixada, mas falhou ao converter em figurinha. Tente outra foto ou um vídeo de até 9.9 segundos."
           : "❌🌸 A figurinha foi criada, mas não consegui enviá-la. Tente novamente."

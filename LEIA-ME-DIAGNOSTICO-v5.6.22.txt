@@ -1,0 +1,5 @@
+Esta atualização adiciona diagnóstico ao erro persistente de download. Não é uma correção confirmada da visualização única.
+Atualize e reinicie a hospedagem. Envie uma NOVA foto com /s na legenda, ou responda com /s.
+Se falhar, copie o aviso completo que o bot enviar: tipo, origem, chave em bytes, presença de URL/caminho, código e rota.
+O aviso não contém a chave, o endereço do arquivo nem conteúdo da foto. Não precisa enviar sessão ou token.
+Mantém /txt, rename e correções de desempenho anteriores.
