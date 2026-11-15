@@ -1,5 +1,5 @@
 {
-  "version": "5.6.25",
-  "name": "Kobayashi Bot v5.6.25 — Testes e comparação do Sentinela",
-  "update": "Recebimento principal registrado antes da fila e verificações adicionais contra detecções falsas durante consultas lentas."
+  "version": "5.6.26",
+  "name": "Kobayashi Bot v5.6.26 — Sentinela: menções e diagnóstico",
+  "update": "Detector de menções em massa, modo observar/remover e diagnóstico de recebimento por grupo."
 }

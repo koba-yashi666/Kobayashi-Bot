@@ -1,0 +1,28 @@
+KOBAYASHI v5.6.26 — SENTINELA
+
+INÍCIO
+/sentinel parear 55DDDNUMERO
+/sentinel on
+/sentinel modo observar
+/sentinel diagnostico
+/sentinel log
+
+Modo observar é o padrão desta versão, inclusive para detecções de link. Não apaga nem remove. Configure por grupo.
+O diagnóstico conta eventos notify recebidos no grupo habilitado, inclusive eventos sem conteúdo; não captura histórico antigo. Contadores em RAM zeram ao reiniciar. Os logs persistem e incluem motivo/menções das suspeitas.
+Se o contador recebido fica em zero após novas mensagens: conferir conta Sentinela no grupo, ONLINE, /sentinel on e código atualizado. O detector não pode analisar dados que não chegaram.
+
+REMOÇÃO
+Após validar no grupo de teste:
+/sentinel modo remover
+Reverte com /sentinel modo observar.
+Marcação em massa: >=10 identificadores únicos nas menções reais de mensagem atual, em >=2 mensagens do mesmo autor e grupo, com intervalo de no máximo 15s entre eventos suspeitos. Cada mensagem passa pela janela de comparação, padrão 2000ms; janela configurável de 1200 a 10000ms. IDs repetidos e citações não contam.
+Links no texto/legenda continuam sendo detectados; menções não precisam de link para serem suspeitas.
+Não faz OCR, download nem análise visual de imagens. Só lê os campos efetivamente entregues ao bot. Atraso da conta principal pode produzir ausência temporária; isso não prova que uma mensagem é invisível.
+O alvo é o autor (participant/participantAlt), nunca quem foi marcado. Respeita ADM, dono e whitelist e passa pelo removedor protegido existente. Falha de consulta de grupo cancela punição.
+
+TESTES
+Passaram testes simulados de: imagem e envelope, deduplicação de menções, citação ignorada, observação sem punição, remoção após repetição, ADM/whitelist, cancelamento e corridas da versão anterior, pareamento e ausência de consulta global por comando. Ainda precisa de teste WhatsApp real.
+A primeira rodada deve ser de observação, com mensagens normais e marcações consensuais em grupo de teste. Não precisa reproduzir ataques nem usar serviços de flood.
+
+PERFORMANCE/PRIVACIDADE
+Parser limitado, sem consulta de membros para contar menções. Até 1000 comparações pendentes; excedentes entram no contador de fila cheia. Diagnóstico só guarda contadores/tipo/quantidade; não guarda lista de pessoas marcadas, mídia ou chaves. Logs de suspeita guardam autor, grupo, mensagem e motivo. Conexão inicia pausada após reinício; /sentinel parear reconecta.
