@@ -8168,99 +8168,6 @@ case "antifarmdiario": {
   if (!isGroup) return reply(mess.onlyGroup());
   const action = String(args?.[0] || "status").toLowerCase();
 
-
-  if (action === "status") {
-    return reply(
-      `╭━━〔 🛰️ SENTINEL BRIDGE 〕━━╮\n` +
-      `┃ 📡 Transporte: *WhatsApp*\n` +
-      `┃ 🛡️ Sistema: *${s.enabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
-      `┃ 🧪 Modo: *${s.testMode ? "TESTE (sem remoção)" : "PROTEÇÃO (remove)"}*\n` +
-      `┃ 📱 Sentinela: *${s.sentinelNumber || "não configurada"}*\n` +
-      `┃ 📨 Recebidos: *${s.received}*\n` +
-      `┃ ✅ Aceitos: *${s.accepted}*\n` +
-      `┃ ⛔ Rejeitados: *${s.rejected}*\n` +
-      `┃ 🔨 Remoções: *${s.removals}*\n` +
-      `┃\n` +
-      `┃ ${prefix}sentinelbridge token\n` +
-      `┃ ${prefix}sentinelbridge renovar\n` +
-      `┃ ${prefix}sentinelbridge logs\n` +
-      `┃ ${prefix}sentinelbridge numero 55DDDNUMERO\n` +
-      `┃ ${prefix}sentinelbridge teste/proteger\n` +
-      `┃ ${prefix}sentinelbridge on/off\n` +
-      `╰━━━━━━━━━━━━━━━━━━━━━━╯`
-    );
-  }
-
-  if (action === "token") {
-    const tokenText = `🛰️ *TOKEN DO SENTINEL BRIDGE*\n\n${s.secret}\n\n⚠️ Não compartilhe este token. Use-o como bridgeSecret no config.json do Sentinel Core.`;
-    if (from === dono) return reply(tokenText);
-    await conn.sendMessage(dono, { text: tokenText }).catch(() => {});
-    return reply("🔐 Enviei o token do Sentinel Bridge no PV do dono.");
-  }
-
-  if (["renovar","rotate","rotacionar"].includes(action)) {
-    const secret = rotateSentinelBridgeSecret();
-    await conn.sendMessage(dono, { text: `🔐 *NOVO TOKEN SENTINEL BRIDGE*\n\n${secret}\n\nAtualize o bridgeSecret do Sentinel Core.` }).catch(() => {});
-    return reply("✅ Token do Bridge renovado. O novo token foi enviado ao PV do dono.");
-  }
-
-  if (["numero","número","number"].includes(action)) {
-    const number = String(args?.[1] || "").replace(/\D/g, "");
-    if (number.length < 10 || number.length > 15) {
-      return reply(`📱 Use: *${prefix}sentinelbridge numero 55DDDNUMERO*`);
-    }
-    const cfg = setSentinelWhatsAppNumber(number);
-    return reply(`✅ Número autorizado da Sentinela: *${cfg.sentinelNumber}*\n\nEssa conta deve permanecer como membro comum.`);
-  }
-
-  if (["teste","test"].includes(action)) {
-    setSentinelBridgeTestMode(true);
-    return reply("🧪 Sentinel Bridge em *modo de teste*. Os eventos serão validados e registrados, sem remover membros.");
-  }
-
-  if (["proteger","protecao","proteção","ativo"].includes(action)) {
-    setSentinelBridgeTestMode(false);
-    return reply("🛡️ Sentinel Bridge em *modo de proteção*. Eventos válidos poderão remover invasores.");
-  }
-
-  if (action === "on" || action === "off") {
-    const cfg = setSentinelBridgeEnabled(action === "on");
-    if (cfg.enabled) ensureSentinelBridgeServer();
-    return reply(`🛰️ Sentinel Bridge *${cfg.enabled ? "ativado ✅" : "desativado ❌"}*.`);
-  }
-
-  if (action === "logs" || action === "log") {
-    const logs = getSentinelBridgeLogs(10);
-    if (!logs.length) return reply("🛰️ Ainda não há eventos no Sentinel Bridge.");
-    return reply(
-      `╭━━〔 🛰️ BRIDGE LOG 〕━━╮\n` +
-      logs.map((x,i)=>`┃ ${i+1}. ${x.action || "evento"} • ${x.reason || (x.reasons||[]).join(", ") || "ok"}\n┃ ${new Date(x.timestamp||Date.now()).toLocaleString("pt-BR")}`).join("\n┃\n") +
-      `\n╰━━━━━━━━━━━━━━━━━━╯`
-    );
-  }
-
-  return reply(`🛰️ Use *${prefix}sentinelbridge status*.`);
-}
-break;
-
-case "sentinel": {
-  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode configurar o Kobayashi Sentinel.");
-
-  const action = String(args?.[0] || "status").toLowerCase();
-
-  if (action === "modo") {
-    if (!isGroup) return reply(mess.onlyGroup());
-    const mode=String(args[1]||"").toLowerCase();
-    if (!["observar","remover"].includes(mode)) return reply(`Use ${prefix}sentinel modo observar ou ${prefix}sentinel modo remover.`);
-    setSentinelMode(from,mode);
-    return reply(`🛰️ Modo: *${mode}*. ${mode==='observar'?'Ocorrências serão registradas sem apagar ou remover.':'Remoção automática habilitada para mensagens suspeitas ausentes na principal. Menções: pelo menos 10 pessoas, repetidas em 2 mensagens em até 15s.'}`);
-  }
-  if (action === "diagnostico" || action === "diagnóstico") {
-    if (!isGroup) return reply(mess.onlyGroup());
-    const d=getSentinelDiagnostic(from);
-    return reply(`🛰️ DIAGNÓSTICO SENTINELA\nModo: ${d.mode}\nRecebidas pelo Sentinela: ${d.received||0}\nRecebidas nas duas contas: ${d.shared||0}\nAusentes na comparação: ${d.compared||0}\nSuspeitas: ${d.suspected||0}\nPendentes: ${d.pending}\nLimite de fila atingido: ${d.overflow||0}\nÚltimo tipo: ${d.type||'-'}\nMenções no último evento: ${d.mentions||0}\nContadores em memória; zeram ao reiniciar.`);
-  }
-
   if (action === "on" || action === "off") {
     if (!isGroupAdmins) return reply(mess.onlyAdmins());
     const enabled = setAntiFarmEnabled(from, action === "on");
@@ -10178,6 +10085,99 @@ case "bridge": {
   const action = String(args?.[0] || "status").toLowerCase();
   const s = getSentinelBridgeStatus();
 
+  if (action === "status") {
+    return reply(
+      `╭━━〔 🛰️ SENTINEL BRIDGE 〕━━╮\n` +
+      `┃ 📡 Transporte: *WhatsApp*\n` +
+      `┃ 🛡️ Sistema: *${s.enabled ? "ATIVO ✅" : "DESATIVADO ❌"}*\n` +
+      `┃ 🧪 Modo: *${s.testMode ? "TESTE (sem remoção)" : "PROTEÇÃO (remove)"}*\n` +
+      `┃ 📱 Sentinela: *${s.sentinelNumber || "não configurada"}*\n` +
+      `┃ 📨 Recebidos: *${s.received}*\n` +
+      `┃ ✅ Aceitos: *${s.accepted}*\n` +
+      `┃ ⛔ Rejeitados: *${s.rejected}*\n` +
+      `┃ 🔨 Remoções: *${s.removals}*\n` +
+      `┃\n` +
+      `┃ ${prefix}sentinelbridge token\n` +
+      `┃ ${prefix}sentinelbridge renovar\n` +
+      `┃ ${prefix}sentinelbridge logs\n` +
+      `┃ ${prefix}sentinelbridge numero 55DDDNUMERO\n` +
+      `┃ ${prefix}sentinelbridge teste/proteger\n` +
+      `┃ ${prefix}sentinelbridge on/off\n` +
+      `╰━━━━━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  if (action === "token") {
+    const tokenText = `🛰️ *TOKEN DO SENTINEL BRIDGE*\n\n${s.secret}\n\n⚠️ Não compartilhe este token. Use-o como bridgeSecret no config.json do Sentinel Core.`;
+    if (from === dono) return reply(tokenText);
+    await conn.sendMessage(dono, { text: tokenText }).catch(() => {});
+    return reply("🔐 Enviei o token do Sentinel Bridge no PV do dono.");
+  }
+
+  if (["renovar","rotate","rotacionar"].includes(action)) {
+    const secret = rotateSentinelBridgeSecret();
+    await conn.sendMessage(dono, { text: `🔐 *NOVO TOKEN SENTINEL BRIDGE*\n\n${secret}\n\nAtualize o bridgeSecret do Sentinel Core.` }).catch(() => {});
+    return reply("✅ Token do Bridge renovado. O novo token foi enviado ao PV do dono.");
+  }
+
+  if (["numero","número","number"].includes(action)) {
+    const number = String(args?.[1] || "").replace(/\D/g, "");
+    if (number.length < 10 || number.length > 15) {
+      return reply(`📱 Use: *${prefix}sentinelbridge numero 55DDDNUMERO*`);
+    }
+    const cfg = setSentinelWhatsAppNumber(number);
+    return reply(`✅ Número autorizado da Sentinela: *${cfg.sentinelNumber}*\n\nEssa conta deve permanecer como membro comum.`);
+  }
+
+  if (["teste","test"].includes(action)) {
+    setSentinelBridgeTestMode(true);
+    return reply("🧪 Sentinel Bridge em *modo de teste*. Os eventos serão validados e registrados, sem remover membros.");
+  }
+
+  if (["proteger","protecao","proteção","ativo"].includes(action)) {
+    setSentinelBridgeTestMode(false);
+    return reply("🛡️ Sentinel Bridge em *modo de proteção*. Eventos válidos poderão remover invasores.");
+  }
+
+  if (action === "on" || action === "off") {
+    const cfg = setSentinelBridgeEnabled(action === "on");
+    if (cfg.enabled) ensureSentinelBridgeServer();
+    return reply(`🛰️ Sentinel Bridge *${cfg.enabled ? "ativado ✅" : "desativado ❌"}*.`);
+  }
+
+  if (action === "logs" || action === "log") {
+    const logs = getSentinelBridgeLogs(10);
+    if (!logs.length) return reply("🛰️ Ainda não há eventos no Sentinel Bridge.");
+    return reply(
+      `╭━━〔 🛰️ BRIDGE LOG 〕━━╮\n` +
+      logs.map((x,i)=>`┃ ${i+1}. ${x.action || "evento"} • ${x.reason || (x.reasons||[]).join(", ") || "ok"}\n┃ ${new Date(x.timestamp||Date.now()).toLocaleString("pt-BR")}`).join("\n┃\n") +
+      `\n╰━━━━━━━━━━━━━━━━━━╯`
+    );
+  }
+
+  return reply(`🛰️ Use *${prefix}sentinelbridge status*.`);
+}
+break;
+
+case "sentinel": {
+  if (!SoDonoPrincipal) return reply("👑 Apenas o dono principal pode configurar o Kobayashi Sentinel.");
+
+  const action = String(args?.[0] || "status").toLowerCase();
+
+  if (action === "modo") {
+    if (!isGroup) return reply(mess.onlyGroup());
+    const mode=String(args[1]||"").toLowerCase();
+    if (!["observar","remover"].includes(mode)) return reply(`Use ${prefix}sentinel modo observar ou ${prefix}sentinel modo remover.`);
+    setSentinelMode(from,mode);
+    return reply(`🛰️ Modo: *${mode}*. ${mode==='observar'?'Ocorrências serão registradas sem apagar ou remover.':'Remoção automática habilitada para mensagens suspeitas ausentes na principal. Menções: pelo menos 10 pessoas, repetidas em 2 mensagens em até 15s.'}`);
+  }
+  if (action === "diagnostico" || action === "diagnóstico") {
+    if (!isGroup) return reply(mess.onlyGroup());
+    const d=getSentinelDiagnostic(from);
+    return reply(`🛰️ DIAGNÓSTICO SENTINELA\nModo: ${d.mode}\nRecebidas pelo Sentinela: ${d.received||0}\nRecebidas nas duas contas: ${d.shared||0}\nAusentes na comparação: ${d.compared||0}\nSuspeitas: ${d.suspected||0}\nPendentes: ${d.pending}\nLimite de fila atingido: ${d.overflow||0}\nÚltimo tipo: ${d.type||'-'}\nMenções no último evento: ${d.mentions||0}\nContadores em memória; zeram ao reiniciar.`);
+  }
+
+
 
   if (action === "status") {
     const s = getSentinelStatus(from);
@@ -10241,7 +10241,7 @@ case "bridge": {
       enabled
         ? `🛰️✅ *Kobayashi Sentinel ativado neste grupo.*\n\n` +
           `A conta membro comum irá comparar mensagens com a Kobayashi ADM.\n` +
-          `Modo atual: *${getSentinelDiagnostic(from).mode}*. Use /sentinel diagnostico para conferir o recebimento. Em observação não há punição; /sentinel modo remover habilita as ações.`
+          `Modo atual: *${getSentinelDiagnostic(from).mode}*. Em observação não há punição. Use /sentinel diagnostico para conferir o recebimento.`
         : `🛰️❌ *Kobayashi Sentinel desativado neste grupo.*`
     );
   }

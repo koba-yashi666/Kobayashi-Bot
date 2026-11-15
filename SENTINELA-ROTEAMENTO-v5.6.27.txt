@@ -1,0 +1,8 @@
+KOBAYASHI v5.6.27
+Corrige uma regressão da v5.6.26 que misturou os corpos dos comandos antifarm, sentinel e sentinelbridge.
+Restaura o index.js da v5.6.25 e aplica as opções novas apenas no case sentinel correto. A lista completa de comandos foi preservada.
+Testes executam os corpos reais dos cases em contexto simulado: /sentinel status, off, modo remover, diagnostico; /antifarm status/off; /sentinelbridge status; proteção do dono.
+Mantém detector de menções e modo observar/remover da v5.6.26. Sessões e bancos não são apagados.
+Depois de atualizar/reiniciar, use /sentinel status. Não deve mostrar Anti-Farm.
+/sentinel parear NUMERO para reconectar a sessão, /sentinel on e /sentinel modo observar. Confira /sentinel diagnostico e /sentinel log.
+Teste de rede WhatsApp ainda depende da hospedagem.

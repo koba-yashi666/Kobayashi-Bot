@@ -1,5 +1,5 @@
 {
-  "version": "5.6.26",
-  "name": "Kobayashi Bot v5.6.26 — Sentinela: menções e diagnóstico",
-  "update": "Detector de menções em massa, modo observar/remover e diagnóstico de recebimento por grupo."
+  "version": "5.6.27",
+  "name": "Kobayashi Bot v5.6.27 — Corrige roteamento do Sentinela",
+  "update": "Separa comandos Sentinela, antifarm e bridge, mantendo detector de menções e diagnóstico."
 }
