@@ -1,0 +1,13 @@
+KOBAYASHI v5.6.29 — PLAY ÁUDIO E VÍDEO
+
+/play Anestesiado Bruno e Marrone
+/play LINK_DO_YOUTUBE
+
+O resultado mostra informações e dois botões: Áudio e Vídeo. Somente quem pediu pode usar a escolha no mesmo chat, por cinco minutos; reinício apaga as escolhas. Cada escolha permite um download. Para obter outro formato, faça /play novamente.
+Áudio: envia descrição em texto e depois o arquivo de áudio.
+Vídeo: envia vídeo com a descrição na legenda, exibida abaixo da mídia no WhatsApp.
+Ficha: título, canal, duração, visualizações, publicação, link e descrição disponíveis no yt-search. Descrição até 4000 caracteres; campos indisponíveis são informados sem inventar dados.
+O token Yuta existente é reaproveitado. Áudio usa ytaudio2; vídeo usa ytvideo. Limite 32MB por arquivo; sem download de mídia antes da seleção.
+Se falhar o envio interativo, oferece dois comandos textuais com a mesma escolha. Se o WhatsApp não renderizar botões apesar de confirmar o envio, faça /play novamente; essa limitação de cliente não pode ser detectada automaticamente.
+Não aplica o bloqueio de ativação central da v5.6.28; esse projeto continua separado até configuração do serviço.
+Testes locais simulados passaram, inclusive respostas binárias e JSON da Yuta, limites e roteamento. Não foi realizado download real pela API nem teste de botões em conta WhatsApp real.

@@ -1,3 +1,4 @@
+import {handlePlay} from "./lib/features/downloads/playChoice.js";
 import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
@@ -5417,161 +5418,11 @@ case "ajudacmd": {
 break;
 
 case "play": {
-  const query = String(q || "").trim();
-
-  if (!query) {
-    return reply(
-      `╭──────「 🎧 」──────╮\n` +
-      `       *PLAY*\n` +
-      `╰──────────────────╯\n\n` +
-      `🌸 Digite o nome da música ou envie um link do YouTube.\n\n` +
-      `🎵 *${prefix}play nome da música*\n` +
-      `🔗 *${prefix}play link do YouTube*`
-    );
-  }
-
-  try {
-    await reagir("🎧");
-
-    const cfg = readSettingsFile();
-    const yutaToken = String(cfg.yutaToken || "").trim();
-
-    if (!yutaToken || yutaToken === "COLOQUE_SEU_TOKEN_YUTA_AQUI") {
-      return reply(
-        `🎧🌸 *PLAY NÃO CONFIGURADO*\n\n` +
-        `O serviço de música ainda não foi configurado pelo dono do bot.\n\n` +
-        `👑 Dono: use *${prefix}yutatoken TOKEN* para ativar o Play.`
-      );
-    }
-
-    const ytsModule = await import("yt-search");
-    const yts = ytsModule.default || ytsModule;
-
-    const isUrl = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)/i.test(query);
-    let video = null;
-
-    if (isUrl) {
-      let videoId = null;
-      try {
-        const u = new URL(query);
-        if (u.hostname.includes("youtu.be")) {
-          videoId = u.pathname.split("/").filter(Boolean)[0];
-        } else if (u.pathname.includes("/shorts/")) {
-          videoId = u.pathname.split("/shorts/")[1]?.split(/[?&/]/)[0];
-        } else {
-          videoId = u.searchParams.get("v");
-        }
-      } catch {}
-
-      if (videoId) video = await yts({ videoId });
-    } else {
-      const result = await yts(query);
-      video = result?.videos?.[0];
-    }
-
-    if (!video?.url) {
-      return reply("🌸 Não encontrei essa música no YouTube.");
-    }
-
-    await conn.sendMessage(from, {
-      image: { url: video.thumbnail },
-      caption:
-        `╭──────「 🎧 」──────╮\n` +
-        `    *KOBAYASHI PLAY*\n` +
-        `╰──────────────────╯\n\n` +
-        `🎵 *${video.title || "Música"}*\n` +
-        `🎙️ Canal: ${video.author?.name || video.author || "Desconhecido"}\n` +
-        `⏱️ Duração: ${video.timestamp || "—"}\n` +
-        `🔗 ${video.url}\n\n` +
-        `🌸 Preparando seu áudio...`
-    }, { quoted: info });
-
-    // Rota de áudio usada pelo sistema do Kobayashi V10.
-    const apiUrl =
-      `https://yuta-apis.xyz/api/downloads/ytaudio2?url=${encodeURIComponent(video.url)}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        "Authorization": yutaToken,
-        "x-yuta-client": "KobayashiBot-MD",
-        "x-yuta-apikey": "lmonly_92848OlfQmCn836B53OSR1mEk7X7n8o63l8",
-        "Accept": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      let detail = "";
-      try { detail = await response.text(); } catch {}
-      throw new Error(`Yuta API HTTP ${response.status}: ${detail.slice(0,200)}`);
-    }
-
-    const contentType = String(response.headers.get("content-type") || "").toLowerCase();
-    const buffer = Buffer.from(await response.arrayBuffer());
-
-    // O endpoint do Kobayashi retorna o áudio diretamente.
-    // Se a API devolver JSON de erro, mostramos uma mensagem mais clara.
-    if (contentType.includes("application/json")) {
-      let apiData = null;
-      try { apiData = JSON.parse(buffer.toString("utf8")); } catch {}
-
-      if (apiData) {
-        const possibleUrl =
-          apiData?.url ||
-          apiData?.audio ||
-          apiData?.result?.url ||
-          apiData?.result?.audio ||
-          apiData?.data?.url ||
-          apiData?.data?.audio;
-
-        if (typeof possibleUrl === "string" && /^https?:\/\//i.test(possibleUrl)) {
-          const mediaRes = await fetch(possibleUrl);
-          if (!mediaRes.ok) throw new Error(`Falha ao baixar áudio retornado pela API: ${mediaRes.status}`);
-          const audioBuffer = Buffer.from(await mediaRes.arrayBuffer());
-
-          await conn.sendMessage(from, {
-            audio: audioBuffer,
-            mimetype: "audio/mpeg",
-            fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0,80)}.mp3`
-          }, { quoted: info });
-
-          await reagir("🌸");
-          break;
-        }
-
-        const apiMessage =
-          apiData?.message ||
-          apiData?.msg ||
-          apiData?.error ||
-          "A API não retornou um áudio válido.";
-
-        throw new Error(String(apiMessage));
-      }
-    }
-
-    if (!buffer.length) throw new Error("A Yuta API retornou um arquivo vazio.");
-
-    await conn.sendMessage(from, {
-      audio: buffer,
-      mimetype: contentType.includes("audio/") ? contentType.split(";")[0] : "audio/mpeg",
-      fileName: `${String(video.title || "Kobayashi Play").replace(/[\\/:*?"<>|]/g, "").slice(0,80)}.mp3`
-    }, { quoted: info });
-
-    await reagir("🌸");
-  } catch (e) {
-    console.error("[PLAY] Erro ao preparar áudio:", e);
-    const errorText = String(e?.message || e || "");
-
-    if (/401|403|token|authorization|unauthorized/i.test(errorText)) {
-      return reply("🔑❌ O serviço de música recusou a configuração atual. O dono precisa atualizar o token do Play.");
-    }
-
-    return reply(
-      `❌🌸 Não consegui preparar essa música agora. Tente novamente em alguns instantes.`
-    );
-  }
+  return handlePlay({q,prefix,sender,from,conn,info,reply,
+    token:String(readSettingsFile().yutaToken||'').trim(),clientKey:YUTA_CLIENT_KEY,
+    generateWAMessageFromContent});
 }
 break;
-
 
 case "pinterest":
 case "youtube":

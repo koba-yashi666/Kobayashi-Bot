@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';
+import {createPlayHandler,sendPlayButtons} from '../lib/features/downloads/playChoice.js';
+let now=1000,buttons=[],sent=[],replies=[],downloads=[];
+const video={title:'Anestesiado',url:'https://www.youtube.com/watch?v=abcdefghijk',author:{name:'Canal'},timestamp:'3:00',views:20,description:'Descrição disponível'};
+const handle=createPlayHandler({clock:()=>now,search:async()=>({videos:[video]}),sendButtons:async(ctx,v,id)=>buttons.push(id),download:async(service,url)=>{downloads.push({service,url});return {kind:service==='playAudio'?'audio':'video',bytes:Buffer.from('ID3 example')};}});
+const ctx={q:'Anestesiado cantor',token:'test',prefix:'/',sender:'user',from:'group',info:{},reply:async x=>replies.push(x),conn:{sendMessage:async(to,content)=>sent.push(content)}};
+await handle(ctx);assert.equal(downloads.length,0);assert.equal(buttons.length,1);
+await handle({...ctx,sender:'other',q:'audio'}); // nova busca não permite escolher menu alheio
+await handle({...ctx,sender:'other',q:'audio '+buttons[0]});assert.equal(downloads.length,0);
+await handle({...ctx,q:'audio '+buttons[0]});assert.equal(downloads[0].service,'playAudio');assert.match(sent[0].text,/Descrição disponível/);assert.ok(sent[1].audio);
+await handle({...ctx,q:'video '+buttons[0]});assert.equal(downloads.length,1);
+now+=16000;await handle(ctx);await handle({...ctx,q:'video '+buttons.at(-1)});assert.ok(sent.at(-1).video);assert.match(sent.at(-1).caption,/Anestesiado/);assert.equal(downloads.at(-1).url,video.url);
+await handle(ctx);now+=300001;await handle({...ctx,q:'audio '+buttons.at(-1)});assert.equal(downloads.length,2);
+let relayed;
+await sendPlayButtons({from:'group@g.us',prefix:'/',info:{},conn:{user:{id:'bot'},relayMessage:async(...args)=>relayed=args}},video,'abc',(jid,content)=>({key:{id:'message'},message:content}));
+assert.deepEqual(relayed[1].interactiveMessage.nativeFlowMessage.buttons.map(b=>JSON.parse(b.buttonParamsJson).id),['/play audio abc','/play video abc']);
+const fail=createPlayHandler({search:async()=>({videos:[video]}),sendButtons:async()=>{throw Error('fail')}});
+await fail(ctx);assert.match(replies.at(-1),/play audio [a-f0-9]{24}/);
+console.log('Play: botões áudio/vídeo, sem download antes da escolha, mesmo resultado, autoria, uso único, expiração, legenda, ordem do áudio e alternativa textual OK.');

@@ -3,6 +3,12 @@ import {validSource,safeMediaUrl,fetchYutaMedia,resultUrls,createDownloadHandler
 const mp4=Buffer.concat([Buffer.from([0,0,0,24]),Buffer.from('ftypisom'),Buffer.alloc(30)]),jpg=Buffer.from([255,216,255,224,1,2,3]);
 const json=o=>new Response(JSON.stringify(o),{headers:{'content-type':'application/json'}});
 const lookup=async()=>[{address:'8.8.8.8'}];
+const audio=Buffer.from('ID3 mock mp3');
+const audioDirect=await fetchYutaMedia('playAudio','https://youtu.be/abcdefghijk',{token:'SECRET',lookup,fetchImpl:async url=>{assert.equal(new URL(url).pathname,'/api/downloads/ytaudio2');return new Response(audio);}});
+assert.equal(audioDirect.kind,'audio');
+let audioRemote=false;
+const audioJson=await fetchYutaMedia('playAudio','https://youtu.be/abcdefghijk',{token:'SECRET',lookup,fetchImpl:async(url,options)=>{if(url.startsWith('https://yuta-apis.xyz'))return json({result:{audio:'https://cdn.test/audio.mp3'}});audioRemote=true;assert(!options.headers.Authorization);return new Response(audio);}});
+assert.equal(audioJson.kind,'audio');assert(audioRemote);
 for(const [platform,url] of [['youtube','https://youtu.be/abcd'],['youtube','https://www.youtube.com/shorts/abcd'],['tiktok','https://vm.tiktok.com/a'],['instagram','https://www.instagram.com/reel/a'],['pinterest','https://pin.it/a']])assert(validSource(url,platform));
 for(const url of ['https://youtube.com.evil.test/a','https://youtube.com@evil.test','http://youtube.com/a','https://youtube.com:8443/a'])assert(!validSource(url,'youtube'));
 for(const url of ['http://127.0.0.1/a','http://169.254.169.254/a','http://[::1]/a','http://[::ffff:127.0.0.1]/a','file:///tmp/a'])await assert.rejects(()=>safeMediaUrl(url,lookup));
