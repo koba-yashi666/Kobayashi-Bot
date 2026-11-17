@@ -14,6 +14,13 @@ await handle(ctx);now+=300001;await handle({...ctx,q:'audio '+buttons.at(-1)});a
 let relayed;
 await sendPlayButtons({from:'group@g.us',prefix:'/',info:{},conn:{user:{id:'bot'},relayMessage:async(...args)=>relayed=args}},video,'abc',(jid,content)=>({key:{id:'message'},message:content}));
 assert.deepEqual(relayed[1].interactiveMessage.nativeFlowMessage.buttons.map(b=>JSON.parse(b.buttonParamsJson).id),['/play audio abc','/play video abc']);
+const thumbCtx={from:'group@g.us',prefix:'/',info:{},prepareWAMessageMedia:async(content)=>{assert.equal(content.image.url,'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg');return {imageMessage:{url:'uploaded'}}},conn:{user:{id:'bot'},relayMessage:async(...args)=>relayed=args}};
+await sendPlayButtons(thumbCtx,{...video,thumbnail:'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg'},'abc',(jid,content)=>({key:{id:'m'},message:content}));
+assert.equal(relayed[1].interactiveMessage.header.hasMediaAttachment,true);
+assert.equal(relayed[1].interactiveMessage.header.imageMessage.url,'uploaded');
+await sendPlayButtons({...thumbCtx,prepareWAMessageMedia:async()=>{throw Error('upload failed')}},{...video,thumbnail:'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg'},'abc',(jid,content)=>({key:{id:'m'},message:content}));
+assert.equal(relayed[1].interactiveMessage.header.hasMediaAttachment,false);
+assert.equal(relayed[1].interactiveMessage.nativeFlowMessage.buttons.length,2);
 const fail=createPlayHandler({search:async()=>({videos:[video]}),sendButtons:async()=>{throw Error('fail')}});
 await fail(ctx);assert.match(replies.at(-1),/play audio [a-f0-9]{24}/);
 console.log('Play: botões áudio/vídeo, sem download antes da escolha, mesmo resultado, autoria, uso único, expiração, legenda, ordem do áudio e alternativa textual OK.');

@@ -5420,7 +5420,7 @@ break;
 case "play": {
   return handlePlay({q,prefix,sender,from,conn,info,reply,
     token:String(readSettingsFile().yutaToken||'').trim(),clientKey:YUTA_CLIENT_KEY,
-    generateWAMessageFromContent});
+    generateWAMessageFromContent,prepareWAMessageMedia});
 }
 break;
 

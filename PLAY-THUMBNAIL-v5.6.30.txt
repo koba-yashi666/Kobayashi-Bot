@@ -1,0 +1,4 @@
+KOBAYASHI v5.6.30
+/play busca agora mostra thumbnail do vídeo acima da descrição e dos botões Áudio/Vídeo. Reaproveita o mesmo resultado e o token atual. Imagens de i.ytimg.com ou img.youtube.com em HTTPS.
+Se a imagem faltar ou falhar, mantém o menu de escolhas sem imagem. Não envia uma segunda mensagem de thumbnail separada.
+Testes simulados do cabeçalho, upload falhando e fluxo anterior passaram. Conferir renderização real no WhatsApp após atualizar e reiniciar a hospedagem.

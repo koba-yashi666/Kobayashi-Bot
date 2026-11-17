@@ -1,5 +1,5 @@
 {
-  "version": "5.6.29",
-  "name": "Kobayashi Bot v5.6.29 — Play: áudio e vídeo",
-  "update": "Busca única com botões Áudio/Vídeo, descrição e envio do formato escolhido."
+  "version": "5.6.30",
+  "name": "Kobayashi Bot v5.6.30 — Thumbnail no Play",
+  "update": "Resultado do /play com thumbnail do vídeo acima da descrição e dos botões."
 }
