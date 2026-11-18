@@ -1,5 +1,6 @@
 import {handlePlay} from "./lib/features/downloads/playChoice.js";
 import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
+import {handleBillingCommand,BILLING_COMMANDS} from "./lib/features/billing/commands.js";
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
 import { downloadStickerMedia, formatStickerDownloadDiagnostic } from "./lib/features/stickers/stickerMediaDownload.js";
@@ -1147,6 +1148,20 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "aliaslist",
   "alugel_permanente",
   "aluguel",
+  "alugar",
+  "renovar",
+  "meusalugueis",
+  "meuspagamentos",
+  "pagamento",
+  "cancelarpagamento",
+  "vincularaluguel",
+  "emailpagamento",
+  "mptoken",
+  "mpmodo",
+  "mpstatus",
+  "mpteste",
+  "mppreco",
+  "mpavisos",
   "aluguel_avisos",
   "aluguel_global",
   "aluguel_gratis",
@@ -2174,7 +2189,7 @@ if (pendingUpdateNews?.targetJid) {
   }
 }
 
-if (!isGroup && !isStatus && !info.key.fromMe && !SoDono) {
+if (!isGroup && !isStatus && !info.key.fromMe && !SoDono && !BILLING_COMMANDS.has(command)) {
   // Compatibilidade: instalações antigas com antiPv=true entram em modo aviso.
   const antiPvMode = String(
     runtimeSettings?.antiPvMode ||
@@ -2704,7 +2719,7 @@ if (((isCmd && command) || kobaQuestion(info.message?.conversation ?? info.messa
     blockedByRental = !rentalState?.active;
   }
 
-  if (blockedByRental && (expiredRental || !rentalSafeCommands.has(command))) {
+  if (blockedByRental && !BILLING_COMMANDS.has(command) && (expiredRental || !rentalSafeCommands.has(command))) {
     const expired = expiredRental;
     await reply(
       `🐉🌸 *KOBAYASHI • ACESSO RESTRITO*\n\n` +
@@ -3111,6 +3126,8 @@ if (!isCmd && !info.key.fromMe && /^prefixo[!?]?$/.test(String(prefixQueryText).
 }
 
 if (isCmd) {
+  if(await handleBillingCommand({command,q,from,sender,conn,info,reply,prefix,isGroup,
+    identities:ownerIdentityCandidates,generate:generateWAMessageFromContent}))continue;
   if (OWNER_COMMANDS.has(command) && !SoDonoPrincipal) {
     await reply("👑🐉 Este comando é exclusivo do dono do bot.");
     continue;
@@ -3601,39 +3618,15 @@ break;
 
 case "planos":
 case "plans": {
-  const plans = listRentalPlans();
-  const caption =
-    `╭━━〔 🏷️🐉 *KOBAYASHI • PLANOS* 〕━━╮\n` +
-    plans.map((p) => `┃ *${p.id}.* ${p.name}\n┃ 📅 ${p.days} dias • 💰 R$ ${p.price.toFixed(2).replace(".", ",")}\n┃ 🤝 Parceria: +${p.partnerBonusDays} dias`).join("\n┃\n") +
-    `\n╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-    `🔎 Veja um plano: *${prefix}plano 1* até *${prefix}plano 4*\n` +
-    `📩 *Contato do dono:* https://wa.me/5515997075304\n` +
-    `💬 Escolha um plano para receber o link já com o plano selecionado.`;
-  try {
-    const planImage = fs.readFileSync(new URL("./assets/kobayashi-planos.png", import.meta.url));
-    await conn.sendMessage(from, { image: planImage, caption }, { quoted: info });
-    return;
-  } catch {
-    return reply(caption);
-  }
+  return handleBillingCommand({command:'alugar',q:'',from,sender,conn,info,reply,prefix,isGroup,
+    identities:ownerIdentityCandidates,generate:generateWAMessageFromContent});
+
 }
 break;
 
 case "plano": {
-  const plan = getRentalPlan(args[0]);
-  if (!plan) return reply(`📦 Use *${prefix}plano 1*, *2*, *3* ou *4*.`);
-  return reply(
-    `╭━━〔 🐉 *${plan.name.toUpperCase()}* 〕━━╮\n` +
-    `┃ 📅 Duração: *${plan.days} dias*\n` +
-    `┃ 💰 Valor: *R$ ${plan.price.toFixed(2).replace(".", ",")}*\n` +
-    `┃ 🤝 Com parceria: *+${plan.partnerBonusDays} dias grátis*\n` +
-    `┃ 🎁 Total com parceria: *${plan.days + plan.partnerBonusDays} dias*\n` +
-    `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-    `📩 *CONTRATAR ESTE PLANO*\n` +
-    `🔗 https://wa.me/5515997075304?text=${encodeURIComponent(`Olá! Quero contratar o Plano ${plan.id} - ${plan.name} do Kobayashi Bot (${plan.days} dias por R$ ${plan.price.toFixed(2).replace(".", ",")}).`)}\n\n` +
-    `👑 Dono: https://wa.me/5515997075304\n` +
-    `📦 Plano selecionado: *Plano ${plan.id} - ${plan.name}*`
-  );
+  return handleBillingCommand({command:'alugar',q:'',from,sender,conn,info,reply,prefix,isGroup,
+    identities:ownerIdentityCandidates,generate:generateWAMessageFromContent});
 }
 break;
 

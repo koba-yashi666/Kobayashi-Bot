@@ -1,0 +1,86 @@
+KOBAYASHI v5.6.32 — PIX, CONTRATAÇÃO E RENOVAÇÃO
+
+IMPORTANTE ANTES DE ATUALIZAR
+A saída por vencimento vale para TODOS os contratos temporários registrados, antigos e novos. Se um grupo já estiver vencido há mais de duas horas, o bot poderá sair dele ao iniciar esta versão. Permanentes e grupos sem aluguel registrado não são removidos por esta rotina. Atualize previamente prazos que devam continuar válidos usando os comandos manuais existentes.
+A verificação roda a cada minuto enquanto o processo está conectado. Duas horas são a carência, não promessa de execução em um segundo exato. Falha de rede, desconexão ou conciliação de pagamento pendente podem adiar a saída.
+
+PLANOS POR GRUPO, SEM DESCONTO AUTOMÁTICO
+Plano Inicial: 15 dias — R$17
+Plano Popular: 30 dias — R$25
+Plano Premium: 60 dias — R$45
+Plano Supremo: 90 dias — R$67
+1, 2, 3 ou Mais grupos (digitar a quantidade de 1 a 50). Ex.: 30 dias x 3 grupos = R$75. Preço e quantidade são calculados no bot, não aceitos do botão como total.
+Os mesmos quatro planos são usados nos comandos manuais por ID 1/2/3/4 para novos registros/renovações. Contratos já registrados NÃO têm seus prazos ou valores reescritos retroativamente. Bônus de parceria dos comandos manuais existentes são preservados; compra Pix não concede bônus extra automaticamente.
+
+COMECE SEM DINHEIRO (SÓ CRIADOR +5515997075304, NO PRIVADO)
+/mpteste suite
+Executa 21 verificações locais sem API, clientes ou grupos reais.
+/mpmodo teste
+/mpteste menu
+Percorra plano, quantidade e resumo. O pedido terá rótulo SIMULAÇÃO — NÃO PAGUE, sem Pix real.
+/mpteste aprovar ID
+/mpteste cancelar ID
+/mpteste expirar ID
+Essas ações só funcionam em pedidos simulados do próprio criador e NUNCA alteram aluguel real.
+/mpteste renovar
+Testa a seleção dos grupos cadastrados em nome do criador, sem renovar os contratos reais. Se não houver grupos vinculados ao criador, informa isso.
+
+CONFIGURAR A API NO PRIVADO DO BOT
+/mptoken SEU_ACCESS_TOKEN
+Salva em settings/mercadopago.json com permissão restrita e tenta apagar a mensagem. Se falhar a exclusão, avisa para apagar manualmente. Nunca repete o token na resposta. NÃO envie o token neste chat, grupos ou GitHub.
+/mpteste conexao
+Consulta GET /users/me para validar credencial e registrar a conta recebedora. Não cria cobrança. Se falhar, permanece bloqueada a liberação do modo real.
+/mpstatus
+Mostra presença da credencial, conta validada e modo, sem mostrar o segredo.
+/emailpagamento seu@email.com
+Cadastre um e-mail real de pagador antes de gerar Pix. A integração envia email ao Mercado Pago; não inventa CPF ou e-mail. A API pode exigir dados adicionais conforme a conta. Se isso acontecer, não há liberação: o teste real deve confirmar as exigências dessa conta antes da produção.
+
+PILOTO REAL EXCLUSIVO DO CRIADOR
+/mpmodo piloto CONFIRMAR
+Somente o criador pode gerar cobrança REAL usando /alugar. Clientes não podem gerar Pix real nesse modo. O resumo informa o valor e precisa de confirmação antes da cobrança. A aprovação só ocorre após consulta autenticada à API. Não há comando para forçar aprovação de pedido real. O pagamento do Pix em si é uma ação manual e envolve dinheiro real; esta entrega não executou nenhum pagamento.
+
+ABRIR PARA CLIENTES APÓS VALIDAR O PILOTO
+/mpmodo producao CONFIRMAR
+/mpmodo off — bloqueia novas cobranças reais; cobranças anteriores continuam sendo conciliadas.
+/mpmodo teste — clientes não geram Pix real; criador usa /mpteste menu.
+Trocar token desativa o modo real e exige validar a conta novamente. Se mudar a conta recebedora com cobranças em aberto, elas exigem conciliação usando a credencial original; não assumimos que outro recebedor é o mesmo.
+
+COMANDOS DO CLIENTE (PRIVADO)
+/alugar ou /planos — plano > quantidade > resumo > confirmar Pix.
+/alugar ajuda — comandos.
+/emailpagamento EMAIL — email real para a cobrança.
+/meuspagamentos — últimos 10 pedidos do próprio responsável.
+/pagamento ID — consulta/reconcilia pedido, limite de 15s entre consultas manuais.
+/cancelarpagamento ID — tenta cancelar cobrança ainda pendente, sujeito à resposta do Mercado Pago. Não cancela pagamento aprovado nem reembolsa.
+/vincularaluguel ID https://chat.whatsapp.com/CONVITE — depois de aprovado, vincula cada vaga de uma contratação nova a um grupo. O bot entra pelo convite e só consome a vaga quando a entrada é confirmada. Grupos com aprovação pendente precisam aguardar a entrada e repetir o comando. Promova o bot a ADM para moderação. Não substitui contrato de outro responsável nem permanente.
+/meusalugueis — grupos vinculados ao solicitante.
+/renovar — seleciona novo plano e quais grupos renovar. Lista paginada com 6 grupos/página, marcar/desmarcar, todos e resumo. Grupos de outros responsáveis não aparecem. Somente o responsável pode usar a seleção.
+Desmarcados continuam até a data paga, sem renovação. Pode confirmar não renovar nenhum, sem gerar Pix. Após criar a cobrança, a seleção daquele pedido fica fechada; outra escolha exige novo pedido.
+Compra antecipada acrescenta dias ao vencimento vigente; se já venceu, começa na data de processamento da aprovação. Cada grupo conserva seus dias restantes individualmente.
+
+CONFIRMAÇÃO AUTOMÁTICA
+Esta primeira versão consulta diretamente a API Payments do Mercado Pago a cada 30s, até 10 pedidos por rodada (fila e timeout podem ampliar esse prazo). Não precisa webhook ou segundo servidor HTTPS para esta função; o serviço de ativação da v5.6.28 permanece separado e NÃO é habilitado por este pacote.
+Usa POST /v1/payments com X-Idempotency-Key persistente e GET /v1/payments/ID. Aprovação exige: status approved, Pix, BRL, valor exato, referência do pedido, ID do pagamento, recebedor esperado, live_mode true e nenhum reembolso registrado.
+O retorno do cliente, comprovante ou um clique em Verificar não prova pagamento. Reenvio de confirmação não duplica os dias: o registro de aplicação fica no mesmo banco do aluguel. Se cair após gerar cobrança, a retomada usa a mesma chave e o mesmo corpo. Guarde backup dos bancos.
+Pedidos expirados continuam sendo conciliados por 48h para detectar confirmação atrasada; depois ainda podem ser consultados manualmente. Reembolsos e chargebacks encontrados na consulta viram review: não há reembolso automático nem retirada retroativa de dias; revisão do criador é necessária. Não há monitoramento financeiro indefinido de todos os pagamentos antigos.
+Uma contratação nova libera vagas, não entra em grupos sozinho antes do cliente enviar os convites. O prazo começa ao vincular o grupo. Vagas ainda não usadas não vencem automaticamente nesta versão. Não permite transferir grupos já vinculados entre pedidos ou pessoas.
+
+AVISOS E SAÍDA
+Avisos no privado do responsável e, por padrão, também no grupo: 7 dias, 3 dias e vencimento. Não contêm preço no grupo. Aviso privado oferece Renovar/Alterar plano e Meus aluguéis. Registros persistem por vencimento/canal para evitar repetir após reinício. Em falha de envio, haverá nova tentativa; entrega exatamente uma vez não é garantida se o processo cair entre enviar e registrar.
+/mpavisos off — desativa os avisos nos grupos; privado continua.
+/mpavisos on — reativa.
+No aluguel antigo, é necessário ter responsibleJid cadastrado para avisar no privado. Cadastre com o /rg_aluguel existente, mencionando o responsável. Não inferimos responsável pelo nome ou pelo criador do grupo. Mesmo sem responsável cadastrado, a saída por vencimento do contrato registrado continua funcionando.
+Antes de sair, o bot reconcilia cobranças de renovação pendentes daquele grupo e relê o contrato; uma renovação confirmada impede a saída. Se houver falha de consulta dessa cobrança pendente, adia a saída e tenta depois. O bot não cria débito recorrente mensal: cada renovação é uma nova cobrança Pix confirmada pelo cliente.
+
+PREÇOS CONFIGURÁVEIS (CRIADOR/PV)
+/mppreco 30 25.00 — altera preço por grupo para futuras cobranças. Planos possíveis: 15,30,60,90. Inicialmente usa exatamente os preços enviados acima. Se mudar depois do resumo, pede nova confirmação; pedido já criado conserva valor. Não há desconto por volume nesta versão.
+
+ARQUIVOS PRIVADOS / BACKUP
+settings/mercadopago.json — credencial, modo e preços. Nunca publicar.
+files/database/billing.json — pedidos, emails, seleções e avisos.
+files/database/alugueis.json — contratos e aplicações idempotentes de pagamentos.
+Updater preserva configuração e bancos. Rode uma instância por pasta/banco. Backup deve incluir ambos os bancos consistentemente. Banco inválido não deve ser substituído por um arquivo vazio.
+
+VALIDAÇÃO REAL PENDENTE
+Passaram testes locais com API simulada: preços/quantidades, permissões, interface, segredo sem eco, idempotência, falha/reinício, pagamentos incompatíveis, expiração/confirmacão tardia, seleção/nenhum grupo, legado, renovação, saída após 2h e permanentes; regressões de Menu, Play, Sentinela e permissões.
+Não houve conexão à conta real Mercado Pago, Pix real ou sessão WhatsApp real. O piloto serve para validar credencial, dados exigidos, QR e renderização dos botões na hospedagem. Falha de envio de botões usa alternativas textuais. Não podemos prometer operação perfeita antes dessa validação.

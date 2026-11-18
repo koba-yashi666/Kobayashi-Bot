@@ -9,3 +9,5 @@ npm-debug.log*
 .npm/
 
 /settings/gemini.json
+
+/settings/mercadopago.json

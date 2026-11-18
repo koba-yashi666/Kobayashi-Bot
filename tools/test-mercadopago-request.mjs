@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {mpRequest,pixBody} from '../lib/features/billing/mercadoPago.js';
+let calls=[];
+const order={id:'order',cents:6700,quantity:1,days:90,expiresAt:Date.now()+1800000};
+const fetchImpl=async(url,options)=>{calls.push({url,options});return new Response(JSON.stringify({id:'123',status:'pending'}),{status:201});};
+await mpRequest('PRIVATE_TOKEN','/v1/payments',{method:'POST',body:pixBody(order,'customer@example.com'),idempotency:'order',fetchImpl});
+assert.equal(calls[0].url,'https://api.mercadopago.com/v1/payments');assert.equal(calls[0].options.headers.Authorization,'Bearer PRIVATE_TOKEN');assert.equal(calls[0].options.headers['X-Idempotency-Key'],'order');assert.equal(calls[0].options.redirect,'error');assert(!calls[0].url.includes('PRIVATE_TOKEN'));
+const body=JSON.parse(calls[0].options.body);assert.equal(body.transaction_amount,67);assert.equal(body.payer.email,'customer@example.com');assert.equal(body.external_reference,order.id);assert.equal(body.payment_method_id,'pix');
+for(const code of [401,403,429,500])await assert.rejects(()=>mpRequest('PRIVATE_TOKEN','/users/me',{fetchImpl:async()=>new Response('PRIVATE_TOKEN',{status:code})}),e=>e.message.includes(String(code))&&!e.message.includes('PRIVATE_TOKEN'));
+await assert.rejects(()=>mpRequest('','/users/me',{fetchImpl}));
+console.log('Mercado Pago HTTP mock: rota fixa HTTPS, token só no header, idempotência, corpo Pix e erros sem vazamento OK.');

@@ -1,4 +1,5 @@
 import { rememberStickerOriginal } from "./commands/stickers/sticker.js";
+import {ensureBillingRuntime} from "./lib/features/billing/runtime.js";
 import { markPrincipalSeen } from "./lib/features/moderation/sentinelSystem.js";
 import {installBlacklistRuntime} from "./lib/features/moderation/blacklistRuntime.js";
 import { ensureLevelSummaryRuntime } from "./lib/features/social/levelSummary.js";
@@ -17,6 +18,7 @@ import makeWASocket, {
   DisconnectReason,
   Browsers,
   makeCacheableSignalKeyStore,
+  generateWAMessageFromContent,
 } from "@whiskeysockets/baileys";
 
 import { recoverAntiLinkGroupLocks } from "./lib/features/moderation/antiLinkGroupLock.js";
@@ -670,6 +672,7 @@ async function startConnect() {
             console.log(colors.cyan(mess.open()));
             console.log(colors.magenta("🐉🌸 Kobayashi Bot conectado com sucesso!"));
             ensureDragonCoreRuntime(conn);
+            ensureBillingRuntime(conn,{generate:generateWAMessageFromContent});
             ensureRentalRuntime(conn);
             ensureLevelSummaryRuntime(conn);
             await conn.sendPresenceUpdate("available");

@@ -24,6 +24,7 @@ const ARCHIVE_FILE = path.join(os.tmpdir(), "kobayashi-update-package");
 const PROTECTED_PATHS = [
   "settings/settings.json",
   "settings/gemini.json",
+  "settings/mercadopago.json",
   "settings/LOGOS/menu.png",
   "settings.json",
   "files/database/",
