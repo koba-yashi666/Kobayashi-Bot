@@ -19,7 +19,7 @@ import { handleEconomyCommand, ECONOMY_COMMANDS } from "./lib/features/social/dr
 import { recordEconomyMessage, linkEconomyIdentity } from "./lib/features/social/dragonSocial.js";
 import { handleMuteCommand, handleMutedMessage } from "./lib/features/moderation/muteSystem.js";
 import { menuButtonsEnabled, setMenuButtonsEnabled } from "./lib/ui/menuPreferences.js";
-import { sendInteractiveMenu } from "./lib/ui/interactiveMenu.js";
+import { sendCleanMainMenu, menuMentionJid } from "./lib/ui/mainMenuDelivery.js";
 import { discoverBlacklistGroups } from "./lib/features/moderation/blacklistScope.js";
 import { authorIdentities, isPhoneIdentity, OWNER_COMMANDS } from "./lib/features/access/ownerAccess.js";
 import { readCommunity } from "./lib/features/community/store.js";
@@ -9399,24 +9399,16 @@ case "menu": {
     react: { text: "🐉", key: info.key }
   }).catch(() => {});
 
+  const menuMention = menuMentionJid(rawSender, sender);
   const menuPrincipal = buildMainMenu({
-    sender,
-    botName: NomeDoBot,
-    ownerName,
-    prefix,
-    version: getLocalVersion()
+    sender:menuMention,botName:NomeDoBot,ownerName,prefix,version:getLocalVersion()
   });
-
-  if (!menuButtonsEnabled() || ["texto", "text", "simples"].includes(String(args?.[0] || "").toLowerCase())) {
-    await reply(menuPrincipal);
-    break;
-  }
-  await sendInteractiveMenu({
-    conn, jid: from, quoted: info, sender, botName: NomeDoBot, prefix,
-    version: getLocalVersion(),
-    imagePath: path.join(process.cwd(), "settings", "LOGOS", "menu.png"),
-    fallback: menuPrincipal
-  }, { generateWAMessageFromContent, prepareWAMessageMedia });
+  return sendCleanMainMenu({
+    conn,from,info,text:menuPrincipal,mention:menuMention,prefix,
+    imagePath:path.join(process.cwd(),"media","menu-kobayashi.jpg"),
+    buttons:menuButtonsEnabled() && !["texto","text","simples"].includes(String(args?.[0]||"").toLowerCase()),
+    generate:generateWAMessageFromContent,prepare:prepareWAMessageMedia
+  });
 }
 break;
 

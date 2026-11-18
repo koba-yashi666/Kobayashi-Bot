@@ -1,0 +1,6 @@
+KOBAYASHI v5.6.31
+Menu principal no modelo enviado: sem subtítulo Sakura Dragon, título extra de portais ou assinatura duplicada. Categorias, criador configurado, versão dinâmica, hora de São Paulo e canal preservados.
+Inclui foto da Kobayashi enviada pelo usuário em media/menu-kobayashi.jpg.
+Menção do solicitante enviada com metadados reais no texto/foto e no contexto interativo, usando PN/LID da mensagem original. O WhatsApp decide o nome exibido segundo seus dados de contato; não garante mostrar um apelido específico em todos os aparelhos.
+/Menu e /menu texto respeitam a preferência de botões. Texto/simples usam envio convencional com foto e menção; se a imagem falhar, texto com menção. Menu interativo usa o mesmo texto limpo e foto. Não envia ambos de propósito.
+Testes locais simulados passaram. Não testado em conta WhatsApp real. Configurações, sessões e banco não entram no ZIP.
