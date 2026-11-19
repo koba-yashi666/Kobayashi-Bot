@@ -1,0 +1,57 @@
+KOBAYASHI v5.6.35 — PIX NA CONVERSA
+
+1. Envie a atualização ao GitHub com o script do ZIP. Atualize e reinicie na hospedagem.
+2. No PRIVADO, pelo número criador +55 15 99707-5304:
+   /asaasteste conexao
+   /asaaspix ativar
+   /asaasteste suite
+   /asaasteste menu
+3. Depois dos testes simulados, /alugar usa o modo já configurado.
+   Se estiver off, /asaasmodo piloto CONFIRMAR permite cobrança REAL só para o criador;
+   /asaasmodo producao CONFIRMAR libera cobrança REAL para clientes.
+   Nenhum pagamento real foi feito nos testes deste pacote.
+
+COMO O CLIENTE USA
+/alugar → plano → quantidade → resumo → confirmar → imagem QR → código Pix em mensagem separada.
+A pessoa pode tocar nos interativos ou responder apenas com o número da opção do último menu.
+A opção Mais grupos permite responder com qualquer quantidade entre 1 e 50.
+O resumo exige confirmação explícita antes da chamada que gera o Pix.
+As opções numéricas valem por dez minutos e somente no próprio privado.
+Se citar uma mensagem antiga, o número não é interpretado como opção do menu atual.
+Os botões dependem da renderização do cliente WhatsApp; não foram validados em uma sessão real.
+Se Copiar Pix não aparecer, segure a mensagem que contém apenas o código e escolha Copiar.
+
+PIX DIRETO
+O bot identifica uma chave ATIVA da própria conta Asaas, preferindo a chave aleatória (EVP).
+A chave recebedora não muda para cada cliente. Cada pedido recebe seu próprio identificador de QR,
+valor definido, uso único (allowsMultiplePayments=false) e validade de trinta minutos.
+Não exige coletar nome/CPF no bot: o Asaas identifica o pagador ao receber esse tipo de Pix.
+Não cria nem envia chaves Pix fictícias. Não usa comprovantes como confirmação.
+Somente RECEIVED na API, com identificador, valor e tipo PIX corretos, libera o aluguel.
+A consulta automática respeita ao menos sessenta segundos por pedido; a fila pode ampliar o prazo.
+/pagamento ID consulta o pedido e reenvia QR/código se ainda estiver pendente.
+/meuspagamentos lista seus pedidos. /cancelarpagamento ID solicita remover o QR.
+O cancelamento segue em conciliação para reconhecer recebimentos simultâneos/tardios.
+Uma criação com resposta inconclusiva NÃO é repetida: o criador precisa conferir no Asaas.
+
+TESTES
+/asaasteste suite — 38 verificações locais, sem usar a API nem alterar grupos reais.
+/asaasteste menu — seleção e confirmação simuladas, sem Pix real.
+/asaasteste conexao — consulta a API, não cria cobrança.
+QR financeiro Sandbox precisa ser pago por OUTRA conta Sandbox, como previsto pelo Asaas.
+/asaasteste aprovar ID não finge recebimento de QR estático: orienta esse procedimento.
+Chave de produção nunca é usada no host Sandbox nem o inverso.
+
+COMPATIBILIDADE
+Pedidos antigos com checkout/link continuam válidos e são verificados pelo fluxo original.
+Ativar Pix na conversa afeta apenas novos pedidos. Credenciais e bancos não fazem parte deste ZIP.
+Os quatro planos continuam 15d/R$17; 30d/R$25; 60d/R$45; 90d/R$67, por grupo,
+respeitando ajustes de preço já feitos pelo criador.
+Prazos pagos são preservados e renovações aplicadas uma só vez, inclusive após reinício.
+A saída automática duas horas após vencer continua valendo para contratos temporários antigos e novos.
+Os modos de teste não suspendem os vencimentos dos contratos reais já cadastrados.
+
+REFERÊNCIAS
+https://docs.asaas.com/reference/criar-qrcode-estatico
+https://docs.asaas.com/docs/o-que-e-qr-code-estatico
+https://docs.asaas.com/docs/testar-pagamento-de-qrcodes-pix

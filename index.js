@@ -1,5 +1,6 @@
 import {handlePlay} from "./lib/features/downloads/playChoice.js";
 import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
+import {resolveBillingInput} from './lib/features/billing/ui.js';
 import {handleBillingCommand,BILLING_COMMANDS} from "./lib/features/billing/commands.js";
 import {issueLocalLicense,revokeLocalLicense,canIssueLocalLicense,isLocalLicenseKey} from "./lib/features/license/localLicense.js";
 import { getStickerMediaTarget, rememberStickerMediaMessage } from "./lib/features/stickers/stickerMediaTarget.js";
@@ -1156,7 +1157,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "cancelarpagamento",
   "vincularaluguel",
   "emailpagamento",
-  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos",
+  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos", "asaaspix",
   "mptoken",
   "mpmodo",
   "mpstatus",
@@ -1772,6 +1773,11 @@ function resolveKobaTrigger(messageText, prefix="/"){
 }
 
 let body = extractCommandText(info.message) || info?.text || "";
+// Números só controlam o último menu de aluguel no próprio privado.
+const billingInput=resolveBillingInput({jid:from,text:body,isGroup,fromMe:info.key.fromMe,
+ quotedId:info.message?.extendedTextMessage?.contextInfo?.stanzaId});
+if(billingInput)body=billingInput;
+
 
 // Koba Trigger: só converte intenções conhecidas em comandos reais.
 // Frases como "Koba tudo bem?" continuam sem resposta.

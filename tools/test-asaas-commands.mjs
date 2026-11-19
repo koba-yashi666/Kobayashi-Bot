@@ -27,10 +27,10 @@ try{
  await run('asaasteste','conexao');assert(config.read().verifiedBinding);assert.equal(posts,0);assert(!JSON.stringify(replies).includes('123.45'));
  await run('asaasretorno','5511000000000');await run('asaasmodo','sandbox');assert.equal(config.read().mode,'sandbox');
  await run('asaasmodo','producao CONFIRMAR');assert.equal(config.read().mode,'sandbox');
- const options=()=>relayed.at(-1).interactiveMessage.nativeFlowMessage.buttons.flatMap(b=>b.name==='single_select'?JSON.parse(b.buttonParamsJson).sections[0].rows.map(r=>r.id):[JSON.parse(b.buttonParamsJson).id]);
+ const options=()=>relayed.at(-1).viewOnceMessage.message.interactiveMessage.nativeFlowMessage.buttons.flatMap(b=>b.name==='single_select'?JSON.parse(b.buttonParamsJson).sections[0].rows.map(r=>r.id):[JSON.parse(b.buttonParamsJson).id]);
  const click=async id=>{const [cmd,...args]=id.split(' ');await run(cmd.slice(1),args.join(' '));};
- await run('alugar');assert.equal(options().length,4);await click(options().find(o=>o.endsWith(' 30')));await click(options().find(o=>o.endsWith(' 1')));assert.match(relayed.at(-1).interactiveMessage.body.text,/25,00/);await click(options()[0]);
- assert.equal(posts,1);assert.match(relayed.at(-1).interactiveMessage.body.text,/SANDBOX/);assert.match(relayed.at(-1).interactiveMessage.body.text,/sandbox.asaas.com/);
+ await run('alugar');assert.equal(options().length,4);await click(options().find(o=>o.endsWith(' 30')));await click(options().find(o=>o.endsWith(' 1')));assert.match(relayed.at(-1).viewOnceMessage.message.interactiveMessage.body.text,/25,00/);await click(options()[0]);
+ assert.equal(posts,1);assert.match(relayed.at(-1).viewOnceMessage.message.interactiveMessage.body.text,/SANDBOX/);assert.match(relayed.at(-1).viewOnceMessage.message.interactiveMessage.body.text,/sandbox.asaas.com/);
  const order=Object.values(store.read().orders)[0];assert(order.sandbox);assert(!order.simulated);
  await run('asaasteste','aprovar '+order.id);assert.equal(store.read().orders[order.id].status,'approved');assert.match(replies.at(-1),/Nenhum grupo real/);
  // Test command cannot even consult an order marked as production.
@@ -45,7 +45,7 @@ try{
  assert.equal(reconcileDelay({provider:'asaas',status:'pending'}),60000);assert.equal(reconcileDelay({provider:'asaas',status:'expired'}),900000);assert(reconcileDelay({provider:'asaas',status:'pending',failures:5})>60000);
  ensureBillingRuntime(base.conn);const beforeLeave=calls.length;await base.conn.kobaBillingBeforeLeave('never@g.us');assert.equal(calls.length,beforeLeave);
  store.update(d=>{d.orders.real={...order,id:'real',sandbox:false};});
- await run('asaasteste','suite');assert.match(replies.at(-1),/28 verificações/);
+ await run('asaasteste','suite');assert.match(replies.at(-1),/38 verificações/);
  await run('asaaspreco','30 25,00');assert.equal(config.read().prices[30],2500);
  await run('asaasavisos','off');assert.equal(config.read().groupNotices,false);
  await run('asaasstatus');assert(!replies.at(-1).includes(secret));assert.match(replies.at(-1),/sandbox/);

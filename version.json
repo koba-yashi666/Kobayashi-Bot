@@ -1,5 +1,5 @@
 {
-  "version": "5.6.34",
-  "name": "Kobayashi Bot v5.6.34 — Menu de aluguel visível",
-  "update": "Menu de aluguel em texto antes dos botões, compatível com clientes sem interativos."
+  "version": "5.6.35",
+  "name": "Kobayashi Bot v5.6.35 — Pix e seleção na conversa",
+  "update": "QR Pix de uso único, copia e cola, botões nativos e seleção por número."
 }
