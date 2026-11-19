@@ -25,6 +25,7 @@ const PROTECTED_PATHS = [
   "settings/settings.json",
   "settings/gemini.json",
   "settings/mercadopago.json",
+  "settings/asaas.json",
   "settings/LOGOS/menu.png",
   "settings.json",
   "files/database/",

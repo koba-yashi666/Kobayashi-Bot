@@ -1,0 +1,117 @@
+KOBAYASHI v5.6.33 — PAGAMENTOS ASAAS
+
+ATUALIZAÇÃO CUMULATIVA
+Use ENVIAR-GITHUB-v5.6.33.sh no Termux apenas para publicar o patch. Depois atualize/reinicie na hospedagem. Não é necessário executar o bot no Termux. Sessões, configurações e bancos existentes não são incluídos no ZIP nem substituídos pelo patch.
+Novos pedidos /alugar e /renovar usam ASAAS. Pedidos Mercado Pago anteriores continuam usando a configuração antiga para conciliação. Checkout Pro/Orders do Mercado Pago não foi implementado nesta versão.
+
+CRIADOR AUTORIZADO
+Somente +55 15 99707-5304, no privado. O bot precisa reconhecer a identidade PN do criador. Nenhuma menção ou mensagem respondida concede permissão.
+
+COMEÇAR COM SUA CHAVE SANDBOX
+1. Instale a atualização e reinicie o bot na hospedagem.
+2. Pelo número do criador, no privado do bot:
+   /asaastoken sandbox SUA_CHAVE_SANDBOX
+   /asaasteste conexao
+   /asaasretorno NUMERO_DO_BOT
+   /asaasmodo sandbox
+   /asaasstatus
+   /asaasteste suite
+NUMERO_DO_BOT é o número conectado da Kobayashi com DDI e DDD, somente dígitos; não é necessariamente o número do criador.
+Exemplo de formato: 5511999999999. A URL de retorno será https://wa.me/NUMERO_DO_BOT e sugere /pagamento ID após o checkout. Esse retorno não é confirmação financeira.
+A chave fica em settings/asaas.json, criado apenas na hospedagem, privado e protegido no updater. Não publique esse arquivo. O bot tenta apagar a mensagem com a chave. Suas respostas nunca citam essa mensagem nem exibem o segredo, mesmo em erro. A exclusão no WhatsApp pode falhar; nesse caso apague a mensagem manualmente.
+
+TESTE OFFLINE NO PRÓPRIO BOT
+/asaasteste suite — 28 verificações em memória, incluindo Asaas mock, preços, Sandbox isolada, carência e permanente; não acessa sua API ou grupos reais.
+/asaasteste menu — simula o fluxo de contratação sem API; aprovar com /mpteste aprovar ID para manter compatibilidade com o simulador local.
+/asaasteste renovar — simula seleção de seus grupos já cadastrados, sem modificar o prazo.
+Essas duas simulações locais não são pedidos criados na conta Asaas.
+
+TESTE NA API SANDBOX DO ASAAS
+1. Com modo sandbox ativo, use /alugar e escolha prazo/quantidade.
+2. Confira o resumo e confirme a criação do link de teste.
+3. Abra o link em sandbox.asaas.com e preencha os dados de teste no Asaas para gerar a cobrança Pix. Não use dinheiro real e não envie CPF ou dados de cartão ao bot.
+4. Volte ao bot e envie /asaasteste aprovar ID_DO_PEDIDO.
+   O comando usa somente o endpoint oficial de confirmação Sandbox. Se nenhuma cobrança foi gerada pelo checkout, pede para preencher a página de teste antes.
+5. /asaasteste verificar ID_DO_PEDIDO ou /pagamento ID_DO_PEDIDO mostra o estado.
+6. Teste também /renovar com grupos vinculados a você. A confirmação Sandbox não altera nenhum grupo nem consome vagas ou entra por convite.
+Sandbox: só o criador pode criar pedidos. O comando de aprovação Sandbox nunca pode operar em um pedido de produção. O status approved de um teste é apenas financeiro no ambiente Sandbox, não uma licença real.
+
+PLANOS PADRÃO, POR GRUPO
+Inicial: 15 dias — R$17,00
+Popular: 30 dias — R$25,00
+Premium: 60 dias — R$45,00
+Supremo: 90 dias — R$67,00
+Quantidades: 1,2,3 ou outra de 1 a 50, sem desconto automático. 3 grupos por 30 dias = R$75,00. Pedidos já criados mantêm o preço.
+
+COMANDOS DE CONFIGURAÇÃO (CRIADOR / PRIVADO)
+/asaastoken sandbox CHAVE
+/asaastoken producao CHAVE
+/asaasteste conexao — valida acesso, sem cobrar e sem exibir saldo
+/asaasretorno NUMERO_DO_BOT
+/asaasstatus
+/asaasmodo off — impede novas cobranças, mantém conciliação das existentes
+/asaasmodo sandbox — somente com chave Sandbox validada, só criador
+/asaasmodo piloto CONFIRMAR — somente com chave de produção validada, só criador, dinheiro REAL
+/asaasmodo producao CONFIRMAR — dinheiro REAL, libera clientes
+/asaaspreco DIAS VALOR — preço por grupo de novos pedidos, dias 15/30/60/90
+/asaasavisos on/off — avisos no grupo; avisos privados continuam
+/asaasteste suite|menu|renovar|conexao
+/asaasteste aprovar ID — apenas pedido da Sandbox gerado por /alugar ou /renovar
+/asaasteste verificar ID — apenas pedido da Sandbox
+Comandos /mp... permanecem para conciliar o legado Mercado Pago e o simulador local; não configuram o Asaas nem geram novos pedidos Mercado Pago.
+
+PASSAR PARA PAGAMENTOS REAIS
+Primeiro complete o teste Sandbox. Cadastre/aprove sua conta de produção no Asaas, habilite Pix e confira as tarifas aplicáveis na sua conta.
+Depois:
+/asaastoken producao SUA_CHAVE_DE_PRODUCAO
+/asaasteste conexao
+/asaasmodo piloto CONFIRMAR
+Faça uma compra REAL de teste pelo fluxo /alugar. Uma aprovação real exige dinheiro real; /asaasteste aprovar não aprova produção. Não use o comprovante como autorização.
+Após conferir confirmação, prazo e vínculo do grupo:
+/asaasmodo producao CONFIRMAR
+Trocar a chave desativa cobranças e exige nova validação. Pedidos ficam vinculados à chave e ao ambiente originais. Troca bloqueada enquanto há pedidos reais recentes pendentes/em conciliação. Não revogue a chave original com pagamentos em andamento. Nova chave da mesma conta também tem fingerprint diferente e não reconcilia automaticamente pedidos antigos.
+
+COMANDOS DOS CLIENTES (PRIVADO)
+/alugar — escolher prazo, quantidade e confirmar antes de criar checkout
+/planos, /plano, /plans — abrem o fluxo de contratação
+/renovar — escolher prazo, marcar/desmarcar seus grupos, páginas e resumo
+/meusalugueis — grupos atribuídos ao seu número
+/meuspagamentos — últimos dez pedidos do responsável
+/pagamento ID — consultar estado financeiro na API (intervalo manual mínimo 15s)
+/cancelarpagamento ID — pede encerramento do checkout; não estorna pagamentos
+/vincularaluguel ID LINK_DO_GRUPO — só após pagamento real recebido; entra por convite e atribui uma vaga
+/alugar ajuda
+/emailpagamento EMAIL permanece compatível com Mercado Pago. Asaas não exige esse cadastro no bot: os dados do pagador são preenchidos na página do Asaas.
+Não compartilhe seu link de compra. A licença pertence ao responsável do pedido no WhatsApp, ainda que outra pessoa faça o Pix.
+
+CONFIRMAÇÃO E RENOVAÇÃO
+Checkout Pix avulso com valor fixo, uma compra por pedido e validade de 30 minutos. A API é consultada com a chave do ambiente original e filtro checkoutSession; o pagamento retornado é novamente consultado e deve ter ID, checkout de origem, valor exato e billingType PIX válidos, sem exclusão, estorno ou contestação.
+Somente RECEIVED libera aluguel real. CONFIRMED pode significar retenção cautelar e não libera até mudar para RECEIVED. Dinheiro confirmado manualmente/RECEIVED_IN_CASH não libera.
+A renovação usa um registro atômico no mesmo banco dos aluguéis para acrescentar dias apenas uma vez. Mantém os dias ainda pagos. Repetir consulta, botão ou reiniciar não deve duplicar o prazo. Compra nova começa ao vincular cada vaga ao grupo; a vaga não utilizada não tem expiração automática nesta versão.
+Sem domínio público configurado, esta entrega usa conciliação por consulta automática, não webhook. Roda em segundo plano, no máximo 10 pedidos por rodada, intervalo mínimo 60s por pedido Asaas ativo e 15min após expiração; falhas aplicam espera progressiva até 15min. Consulta expirada continua por até sete dias. Fila, indisponibilidade e limites da conta podem ampliar a demora. /pagamento permite consultar pontualmente. O Asaas recomenda Webhooks para escala maior; não há webhook publicado nesta entrega.
+Falha no envio da mensagem de confirmação é tentada novamente; em queda entre envio e persistência pode haver aviso repetido, mas sem duplicar dias.
+
+CANCELAMENTO, REDE E REVISÃO
+Cancelar o checkout fecha a jornada, mas não comprova que um Pix já gerado foi cancelado. O bot mantém a conciliação e reconhece recebimento tardio. O comando não faz estornos.
+POST /checkouts não tem idempotência garantida pela documentação consultada. O bot persiste a intenção antes de enviar, permite apenas uma tentativa e não repete criação de resultado inconclusivo (timeout, falha ou queda antes de salvar o ID). O pedido fica uncertain; o criador deve conferir os logs da conta Asaas/suporte antes de criar outro. Não é seguro repetir automaticamente ou prometer recuperação se o provedor não retornou ID. Limite de três pedidos pendentes/inconclusivos por responsável; 15s entre novas criações na API.
+Estornos/contestações detectados durante conciliação são bloqueados para revisão. Depois de aplicar e notificar uma compra, não há monitoramento financeiro permanente nem remoção retroativa automática de dias por estorno. Essa revisão cabe ao criador.
+
+AVISOS E SAÍDA DOS GRUPOS — INDEPENDENTE DO MODO DE PAGAMENTO
+Contratos temporários antigos e novos: avisos em até 7 dias, 3 dias e no vencimento, enviados ao responsável cadastrado e, por padrão, no grupo. Sem responsável não há privado/listagem de renovação para o cliente; o criador deve ajustar com os comandos antigos de aluguel.
+Sem renovação, saída na primeira verificação possível depois de completar DUAS HORAS do vencimento. Verificação a cada minuto enquanto o bot está conectado. Grupos permanentes e grupos sem contrato registrado não saem por essa rotina.
+ATENÇÃO: contratos antigos já vencidos há mais de duas horas também podem sair ao iniciar esta versão. O modo Sandbox isola pagamentos de teste; não desliga a rotina real de vencimentos já autorizada.
+Antes de sair, concilia pedidos reais de renovação ligados ao grupo e revalida o prazo. Falha nessa conciliação adia a saída. Pedidos Sandbox e simulações locais nunca impedem/renovam um contrato real. A infraestrutura offline não executa ações no horário; verifica ao reconectar.
+
+VALIDAÇÃO DESTA ENTREGA
+Passaram testes locais de transporte HTTP mock, chave sem eco ou citação, ambientes separados, creator/PV, fluxo de seleção, Sandbox aprovada sem tocar grupos, produção/piloto, confirmação adulterada, retenção CONFIRMED, duplicidade/reinício, rede, timeout de criação sem repetir, cancelamento/recebimento tardio, envio repetível e legado de carência/permanentes. Regressões Menu/Play/Sentinela/permissões e Import Guard também passaram.
+Não houve acesso à sua chave, cobrança online, pagamento real ou teste conectado ao WhatsApp. /asaasteste conexao, o checkout Sandbox e os botões ainda devem ser validados na sua hospedagem. Não é garantia de disponibilidade ou aprovação cadastral do Asaas.
+
+DOCUMENTAÇÃO CONSULTADA EM 18/11/2026
+https://docs.asaas.com/docs/checkout-for-pix
+https://docs.asaas.com/reference/criar-novo-checkout
+https://docs.asaas.com/docs/link-do-checkout-e-redirecionamento-do-cliente
+https://docs.asaas.com/reference/listar-cobrancas
+https://docs.asaas.com/reference/recuperar-uma-unica-cobranca
+https://docs.asaas.com/reference/confirmar-pagamento
+https://docs.asaas.com/reference/cancelar-um-checkout
+https://docs.asaas.com/docs/retries-e-idempot%C3%AAncia

@@ -11,3 +11,6 @@ npm-debug.log*
 /settings/gemini.json
 
 /settings/mercadopago.json
+
+/settings/asaas.json
+/settings/mercadopago.json

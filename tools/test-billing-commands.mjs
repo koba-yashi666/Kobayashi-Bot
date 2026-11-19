@@ -15,7 +15,7 @@ try{
  async function click(id){const parts=id.split(' ');await run(parts[0].slice(1),parts.slice(1).join(' '));}
  await run('mptoken','SHOULD-NOT-SAVE',{sender:other,identities:[other]});assert.equal(configStore.read().token,undefined);
  await run('mptoken','secret-test-value');assert.equal(configStore.read().token,'secret-test-value');assert.equal(deleted,1);assert(!messages.some(m=>m.includes('secret-test-value')));
- await run('mpteste','suite');assert.match(messages.at(-1),/21 verificações/);
+ await run('mpteste','suite');assert.match(messages.at(-1),/28 verificações/);
  await run('mpteste','menu');assert.equal(options().length,4);assert(!options().some(o=>o.endsWith(' 45')));
  await click(options().find(o=>o.endsWith(' 30')));assert.equal(options().length,4);assert(options().some(o=>o.includes(' mais ')));
  await click(options().find(o=>o.endsWith(' 3')));assert.match(relayed.at(-1).interactiveMessage.body.text,/75,00/);

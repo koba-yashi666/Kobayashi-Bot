@@ -1156,6 +1156,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "cancelarpagamento",
   "vincularaluguel",
   "emailpagamento",
+  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos",
   "mptoken",
   "mpmodo",
   "mpstatus",
