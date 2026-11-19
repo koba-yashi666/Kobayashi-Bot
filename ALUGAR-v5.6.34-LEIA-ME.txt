@@ -1,0 +1,11 @@
+KOBAYASHI v5.6.34 — /ALUGAR SEM RESPOSTA
+
+Corrige um possível silêncio na entrega do menu: texto com planos e comandos é enviado antes dos botões, pois o WhatsApp pode aceitar relay sem renderizar o interativo. Se botões não aparecerem, copie e envie o comando da opção na mensagem de texto.
+
+Instale usando ENVIAR-GITHUB-v5.6.34.sh no Termux e atualize/reinicie na hospedagem. Teste /alugar no privado do bot. O menu inicial não exige chave Asaas configurada. Para criar cobranças, siga PAGAMENTOS-ASAAS-v5.6.33-LEIA-ME.txt.
+
+Se ainda não responder: confira a versão pelo /ping e envie a resposta e o log do comando na hospedagem, sem chaves ou sessões. Um bloqueio anterior ao handler, prefixo diferente ou versão antiga não é diagnosticado apenas pela ausência do menu.
+
+Patch cumulativo preserva dados locais. Não contém chaves. Rotina real de saída após duas horas do vencimento continua ativa, inclusive com modo financeiro Sandbox; contratos antigos já vencidos podem sair ao iniciar.
+
+Testes locais de entrega e comandos passaram. Sem validação conectada ao WhatsApp nesta entrega.

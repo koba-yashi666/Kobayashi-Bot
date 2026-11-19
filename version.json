@@ -1,5 +1,5 @@
 {
-  "version": "5.6.33",
-  "name": "Kobayashi Bot v5.6.33 — Aluguel com Asaas",
-  "update": "Checkout Pix Asaas, Sandbox isolada, configuração privada e testes."
+  "version": "5.6.34",
+  "name": "Kobayashi Bot v5.6.34 — Menu de aluguel visível",
+  "update": "Menu de aluguel em texto antes dos botões, compatível com clientes sem interativos."
 }
