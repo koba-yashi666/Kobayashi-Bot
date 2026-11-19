@@ -20,7 +20,7 @@ try{
  await run('asaaspix','ativar',{sender:other,identities:[other]});assert.equal(gets,0);await run('asaaspix','ativar',{isGroup:true});assert.equal(gets,0);
  active=false;await run('asaaspix','ativar');assert(!config.read().directPixBinding);active=true;await run('asaaspix','ativar');assert.equal(config.read().directPixBinding,asaasBinding(config.read()));assert(!JSON.stringify(replies).includes('own-account-key'));
  await run('asaasstatus');assert.match(replies.at(-1),/Pix na conversa: ativado/);
- await run('alugar');await number(2);await number(4);assert.match(messages.at(-1).text,/Responda apenas com a quantidade/);await number(6);assert.match(messages.at(-1).text,/150,00/);assert.equal(posts,0);await number(1);assert.equal(posts,1);
+ await run('alugar');await number(2);await number(4);assert.match(messages.at(-1).text,/Responda apenas com a quantidade/);await number(6);assert.match(messages.at(-1).text,/150,00/);assert.equal(posts,0);await number(1);assert.equal(posts,1);assert.equal(store.read().orders[ref].manualActivation,true);
  const image=messages.findIndex(m=>m.image);assert(image>=0);assert.match(messages[image].caption,/150,00/);assert.equal(messages[image+1].text,store.read().orders[ref].qr);assert(!JSON.stringify(messages.slice(image)).includes('checkoutSession'));
  const buttons=relays.at(-1).viewOnceMessage.message.interactiveMessage.nativeFlowMessage.buttons;assert.equal(buttons[0].name,'cta_copy');assert.equal(JSON.parse(buttons[0].buttonParamsJson).copy_code,messages[image+1].text);
  await run('asaasteste','suite');assert.match(replies.at(-1),/38/);assert.equal(posts,1);

@@ -1,0 +1,19 @@
+KOBAYASHI v5.6.36 — COMPROVANTE E ATIVAÇÃO MANUAL
+
+Atualize pelo script do ZIP e reinicie na hospedagem. Não precisa reconfigurar a chave Asaas.
+Após a API confirmar o recebimento real, o bot envia o contato +55 15 99707-5304.
+O link abre o WhatsApp com mensagem contendo plano, dias, quantidade de grupos, total e pedido.
+A pessoa envia a mensagem e anexa o comprovante e os links dos grupos por conta própria.
+O link não envia nada sozinho e não anexa o comprovante automaticamente.
+
+Novas contratações feitas com /alugar aguardam a ativação manual do criador.
+O comando de vínculo do cliente não ativa esses pedidos. O criador usa seu cadastro de aluguel existente.
+O início do prazo será o registrado pelo criador na ativação manual.
+Renovações de contratos já vinculados seguem automáticas, preservando os dias pagos.
+Pedidos antigos mantêm suas condições. O contato também aparece ao consultar /pagamento ID aprovado.
+Sandbox, simulação e pagamentos pendentes não exibem confirmação real nem instrução de comprovante.
+Não alteramos os planos, Pix/QR, credenciais, sessão, bancos ou saída duas horas após vencer.
+
+Validação: testes locais com dados fictícios; nenhum pagamento real foi efetuado.
+No privado do criador: /asaasteste suite (38 verificações simuladas gerais).
+Teste específico novo: tools/test-payment-receipt.mjs, executado também no script de envio.

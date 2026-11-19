@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {paymentReceipt} from '../lib/features/billing/paymentReceipt.js';
+import {createBillingEngine} from '../lib/features/billing/engine.js';
+const order={id:'order-123',owner:'client@s.whatsapp.net',status:'approved',days:30,quantity:2,cents:5000,groups:[],manualActivation:true};
+const text=paymentReceipt(order),url=text.match(/https:\/\/wa\.me\/\S+/)[0],parsed=new URL(url);
+assert.equal(parsed.pathname,'/5515997075304');const message=parsed.searchParams.get('text');
+for(const part of ['Plano Popular (30 dias)','2 grupo(s)','R$','50,00','order-123'])assert(message.includes(part));
+assert.match(text,/manualmente pelo criador/);assert.match(text,/anexado por você/);
+for(const status of ['pending','creating','uncertain','cancelled','expired'])assert.equal(paymentReceipt({...order,status}),null);
+assert.equal(paymentReceipt({...order,sandbox:true}),null);assert.equal(paymentReceipt({...order,simulated:true}),null);
+assert.match(paymentReceipt({...order,groups:['g@g.us']}),/Renovação aplicada/);
+for(const [days,name]of [[15,'Inicial'],[30,'Popular'],[60,'Premium'],[90,'Supremo']])assert(paymentReceipt({...order,days}).includes(name));
+const store={read:()=>({orders:{[order.id]:order}})},rentals={read:()=>({groups:{}})};
+const engine=createBillingEngine({store,config:{read:()=>({})},rentals});let joins=0;
+await assert.rejects(engine.attach(order.id,order.owner,'https://chat.whatsapp.com/test',{groupGetInviteInfo:async()=>{joins++}}),/pelo criador/);assert.equal(joins,0);
+assert.throws(()=>engine.owned(order.id,'other@s.whatsapp.net'));
+console.log('Comprovante: contato correto, texto preenchido/valor total, quatro planos, somente aprovado real, Sandbox isolada, renovação e bloqueio de ativação pelo cliente OK.');
