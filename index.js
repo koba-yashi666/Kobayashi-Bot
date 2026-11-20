@@ -1,3 +1,4 @@
+import {groupDiagnostic} from './lib/features/billing/groupDiagnostic.js';
 import {handlePlay} from "./lib/features/downloads/playChoice.js";
 import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
 import {resolveBillingInput} from './lib/features/billing/ui.js';
@@ -1157,7 +1158,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "cancelarpagamento",
   "vincularaluguel",
   "emailpagamento",
-  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos", "asaaspix",
+  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos", "asaaspix", "ativacoes", "ativarpedido", "indicacao", "indicacoes", "minhasindicacoes", "aprovarindicacao", "meuplano",
   "mptoken",
   "mpmodo",
   "mpstatus",
@@ -3134,7 +3135,7 @@ if (!isCmd && !info.key.fromMe && /^prefixo[!?]?$/.test(String(prefixQueryText).
 
 if (isCmd) {
   if(await handleBillingCommand({command,q,from,sender,conn,info,reply,prefix,isGroup,
-    identities:ownerIdentityCandidates,generate:generateWAMessageFromContent}))continue;
+    identities:ownerIdentityCandidates,isGroupAdmins,generate:generateWAMessageFromContent}))continue;
   if (OWNER_COMMANDS.has(command) && !SoDonoPrincipal) {
     await reply("👑🐉 Este comando é exclusivo do dono do bot.");
     continue;
@@ -5440,6 +5441,11 @@ break;
 case "statusbot":
 case "diagnostico":
 case "diagnóstico": {
+  if(isGroup&&command!=='statusbot'){
+    if(!isGroupAdmins&&!SoDonoPrincipal)return reply('🛡️ Diagnóstico de proteção exclusivo de ADM ou criador.');
+    const botIsAdmin=await currentGroupAdmin(conn,from,[conn.user?.id,conn.user?.lid,conn.user?.phoneNumber].filter(Boolean));
+    return reply(groupDiagnostic({name:groupName,botIsAdmin,protection:getGroupProtection(from),antiFake:getAntiFakeConfig(from),antiSpam:getAntiSpamConfig(from),antiTrava:getAntiTravaConfig(from),rental:getRental(from)}));
+  }
   const startedAt = Number(global.startTime || 0);
   const nowSeconds = Math.floor(Date.now() / 1000);
   const uptimeSeconds = startedAt > 0

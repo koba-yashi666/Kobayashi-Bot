@@ -1,0 +1,79 @@
+KOBAYASHI v5.6.37 — ATIVAÇÕES E INDICAÇÕES
+
+INSTALAÇÃO
+Use o script ENVIAR-GITHUB-v5.6.37.sh no Termux para enviar ao GitHub.
+Depois atualize e reinicie na hospedagem. Não precisa configurar a API novamente.
+O ZIP não contém bancos, chave Asaas, configuração privada nem sessão.
+As interações novas (cafuné etc.) ficaram para depois, conforme solicitado.
+
+PAINEL DE ATIVAÇÕES — EXCLUSIVO DO CRIADOR NO PRIVADO
+/ativacoes
+Lista contratações reais aprovadas com vagas ainda não ativadas.
+Mostra pedido, responsável, plano, valor e vagas; tem seleção por botões ou número.
+O painel usa o status registrado. Antes de gravar a ativação, a API é consultada novamente.
+
+/ativarpedido ID
+1. Adicione a Kobayashi aos grupos do cliente antes de abrir o comando.
+2. Abra o pedido pelo painel ou use o comando com o ID.
+3. Marque os grupos. A lista mostra grupos conhecidos do bot e respeita a quantidade paga.
+4. Toque em Conferir ativação e depois Ativar agora.
+O responsável é o comprador registrado no pedido; não é substituído pelo número do criador.
+O prazo começa na ativação. Se já houver prazo do mesmo responsável, os dias pagos são preservados.
+Todos os grupos selecionados são validados antes da gravação; falha de um não ativa os outros.
+A seleção vale dez minutos. Confirme a quantidade restante no painel para ativações parciais.
+Repetir uma ativação já aplicada não consome outra vaga nem soma dias novamente.
+Grupos permanentes ou vinculados a outro responsável não entram na seleção.
+Se o bot não aparecer mais como membro, a ativação é recusada; a entrada continua manual.
+Promova o bot a ADM para as proteções que precisam apagar mensagens ou remover pessoas.
+Pedidos Sandbox/simulados e pedidos de renovação não entram nesse painel.
+Renovações de grupos já vinculados continuam automáticas como nas versões anteriores.
+
+INDICAÇÃO — BÔNUS DE 20 DIAS, APROVAÇÃO MANUAL
+/indicacao
+No grupo: responsável, ADM ou criador pode gerar o código.
+No privado: lista os grupos temporários do próprio responsável.
+O grupo precisa ter contrato temporário e telefone do responsável cadastrados, mesmo que vencido.
+O mesmo grupo reutiliza seu código; se o responsável mudar, peça revisão ao criador.
+
+O novo cliente inicia no PRIVADO da Kobayashi:
+/alugar CODIGO
+A indicação aparece na seleção e é gravada junto ao pedido antes de gerar o Pix.
+O código não reduz o valor da compra e não se aplica a renovações.
+
+/minhasindicacoes
+No privado: códigos do responsável e contagens de contratações, bônus e análises pendentes.
+Não revela telefone ou dados dos compradores aos indicadores.
+
+/indicacoes
+EXCLUSIVO DO CRIADOR/PV. Lista indicações com pagamento real aprovado aguardando análise.
+
+/aprovarindicacao ID
+Mostra o grupo beneficiado e pede confirmação explícita pelos botões ou número.
+Também é possível usar /aprovarindicacao ID CONFIRMAR.
+Reconsulta o pagamento, exige todas as vagas ativadas e adiciona 20 dias uma única vez.
+Somente a primeira contratação real aprovada do comprador é elegível.
+Autoindicação, renovação e bônus repetido do mesmo comprador são bloqueados.
+Os 20 dias são somados ao vencimento ou à data atual se o grupo já venceu.
+Grupos permanentes não recebem bônus em dias. O responsável do grupo deve continuar o mesmo.
+Se o bot já tiver saído do grupo beneficiado, adicione-o novamente para retomar o uso.
+A aprovação do bônus não envia mensagens por sua conta a outros contatos.
+
+PLANOS E DIAGNÓSTICO
+/meuplano
+No grupo: mostra nome/plano/vencimento e se há responsável cadastrado.
+No privado: mostra somente os contratos vinculados a quem chamou, com opção de renovar.
+Para contratos antigos sem responsável, cadastre o telefone pelo seu sistema de aluguel existente.
+
+/diagnostico (no grupo, ADM ou criador)
+Mostra se o bot é ADM e o estado de Antilink, links de grupo/Telegram,
+AntiStatus, Antifake, AntiSpam e Antitrava, além da situação do aluguel.
+ON mostra a configuração, não a garantia de que um evento será recebido ou punido.
+/statusbot e /diagnostico no privado preservam o diagnóstico geral anterior.
+
+TESTES
+Os scripts test-rental-management.mjs e test-rental-management-commands.mjs são executados
+no envio do patch. Cobrem integração do código ao Pix, ativação e bônus, permissões,
+API/metadados incompatíveis, isolamento, gravação conjunta, cota, validade e repetição.
+As regressões de pagamento, carência de 2h, permanentes, menus/play/Sentinel também passaram.
+Nenhum pagamento real, saída ou mensagem a cliente foi realizado nos testes locais.
+/asaasteste suite continua disponível para as 38 verificações simuladas gerais.
