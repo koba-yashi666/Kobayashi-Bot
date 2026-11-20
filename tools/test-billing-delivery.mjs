@@ -15,5 +15,8 @@ for(const mode of ['accepted-but-not-rendered','throw','no-generator']){
  await billingOptions({conn,jid:'user@s.whatsapp.net',text:'Pix',options:options.slice(0,2),copy:'000201example',store,clock:()=>now,generate:(jid,message)=>({key:{id:'copy'},message})});
  assert.equal(JSON.parse(wire.viewOnceMessage.message.interactiveMessage.nativeFlowMessage.buttons[0].buttonParamsJson).copy_code,'000201example');
 }
+const aliases=memory();aliases.update(d=>d.identityAliases={'777@lid':'user@s.whatsapp.net'});
+await billingOptions({conn:{sendMessage:async()=>({key:{id:'alias-menu'}})},jid:'user@s.whatsapp.net',text:'Renovar',options:[['Renovar','/renovar']],store:aliases});
+assert.equal(resolveBillingInput({jid:'777@lid',text:'1',store:aliases}),'/renovar');
 let relays=0;await assert.rejects(billingOptions({conn:{user:{id:'bot'},sendMessage:async()=>{throw Error('transport unavailable')},relayMessage:async()=>relays++},jid:'u',text:'test',options,store:memory(),generate:()=>({})}));assert.equal(relays,0);
 console.log('Entrega: envelope nativo, copiar Pix, fallback numerado, quantidade livre 1–50, TTL, remetente, privado, citação antiga e transporte OK.');

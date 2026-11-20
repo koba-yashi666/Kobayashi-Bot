@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
+const cwd=process.cwd(),dir=fs.mkdtempSync(path.join(os.tmpdir(),'koba-activation-ui-')),originalFetch=globalThis.fetch;process.chdir(dir);
+try{
+ const {handleBillingCommand,BILLING_COMMANDS}=await import('../lib/features/billing/commands.js');
+ const {asaasConfigStore:config,billingStore:store,DAY}=await import('../lib/features/billing/storage.js');
+ const {asaasBinding}=await import('../lib/features/billing/asaas.js');
+ const {billingTick}=await import('../lib/features/billing/runtime.js');
+ const {readRentalDb,writeRentalDb}=await import('../lib/features/rental/rentalSystem.js');
+ const owner='5511999999999@s.whatsapp.net',lid='999999@lid',other='5511888888888@s.whatsapp.net',creator='5515997075304@s.whatsapp.net',bot='5511000000000@s.whatsapp.net';let state='PENDING',posts=0,calls=0,joined=false;
+ const cfg={token:'OFFLINE-KEY',environment:'production',mode:'production'};config.write(cfg);
+ store.write({orders:{paid:{id:'paid',owner,provider:'asaas',flow:'pix-direct',environment:'production',binding:asaasBinding(cfg),pixQrCodeId:'qr_commands_123',status:'pending',quantity:1,cents:2500,days:30,groups:[],automaticActivation:true,createdAt:Date.now(),expiresAt:Date.now()+1800000}},profiles:{},sessions:{},notices:{}});
+ globalThis.fetch=async(url,opts)=>{calls++;assert.equal(new URL(url).hostname,'api.asaas.com');assert(!opts?.method||opts.method==='GET');const p={id:'pay_commands',pixQrCodeId:'qr_commands_123',value:25,billingType:'PIX',status:state};return new Response(JSON.stringify(new URL(url).pathname==='/v3/payments'?{data:[p],hasMore:false}:p));};
+ const replies=[],messages=[],ctx={from:lid,sender:lid,identities:[lid,owner],isGroup:false,info:{key:{id:'in'}},reply:async t=>replies.push(t),conn:{user:{id:bot},sendMessage:async(jid,data)=>{messages.push({jid,data});return {key:{id:'out'}}},groupGetInviteInfo:async()=>({id:'100@g.us'}),groupMetadata:async jid=>{if(!joined)throw Error('pending');return {id:jid,subject:'Cliente',participants:[{id:bot},{id:lid,phoneNumber:owner}]};},groupAcceptInvite:async()=>{posts++;joined=true;return '100@g.us';}}};
+ const run=(command,q='',extra={})=>handleBillingCommand({...ctx,command,q,...extra});
+ for(const name of ['entrar','gerarcodigo','meuscodigos','ativarbot','ativarcodigo','responsavelaluguel'])assert(BILLING_COMMANDS.has(name));
+ await run('gerarcodigo','paid');assert(!store.read().orders.paid.activationCode);assert.match(replies.at(-1),/aprovada/);
+ state='RECEIVED';store.update(d=>delete d.orders.paid.lastManualCheck);await run('pagamento','paid');assert.match(replies.at(-1),/CÓDIGO DE ATIVAÇÃO/);assert.match(replies.at(-1),/ativarbot KBA-/);const code=store.read().orders.paid.activationCode.code;
+ await billingTick(ctx.conn);const confirmation=messages.find(m=>m.data.text?.includes('PIX APROVADO'));assert(confirmation);assert.equal(confirmation.jid,owner);assert(confirmation.data.text.includes(code));assert.equal(store.read().orders.paid.activationCode.code,code);
+ await run('entrar','https://chat.whatsapp.com/groupInvite '+code,{sender:other,identities:[other],info:{message:{extendedTextMessage:{contextInfo:{participant:owner}}}}});assert.equal(posts,0);
+ await run('entrar','https://chat.whatsapp.com/groupInvite');assert.equal(posts,1);assert.match(replies.at(-1),/Entrada confirmada/);assert(!readRentalDb().groups['100@g.us']);
+ await run('ativarbot',code,{isGroup:true,from:'100@g.us'});assert.match(messages.at(-1).data.text,/KOBAYASHI ATIVADA/);const rental=readRentalDb().groups['100@g.us'];assert.equal(rental.responsibleJid,owner);assert.equal(rental.responsibleLid,lid);assert.equal(store.read().identityAliases[lid],owner);assert(rental.expiresAt>Date.now()+29*DAY);
+ await run('ativarcodigo',code,{isGroup:true,from:'100@g.us'});assert.equal(readRentalDb().groups['100@g.us'].expiresAt,rental.expiresAt);
+ await run('meuplano');assert(messages.at(-1).data.text.includes('Cliente'));await run('renovar');assert(!replies.at(-1).includes('Nenhum grupo vinculado'));assert(messages.at(-1).data.text.includes('Escolha o prazo'));
+ writeRentalDb({...readRentalDb(),groups:{...readRentalDb().groups,'200@g.us':{expiresAt:777,groupName:'Antigo'}}});
+ await run('responsavelaluguel','5511888888888',{isGroup:true,from:'200@g.us'});assert(!readRentalDb().groups['200@g.us'].responsibleJid);
+ await run('responsavelaluguel','5511888888888',{isGroup:true,from:'200@g.us',sender:creator,identities:[creator]});assert.equal(readRentalDb().groups['200@g.us'].responsibleJid,other);assert.equal(readRentalDb().groups['200@g.us'].expiresAt,777);
+ const index=fs.readFileSync(path.join(cwd,'index.js'),'utf8');for(const name of ['entrar','gerarcodigo','meuscodigos','ativarbot','ativarcodigo'])assert(index.includes('"'+name+'"'));
+ console.log('Comandos: confirmação gera código, notificação recuperável, entrada paga, ativação PN/LID, repetição sem prazo extra, /meuplano→/renovar e responsável antigo sem alterar vencimento OK.');
+}finally{globalThis.fetch=originalFetch;process.chdir(cwd);fs.rmSync(dir,{recursive:true,force:true})}

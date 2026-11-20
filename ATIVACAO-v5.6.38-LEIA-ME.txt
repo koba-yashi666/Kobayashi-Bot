@@ -1,0 +1,85 @@
+KOBAYASHI v5.6.38 — ENTRADA E ATIVAÇÃO POR CÓDIGO
+
+INSTALAÇÃO
+Envie a atualização pelo script do ZIP no Termux, atualize e reinicie na hospedagem.
+Não precisa cadastrar a API novamente. Bancos, credenciais e sessão não fazem parte do ZIP.
+
+FLUXO DO CLIENTE
+1. No privado do bot: /alugar
+2. Escolha plano/quantidade, confirme o resumo e pague o Pix.
+3. Após RECEIVED ser confirmado na API, a mensagem de aprovação inclui o código e as instruções.
+4. No privado: /entrar LINK_DO_GRUPO CODIGO
+5. Se houver solicitação pendente, um ADM deve aceitar a Kobayashi.
+6. No grupo, o RESPONSÁVEL PELO PAGAMENTO envia: /ativarbot CODIGO
+7. O bot registra responsável, plano e vencimento e informa a conclusão.
+8. Promova a Kobayashi a ADM para usar moderação.
+
+Também é possível adicionar o bot manualmente e começar pelo passo 6.
+O bot não precisa ser ADM para registrar o aluguel; precisa estar no grupo junto do responsável.
+O prazo começa NA ATIVAÇÃO, não ao gerar o Pix, o código ou ao entrar no grupo.
+Se o grupo já tinha prazo do mesmo responsável, os dias restantes são preservados.
+O mesmo código pode ativar até a quantidade paga de grupos distintos.
+Repetir a ativação no mesmo grupo não soma outros dias nem consome outra vaga.
+O código só funciona para a identidade do responsável que pagou, não como licença transferível.
+
+COMANDOS
+/gerarcodigo ID — privado, somente o comprador do pedido real aprovado.
+Gera/recupera o código. Pode ser usado em pedidos anteriores ainda com vagas.
+Se houver somente um pedido elegível, /gerarcodigo sem ID também funciona.
+O botão Copiar ativação copia o comando completo para colar no grupo.
+
+/meuscodigos — privado, lista seus pedidos, códigos, vagas e quantidade de grupos reservados.
+Código válido por SETE DIAS para ativar. Depois, gere outro com /gerarcodigo ID.
+Regenerar um código vencido não recupera vagas já usadas nem elimina reservas de entrada.
+
+/entrar LINK_DO_GRUPO CODIGO — privado, verifica dono e pagamento antes de solicitar entrada.
+/entrar LINK_DO_GRUPO — também funciona quando há só um pedido elegível com vagas.
+Só usa convite https://chat.whatsapp.com/..., limitado às vagas pagas e reservadas.
+Grupo permanente ou de outro responsável não pode ser vinculado ao pedido.
+
+/ativarbot CODIGO — dentro do grupo, enviado pelo comprador/responsável.
+/ativarcodigo CODIGO — alternativa com a mesma função.
+O bot confere o pagamento, a validade, as vagas e os participantes antes de registrar o aluguel.
+Proibições já configuradas pelos ADMs, como modo só-ADM, continuam sendo respeitadas.
+
+/meuplano — no grupo mostra o plano; no privado mostra só os contratos do responsável.
+/renovar — privado, seleciona grupos e pode alterar plano ou descontinuar a renovação.
+
+/ativacoes e /ativarpedido ID — painel e ativação pelo criador continuam disponíveis.
+Os bônus de indicação dependem da aprovação do criador como na v5.6.37.
+O contato para comprovante e suporte continua na confirmação; comprovante não substitui a API.
+
+AVISOS E VENCIMENTO
+O bot avisa na janela de 7 dias, de 3 dias e ao vencer.
+Envia no privado do responsável e, quando avisos de grupo estão on, no grupo com menção.
+Identifica PN/LID a partir do autor e dos participantes quando esses dados estão disponíveis.
+Falha na entrega privada não bloqueia a tentativa no grupo, nem o contrário.
+Os avisos possuem registro por grupo/vencimento/etapa para evitar repetição normal.
+Renovação paga preserva dias restantes e inicia um novo ciclo de avisos.
+Sem renovação, o bot continua programado para sair DUAS HORAS após o vencimento.
+A saída pode ocorrer na rodada seguinte do temporizador; falhas de API/WhatsApp podem adiá-la.
+Se o bot ficar offline, usa a etapa correspondente ao tempo restante ao voltar.
+Não envia todos os avisos perdidos de uma só vez.
+
+CONTRATOS ANTIGOS
+Ser criador não transforma todos os grupos em aluguéis do seu próprio número.
+Se falta responsável, pelo número criador, DENTRO do grupo:
+/responsavelaluguel 5511999999999
+O comando altera só o responsável, preservando vencimento e prazo já pagos.
+Telefone com DDI+DDD, sem @. Outros usuários não podem usar esse comando.
+Aliases LID já comprovados do próprio autor podem ser alinhados ao telefone autenticado.
+Nunca se usa autor de mensagem citada, menção ou encaminhamento para conceder acesso.
+
+ENTRADA PENDENTE OU INCONCLUSIVA
+A vaga é reservada antes de enviar a solicitação ao WhatsApp.
+Se a resposta for incerta, o bot não repete automaticamente a entrada depois de reiniciar.
+Aceite a solicitação ou adicione o bot manualmente e use o código no mesmo grupo.
+Se a vaga ficou reservada para um grupo errado, fale com o criador para revisar o pedido.
+O painel manual do criador pode concluir a ativação dos grupos corretos.
+
+TESTES
+Scripts novos de código, comandos e lembretes foram executados com API/WhatsApp simulados.
+Cobrem identidade, metadados, quotas/reservas, validade, refund, repetição, reinício,
+Sandbox, indicação e os avisos. Nenhuma cobrança nem entrada real foi feita nos testes.
+/asaasteste suite continua com as 38 verificações simuladas gerais.
+Este ZIP é cumulativo e não inclui novas interações de brincadeira.

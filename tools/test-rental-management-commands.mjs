@@ -23,7 +23,7 @@ try{
  for(const command of ['ativacoes','ativarpedido','indicacao','indicacoes','minhasindicacoes','aprovarindicacao','meuplano'])assert(BILLING_COMMANDS.has(command));
  await run('indicacao','',{from:'100@g.us',sender:referrer,identities:[referrer],isGroup:true,isGroupAdmins:true});const code=Object.keys(store.read().referralCodes)[0];assert(code);assert(replies.at(-1).includes('/alugar '+code));
  await run('alugar',code);assert(store.read().sessions[Object.keys(store.read().sessions)[0]].referralCode===code);
- await click(options().find(o=>o.endsWith(' 30')));await click(options().find(o=>o.endsWith(' 1')));await click(options()[0]);const order=Object.values(store.read().orders)[0];assert.equal(order.referral.code,code);assert.equal(order.manualActivation,true);assert.equal(body.value,25);
+ await click(options().find(o=>o.endsWith(' 30')));await click(options().find(o=>o.endsWith(' 1')));await click(options()[0]);const order=Object.values(store.read().orders)[0];assert.equal(order.referral.code,code);assert.equal(order.automaticActivation,true);assert.equal(body.value,25);
  await run('ativacoes');assert(!sent.at(-1).text.includes(order.id));
  paymentStatus='RECEIVED';await run('pagamento',order.id);assert.match(replies.at(-1),/PIX APROVADO/);assert(decodeURIComponent(replies.at(-1)).includes('Indicação: '+code));
  const before=calls;await run('ativacoes','',{sender:referrer,identities:[referrer]});assert.equal(calls,before);assert.match(replies.at(-1),/criador/);
