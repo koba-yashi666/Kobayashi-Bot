@@ -1,0 +1,64 @@
+KOBAYASHI v5.6.39 — INICIAR E ENCERRAR TESTE
+
+INSTALAÇÃO
+Envie ao GitHub com o script do ZIP, atualize e reinicie na hospedagem.
+Não precisa configurar a API de novo. O ZIP não inclui sessão, bancos nem chaves privadas.
+
+INICIAR
+Pelo criador +55 15 99707-5304, no PRIVADO da Kobayashi:
+/iniciarteste
+O bot apresenta a lista dos comandos. Repetir mostra a lista, sem apagar a sessão existente.
+O prefixo global continua o mesmo. Nos exemplos usamos /; use seu prefixo configurado.
+
+COMO TESTAR
+1. /alugar — escolha plano e quantidade pelos botões ou pelo número das opções.
+2. Confira e confirme: o pedido é aprovado de forma FICTÍCIA, sem gerar Pix e sem acessar Asaas/MP.
+3. Copie o código TST recebido; /meuscodigos ou /gerarcodigo ID recuperam o código.
+4. No privado: /entrar LINK_DO_GRUPO CODIGO_TST
+5. Após a entrada, no grupo: /ativarbot CODIGO_TST
+6. /meuplano — confira o contrato isolado.
+7. No privado: /renovar — selecione o grupo e confirme outro prazo/plano.
+O novo vencimento será aplicado somente ao banco da sessão de teste.
+/ativacoes e /ativarpedido ID também usam exclusivamente os dados da sessão enquanto ativo.
+
+AVISOS SEM ESPERAR DIAS
+Dentro do grupo ativado para teste:
+/iniciarteste avisos 7d
+/iniciarteste avisos 3d
+/iniciarteste avisos vencido
+/iniciarteste avisos saida
+O último comando verifica a carência e faz o bot SAIR de verdade do grupo de teste.
+Os demais enviam as mensagens de teste no grupo e no privado, com marcação de TESTE.
+Os avisos normais possuem deduplicação: repetir a mesma etapa imediatamente pode não reenviar.
+
+ENCERRAR
+No privado:
+/encerrarteste
+Interrompe o modo isolado, invalida o uso dos códigos TST e devolve os comandos ao modo normal.
+Não muda configurações financeiras nem o prefixo do bot.
+Os registros de teste permanecem separados para diagnóstico, sem ativar contratos reais.
+O bot confere a saída dos grupos em que entrou pelo teste; preserva grupos em que já estava.
+Se o convite estava aguardando aprovação, recuse a solicitação do bot no grupo.
+Uma limpeza periódica tenta retirar o bot se uma aprovação tardia ocorrer, por até sete dias.
+Se um desses grupos passar a ter contrato real ou vaga real reservada, a limpeza o preserva.
+Depois de encerrar, /alugar volta ao fluxo normal, que pode gerar cobrança real conforme seu modo.
+
+ISOLAMENTO
+Somente o criador usa o ambiente de teste. Os clientes seguem no funcionamento normal.
+Use grupos exclusivos, sem contrato real ou vaga de pagamento real reservada.
+A entrada/saída no WhatsApp é REAL; o pagamento e o aluguel do teste são FICTÍCIOS.
+Os grupos já alugados, mesmo vencidos, ficam bloqueados para esse teste.
+A configuração de Asaas/MP fica bloqueada no modo de teste; encerre antes de alterá-la.
+/iniciarteste não suspende os vencimentos e a saída dos contratos reais dos clientes.
+O modo ativo é recuperado se o bot reiniciar. Use /encerrarteste para retornar ao normal.
+Se um encerramento foi interrompido, repita /encerrarteste para finalizar a conferência.
+Cadastro/renovação legados e mudanças de prefixo ficam bloqueados para o criador durante o teste; use os comandos da lista.
+
+TESTES DO PACOTE
+Teste integrado local com WhatsApp simulado: exclusividade do criador (PN/LID), lista,
+compra fictícia sem rede financeira, código TST, entrada, ativação, renovação, avisos,
+proteção dos clientes, recuperação de sessão, limpeza, grupo preexistente e retorno normal.
+Códigos/contratos TST também foram recusados explicitamente pelo motor normal.
+As regressões de pagamento, ativação real por API simulada, gestão/indicação, menu,
+play, Sentinel e permissões passaram. Nenhuma entrada ou mensagem real foi executada
+no ambiente de testes deste pacote.

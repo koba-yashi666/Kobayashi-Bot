@@ -1,3 +1,4 @@
+import {ensureRentalTestRuntime} from './lib/features/billing/testMode.js';
 import { rememberStickerOriginal } from "./commands/stickers/sticker.js";
 import {ensureBillingRuntime} from "./lib/features/billing/runtime.js";
 import { markPrincipalSeen } from "./lib/features/moderation/sentinelSystem.js";
@@ -673,6 +674,7 @@ async function startConnect() {
             console.log(colors.magenta("🐉🌸 Kobayashi Bot conectado com sucesso!"));
             ensureDragonCoreRuntime(conn);
             ensureBillingRuntime(conn,{generate:generateWAMessageFromContent});
+            ensureRentalTestRuntime(conn);
             ensureRentalRuntime(conn);
             ensureLevelSummaryRuntime(conn);
             await conn.sendPresenceUpdate("available");

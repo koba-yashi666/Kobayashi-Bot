@@ -1,3 +1,4 @@
+import {resolveRentalTestInput,rentalTestMode} from './lib/features/billing/testMode.js';
 import {groupDiagnostic} from './lib/features/billing/groupDiagnostic.js';
 import {handlePlay} from "./lib/features/downloads/playChoice.js";
 import { runStickerCommand, stickerCaption } from "./commands/stickers/sticker.js";
@@ -1158,7 +1159,7 @@ const KOBA_TRIGGER_COMMANDS = new Set([
   "cancelarpagamento",
   "vincularaluguel",
   "emailpagamento",
-  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos", "asaaspix", "ativacoes", "ativarpedido", "indicacao", "indicacoes", "minhasindicacoes", "aprovarindicacao", "meuplano", "entrar", "gerarcodigo", "meuscodigos", "ativarbot", "ativarcodigo", "responsavelaluguel",
+  "asaastoken", "asaasstatus", "asaasmodo", "asaasteste", "asaasretorno", "asaaspreco", "asaasavisos", "asaaspix", "ativacoes", "ativarpedido", "indicacao", "indicacoes", "minhasindicacoes", "aprovarindicacao", "meuplano", "entrar", "gerarcodigo", "meuscodigos", "ativarbot", "ativarcodigo", "responsavelaluguel", "iniciarteste", "encerrarteste",
   "mptoken",
   "mpmodo",
   "mpstatus",
@@ -1775,8 +1776,9 @@ function resolveKobaTrigger(messageText, prefix="/"){
 
 let body = extractCommandText(info.message) || info?.text || "";
 // Números só controlam o último menu de aluguel no próprio privado.
-const billingInput=resolveBillingInput({jid:from,text:body,isGroup,fromMe:info.key.fromMe,
- quotedId:info.message?.extendedTextMessage?.contextInfo?.stanzaId});
+const billingInputArgs={jid:from,text:body,isGroup,fromMe:info.key.fromMe,
+ quotedId:info.message?.extendedTextMessage?.contextInfo?.stanzaId};
+const billingInput=resolveRentalTestInput(billingInputArgs)||resolveBillingInput(billingInputArgs);
 if(billingInput)body=billingInput;
 
 
@@ -3134,6 +3136,7 @@ if (!isCmd && !info.key.fromMe && /^prefixo[!?]?$/.test(String(prefixQueryText).
 }
 
 if (isCmd) {
+  if(await rentalTestMode.blockLiveCommand({command,sender,identities:ownerIdentityCandidates,reply}))continue;
   if(await handleBillingCommand({command,q,from,sender,conn,info,reply,prefix,isGroup,
     identities:ownerIdentityCandidates,isGroupAdmins,generate:generateWAMessageFromContent}))continue;
   if (OWNER_COMMANDS.has(command) && !SoDonoPrincipal) {
