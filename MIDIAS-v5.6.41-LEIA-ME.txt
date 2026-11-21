@@ -1,0 +1,24 @@
+KOBAYASHI BOT v5.6.41
+
+Atualização cumulativa: inclui as correções anteriores até 5.6.40.
+Corrige o fluxo de download de mídias comuns para /s, /s2 e autosticker.
+Aceita chave em Buffer, Uint8Array, array, JSON Buffer e base64 válido.
+Em 404/410, com ID e chave disponíveis, pede a atualização da própria mídia ao telefone e tenta uma vez.
+Prefere a função de download da conexão, quando disponível. Não instala forks ou atualizações experimentais do Baileys.
+Não insiste em 401/403/429, não inventa chaves nem recupera mídia indisponível.
+O fluxo de figurinhas pede reenvio comum para mídia de visualização única; não a revela.
+
+Termux:
+unzip -o ~/storage/downloads/Kobayashi-Bot-v5.6.41-Midias.zip -d ~/koba-v5.6.41
+bash ~/koba-v5.6.41/ENVIAR-GITHUB-v5.6.41.sh
+
+Atualize e reinicie na hospedagem. Preserve sessões/configurações/bancos.
+
+Verificação real após instalar:
+1. Envie uma foto comum com /s na legenda.
+2. Responda a uma foto comum com /s2.
+3. Envie vídeo comum de até 9.9 segundos e teste /s.
+4. Responda a uma figurinha comum com /s.
+5. Havendo erro, envie apenas a mensagem de diagnóstico e a versão. Não envie chaves ou dados da sessão.
+
+Os testes do pacote são simulados. Nenhum acesso ao WhatsApp ou pagamento real foi executado.

@@ -1,5 +1,5 @@
 {
-  "version": "5.6.40",
-  "name": "Kobayashi Bot v5.6.40 — Lista negra global",
-  "update": "Identificação PN/LID, consultas sem duplicação e pausa ao atingir limite do WhatsApp."
+  "version": "5.6.41",
+  "name": "Kobayashi Bot v5.6.41 — Recuperação de mídia comum",
+  "update": "Download compartilhado de figurinhas, atualização de mídia comum em 404/410 e tratamento de chaves serializadas."
 }

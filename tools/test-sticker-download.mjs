@@ -3,7 +3,7 @@ import {Readable} from 'node:stream';
 import {downloadStickerMedia} from '../lib/features/stickers/stickerMediaDownload.js';
 for(const type of ['image','video']){
  let generic=0,direct=0;const node={directPath:'/received-media',mediaKey:Buffer.from('key')};
- const deps={conn:{},downloadMediaMessage:async()=>{generic++;throw Error('wrapper must not run without url')},downloadContentFromMessage:async(n,t)=>{assert.equal(n,node);assert.equal(t,type);direct++;return Readable.from([Buffer.from('abc'),Buffer.from('def')])}};
+ const deps={conn:{},downloadMediaMessage:async()=>{generic++;throw Error('wrapper must not run without url')},downloadContentFromMessage:async(n,t)=>{assert.equal(n.directPath,node.directPath);assert.deepEqual(n.mediaKey,node.mediaKey);assert.equal(t,type);direct++;return Readable.from([Buffer.from('abc'),Buffer.from('def')])}};
  assert.equal((await downloadStickerMedia({message:{[type+'Message']:node}},deps)).toString(),'abcdef');assert.equal(generic,0);assert.equal(direct,1);
  node.url='https://mmg.whatsapp.net/media';deps.downloadMediaMessage=async()=>{generic++;return Buffer.from('normal')};
  assert.equal((await downloadStickerMedia({message:{[type+'Message']:node}},deps)).toString(),'normal');assert.equal(direct,1);

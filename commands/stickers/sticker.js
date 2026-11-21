@@ -1,10 +1,10 @@
+import {downloadStickerMedia, isViewOnceStickerMessage, stickerMediaKeyBytes} from "../../lib/features/stickers/stickerMediaDownload.js";
 const originals = new Map();
 const TTL = 300000;
-const LIMIT = 32 * 1024 * 1024;
-const wrappers = ["ephemeralMessage", "viewOnceMessage", "viewOnceMessageV2",
-  "viewOnceMessageV2Extension", "documentWithCaptionMessage", "deviceSentMessage"];
+const wrappers = ["ephemeralMessage", "documentWithCaptionMessage", "deviceSentMessage"];
 
 export function readStickerMessage(message) {
+  if (isViewOnceStickerMessage(message)) return {message:{}, type:null, media:null, protected:true};
   const seen = new Set();
   for (let i = 0; i < 12 && message && !seen.has(message); i++) {
     seen.add(message);
@@ -20,7 +20,7 @@ export function readStickerMessage(message) {
 }
 
 const keyOf = key => JSON.stringify([key?.remoteJid, key?.id]);
-const keyBytes = media => media?.mediaKey?.byteLength || media?.mediaKey?.length || media?.mediaKey?.data?.length || 0;
+const keyBytes = media => stickerMediaKeyBytes(media?.mediaKey).length;
 const score = media => Number(keyBytes(media) > 0) + Number(Boolean(media?.url || media?.directPath));
 
 // Captura os dados originais antes de captcha, comandos ou outras transformações.
@@ -44,9 +44,11 @@ export function stickerCaption(message) {
 
 export function resolveStickerInput(info, now = Date.now()) {
   const current = readStickerMessage(info?.message);
+  if (current.protected) return current;
   if (current.media) return {...current, key: info.key, source: "current", original: true};
   const context = Object.values(current.message).find(node => node?.contextInfo?.quotedMessage)?.contextInfo;
   if (!context) return null;
+  if (isViewOnceStickerMessage(context.quotedMessage)) return {protected:true};
   const cachedKey = keyOf({remoteJid: info?.key?.remoteJid, id: context.stanzaId});
   const cached = originals.get(cachedKey);
   if (cached && now - cached.at >= TTL) originals.delete(cachedKey);
@@ -59,37 +61,19 @@ export function resolveStickerInput(info, now = Date.now()) {
 }
 
 async function mediaBuffer(input, deps) {
-  if (input.media.directPath && keyBytes(input.media)) {
-    const stream = await deps.downloadContentFromMessage(input.media, input.type, {});
-    const chunks = [];
-    let size = 0;
-    for await (const chunk of stream) {
-      size += chunk.length;
-      if (size > LIMIT) { stream.destroy?.(); throw new Error("media-too-large"); }
-      chunks.push(chunk);
-    }
-    if (!size) throw new Error("empty-media");
-    return Buffer.concat(chunks);
-  }
-  const target = {key:input.key, message:{[input.type + "Message"]:input.media}};
-  const result = await deps.downloadMediaMessage(target, "buffer", {}, {
-    logger: console,
-    ...(deps.conn?.updateMediaMessage ? {reuploadRequest:deps.conn.updateMediaMessage.bind(deps.conn)} : {})
-  });
-  if (!Buffer.isBuffer(result) || !result.length) throw new Error("empty-media");
-  if (result.length > LIMIT) throw new Error("media-too-large");
-  return result;
+  return downloadStickerMedia({key:input.key, message:{[input.type + "Message"]:input.media}}, {...deps, preferDirect:true});
 }
 
 export async function runStickerCommand(ctx, deps) {
   const input = resolveStickerInput(ctx.info);
+  if (input?.protected) return ctx.reply("🔒 Essa mídia é de visualização única. Peça ao remetente para reenviar como foto ou vídeo comum para criar a figurinha.");
   if (!input) return ctx.reply(`🎴 Envie uma foto/vídeo com ${ctx.prefix}${ctx.command} na legenda ou responda à mídia. Vídeos: até 9.9 segundos.`);
   if (input.type === "video" && Number(input.media.seconds || 0) > 9.9) {
     return ctx.reply("🎞️ O vídeo precisa ter no máximo 9.9 segundos.");
   }
   const location = Boolean(input.media.url || input.media.directPath);
   if (!keyBytes(input.media) || !location) {
-    return ctx.reply(`❌ A mensagem chegou sem os dados necessários para baixar a mídia.\nTipo: ${input.type} • origem: ${input.source}\nOriginal recebido: ${input.original ? "sim" : "não"} • legenda recebida: ${Boolean(input.media.caption) ? "sim" : "não"}\nChave: ${keyBytes(input.media)} bytes • endereço: ${location ? "sim" : "não"}\nEnvie este diagnóstico ao dono. Não é uma falha de conversão.`);
+    return ctx.reply(`❌ A mensagem chegou sem os dados necessários para baixar a mídia.\nTipo: ${input.type} • origem: ${input.source}\nOriginal recebido: ${input.original ? "sim" : "não"} • legenda recebida: ${Boolean(input.media.caption) ? "sim" : "não"}\nChave: ${keyBytes(input.media)} bytes • endereço: ${location ? "sim" : "não"}\nPeça o reenvio como mídia comum e tente novamente. Não é uma falha de conversão.`);
   }
   let stage = "download";
   try {
