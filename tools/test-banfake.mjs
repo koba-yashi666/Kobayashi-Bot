@@ -25,7 +25,7 @@ try {
  const {checkAntiFakeParticipant}=await import('../lib/features/moderation/antiFake.js');
  assert((await checkAntiFakeParticipant(conn,group,'447123456789@s.whatsapp.net')).allowed);
  assert(!(await checkAntiFakeParticipant(conn,group,br)).allowed);
- const source=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');assert(source.indexOf('if (!authorIsAdmin)')<source.indexOf('if (isCmd) {\n  if (OWNER_COMMANDS'));
+ const source=fs.readFileSync(new URL('../index.js',import.meta.url),'utf8');assert(source.indexOf('if (!authorIsAdmin)')<source.indexOf('if (OWNER_COMMANDS.has(command)'));
  assert(source.indexOf('await handleMutedMessage')<source.indexOf('if (!authorIsAdmin)'));
  console.log('✅ BanFake: ADM obrigatório, bot ADM, prefixo +55, PN/LID confirmado, desconhecidos, criador/ADMs protegidos, falha sem falso sucesso e antifake OFF.');
 } finally {process.chdir(old);fs.rmSync(tmp,{recursive:true,force:true});}

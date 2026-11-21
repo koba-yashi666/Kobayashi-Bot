@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {discoverBlacklistGroups} from '../lib/features/moderation/blacklistScope.js';
+import {purgeBlacklistTargets} from '../lib/features/moderation/blacklistRegistry.js';
+import {formatBlacklistIssues,formatPurgeIssues} from '../lib/features/moderation/groupPurge.js';
+import {moderationQueries} from '../lib/features/moderation/moderationQueries.js';
+import {installRemovalProtection} from '../lib/features/moderation/removalProtection.js';
+let now=0,bulk=0,metadata=0,updates=0,limited=true;
+const bot='5511000000000@s.whatsapp.net',botLid='123456789@lid',user='5511888888888@s.whatsapp.net',userLid='987654321@lid';
+const members=new Map(Array.from({length:30},(_,i)=>[`${100+i}@g.us`,[{id:botLid,admin:'admin',...(i===29?{phoneNumber:bot}:{})},{id:userLid,phoneNumber:user}]]));
+const conn={user:{id:'5511000000000:8@s.whatsapp.net'},signalRepository:{lidMapping:{getPNForLID:async id=>id===botLid?{pn:bot,lid:botLid}:id===userLid?{pn:user,lid:userLid}:null,getLIDForPN:async()=>null}},groupFetchAllParticipating:async()=>{bulk++;return Object.fromEntries([...members].map(([id,p])=>[id,{id,subject:'Grupo '+id,participants:structuredClone(p)}]))},groupMetadata:async id=>{metadata++;return {id,subject:'Grupo '+id,participants:structuredClone(members.get(id))}},groupParticipantsUpdate:async(id,targets)=>{updates++;if(limited&&updates===2)throw Error('rate-overlimit');assert.equal(targets[0],userLid);members.set(id,members.get(id).filter(p=>p.id!==targets[0]));return targets.map(jid=>({jid,status:'200'}))},sendMessage:async()=>({})};
+moderationQueries(conn,{clock:()=>now,pause:async ms=>{now+=ms},gap:650,cooldown:60000});installRemovalProtection(conn);
+const scope=await discoverBlacklistGroups(conn);assert.equal(scope.groups.length,30);assert.equal(scope.issues.length,0);assert.equal(metadata,0);assert.equal(bulk,1);
+const rows=await purgeBlacklistTargets(conn,[user],scope.groups);assert.equal(updates,2);assert.equal(metadata,0);assert.equal(rows.filter(r=>r.status==='removed').length,1);assert.equal(rows.filter(r=>r.status==='rate-limited').length,29);assert(rows.every(r=>r.isAdmin===true));
+const report=formatBlacklistIssues(scope,rows);assert(!report.includes('não é ADM'));assert(report.includes('pendente'));assert(!report.includes('rate-overlimit'));
+await purgeBlacklistTargets(conn,[user],scope.groups);assert.equal(updates,2);assert.equal(metadata,0);
+now+=60001;limited=false;members.get('105@g.us')[0].admin=null;
+const resumed=await purgeBlacklistTargets(conn,[user],scope.groups);assert.equal(resumed.find(r=>r.jid==='105@g.us').status,'not-admin');assert.equal(resumed.filter(r=>r.status==='removed').length,28);assert(members.get('105@g.us').some(p=>p.id===userLid));
+// Snapshot incompleto requer uma confirmação, mas rate limit interrompe novas consultas.
+let queries=0,t=0;const partial={user:{id:bot},groupFetchAllParticipating:async()=>({'1@g.us':{subject:'Mesmo nome',participants:[{id:bot}]},'2@g.us':{subject:'Mesmo nome'},'3@g.us':{subject:'Terceiro'},'4@g.us':{participants:[{id:bot,admin:'admin'}]}}),groupMetadata:async id=>{queries++;if(id==='1@g.us')return {id,participants:[{id:bot,admin:null}]};throw Object.assign(Error('rate-overlimit'),{output:{statusCode:429}})}};
+moderationQueries(partial,{clock:()=>t,pause:async ms=>{t+=ms}});const partialScope=await discoverBlacklistGroups(partial);assert.equal(queries,2);assert.equal(partialScope.groups.length,1);assert.equal(partialScope.diagnostics.find(r=>r.jid==='1@g.us').status,'not-admin');assert.equal(partialScope.diagnostics.filter(r=>r.status==='rate-limited').length,2);assert(partialScope.diagnostics.filter(r=>r.status==='rate-limited').every(r=>r.isAdmin===null));
+const pending=formatBlacklistIssues(partialScope,[]);assert(pending.includes('[1@g.us]'));assert(pending.includes('[2@g.us]'));
+const final=formatBlacklistIssues({diagnostics:[{jid:'same@g.us',name:'Unico',status:'bot-unknown',isAdmin:null}]},[{jid:'same@g.us',name:'Unico',status:'not-admin',isAdmin:false}]);assert.equal((final.match(/🏘️/g)||[]).length,1);assert(!final.includes('pendente'));
+assert.equal((formatPurgeIssues([{jid:'x@g.us',name:'X',status:'failed',isAdmin:true,error:'Falha A'},{jid:'x@g.us',name:'X',status:'failed',isAdmin:true,error:'Falha B'}]).match(/🏘️/g)||[]).length,1);
+assert(formatBlacklistIssues({diagnostics:[]},[{jid:'mixed@g.us',status:'failed',isAdmin:true,error:'Falha preservada'},{jid:'mixed@g.us',status:'absent',isAdmin:true}]).includes('Falha preservada'));
+console.log('Lista negra: 30 grupos com snapshot PN/LID compartilhado, sem consultas duplicadas da proteção, pausa imediata após rate-overlimit, retomada, mudança de ADM, metadados parciais e relatório único por JID OK.');

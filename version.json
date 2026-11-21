@@ -1,5 +1,5 @@
 {
-  "version": "5.6.39",
-  "name": "Kobayashi Bot v5.6.39 — Modo de teste do criador",
-  "update": "Iniciar/encerrar teste isolado com entrada, código TST, aluguel, renovação e avisos sem Pix real."
+  "version": "5.6.40",
+  "name": "Kobayashi Bot v5.6.40 — Lista negra global",
+  "update": "Identificação PN/LID, consultas sem duplicação e pausa ao atingir limite do WhatsApp."
 }

@@ -16,9 +16,9 @@ try{
  await registerBlacklistTargets(conn,{group,targets:[pn],by:bot,participants:members});
  assert(local.isBlacklisted(group,lid));assert(!local.isBlacklisted('outro@g.us',lid));assert.equal(calls,0);
  const result=await enforceBlacklist(conn,group,{id:lid,phoneNumber:pn});assert(result.removed);assert.equal(calls,1);
- installBlacklistRuntime(conn);installBlacklistRuntime(conn);assert.equal(conn.ev.listenerCount('group-participants.update'),1);
+ const listeners=conn.ev.listenerCount('group-participants.update');installBlacklistRuntime(conn);installBlacklistRuntime(conn);assert.equal(conn.ev.listenerCount('group-participants.update'),listeners+1);
  members=[{id:bot,admin:'admin'},{id:lid,phoneNumber:pn}];conn.ev.emit('group-participants.update',{id:group,action:'add',participants:[{id:lid,phoneNumber:pn}]});
- for(let i=0;i<100&&calls<2;i++)await new Promise(r=>setTimeout(r,5));assert.equal(calls,2);
+ for(let i=0;i<600&&calls<2;i++)await new Promise(r=>setTimeout(r,5));assert.equal(calls,2);
  local.removeBlacklist(group,lid);assert(!local.isBlacklisted(group,pn));
  await registerBlacklistTargets(conn,{group,targets:[pn],scope:[{jid:group}],by:bot});assert(global.isGloballyBlacklisted(lid,group));assert(!global.isGloballyBlacklisted(lid,'outro@g.us'));
  const persisted=JSON.parse(fs.readFileSync('files/database/lista-negra-global.json'));assert(persisted.users[pn].aliases.includes(lid));

@@ -31,7 +31,7 @@ import { COMMUNITY_COMMANDS, handleCommunityCommand } from "./lib/features/commu
 import { isCommunityBotAdmin } from "./lib/features/community/runtime.js";
 import { protectedRemovalMessage } from "./lib/features/moderation/removalProtection.js";
 import { buildWaMeLink } from "./lib/features/social/waMe.js";
-import { purgeGroups, formatPurgeIssues } from "./lib/features/moderation/groupPurge.js";
+import { purgeGroups, formatPurgeIssues, formatBlacklistIssues } from "./lib/features/moderation/groupPurge.js";
 import { getAntiFakeConfig, setAntiFakeEnabled } from "./lib/features/moderation/antiFake.js";
 import { setDragonCommunityState, selectDragonMessageGroups, DRAGON_GROUPS } from "./lib/features/group/dragonCommunity.js";
 import { getX9Events, recordX9Decision, recordX9Request, setX9Enabled, isX9Enabled, formatX9Entry } from "./lib/features/group/x9Audit.js";
@@ -4099,12 +4099,13 @@ case "listanegraglobal": {
  if(!targets.length)return reply(`🖤 Lista negra global: ${listGlobalBlacklist().length} registros.\nUse ${prefix}listanegrag +5511999999999\nPode colar números por linha, separados por vírgulas ou com +DDI. Também aceita menção/resposta.\nAlcance: grupos atuais em que a Kobayashi é ADM.`);
  try{
   const scope=await discoverBlacklistGroups(conn);
-  if(!scope.groups.length)return reply("Nenhum grupo com ADM confirmado. Nada foi salvo.\n"+scope.issues.join("\n"));
+  if(!scope.groups.length)return reply("Nenhum grupo com ADM confirmado. Nada foi salvo.\n"+formatBlacklistIssues(scope,[]));
   const saved=await registerBlacklistTargets(conn,{group:from,targets,scope:scope.groups,by:sender,participants:Array.isArray(groupMembers)?groupMembers:[]});
   await reply(`💾 ${saved.saved.length} número(s) salvos no autoban global. Iniciando remoção em ${scope.groups.length} grupo(s) ADM…`);
   const rows=saved.saved.length?await purgeBlacklistTargets(conn,saved.saved,scope.groups,{protectedIdentity:isMainOwnerJid}):[];
-  const issues=[...scope.issues,formatPurgeIssues(rows)].filter(Boolean);
-  return reply(`🖤 *LISTA NEGRA GLOBAL*\n\n💾 Salvos: ${saved.saved.length}\n🛡️ Protegidos: ${saved.protectedTargets.length}\n🏯 Grupos ADM registrados: ${scope.groups.length}\n🔨 Removidos: ${rows.filter(r=>r.status==="removed").length}\n⚠️ Entradas inválidas: ${invalid.length}\n\nReentrada bloqueada nos grupos registrados. Novos grupos exigem executar novamente.`+(issues.length?"\n\n"+issues.join("\n\n"):""));
+  const report=formatBlacklistIssues(scope,rows);
+  const pending=new Set([...(scope.diagnostics||[]),...rows].filter(r=>["metadata-error","rate-limited","bot-unknown","failed"].includes(r.status)).map(r=>r.jid)).size;
+  return reply(`🖤 *LISTA NEGRA GLOBAL*\n\n💾 Salvos: ${saved.saved.length}\n🛡️ Protegidos: ${saved.protectedTargets.length}\n🏯 Grupos ADM registrados: ${scope.groups.length}\n🔨 Removidos: ${rows.filter(r=>r.status==="removed").length}\n⚠️ Entradas inválidas: ${invalid.length}\n⏳ Grupos com verificação/remoção pendente: ${pending}\n\nReentrada bloqueada somente nos grupos ADM registrados. Novos grupos ou pendências exigem nova execução após a pausa do WhatsApp.`+(report?"\n\n"+report:""));
  }catch(error){console.error("[LISTANEGRAG]",error.message);return reply("❌ Não consegui concluir: "+error.message+"\nSe o cadastro foi confirmado antes da falha, ele permanece salvo.");}
 }
 break;

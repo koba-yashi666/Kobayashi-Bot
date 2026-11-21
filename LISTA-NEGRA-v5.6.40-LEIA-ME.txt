@@ -1,0 +1,16 @@
+KOBAYASHI BOT v5.6.40 — LISTA NEGRA GLOBAL
+
+Correções:
+- Identificação da Kobayashi por número e LID, com vínculos locais confirmados.
+- Reaproveitamento dos metadados; fila com intervalo e pausa de 60 segundos após rate-overlimit.
+- Falha de consulta aparece como pendência, nunca como falta de ADM confirmada.
+- Cada grupo é apresentado uma vez. Nomes iguais recebem o ID para distinguir grupos diferentes.
+- Reentrada continua bloqueada apenas nos grupos ADM registrados.
+
+Instalação no Termux:
+unzip -o ~/storage/downloads/Kobayashi-Bot-v5.6.40-Lista-Negra.zip -d ~/koba-v5.6.40
+bash ~/koba-v5.6.40/ENVIAR-GITHUB-v5.6.40.sh
+
+Depois, atualize pelo GitHub e reinicie a hospedagem. Não apague sessões, configurações nem bancos.
+Repita o comando que gerou a lista negra. Havendo limite, aguarde a pausa indicada antes de repetir.
+Os testes locais usam dados fictícios. Nenhuma remoção real foi executada durante a preparação.
